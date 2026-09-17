@@ -10,7 +10,9 @@ const { WebSocketServer } = require('ws');
 
 const PORT = process.env.PORT || 4300;
 const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
+const LOG_DIR = path.join(__dirname, 'data', 'lessons');
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+fs.mkdirSync(LOG_DIR, { recursive: true });
 
 const app = express();
 
@@ -32,6 +34,33 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
   res.json({ url: `/uploads/${req.file.filename}`, name: req.file.originalname });
 });
 
+// ---------- Dars jurnallari (keyinchalik replay / AI tahlil uchun) ----------
+app.get('/api/lessons', (req, res) => {
+  fs.readdir(LOG_DIR, (err, files) => {
+    if (err) return res.status(500).json({ error: 'o\u2018qib bo\u2018lmadi' });
+    const list = files
+      .filter((f) => f.endsWith('.jsonl'))
+      .map((f) => {
+        const st = fs.statSync(path.join(LOG_DIR, f));
+        return { file: f, room: f.split('__')[0], size: st.size, mtime: st.mtime };
+      })
+      .sort((a, b) => b.mtime - a.mtime);
+    res.json(list);
+  });
+});
+
+app.get('/api/lessons/:file', (req, res) => {
+  const f = req.params.file;
+  if (!/^[\w.\-]+\.jsonl$/.test(f)) return res.status(400).json({ error: 'noto\u2018g\u2018ri nom' });
+  fs.readFile(path.join(LOG_DIR, f), 'utf8', (err, txt) => {
+    if (err) return res.status(404).json({ error: 'topilmadi' });
+    const events = txt.trim().split('\n').filter(Boolean).map((l) => {
+      try { return JSON.parse(l); } catch { return null; }
+    }).filter(Boolean);
+    res.json({ file: f, events });
+  });
+});
+
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 const server = http.createServer(app);
@@ -45,8 +74,28 @@ function emptyState() {
 }
 
 function getRoom(id) {
-  if (!rooms.has(id)) rooms.set(id, { peers: new Map(), state: emptyState() });
+  if (!rooms.has(id)) {
+    const startedAt = Date.now();
+    const stamp = new Date(startedAt).toISOString().replace(/[:.]/g, '-');
+    const room = {
+      peers: new Map(),
+      state: emptyState(),
+      startedAt,
+      logFile: path.join(LOG_DIR, `${id}__${stamp}.jsonl`),
+    };
+    rooms.set(id, room);
+    logEvent(room, { type: 'lesson-start', room: id });
+  }
   return rooms.get(id);
+}
+
+// Dars voqealari vaqt belgisi bilan diskka yoziladi — keyin qayta o'ynatish uchun.
+// t = dars boshlanganidan beri o'tgan millisekund.
+function logEvent(room, ev) {
+  const line = JSON.stringify({ t: Date.now() - room.startedAt, at: Date.now(), ...ev });
+  fs.appendFile(room.logFile, line + '\n', (err) => {
+    if (err) console.warn('jurnalga yozib bo\'lmadi:', err.message);
+  });
 }
 
 function send(ws, msg) {
@@ -95,6 +144,7 @@ wss.on('connection', (ws, req) => {
   });
 
   broadcast(room, { type: 'peer-join', peer: { id: clientId, role, name } }, clientId);
+  logEvent(room, { type: 'join', role, name });
 
   ws.on('message', (raw) => {
     let msg;
@@ -117,6 +167,7 @@ wss.on('connection', (ws, req) => {
         room.state.strokes = [];
         room.state.scroll = 0;
         broadcast(room, { type: 'doc', ...room.state.doc }, clientId);
+        logEvent(room, { type: 'doc', url: room.state.doc.url, name: room.state.doc.name });
         break;
 
       case 'page':
@@ -124,6 +175,7 @@ wss.on('connection', (ws, req) => {
         room.state.page = Math.max(1, Number(msg.page) || 1);
         room.state.scroll = 0;
         broadcast(room, { type: 'page', page: room.state.page }, clientId);
+        logEvent(room, { type: 'page', page: room.state.page });
         break;
 
       case 'scroll':
@@ -132,11 +184,14 @@ wss.on('connection', (ws, req) => {
         broadcast(room, { type: 'scroll', y: room.state.scroll }, clientId);
         break;
 
-      case 'stroke':
+      case 'stroke': {
         if (role !== 'teacher') return;
-        if (room.state.strokes.length < 5000) room.state.strokes.push(msg.stroke);
-        broadcast(room, { type: 'stroke', stroke: msg.stroke }, clientId);
+        const stroke = { ...msg.stroke, t: Date.now() - room.startedAt };
+        if (room.state.strokes.length < 5000) room.state.strokes.push(stroke);
+        broadcast(room, { type: 'stroke', stroke }, clientId);
+        logEvent(room, { type: 'stroke', stroke });
         break;
+      }
 
       case 'stroke-live':
         if (role !== 'teacher') return;
@@ -147,12 +202,14 @@ wss.on('connection', (ws, req) => {
         if (role !== 'teacher') return;
         room.state.strokes.pop();
         broadcast(room, { type: 'undo' }, clientId);
+        logEvent(room, { type: 'undo' });
         break;
 
       case 'clear':
         if (role !== 'teacher') return;
         room.state.strokes = room.state.strokes.filter((s) => s.page !== room.state.page);
         broadcast(room, { type: 'clear', page: room.state.page }, clientId);
+        logEvent(room, { type: 'clear', page: room.state.page });
         break;
 
       default:
@@ -163,7 +220,9 @@ wss.on('connection', (ws, req) => {
   ws.on('close', () => {
     room.peers.delete(clientId);
     broadcast(room, { type: 'peer-leave', id: clientId });
+    logEvent(room, { type: 'leave', role, name });
     if (room.peers.size === 0) {
+      logEvent(room, { type: 'lesson-end', strokes: room.state.strokes.length });
       setTimeout(() => {
         const r = rooms.get(roomId);
         if (r && r.peers.size === 0) rooms.delete(roomId);

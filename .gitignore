@@ -1,4 +1,5 @@
 node_modules/
+data/
 public/uploads/*
 !public/uploads/.gitkeep
 .DS_Store

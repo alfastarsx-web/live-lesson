@@ -79,7 +79,35 @@ Xona sahifasini ilova ichida WebView orqali ochish mumkin:
 Ilova foydalanuvchini to‘g‘ridan-to‘g‘ri
 `https://<domen>/room.html?room=<dars_id>&role=student&name=<ism>` manziliga yuboradi.
 
+## Dars jurnali (timestamp)
+
+Har bir dars `data/lessons/<xona>__<sana>.jsonl` fayliga yoziladi. Har qatorda bitta voqea:
+
+```json
+{"t":1206,"at":1789672009421,"type":"stroke","stroke":{"page":2,"tool":"pen","t":1206,"dur":120,"pts":[[0.2,0.3]]}}
+```
+
+- `t` — dars boshlanganidan beri o‘tgan millisekund (server qo‘yadi, mijozga ishonilmaydi)
+- `at` — mutlaq vaqt (unix ms)
+- `dur` — chiziq qancha vaqtda chizilgani
+
+Voqea turlari: `lesson-start`, `join`, `doc`, `page`, `stroke`, `undo`, `clear`, `leave`, `lesson-end`.
+Shovqin bo‘lgani uchun `scroll` va `stroke-live` yozilmaydi.
+
+O‘qish:
+
+```
+GET /api/lessons            # darslar ro‘yxati
+GET /api/lessons/<fayl>     # bitta darsning barcha voqealari
+```
+
+Shu ma’lumot bilan keyinchalik darsni **video yozmasdan** qayta o‘ynatish mumkin:
+qaysi sahifada qancha turilgan, nima belgilangan, qaysi tartibda. Audio yozish va
+transcript qo‘shilganda, transcript ham shu vaqt o‘qiga tushadi.
+
+> Diqqat: bu endpointlar hozircha ochiq — auth qo‘shilgunga qadar prodakshnga chiqarmang.
+
 ## Keyingi bosqich
 
-Booking (time slot), auth, dars tarixi — hali yo‘q. Xona nomi hozircha ochiq havola;
+Booking (time slot), auth, audio yozish va transcript — hali yo‘q (dars jurnali esa yozilmoqda). Xona nomi hozircha ochiq havola;
 prodakshnda qisqa muddatli token bilan almashtirish kerak.

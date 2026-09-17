@@ -453,7 +453,7 @@ function redraw() {
 // --- Ustozning qo'l harakati ---
 if (IS_TEACHER) {
   const c = el.inkCanvas;
-  let drawing = false, lastSent = 0;
+  let drawing = false, lastSent = 0, strokeStart = 0;
 
   const pos = (e) => {
     const r = c.getBoundingClientRect();
@@ -465,6 +465,7 @@ if (IS_TEACHER) {
     if (e.pointerType === 'touch' && e.isPrimary === false) return;
     drawing = true;
     c.setPointerCapture(e.pointerId);
+    strokeStart = performance.now();
     liveLocal = { page: pageNum, tool, color, w: WIDTH[tool], pts: [pos(e)] };
     redraw();
   });
@@ -486,7 +487,11 @@ if (IS_TEACHER) {
     drawing = false;
     const s = liveLocal;
     liveLocal = null;
-    if (s && s.pts.length) { strokes.push(s); wsSend({ type: 'stroke', stroke: s }); }
+    if (s && s.pts.length) {
+      s.dur = Math.round(performance.now() - strokeStart); // chizish qancha davom etdi
+      strokes.push(s);
+      wsSend({ type: 'stroke', stroke: s });
+    }
     redraw();
   };
   c.addEventListener('pointerup', finish);
