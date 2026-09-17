@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Dars xonasi</title>
+<link rel="stylesheet" href="room.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== TEPA: ishtirokchilar (ekranning yarmi) ===== -->
+  <section class="stage" id="stage">
+    <div class="tile" id="tileRemote">
+      <video id="remoteVideo" playsinline autoplay></video>
+      <div class="ph" id="remotePh"><span class="spin"></span><b>Kutilmoqda…</b></div>
+      <div class="tag" id="remoteTag">Suhbatdosh</div>
+    </div>
+    <div class="tile" id="tileLocal">
+      <video id="localVideo" playsinline autoplay muted></video>
+      <div class="ph" id="localPh"><b>Kamera o‘chiq</b></div>
+      <div class="tag" id="localTag">Siz</div>
+    </div>
+
+    <div class="bar">
+      <button id="btnMic" class="ic" title="Mikrofon">🎤</button>
+      <button id="btnCam" class="ic" title="Kamera">🎥</button>
+      <span class="status" id="status">Ulanmoqda…</span>
+      <button id="btnLeave" class="ic danger" title="Chiqish">✕</button>
+    </div>
+  </section>
+
+  <!-- ===== PAST: ish maydoni ===== -->
+  <section class="work">
+    <div class="toolbar" id="toolbar">
+      <label class="ic file" title="PDF ochish">📄<input type="file" id="fileInput" accept="application/pdf" hidden></label>
+      <span class="sep"></span>
+      <button class="ic tool" data-tool="pen" aria-pressed="true" title="Qalam">✏️</button>
+      <button class="ic tool" data-tool="hl" aria-pressed="false" title="Marker">🖍️</button>
+      <span class="sep"></span>
+      <span class="colors" id="colors">
+        <button class="sw" data-color="#ef4444" style="--c:#ef4444" aria-pressed="true"></button>
+        <button class="sw" data-color="#3b82f6" style="--c:#3b82f6" aria-pressed="false"></button>
+        <button class="sw" data-color="#22c55e" style="--c:#22c55e" aria-pressed="false"></button>
+        <button class="sw" data-color="#111827" style="--c:#111827" aria-pressed="false"></button>
+      </span>
+      <span class="sep"></span>
+      <button class="ic" id="btnUndo" title="Orqaga">↩︎</button>
+      <button class="ic" id="btnClear" title="Sahifani tozalash">🧽</button>
+    </div>
+
+    <div class="pagepill" id="pagePill" hidden>
+      <button class="ic" id="btnPrev" title="Oldingi">‹</button>
+      <span class="pageno" id="pageNo">—</span>
+      <button class="ic" id="btnNext" title="Keyingi">›</button>
+    </div>
+
+    <div class="board" id="board">
+      <div class="empty" id="empty">
+        <b>Hujjat ochilmagan</b>
+        <span id="emptyHint">Ustoz PDF ochishini kuting</span>
+      </div>
+      <div class="pdfbox" id="pdfbox" hidden>
+        <canvas id="pdfCanvas"></canvas>
+        <canvas id="inkCanvas"></canvas>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="room.js"></script>
+</body>
+</html>
