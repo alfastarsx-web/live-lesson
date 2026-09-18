@@ -91,8 +91,13 @@ function connect() {
 async function onSignal(m) {
   switch (m.type) {
     case 'full':
-      alert('Bu xonada allaqachon 2 ta ishtirokchi bor.');
-      location.href = 'index.html';
+      // Sahifadan otib yubormaymiz — nima bo'lganini ko'rsatamiz
+      retry = 99;                       // qayta ulanishga urinmasin
+      setStatus('Xona to‘la');
+      el.remotePh.hidden = false;
+      el.remotePh.innerHTML = '<b>Xona to‘la</b><span>Bu darsda allaqachon 2 ta ishtirokchi bor.<br>'
+        + 'Boshqa qurilmada ochiq oynangiz bo‘lsa, yoping va qayta urinib ko‘ring.</span>';
+      toast('Xona to‘la — boshqa ochiq oynani yoping', 8000);
       break;
 
     case 'error':
