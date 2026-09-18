@@ -101,9 +101,13 @@ async function onSignal(m) {
       break;
 
     case 'error':
+      // Sahifadan otib yubormaymiz — sababi ko'rinib tursin
+      retry = 99;
       setStatus(m.message || 'Xatolik');
+      el.remotePh.hidden = false;
+      el.remotePh.innerHTML = `<b>Xonaga kirib bo‘lmadi</b><span>${m.message || 'Xatolik'}<br>`
+        + '<a href="index.html" style="color:#60a5fa">Bosh sahifaga qaytish</a></span>';
       toast(m.message || 'Xatolik', 8000);
-      if (!TOKEN) location.href = 'index.html';
       break;
 
     case 'joined':

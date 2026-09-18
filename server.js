@@ -97,6 +97,14 @@ app.get('/api/lessons/:file', adminOnly, (req, res) => {
   });
 });
 
+// Ilova qaysi rejimda ishlayotganini bosh sahifa shundan biladi
+app.get('/api/config', (req, res) => {
+  res.json({
+    auth: AUTH_ON ? 'token' : 'open',
+    devTokens: process.env.DEV_TOKENS === 'true',
+  });
+});
+
 // Vaqtinchalik TURN hisob ma'lumotlari. Token rejimida token talab qilinadi.
 app.get('/api/ice', (req, res) => {
   if (AUTH_ON) {

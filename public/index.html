@@ -63,11 +63,43 @@
   if (q.get('role') === 'student') document.querySelector('[data-role="student"]').click();
   $('#name').value = localStorage.getItem('ll-name') || '';
 
-  $('#go').onclick = () => {
+  // Server qaysi rejimda? Token rejimida xonaga tokensiz kirib bo'lmaydi.
+  let CFG = { auth: 'open', devTokens: false };
+  fetch('/api/config').then((r) => r.json()).then((c) => {
+    CFG = c;
+    if (c.auth === 'token' && !c.devTokens) {
+      $('#go').disabled = true;
+      $('#go').textContent = 'Kirish ilova orqali';
+      document.querySelector('.hint').innerHTML =
+        '<b>Bu xona yopiq.</b> Darsga MyTeacher ilovasidan kiriladi — ilova sizga '
+        + 'shaxsiy kirish havolasini beradi. Bu sahifadan to‘g‘ridan-to‘g‘ri kirib bo‘lmaydi.';
+    }
+  }).catch(() => {});
+
+  $('#go').onclick = async () => {
     const room = $('#room').value.trim().toLowerCase().replace(/[^a-z0-9\-]+/g, '-');
     if (room.length < 3) { $('#room').focus(); return alert('Xona nomi kamida 3 ta belgi bo‘lsin'); }
     const name = $('#name').value.trim();
     localStorage.setItem('ll-name', name);
+
+    if (CFG.auth === 'token') {
+      // Sinov rejimi: token shu yerda yasaladi
+      $('#go').disabled = true;
+      $('#go').textContent = 'Kirilmoqda…';
+      try {
+        const q = `room=${encodeURIComponent(room)}&role=${role}&name=${encodeURIComponent(name)}&ttl=43200`;
+        const r = await fetch(`/api/dev-token?${q}`);
+        if (!r.ok) throw new Error('token');
+        const { token } = await r.json();
+        location.href = `room.html?t=${encodeURIComponent(token)}`;
+      } catch {
+        $('#go').disabled = false;
+        $('#go').textContent = 'Darsga kirish';
+        alert('Kirish havolasini olib bo‘lmadi. Qaytadan urinib ko‘ring.');
+      }
+      return;
+    }
+
     location.href = `room.html?room=${encodeURIComponent(room)}&role=${role}&name=${encodeURIComponent(name)}`;
   };
   $('#room').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#go').click(); });
