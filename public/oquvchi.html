@@ -25,9 +25,9 @@
   </div>
 
   <div class="amallar">
-    <button class="amal" data-amal="qongiroq">
-      <svg viewBox="0 0 24 24"><path d="M6.6 3h3l1.5 4-2 1.4a12 12 0 0 0 5.5 5.5l1.4-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.6 5.2 2 2 0 0 1 6.6 3Z"/></svg>
-      <span>Qo‘ng‘iroq</span>
+    <button class="amal" id="videoTugma">
+      <svg viewBox="0 0 24 24"><path d="M15 10l5-3v10l-5-3v-4Z"/><rect x="3" y="6" width="12" height="12" rx="2.5"/></svg>
+      <span>Video dars</span>
     </button>
     <button class="amal" data-amal="chat">
       <svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3 1.2-4.2A8 8 0 1 1 21 12Z"/></svg>
@@ -40,6 +40,7 @@
   </div>
 
   <div id="darsBlok"></div>
+  <div id="tezkorBlok"></div>
 
   <div class="royxat">
     <h3>Qo‘ng‘iroqlar</h3>
@@ -109,6 +110,51 @@ async function faollikniYukla() {
   }).join('') : '<div class="bosh-holat"><b>Faollik yo‘q</b><span>Bu o‘quvchi hali dars boshlamagan</span></div>';
 }
 
+// --- video dars: jadvaldagi dars bo'lsa o'shanga, bo'lmasa tezkor xona ---
+let DARS = null;   // shu o'quvchi bilan eng yaqin dars
+
+document.getElementById('videoTugma').onclick = async () => {
+  const btn = document.getElementById('videoTugma');
+  btn.disabled = true;
+
+  // 1) Jadvaldagi dars kirish oynasida bo'lsa — o'shanga
+  if (DARS && new Date(DARS.startsAt).getTime() - Date.now() <= 10 * 60_000) {
+    const e = await api(`/api/booking/${DARS.id}/entry`);
+    btn.disabled = false;
+    if (e && e.ok && e.data.url) return (location.href = e.data.url);
+  }
+
+  // 2) Aks holda — hoziroq tezkor xona
+  const r = await api('/api/tezkor', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ studentId: ID }),
+  });
+  btn.disabled = false;
+  if (!r) return;
+  if (!r.ok) return alert(r.data.error || 'Xonani ochib bo‘lmadi');
+
+  const havola = location.origin + r.data.studentUrl;
+  document.getElementById('tezkorBlok').innerHTML = `
+    <div class="karta-oq" style="margin-bottom:16px">
+      <h2>Dars xonasi tayyor</h2>
+      <div class="izoh">O‘quvchiga shu havolani yuboring — u parolsiz kiradi.</div>
+      <div class="havola-quti">
+        <code id="tezkorHavola">${havola}</code>
+        <button id="tezkorNusxa">Nusxa</button>
+      </div>
+      <button class="tugma" style="margin-top:14px" id="tezkorKirish">Xonaga kirish</button>
+    </div>`;
+
+  document.getElementById('tezkorNusxa').onclick = () => {
+    navigator.clipboard.writeText(havola).then(() => {
+      document.getElementById('tezkorNusxa').textContent = 'Nusxalandi';
+    }, () => {});
+  };
+  document.getElementById('tezkorKirish').onclick = () => { location.href = r.data.teacherUrl; };
+  document.getElementById('tezkorBlok').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+};
+
 // --- keyingi dars ---
 const DARS_IKON = '<svg viewBox="0 0 24 24"><path d="M15 10l5-3v10l-5-3v-4Z"/><rect x="3" y="6" width="12" height="12" rx="2.5"/></svg>';
 const SOAT_IKON = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
@@ -131,6 +177,7 @@ async function darsniYukla() {
     .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 
   const dars = darslar[0];
+  DARS = dars || null;
   if (!dars) {
     blok.innerHTML = `<div class="dars-karta bosh-dars">
       <span class="belgi">${SOAT_IKON}</span>

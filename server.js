@@ -259,6 +259,30 @@ app.get('/api/whoami', (req, res) => {
   });
 });
 
+// ---------- Tezkor dars (jadvalsiz, "hoziroq") ----------
+// Ustoz o'quvchi kartasidan video darsni darhol boshlashi uchun.
+// Xona nomi ikkala tomon id'sidan hosil qilinadi — har safar bir xil chiqadi,
+// ya'ni ustoz va o'quvchi albatta bitta xonada uchrashadi.
+app.post('/api/tezkor', (req, res) => {
+  const c = verify(cookies(req)[COOKIE]);
+  if (!c || c.role !== 'teacher') return res.status(401).json({ error: 'kirilmagan' });
+
+  const student = String(req.body?.studentId || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
+  if (student.length < 8) return res.status(400).json({ error: 'o\u2018quvchi aniqlanmadi' });
+
+  // "mentor-<uuid>" dan mentor qismini olamiz; uzunlikni 64 belgiga sig'diramiz
+  const mentor = c.room.replace(/^mentor-/, '').replace(/-/g, '').slice(0, 12);
+  const oquvchi = student.replace(/-/g, '').slice(0, 12);
+  const room = `dars-${mentor}-${oquvchi}`;
+
+  const token = sign({ room, role: 'teacher', name: c.name }, 4 * 3600);
+  res.json({
+    room,
+    teacherUrl: `/room.html?t=${encodeURIComponent(token)}`,
+    studentUrl: `/dars/${room}`,
+  });
+});
+
 // ---------- O'quvchi kirishi (havola bilan, parolsiz) ----------
 // Kurs kartasidagi havola shu yerga olib keladi: /dars/<xona>
 app.get('/dars/:room', (req, res) => {
