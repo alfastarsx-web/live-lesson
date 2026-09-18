@@ -57,13 +57,25 @@ function kartaHtml(l) {
         <span class="holat-yorliq">${h.matn}</span>
       </div>
 
-      ${l.note ? `<div class="izohi">${l.note}</div>` : ''}
+      <div class="izohi" data-izoh-korinish ${l.note ? '' : 'hidden'}>${l.note || ''}</div>
+      <div data-izoh-tahrir hidden style="margin-top:10px">
+        <textarea data-izoh-matn rows="3" placeholder="Nima gaplashildi, qachon qayta bog‘lanish kerak…"
+          style="width:100%;padding:11px;border-radius:12px;border:1.5px solid var(--line);
+                 font:inherit;font-size:14px;resize:vertical">${l.note || ''}</textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button data-izoh-saqla style="padding:9px 14px;border-radius:10px;border:0;background:var(--blue);
+                  color:#fff;font:inherit;font-size:13px;font-weight:700;cursor:pointer">Saqlash</button>
+          <button data-izoh-yop style="padding:9px 14px;border-radius:10px;border:1.5px solid var(--line);
+                  background:#fff;font:inherit;font-size:13px;font-weight:700;color:var(--mut2);cursor:pointer">Yopish</button>
+        </div>
+      </div>
 
       <div class="amallari">
         <a href="tel:${l.phoneNumber}" style="text-decoration:none">
           <button class="qongiroq" type="button">Telefon qilish</button></a>
         <button data-h="unreachable">Ulanib bo‘lmadi</button>
         <button data-h="negotiating">Muzokarada</button>
+        <button data-izoh>Izoh</button>
         <button class="asosiy" data-sinov="1">Sinov darsi</button>
       </div>
 
@@ -104,6 +116,28 @@ function chiz() {
       b.onclick = () => holatQoy(id, b.dataset.h, b);
     });
     k.querySelector('[data-sinov]').onclick = () => { quti.hidden = !quti.hidden; };
+
+    const korinish = k.querySelector('[data-izoh-korinish]');
+    const tahrir = k.querySelector('[data-izoh-tahrir]');
+    k.querySelector('[data-izoh]').onclick = () => { tahrir.hidden = !tahrir.hidden; };
+    tahrir.querySelector('[data-izoh-yop]').onclick = () => { tahrir.hidden = true; };
+    tahrir.querySelector('[data-izoh-saqla]').onclick = async (e) => {
+      const matn = tahrir.querySelector('[data-izoh-matn]').value;
+      e.target.disabled = true;
+      const r = await api(`/api/ai/leads/${id}/note`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: matn }),
+      });
+      e.target.disabled = false;
+      if (!r) return;
+      if (!r.ok) return alert(r.data.message || 'Saqlab bo‘lmadi');
+
+      const lid = HAMMASI.find((x) => x.id === id);
+      if (lid) lid.note = matn.trim() || null;
+      korinish.textContent = matn.trim();
+      korinish.hidden = !matn.trim();
+      tahrir.hidden = true;
+    };
     quti.querySelector('[data-bekor]').onclick = () => { quti.hidden = true; };
     quti.querySelector('[data-tasdiq]').onclick = () => sinovBelgila(id, quti);
   });

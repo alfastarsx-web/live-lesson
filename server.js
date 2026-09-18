@@ -227,10 +227,10 @@ const RUXSAT = [
   /^leads\/my$/,
 ];
 
-// Lid holatini o'zgartirish (PATCH) — ruxsat etilgan yozish amali
-app.patch(/^\/api\/ai\/leads\/([0-9a-f-]{36})\/status$/, (req, res) => {
-  const id = req.path.split('/')[4];
-  aiProxy(req, res, `/leads/${id}/status`);
+// Lid holati va izohi (PATCH) — ruxsat etilgan yozish amallari
+app.patch(/^\/api\/ai\/leads\/([0-9a-f-]{36})\/(status|note)$/, (req, res) => {
+  const [, , , , id, amal] = req.path.split('/');
+  aiProxy(req, res, `/leads/${id}/${amal}`);
 });
 
 app.get(/^\/api\/ai\/(.+)$/, (req, res) => {
