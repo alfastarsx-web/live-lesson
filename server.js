@@ -55,7 +55,9 @@ app.get('/api/dev-token', (req, res) => {
   if (!ROOM_RE.test(room)) return res.status(400).json({ error: 'xona nomi noto\u2018g\u2018ri' });
   const role = req.query.role === 'teacher' ? 'teacher' : 'student';
   const name = String(req.query.name || '').slice(0, 40);
-  res.json({ token: sign({ room, role, name }) });
+  // ttl — sekundlarda, ko'pi bilan 30 kun (sinov havolasi tez o'lib qolmasligi uchun)
+  const ttl = Math.min(Number(req.query.ttl) || 3 * 3600, 30 * 24 * 3600);
+  res.json({ token: sign({ room, role, name }, ttl), ttl });
 });
 
 // ---------- Dars jurnallari (keyinchalik replay / AI tahlil uchun) ----------
