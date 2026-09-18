@@ -24,6 +24,7 @@
     <button class="chip" data-t="new" aria-pressed="false">Yangi (0)</button>
     <button class="chip" data-t="negotiating" aria-pressed="false">Muzokarada (0)</button>
     <button class="chip" data-t="trial_scheduled" aria-pressed="false">Sinov darsi (0)</button>
+    <button class="chip" data-t="trial_completed" aria-pressed="false">O‘tilgan (0)</button>
   </div>
 
   <div id="royxat"><div class="skelet"></div><div class="skelet"></div></div>
@@ -40,6 +41,7 @@ const HOLATLAR = {
   unreachable:     { matn: 'Ulanib bo‘lmadi' },
   negotiating:     { matn: 'Muzokarada' },
   trial_scheduled: { matn: 'Sinov darsi belgilandi' },
+  trial_completed: { matn: 'Sinov darsi o‘tildi' },
   converted:       { matn: 'O‘quvchiga aylandi' },
   lost:            { matn: 'Qiziqmadi' },
 };
@@ -75,6 +77,8 @@ function kartaHtml(l) {
           <button class="qongiroq" type="button">Telefon qilish</button></a>
         <button data-h="unreachable">Ulanib bo‘lmadi</button>
         <button data-h="negotiating">Muzokarada</button>
+        ${l.status === 'trial_scheduled' ? '<button data-h="trial_completed" class="asosiy">Sinov darsi o‘tildi</button>' : ''}
+        ${l.status === 'trial_completed' ? '<button data-h="converted" class="asosiy">O‘quvchiga aylandi</button>' : ''}
         <button data-izoh>Izoh</button>
         <button class="asosiy" data-sinov="1">Sinov darsi</button>
       </div>
@@ -97,7 +101,10 @@ function kartaHtml(l) {
 function sanoq() {
   const son = (t) => t === 'all' ? HAMMASI.length : HAMMASI.filter((x) => x.status === t).length;
   document.querySelectorAll('.chip').forEach((c) => {
-    const nom = { all: 'Barchasi', new: 'Yangi', negotiating: 'Muzokarada', trial_scheduled: 'Sinov darsi' }[c.dataset.t];
+    const nom = {
+      all: 'Barchasi', new: 'Yangi', negotiating: 'Muzokarada',
+      trial_scheduled: 'Sinov darsi', trial_completed: 'O‘tilgan',
+    }[c.dataset.t];
     c.textContent = `${nom} (${son(c.dataset.t)})`;
   });
 }
