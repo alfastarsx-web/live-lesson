@@ -103,6 +103,7 @@ async function onSignal(m) {
 
     case 'joined':
       myId = m.you.id;
+      if (Array.isArray(m.iceServers) && m.iceServers.length) RTC_CONFIG.iceServers = m.iceServers;
       if (m.peers.length) { peerId = m.peers[0].id; isInitiator = true; onPeerReady(m.peers[0]); }
       applyState(m.state);
       break;
@@ -148,12 +149,10 @@ function applyState(state) {
 }
 
 // ================= 2. Media + WebRTC =================
+// ICE serverlar server tomondan keladi ('joined' xabarida): STUN, TURN sozlangan bo'lsa TURN ham.
+// TURN paroli qisqa muddatli — shuning uchun bu yerda hech narsa qattiq yozilmaydi.
 const RTC_CONFIG = {
-  iceServers: [
-    { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
-    // Qattiq NAT ortida TURN kerak bo'ladi — shu yerga qo'shiladi:
-    // { urls:'turn:turn.example.com:3478', username:'u', credential:'p' },
-  ],
+  iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }],
 };
 
 let pc = null, localStream = null, pendingIce = [];
@@ -190,13 +189,28 @@ function ensurePc() {
 
   pc.onconnectionstatechange = () => {
     const s = pc.connectionState;
-    if (s === 'connected') setStatus('Aloqa o‘rnatildi');
+    if (s === 'connected') { setStatus('Aloqa o‘rnatildi'); reportPath(); }
     else if (s === 'connecting') setStatus('Ulanmoqda…');
     else if (s === 'failed') { setStatus('Aloqa uzildi'); restartIce(); }
     else if (s === 'disconnected') setStatus('Aloqa beqaror…');
   };
 
   return pc;
+}
+
+// Aloqa to'g'ridan-to'g'rimi yoki TURN orqalimi — nosozlikni topishda asqotadi
+async function reportPath() {
+  try {
+    const stats = await pc.getStats();
+    let pair = null;
+    stats.forEach((r) => { if (r.type === 'candidate-pair' && r.state === 'succeeded' && r.nominated) pair = r; });
+    if (!pair) return;
+    const local = stats.get(pair.localCandidateId);
+    const remote = stats.get(pair.remoteCandidateId);
+    const relayed = (local && local.candidateType === 'relay') || (remote && remote.candidateType === 'relay');
+    console.log(`[aloqa] ${local && local.candidateType} <-> ${remote && remote.candidateType}`
+                + (relayed ? ' (TURN orqali)' : ' (to‘g‘ridan-to‘g‘ri)'));
+  } catch {}
 }
 
 function playRemote() {

@@ -8,6 +8,7 @@ const express = require('express');
 const multer = require('multer');
 const { WebSocketServer } = require('ws');
 const { AUTH_ON, sign, verify, ROOM_RE } = require('./lib/token');
+const { TURN_ON, TURN_HOST, iceServers } = require('./lib/turn');
 
 const PORT = process.env.PORT || 4300;
 const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
@@ -92,6 +93,16 @@ app.get('/api/lessons/:file', adminOnly, (req, res) => {
     }).filter(Boolean);
     res.json({ file: f, events });
   });
+});
+
+// Vaqtinchalik TURN hisob ma'lumotlari. Token rejimida token talab qilinadi.
+app.get('/api/ice', (req, res) => {
+  if (AUTH_ON) {
+    const c = claimsFrom(req);
+    if (!c) return res.status(403).json({ error: 'ruxsat yo‘q' });
+    return res.json({ iceServers: iceServers(c.room) });
+  }
+  res.json({ iceServers: iceServers('dev') });
 });
 
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
@@ -187,6 +198,7 @@ wss.on('connection', (ws, req) => {
     you: { id: clientId, role, name },
     peers: peerList,
     state: room.state,
+    iceServers: iceServers(roomId),
   });
 
   broadcast(room, { type: 'peer-join', peer: { id: clientId, role, name } }, clientId);
@@ -279,6 +291,7 @@ wss.on('connection', (ws, req) => {
 
 server.listen(PORT, () => {
   console.log(`Jonli dars: http://127.0.0.1:${PORT}`);
+  console.log(TURN_ON ? `TURN: ${TURN_HOST}` : 'TURN: yo‘q — faqat STUN (qattiq NAT ortida ulanmasligi mumkin)');
   console.log(AUTH_ON
     ? 'Rejim: TOKEN — kirish faqat imzolangan token bilan'
     : 'Rejim: OCHIQ — LESSON_TOKEN_SECRET yo‘q, havola bilan kiriladi (faqat ishlab chiqish uchun)');

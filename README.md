@@ -75,14 +75,22 @@ Chiziqlar kanvas o‘lchamiga **nisbiy** (0..1) saqlanadi — telefon va noutbuk
 
 ## TURN server
 
-STUN bilan foydalanuvchilarning ~90% i ulanadi. Qattiq NAT / mobil operator ortidagilar uchun
-TURN kerak. `public/room.js` dagi `RTC_CONFIG` ichida joyi tayyor:
+STUN bilan foydalanuvchilarning ~90% i ulanadi. Qattiq NAT va mobil operatorlar ortidagilar
+uchun TURN kerak — u **o‘rnatilgan va ishlayapti**: `myteacher.uz` (coturn, 46.8.195.59).
 
-```js
-{ urls: 'turn:turn.example.com:3478', username: 'u', credential: 'p' }
+ICE serverlari klientga **server tomondan** beriladi (`joined` xabarida va `GET /api/ice`),
+parol esa har safar qisqa muddatli qilib yasaladi. Shuning uchun klient kodida hech qanday
+TURN paroli yozilmagan — aks holda uni ko‘chirib olib, trafigingiz hisobidan foydalanish mumkin bo‘lardi.
+
+Ilovani ishga tushirishda:
+
+```bash
+TURN_SECRET=<serverdagi /etc/coturn-secret> TURN_HOST=myteacher.uz npm start
 ```
 
-O‘z serveringizga `coturn` o‘rnatish yetarli.
+`TURN_SECRET` yoki `TURN_HOST` berilmasa — faqat STUN ishlatiladi.
+
+O‘rnatish tafsilotlari, NAT gotcha'si va tekshirish usuli: [deploy/coturn.md](deploy/coturn.md).
 
 ## Ilovaga ulash (WebView)
 
