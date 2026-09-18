@@ -9,6 +9,7 @@ const multer = require('multer');
 const { WebSocketServer } = require('ws');
 const { AUTH_ON, sign, verify, ROOM_RE } = require('./lib/token');
 const { TURN_ON, TURN_HOST, iceServers } = require('./lib/turn');
+const teachers = require('./lib/teachers');
 
 const PORT = process.env.PORT || 4300;
 const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
@@ -95,6 +96,63 @@ app.get('/api/lessons/:file', adminOnly, (req, res) => {
     }).filter(Boolean);
     res.json({ file: f, events });
   });
+});
+
+app.use(express.json({ limit: '10kb' }));
+
+// ---------- Ustoz kirishi (login + parol) ----------
+const COOKIE = 'll_sessiya';
+
+function cookies(req) {
+  return Object.fromEntries(
+    (req.headers.cookie || '').split(';').map((c) => {
+      const i = c.indexOf('=');
+      return i < 0 ? [c.trim(), ''] : [c.slice(0, i).trim(), decodeURIComponent(c.slice(i + 1))];
+    }).filter(([k]) => k),
+  );
+}
+
+app.post('/api/login', (req, res) => {
+  const { login, password } = req.body || {};
+  const t = teachers.find(login);
+  // Parol noto'g'ri bo'lsa ham, login topilmasa ham bir xil javob — qaysi login mavjudligi bilinmasin
+  if (!t || !teachers.check(String(password || ''), t.pass)) {
+    return res.status(401).json({ error: 'Login yoki parol noto\u2018g\u2018ri' });
+  }
+  if (!AUTH_ON) return res.status(500).json({ error: 'server sozlanmagan (LESSON_TOKEN_SECRET yo\u2018q)' });
+
+  const token = sign({ room: t.room, role: 'teacher', name: t.name }, 12 * 3600);
+  res.setHeader('Set-Cookie',
+    `${COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${12 * 3600}`
+    + (req.secure || req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : ''));
+  res.json({ ok: true, room: t.room, name: t.name });
+});
+
+app.post('/api/logout', (req, res) => {
+  res.setHeader('Set-Cookie', `${COOKIE}=; Path=/; HttpOnly; Max-Age=0`);
+  res.json({ ok: true });
+});
+
+// Ustoz sahifasi tokenni shu yerdan oladi (cookie HttpOnly — JS uni o'qiy olmaydi)
+app.get('/api/session', (req, res) => {
+  const token = cookies(req)[COOKIE];
+  const c = verify(token);
+  if (!c) return res.status(401).json({ error: 'kirilmagan' });
+  res.json({ token, room: c.room, role: c.role, name: c.name });
+});
+
+// ---------- O'quvchi kirishi (havola bilan, parolsiz) ----------
+// Kurs kartasidagi havola shu yerga olib keladi: /dars/<xona>
+app.get('/dars/:room', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'room.html'));
+});
+
+app.get('/api/join/:room', (req, res) => {
+  const room = String(req.params.room || '').toLowerCase();
+  if (!ROOM_RE.test(room)) return res.status(400).json({ error: 'xona nomi noto\u2018g\u2018ri' });
+  if (!AUTH_ON) return res.json({ token: null, room });
+  const name = String(req.query.name || '').slice(0, 40) || 'O\u2018quvchi';
+  res.json({ token: sign({ room, role: 'student', name }, 6 * 3600), room });
 });
 
 // Ilova qaysi rejimda ishlayotganini bosh sahifa shundan biladi

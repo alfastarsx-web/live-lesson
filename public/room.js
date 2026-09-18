@@ -15,13 +15,37 @@ function peekToken(tok) {
   } catch { return null; }
 }
 
-const CLAIMS = TOKEN ? peekToken(TOKEN) : null;
-const ROOM = (CLAIMS ? CLAIMS.room : Q.get('room') || '').toLowerCase();
-const ROLE = (CLAIMS ? CLAIMS.role : Q.get('role')) === 'teacher' ? 'teacher' : 'student';
-const NAME = (CLAIMS && CLAIMS.name) || Q.get('name') || (ROLE === 'teacher' ? 'Ustoz' : 'O‘quvchi');
-const IS_TEACHER = ROLE === 'teacher';
+// Token uch yo'ldan birida keladi:
+//   1. ?t=<token>          — mobil ilova WebView'da shunday ochadi
+//   2. /dars/<xona>        — o'quvchi kurs kartasidagi havoladan kiradi (parolsiz)
+//   3. cookie              — ustoz login/parol bilan kirgan
+async function tokenTop() {
+  if (TOKEN) return TOKEN;
 
-if (!ROOM && !TOKEN) location.replace('index.html');
+  const m = location.pathname.match(/^\/dars\/([a-z0-9-]{3,40})\/?$/i);
+  if (m) {
+    const nomi = Q.get('name') ? `?name=${encodeURIComponent(Q.get('name'))}` : '';
+    const r = await fetch(`/api/join/${m[1].toLowerCase()}${nomi}`);
+    if (r.ok) return (await r.json()).token;
+    return null;
+  }
+
+  const r = await fetch('/api/session');
+  if (r.ok) return (await r.json()).token;
+  return null;    // ustoz kirmagan
+}
+
+let CLAIMS = TOKEN ? peekToken(TOKEN) : null;
+let ROOM = '', ROLE = 'student', NAME = '', IS_TEACHER = false;
+
+function rolniQoy(claims) {
+  CLAIMS = claims;
+  ROOM = (claims ? claims.room : Q.get('room') || '').toLowerCase();
+  ROLE = (claims ? claims.role : Q.get('role')) === 'teacher' ? 'teacher' : 'student';
+  NAME = (claims && claims.name) || Q.get('name') || (ROLE === 'teacher' ? 'Ustoz' : 'O‘quvchi');
+  IS_TEACHER = ROLE === 'teacher';
+}
+rolniQoy(CLAIMS);
 
 const $ = (s) => document.querySelector(s);
 const el = {
@@ -38,14 +62,21 @@ const el = {
   toast: $('#toast'),
 };
 
-el.localTag.textContent = NAME + ' (siz)';
-if (IS_TEACHER) {
-  document.body.classList.add('can-draw');
-  el.emptyHint.textContent = 'PDF ochish uchun 📄 tugmasini bosing';
-} else {
-  document.body.classList.add('viewer');
-  el.toolbar.hidden = true;
+function interfeysniSozla() {
+  el.localTag.textContent = NAME + ' (siz)';
+  if (IS_TEACHER) {
+    document.body.classList.remove('viewer');
+    document.body.classList.add('can-draw');
+    el.toolbar.hidden = false;
+    el.emptyHint.textContent = 'PDF ochish uchun 📄 tugmasini bosing';
+  } else {
+    document.body.classList.add('viewer');
+    document.body.classList.remove('can-draw');
+    el.toolbar.hidden = true;
+    el.emptyHint.textContent = 'Ustoz PDF ochishini kuting';
+  }
 }
+interfeysniSozla();
 
 let toastTimer;
 function toast(msg, ms = 2600) {
@@ -72,8 +103,8 @@ function flushOutbox() {
 
 function connect() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const url = TOKEN
-    ? `${proto}://${location.host}/ws?t=${encodeURIComponent(TOKEN)}`
+  const url = AKTIV_TOKEN
+    ? `${proto}://${location.host}/ws?t=${encodeURIComponent(AKTIV_TOKEN)}`
     : `${proto}://${location.host}/ws?room=${encodeURIComponent(ROOM)}`
       + `&role=${ROLE}&name=${encodeURIComponent(NAME)}`;
   ws = new WebSocket(url);
@@ -375,8 +406,8 @@ async function gotoPage(n, broadcast = true) {
   if (broadcast && IS_TEACHER) wsSend({ type: 'page', page: pageNum });
 }
 
-el.btnPrev.onclick = () => gotoPage(pageNum - 1);
-el.btnNext.onclick = () => gotoPage(pageNum + 1);
+el.btnPrev.onclick = () => { if (IS_TEACHER) gotoPage(pageNum - 1); };
+el.btnNext.onclick = () => { if (IS_TEACHER) gotoPage(pageNum + 1); };
 
 // Ustoz PDF yuklaydi
 el.fileInput.onchange = async () => {
@@ -387,7 +418,7 @@ el.fileInput.onchange = async () => {
   const fd = new FormData();
   fd.append('file', f);
   try {
-    const r = await fetch(TOKEN ? `/api/upload?t=${encodeURIComponent(TOKEN)}` : '/api/upload',
+    const r = await fetch(AKTIV_TOKEN ? `/api/upload?t=${encodeURIComponent(AKTIV_TOKEN)}` : '/api/upload',
                           { method: 'POST', body: fd });
     const j = await r.json();
     if (!r.ok) throw new Error(j.error || 'upload');
@@ -412,9 +443,9 @@ function applyScroll(frac) {
   requestAnimationFrame(() => { scrollFromPeer = false; });
 }
 
-if (IS_TEACHER) {
+{
   el.board.addEventListener('scroll', () => {
-    if (scrollFromPeer || !pdfDoc) return;
+    if (!IS_TEACHER || scrollFromPeer || !pdfDoc) return;
     const now = performance.now();
     const emit = () => {
       scrollSent = performance.now();
@@ -491,7 +522,9 @@ function redraw() {
 }
 
 // --- Ustozning qo'l harakati ---
-if (IS_TEACHER) {
+// Rol asinxron aniqlanadi, shuning uchun hodisalar doim ulanadi va
+// har birida IS_TEACHER tekshiriladi (o'quvchida hech narsa ishlamaydi).
+{
   const c = el.inkCanvas;
   let drawing = false, lastSent = 0, strokeStart = 0;
 
@@ -501,7 +534,7 @@ if (IS_TEACHER) {
   };
 
   c.addEventListener('pointerdown', (e) => {
-    if (!pdfDoc) return;
+    if (!IS_TEACHER || !pdfDoc) return;
     if (e.pointerType === 'touch' && e.isPrimary === false) return;
     drawing = true;
     c.setPointerCapture(e.pointerId);
@@ -511,7 +544,7 @@ if (IS_TEACHER) {
   });
 
   c.addEventListener('pointermove', (e) => {
-    if (!drawing) return;
+    if (!IS_TEACHER || !drawing) return;
     const p = pos(e);
     const pts = liveLocal.pts;
     const last = pts[pts.length - 1];
@@ -538,8 +571,12 @@ if (IS_TEACHER) {
   c.addEventListener('pointercancel', finish);
   c.addEventListener('pointerleave', finish);
 
-  el.btnUndo.onclick = () => { strokes.pop(); redraw(); wsSend({ type: 'undo' }); };
+  el.btnUndo.onclick = () => {
+    if (!IS_TEACHER) return;
+    strokes.pop(); redraw(); wsSend({ type: 'undo' });
+  };
   el.btnClear.onclick = () => {
+    if (!IS_TEACHER) return;
     if (!confirm('Shu sahifadagi belgilarni o‘chirasizmi?')) return;
     strokes = strokes.filter((s) => s.page !== pageNum);
     redraw();
@@ -548,7 +585,21 @@ if (IS_TEACHER) {
 }
 
 // ================= 5. Ishga tushirish =================
+let AKTIV_TOKEN = TOKEN;
+
 (async function start() {
+  try {
+    AKTIV_TOKEN = await tokenTop();
+  } catch { AKTIV_TOKEN = null; }
+
+  // Ustoz kirmagan bo'lsa — login sahifasiga
+  if (!AKTIV_TOKEN && !ROOM) {
+    location.replace('/login.html?keyin=' + encodeURIComponent(location.pathname + location.search));
+    return;
+  }
+
+  if (AKTIV_TOKEN) { rolniQoy(peekToken(AKTIV_TOKEN)); interfeysniSozla(); }
+
   await initMedia();
   connect();
 })();
