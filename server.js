@@ -291,6 +291,9 @@ app.get('/api/ice', (req, res) => {
   res.json({ iceServers: iceServers('dev') });
 });
 
+// Bosh sahifa — rol tanlash yo'q, rol hisobdan aniqlanadi
+app.get('/', (req, res) => res.redirect('/login.html'));
+
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 const server = http.createServer(app);

@@ -147,7 +147,7 @@ async function onSignal(m) {
       setStatus(m.message || 'Xatolik');
       el.remotePh.hidden = false;
       el.remotePh.innerHTML = `<b>Xonaga kirib bo‘lmadi</b><span>${m.message || 'Xatolik'}<br>`
-        + '<a href="index.html" style="color:#60a5fa">Bosh sahifaga qaytish</a></span>';
+        + '<a href="/jadval.html" style="color:#60a5fa">Jadvalga qaytish</a></span>';
       toast(m.message || 'Xatolik', 8000);
       break;
 
@@ -348,7 +348,7 @@ el.btnLeave.onclick = () => {
   try { ws && ws.close(); } catch {}
   teardownPeer();
   if (localStream) localStream.getTracks().forEach((t) => t.stop());
-  location.href = 'index.html';
+  location.href = IS_TEACHER ? '/jadval.html' : '/band.html';
 };
 
 // ================= 3. PDF =================
