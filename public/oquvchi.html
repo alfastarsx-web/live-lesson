@@ -124,21 +124,38 @@ document.getElementById('videoTugma').onclick = async () => {
     if (e && e.ok && e.data.url) return (location.href = e.data.url);
   }
 
-  // 2) Aks holda — hoziroq tezkor xona
-  const r = await api('/api/tezkor', {
+  // 2) Aks holda — hoziroq chaqiruv: xona ochiladi va o'quvchiga push boradi
+  let r = await api('/api/booking/invite', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ studentId: ID }),
+    body: JSON.stringify({ studentUserId: ID }),
   });
+
+  let pushKetdi = Boolean(r && r.ok);
+
+  // Chaqiruv ishlamasa (masalan zaxira hisob) — kamida xonani ochamiz
+  if (!r || !r.ok) {
+    r = await api('/api/tezkor', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ studentId: ID }),
+    });
+  }
+
   btn.disabled = false;
   if (!r) return;
-  if (!r.ok) return alert(r.data.error || 'Xonani ochib bo‘lmadi');
+  if (!r.ok) return alert(r.data.message || r.data.error || 'Xonani ochib bo‘lmadi');
 
-  const havola = location.origin + r.data.studentUrl;
+  const havola = r.data.studentUrl.startsWith('http')
+    ? r.data.studentUrl
+    : location.origin + r.data.studentUrl;
+
   document.getElementById('tezkorBlok').innerHTML = `
     <div class="karta-oq" style="margin-bottom:16px">
-      <h2>Dars xonasi tayyor</h2>
-      <div class="izoh">O‘quvchiga shu havolani yuboring — u parolsiz kiradi.</div>
+      <h2>${pushKetdi ? 'O‘quvchi chaqirildi' : 'Dars xonasi tayyor'}</h2>
+      <div class="izoh">${pushKetdi
+        ? 'Telefoniga bildirishnoma yuborildi. Havolani qo‘shimcha yuborsangiz ham bo‘ladi.'
+        : 'O‘quvchiga shu havolani yuboring — u parolsiz kiradi.'}</div>
       <div class="havola-quti">
         <code id="tezkorHavola">${havola}</code>
         <button id="tezkorNusxa">Nusxa</button>
