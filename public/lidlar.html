@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lidlar</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="sahifa-bosh">
+    <h1>Lidlar</h1>
+    <div class="izoh" id="izoh">Yuklanmoqda…</div>
+  </div>
+
+  <nav class="nav">
+    <a href="/jadval.html">Jadval</a>
+    <a href="/oquvchilar.html">O‘quvchilar</a>
+    <a href="/lidlar.html" aria-current="page">Lidlar</a>
+  </nav>
+
+  <div class="chiplar" id="chiplar">
+    <button class="chip" data-t="all" aria-pressed="true">Barchasi (0)</button>
+    <button class="chip" data-t="new" aria-pressed="false">Yangi (0)</button>
+    <button class="chip" data-t="negotiating" aria-pressed="false">Muzokarada (0)</button>
+    <button class="chip" data-t="trial_scheduled" aria-pressed="false">Sinov darsi (0)</button>
+  </div>
+
+  <div id="royxat"><div class="skelet"></div><div class="skelet"></div></div>
+</div>
+
+<script src="/auth-webview.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+let HAMMASI = [];
+let FILTR = 'all';
+
+const HOLATLAR = {
+  new:             { matn: 'Yangi' },
+  unreachable:     { matn: 'Ulanib bo‘lmadi' },
+  negotiating:     { matn: 'Muzokarada' },
+  trial_scheduled: { matn: 'Sinov darsi belgilandi' },
+  converted:       { matn: 'O‘quvchiga aylandi' },
+  lost:            { matn: 'Qiziqmadi' },
+};
+
+function kartaHtml(l) {
+  const h = HOLATLAR[l.status] || { matn: l.status };
+  return `
+    <div class="lid l-${l.status}" data-id="${l.id}">
+      <div class="tepa">
+        <div class="avatar">${bosh(l.name)}</div>
+        <div class="ism">
+          <b>${l.name || 'Noma‘lum'}</b>
+          <a href="tel:${l.phoneNumber}">${l.phoneNumber || ''}</a>
+        </div>
+        <span class="holat-yorliq">${h.matn}</span>
+      </div>
+
+      ${l.note ? `<div class="izohi">${l.note}</div>` : ''}
+
+      <div class="amallari">
+        <a href="tel:${l.phoneNumber}" style="text-decoration:none">
+          <button class="qongiroq" type="button">Telefon qilish</button></a>
+        <button data-h="unreachable">Ulanib bo‘lmadi</button>
+        <button data-h="negotiating">Muzokarada</button>
+        <button class="asosiy" data-sinov="1">Sinov darsi</button>
+      </div>
+
+      <div class="sinov-quti" data-sinov-quti hidden>
+        <b>Sinov darsi vaqti</b>
+        <input type="datetime-local" data-vaqt
+               style="width:100%;padding:11px;border-radius:10px;border:1.5px solid var(--line);font:inherit">
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="asosiy" data-tasdiq style="padding:10px 14px;border-radius:10px;border:0;
+                  background:var(--blue);color:#fff;font:inherit;font-weight:700;cursor:pointer">Belgilash</button>
+          <button data-bekor style="padding:10px 14px;border-radius:10px;border:1.5px solid var(--line);
+                  background:#fff;font:inherit;font-weight:700;color:var(--mut2);cursor:pointer">Yopish</button>
+        </div>
+        <div class="xabar2" data-xabar style="margin-top:10px"></div>
+      </div>
+    </div>`;
+}
+
+function sanoq() {
+  const son = (t) => t === 'all' ? HAMMASI.length : HAMMASI.filter((x) => x.status === t).length;
+  document.querySelectorAll('.chip').forEach((c) => {
+    const nom = { all: 'Barchasi', new: 'Yangi', negotiating: 'Muzokarada', trial_scheduled: 'Sinov darsi' }[c.dataset.t];
+    c.textContent = `${nom} (${son(c.dataset.t)})`;
+  });
+}
+
+function chiz() {
+  let ro = FILTR === 'all' ? HAMMASI : HAMMASI.filter((x) => x.status === FILTR);
+  $('#royxat').innerHTML = ro.length
+    ? ro.map(kartaHtml).join('')
+    : '<div class="bosh-holat"><b>Lid yo‘q</b><span>Bu bo‘limda hozircha lid yo‘q</span></div>';
+
+  document.querySelectorAll('.lid').forEach((k) => {
+    const id = k.dataset.id;
+    const quti = k.querySelector('[data-sinov-quti]');
+
+    k.querySelectorAll('[data-h]').forEach((b) => {
+      b.onclick = () => holatQoy(id, b.dataset.h, b);
+    });
+    k.querySelector('[data-sinov]').onclick = () => { quti.hidden = !quti.hidden; };
+    quti.querySelector('[data-bekor]').onclick = () => { quti.hidden = true; };
+    quti.querySelector('[data-tasdiq]').onclick = () => sinovBelgila(id, quti);
+  });
+}
+
+async function holatQoy(id, status, btn) {
+  btn.disabled = true;
+  const r = await api(`/api/ai/leads/${id}/status`, {
+    method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+  btn.disabled = false;
+  if (!r) return;
+  if (!r.ok) return alert(r.data.message || 'O‘zgartirib bo‘lmadi');
+  const lid = HAMMASI.find((x) => x.id === id);
+  if (lid) lid.status = status;
+  sanoq(); chiz();
+}
+
+async function sinovBelgila(id, quti) {
+  const xabar = quti.querySelector('[data-xabar]');
+  const qiymat = quti.querySelector('[data-vaqt]').value;
+  if (!qiymat) { xabar.textContent = 'Vaqtni tanlang'; xabar.className = 'xabar2 err'; return; }
+
+  const tasdiq = quti.querySelector('[data-tasdiq]');
+  tasdiq.disabled = true;
+  const r = await api('/api/booking/trial', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ leadId: id, startsAt: new Date(qiymat).toISOString() }),
+  });
+  tasdiq.disabled = false;
+  if (!r) return;
+
+  if (!r.ok) {
+    xabar.textContent = r.data.message || 'Belgilab bo‘lmadi';
+    xabar.className = 'xabar2 err';
+    return;
+  }
+
+  const lid = HAMMASI.find((x) => x.id === id);
+  if (lid) lid.status = 'trial_scheduled';
+  quti.innerHTML = `<b>Sinov darsi belgilandi</b>
+    <div class="izoh" style="margin-bottom:8px">${sanaChiroyli(r.data.startsAt)} — havolani lidga yuboring</div>
+    <div class="havola-quti"><code>${r.data.joinUrl}</code><button type="button" id="n-${id}">Nusxa</button></div>`;
+  document.getElementById(`n-${id}`).onclick = (e) => {
+    navigator.clipboard.writeText(r.data.joinUrl).then(() => { e.target.textContent = 'Nusxalandi'; }, () => {});
+  };
+  sanoq();
+}
+
+document.querySelectorAll('.chip').forEach((c) => {
+  c.onclick = () => {
+    FILTR = c.dataset.t;
+    document.querySelectorAll('.chip').forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
+    chiz();
+  };
+});
+
+(async () => {
+  await WebViewAuth.tayyorla();
+  const r = await api('/api/ai/leads/my');
+  if (!r) return;
+  if (!r.ok) {
+    $('#izoh').textContent = '';
+    $('#royxat').innerHTML = '<div class="bosh-holat"><b>Lidlarni yuklab bo‘lmadi</b>'
+      + `<span>${r.data.message || 'Qaytadan urinib ko‘ring'}</span></div>`;
+    return;
+  }
+  HAMMASI = Array.isArray(r.data) ? r.data : [];
+  $('#izoh').textContent = `${HAMMASI.length} ta lid biriktirilgan`;
+  sanoq(); chiz();
+})();
+</script>
+</body>
+</html>

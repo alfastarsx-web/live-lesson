@@ -224,7 +224,14 @@ const RUXSAT = [
   /^assignments\/my-students\/online-count$/,
   /^student-activity\/students\/[0-9a-f-]{36}\/logs$/,
   /^calls$/,
+  /^leads\/my$/,
 ];
+
+// Lid holatini o'zgartirish (PATCH) — ruxsat etilgan yozish amali
+app.patch(/^\/api\/ai\/leads\/([0-9a-f-]{36})\/status$/, (req, res) => {
+  const id = req.path.split('/')[4];
+  aiProxy(req, res, `/leads/${id}/status`);
+});
 
 app.get(/^\/api\/ai\/(.+)$/, (req, res) => {
   const yol = req.path.replace(/^\/api\/ai\//, '');

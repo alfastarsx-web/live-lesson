@@ -179,8 +179,9 @@ body{
 
 /* ---------- bo'limlar orasida o'tish ---------- */
 .nav{display:flex;gap:8px;padding:14px 0 4px}
-.nav a{flex:1;text-align:center;padding:11px 6px;border-radius:12px;text-decoration:none;
-       font-size:14px;font-weight:700;color:var(--mut2);background:var(--card);box-shadow:var(--shadow)}
+.nav a{flex:1;text-align:center;padding:11px 4px;border-radius:12px;text-decoration:none;
+       font-size:13.5px;font-weight:700;color:var(--mut2);background:var(--card);
+       box-shadow:var(--shadow);white-space:nowrap}
 .nav a[aria-current="page"]{background:var(--blue);color:#fff}
 
 /* ---------- jadval ---------- */
@@ -222,3 +223,36 @@ body{
 .sana-tug b{display:block;font-size:16px;color:var(--ink);font-weight:800}
 .sana-tug[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
 .sana-tug[aria-pressed="true"] b{color:#fff}
+
+/* ---------- lidlar ---------- */
+.lid{background:var(--card);border-radius:20px;padding:16px;margin-bottom:14px;
+     box-shadow:var(--shadow);border:1.5px solid var(--line)}
+.lid.l-new{border-color:#bfdbfe}
+.lid.l-unreachable{border-color:#e2e8f0}
+.lid.l-negotiating{border-color:#fde68a}
+.lid.l-trial_scheduled{border-color:#bbf7d0}
+.lid.l-converted{border-color:#bbf7d0}
+.lid.l-lost{border-color:#fecdd3}
+
+.lid .tepa{display:flex;align-items:flex-start;gap:12px}
+.lid .ism{flex:1;min-width:0}
+.lid .ism b{display:block;font-size:17px;font-weight:700;letter-spacing:-.2px}
+.lid .ism a{display:block;font-size:13.5px;color:var(--blue);font-weight:600;text-decoration:none;margin-top:1px}
+.lid .holat-yorliq{padding:6px 11px;border-radius:9px;font-size:12.5px;font-weight:700;flex:0 0 auto;white-space:nowrap}
+.l-new .holat-yorliq{background:var(--blue-soft);color:var(--blue-dark)}
+.l-unreachable .holat-yorliq{background:#f1f5f9;color:var(--mut2)}
+.l-negotiating .holat-yorliq{background:var(--amber-soft);color:var(--amber)}
+.l-trial_scheduled .holat-yorliq,.l-converted .holat-yorliq{background:var(--green-soft);color:var(--green)}
+.l-lost .holat-yorliq{background:var(--red-soft);color:var(--red)}
+
+.lid .izohi{font-size:13px;color:var(--mut2);margin-top:10px;background:var(--bg);
+            border-radius:10px;padding:9px 11px}
+.lid .amallari{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.lid .amallari button{padding:9px 13px;border-radius:10px;border:1.5px solid var(--line);
+                      background:#fff;font:inherit;font-size:13px;font-weight:700;
+                      color:var(--mut2);cursor:pointer}
+.lid .amallari button.asosiy{background:var(--blue);border-color:var(--blue);color:#fff}
+.lid .amallari button.qongiroq{background:var(--green-soft);border-color:#bbf7d0;color:var(--green)}
+
+.sinov-quti{background:var(--blue-soft);border-radius:13px;padding:12px;margin-top:12px}
+.sinov-quti b{display:block;font-size:14px;font-weight:700;color:var(--blue-dark);margin-bottom:8px}

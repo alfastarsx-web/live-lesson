@@ -16,6 +16,7 @@
   <nav class="nav">
     <a href="/jadval.html">Jadval</a>
     <a href="/oquvchilar.html" aria-current="page">O‘quvchilar</a>
+    <a href="/lidlar.html">Lidlar</a>
   </nav>
 
   <div class="qidiruv">
@@ -28,6 +29,7 @@
     <button class="chip" data-t="active" aria-pressed="false">Faol (0)</button>
     <button class="chip" data-t="completed" aria-pressed="false">Yakunlangan (0)</button>
     <button class="chip" data-t="cancelled" aria-pressed="false">Bekor qilingan (0)</button>
+    <button class="chip" data-t="trial" aria-pressed="false">Sinov darsi (0)</button>
   </div>
 
   <div id="royxat">
@@ -39,6 +41,7 @@
 <script>
 const $ = (s) => document.querySelector(s);
 let HAMMASI = [];
+let SINOVLAR = [];     // sinov darsi belgilangan lidlar
 let FILTR = 'all';
 
 const IKON = {
@@ -75,8 +78,42 @@ function kartaHtml(x) {
     </div>`;
 }
 
+function sinovKartaHtml(l) {
+  return `
+    <div class="karta s-active" data-lid="${l.id}">
+      <div class="karta-bosh">
+        <div class="avatar">${bosh(l.name)}</div>
+        <div class="karta-ism">
+          <b>${l.name || 'Noma‘lum'}</b>
+          <div class="sana">${l.phoneNumber || ''}</div>
+        </div>
+        <span class="holat"><i></i>Sinov darsi</span>
+      </div>
+      <div class="karta-past">
+        <span class="yorliq">Hali o‘quvchi emas</span>
+        <span class="osma"></span>
+        <a href="/lidlar.html" style="text-decoration:none">
+          <button class="dumaloq" type="button" title="Lidlar bo‘limi">
+            <svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button></a>
+      </div>
+    </div>`;
+}
+
 function chiz() {
   const q = $('#qidiruv').value.trim().toLowerCase();
+
+  // Sinov darsi — hali o'quvchi bo'lmagan lidlar
+  if (FILTR === 'trial') {
+    let lidlar = SINOVLAR;
+    if (q) lidlar = lidlar.filter((x) => (x.name || '').toLowerCase().includes(q));
+    $('#royxat').innerHTML = lidlar.length
+      ? lidlar.map(sinovKartaHtml).join('')
+      : `<div class="bosh-holat"><b>Sinov darsi yo‘q</b>
+           <span>Lidlar bo‘limidan sinov darsi belgilang</span></div>`;
+    return;
+  }
+
   let ro = HAMMASI;
   if (FILTR !== 'all') ro = ro.filter((x) => x.status === FILTR);
   if (q) ro = ro.filter((x) => (x.student.fullName || '').toLowerCase().includes(q));
@@ -87,6 +124,7 @@ function chiz() {
          <span>Boshqa filter yoki qidiruvni sinab ko‘ring</span></div>`;
 
   document.querySelectorAll('.karta').forEach((k) => {
+    if (k.dataset.lid) { k.onclick = () => { location.href = '/lidlar.html'; }; return; }
     k.onclick = (e) => {
       const amal = e.target.closest('[data-amal]');
       if (amal) { e.stopPropagation(); return amalBajar(amal.dataset.amal, k.dataset.id); }
@@ -104,10 +142,17 @@ function amalBajar(amal, id) {
 }
 
 function sanoqlarniYangila() {
-  const son = (t) => t === 'all' ? HAMMASI.length : HAMMASI.filter((x) => x.status === t).length;
+  const son = (t) => {
+    if (t === 'all') return HAMMASI.length;
+    if (t === 'trial') return SINOVLAR.length;
+    return HAMMASI.filter((x) => x.status === t).length;
+  };
   document.querySelectorAll('.chip').forEach((c) => {
     const t = c.dataset.t;
-    const nom = { all: 'Barchasi', active: 'Faol', completed: 'Yakunlangan', cancelled: 'Bekor qilingan' }[t];
+    const nom = {
+      all: 'Barchasi', active: 'Faol', completed: 'Yakunlangan',
+      cancelled: 'Bekor qilingan', trial: 'Sinov darsi',
+    }[t];
     c.textContent = `${nom} (${son(t)})`;
   });
 }
@@ -135,6 +180,14 @@ $('#qidiruv').oninput = chiz;
   $('#izoh').textContent = `${HAMMASI.length} ta o‘quvchi biriktirilgan`;
   sanoqlarniYangila();
   chiz();
+
+  // Sinov darsi belgilangan lidlar — alohida so'rov, ro'yxatni kutdirmasin
+  const lid = await fetch('/api/ai/leads/my').then((x) => x.ok ? x.json() : null).catch(() => null);
+  if (Array.isArray(lid)) {
+    SINOVLAR = lid.filter((x) => x.status === 'trial_scheduled');
+    sanoqlarniYangila();
+    if (FILTR === 'trial') chiz();
+  }
 })();
 </script>
 </body>
