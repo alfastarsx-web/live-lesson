@@ -346,6 +346,8 @@ function getRoom(id) {
       state: emptyState(),
       startedAt,
       logFile: path.join(LOG_DIR, `${id}__${stamp}.jsonl`),
+      // Sinov darsi hisoboti uchun: o'quvchi qachon kirdi va qancha turdi
+      ishtirok: { studentJoined: false, studentSeconds: 0, studentEnteredAt: null },
     };
     rooms.set(id, room);
     logEvent(room, { type: 'lesson-start', room: id });
@@ -369,6 +371,36 @@ function send(ws, msg) {
 function broadcast(room, msg, exceptId) {
   for (const [id, peer] of room.peers) {
     if (id !== exceptId) send(peer, msg);
+  }
+}
+
+/**
+ * Sinov darsi tugagach ai.myteacher.uz ga xabar beramiz: lid kirdimi va
+ * qancha turdi. Shunga qarab lid holati o'zi "o'tildi" yoki "kelmadi" bo'ladi.
+ * Faqat "sinov-" bilan boshlanadigan xonalar uchun.
+ */
+async function sinovHisoboti(roomId, room) {
+  if (!roomId.startsWith('sinov-')) return;
+
+  const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
+  const secret = process.env.LESSON_TOKEN_SECRET || '';
+  if (!base || !secret) return;
+
+  const { studentJoined, studentSeconds } = room.ishtirok;
+
+  try {
+    const r = await fetch(`${base}/lesson-booking/trial/report`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-lesson-secret': secret },
+      body: JSON.stringify({ room: roomId, studentJoined, studentSeconds }),
+      signal: AbortSignal.timeout(10000),
+    });
+    const d = await r.json().catch(() => ({}));
+    console.log(`Sinov darsi hisoboti: ${roomId} kirdi=${studentJoined} soniya=${studentSeconds} -> `
+      + `${r.ok ? (d.status || 'qabul qilindi') : `xato ${r.status}`}`);
+  } catch (e) {
+    // Hisobot ketmasa dars baribir o'tgan — mentor holatni qo'lda qo'yadi
+    console.warn('Sinov darsi hisoboti yuborilmadi:', e.message);
   }
 }
 
@@ -423,6 +455,11 @@ wss.on('connection', (ws, req) => {
 
   broadcast(room, { type: 'peer-join', peer: { id: clientId, role, name } }, clientId);
   logEvent(room, { type: 'join', role, name });
+
+  if (role === 'student') {
+    room.ishtirok.studentJoined = true;
+    room.ishtirok.studentEnteredAt = Date.now();
+  }
 
   ws.on('message', (raw) => {
     let msg;
@@ -499,8 +536,14 @@ wss.on('connection', (ws, req) => {
     room.peers.delete(clientId);
     broadcast(room, { type: 'peer-leave', id: clientId });
     logEvent(room, { type: 'leave', role, name });
+
+    if (role === 'student' && room.ishtirok.studentEnteredAt) {
+      room.ishtirok.studentSeconds += Math.round((Date.now() - room.ishtirok.studentEnteredAt) / 1000);
+      room.ishtirok.studentEnteredAt = null;
+    }
     if (room.peers.size === 0) {
       logEvent(room, { type: 'lesson-end', strokes: room.state.strokes.length });
+      sinovHisoboti(roomId, room);
       setTimeout(() => {
         const r = rooms.get(roomId);
         if (r && r.peers.size === 0) rooms.delete(roomId);
