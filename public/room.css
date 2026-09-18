@@ -109,3 +109,20 @@ body.can-draw #inkCanvas{cursor:crosshair}
   .sw{width:22px;height:22px}
   .colors{gap:3px}
 }
+
+/* ---------- kattalashtirish (pinch zoom) ---------- */
+#pdfCanvas, #inkCanvas{ user-select:none; -webkit-user-select:none; }
+.board{ touch-action:pan-x pan-y; }
+
+.zoom-belgi{
+  position:absolute;left:10px;z-index:9;
+  bottom:calc(10px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:8px;padding:6px 8px 6px 12px;border-radius:999px;
+  background:rgba(12,17,28,.86);backdrop-filter:blur(10px);border:1px solid var(--line);
+  color:var(--fg);font-size:12px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.45)
+}
+.zoom-belgi[hidden]{display:none}
+.zoom-belgi button{
+  border:0;background:var(--acc);color:#fff;border-radius:999px;padding:5px 10px;
+  font:inherit;font-size:12px;font-weight:700;cursor:pointer
+}

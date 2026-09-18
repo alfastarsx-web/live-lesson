@@ -59,6 +59,7 @@ const el = {
   btnPrev: $('#btnPrev'), btnNext: $('#btnNext'), pageNo: $('#pageNo'), pagePill: $('#pagePill'),
   board: $('#board'), empty: $('#empty'), emptyHint: $('#emptyHint'),
   pdfbox: $('#pdfbox'), pdfCanvas: $('#pdfCanvas'), inkCanvas: $('#inkCanvas'),
+  zoomBelgi: $('#zoomBelgi'), zoomFoiz: $('#zoomFoiz'), zoomTiklash: $('#zoomTiklash'),
   toast: $('#toast'),
 };
 
@@ -412,6 +413,7 @@ async function gotoPage(n, broadcast = true) {
   const next = Math.min(Math.max(1, n), pdfDoc.numPages);
   pageNum = next;
   await renderPage(pageNum);
+  if (ZOOM > 1.02) zoomQoy(1);
   applyScroll(0);
   if (broadcast && IS_TEACHER) wsSend({ type: 'page', page: pageNum });
 }
@@ -448,6 +450,8 @@ let scrollFromPeer = false, scrollSent = 0, scrollTimer = null;
 function docHeight() { return el.pdfbox.clientHeight || el.board.scrollHeight || 1; }
 
 function applyScroll(frac) {
+  oxirgiScroll = frac;
+  if (!IS_TEACHER && ZOOM > 1.02) return;   // o'quvchi o'zi kattalashtirgan — tinch qo'yamiz
   scrollFromPeer = true;
   el.board.scrollTop = frac * docHeight();
   requestAnimationFrame(() => { scrollFromPeer = false; });
@@ -471,6 +475,90 @@ window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => { if (pdfDoc) renderPage(pageNum); }, 180);
 });
+
+// ================= Kattalashtirish (ikki barmoq) =================
+// O'quvchi hujjatni kattalashtirib ko'rishi tabiiy ehtiyoj. Kattalashtirilganda
+// ustozning scroll'iga ergashishni to'xtatamiz — aks holda ekran tortishib turadi.
+let ZOOM = 1;
+const ZOOM_MIN = 1, ZOOM_MAX = 4;
+const barmoqlar = new Map();
+let pinchBoshDist = 0, pinchBoshZoom = 1;
+let oxirgiScroll = 0;
+
+function zoomQoy(yangi, markaz) {
+  const eski = ZOOM;
+  ZOOM = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, yangi));
+  if (Math.abs(ZOOM - eski) < 0.001) return;
+
+  el.pdfbox.style.zoom = ZOOM;
+
+  // Barmoqlar orasidagi nuqta joyida qolsin
+  if (markaz) {
+    const k = ZOOM / eski;
+    el.board.scrollLeft = (el.board.scrollLeft + markaz.x) * k - markaz.x;
+    el.board.scrollTop = (el.board.scrollTop + markaz.y) * k - markaz.y;
+  }
+
+  el.zoomBelgi.hidden = ZOOM <= 1.02;
+  el.zoomFoiz.textContent = `${Math.round(ZOOM * 100)}%`;
+
+  // 1x ga qaytganda ustoz qayerda bo'lsa, o'sha yerga qaytamiz
+  if (ZOOM <= 1.02 && !IS_TEACHER && oxirgiScroll) applyScroll(oxirgiScroll);
+}
+
+function zoomTiklash() {
+  zoomQoy(1);
+  if (!IS_TEACHER && oxirgiScroll) applyScroll(oxirgiScroll);
+}
+el.zoomTiklash.onclick = zoomTiklash;
+
+el.board.addEventListener('pointerdown', (e) => {
+  barmoqlar.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (barmoqlar.size === 2) {
+    const [a, b] = [...barmoqlar.values()];
+    pinchBoshDist = Math.hypot(a.x - b.x, a.y - b.y);
+    pinchBoshZoom = ZOOM;
+    bekorQilInk();          // ikki barmoq boshlansa chizishni to'xtatamiz
+  }
+}, { passive: true });
+
+el.board.addEventListener('pointermove', (e) => {
+  if (!barmoqlar.has(e.pointerId)) return;
+  barmoqlar.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (barmoqlar.size !== 2 || !pinchBoshDist) return;
+
+  const [a, b] = [...barmoqlar.values()];
+  const dist = Math.hypot(a.x - b.x, a.y - b.y);
+  const r = el.board.getBoundingClientRect();
+  zoomQoy(pinchBoshZoom * (dist / pinchBoshDist), {
+    x: (a.x + b.x) / 2 - r.left,
+    y: (a.y + b.y) / 2 - r.top,
+  });
+}, { passive: true });
+
+const barmoqTushdi = (e) => {
+  barmoqlar.delete(e.pointerId);
+  if (barmoqlar.size < 2) pinchBoshDist = 0;
+};
+el.board.addEventListener('pointerup', barmoqTushdi, { passive: true });
+el.board.addEventListener('pointercancel', barmoqTushdi, { passive: true });
+
+// Ikki marta tez bosish — tiklaydi
+let oxirgiTegish = 0;
+el.board.addEventListener('pointerup', (e) => {
+  if (e.pointerType === 'mouse') return;
+  const now = performance.now();
+  if (now - oxirgiTegish < 320 && barmoqlar.size === 0) zoomTiklash();
+  oxirgiTegish = now;
+}, { passive: true });
+
+// Kompyuterda: Ctrl/Cmd + g'ildirak
+el.board.addEventListener('wheel', (e) => {
+  if (!e.ctrlKey && !e.metaKey) return;
+  e.preventDefault();
+  const r = el.board.getBoundingClientRect();
+  zoomQoy(ZOOM * (e.deltaY < 0 ? 1.12 : 1 / 1.12), { x: e.clientX - r.left, y: e.clientY - r.top });
+}, { passive: false });
 
 // ================= 4. Chizish =================
 let strokes = [];          // barcha tasdiqlangan chiziqlar
@@ -531,6 +619,8 @@ function redraw() {
   if (liveLocal && liveLocal.page === pageNum) drawStroke(ctx, liveLocal, W, H);
 }
 
+let bekorQilInk = () => {};   // chizish bo'limi uni to'ldiradi
+
 // --- Ustozning qo'l harakati ---
 // Rol asinxron aniqlanadi, shuning uchun hodisalar doim ulanadi va
 // har birida IS_TEACHER tekshiriladi (o'quvchida hech narsa ishlamaydi).
@@ -564,6 +654,14 @@ function redraw() {
     const now = performance.now();
     if (now - lastSent > 70) { lastSent = now; wsSend({ type: 'stroke-live', stroke: liveLocal }); }
   });
+
+  // Ikki barmoq bilan kattalashtirish boshlansa, yarim chizilgan chiziqni tashlaymiz
+  bekorQilInk = () => {
+    if (!drawing) return;
+    drawing = false;
+    liveLocal = null;
+    redraw();
+  };
 
   const finish = () => {
     if (!drawing) return;
