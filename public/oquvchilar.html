@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>O'quvchilar</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="sahifa-bosh">
+    <h1>O‘quvchilar</h1>
+    <div class="izoh" id="izoh">Yuklanmoqda…</div>
+  </div>
+
+  <div class="qidiruv">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5" stroke-linecap="round"/></svg>
+    <input id="qidiruv" placeholder="O‘quvchi qidirish…" autocomplete="off">
+  </div>
+
+  <div class="chiplar" id="chiplar">
+    <button class="chip" data-t="all" aria-pressed="true">Barchasi (0)</button>
+    <button class="chip" data-t="active" aria-pressed="false">Faol (0)</button>
+    <button class="chip" data-t="completed" aria-pressed="false">Yakunlangan (0)</button>
+    <button class="chip" data-t="cancelled" aria-pressed="false">Bekor qilingan (0)</button>
+  </div>
+
+  <div id="royxat">
+    <div class="skelet"></div><div class="skelet"></div>
+  </div>
+</div>
+
+<script src="/auth-webview.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+let HAMMASI = [];
+let FILTR = 'all';
+
+const IKON = {
+  chat: '<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3 1.2-4.2A8 8 0 1 1 21 12Z" stroke-linejoin="round"/></svg>',
+  qongiroq: '<svg viewBox="0 0 24 24"><path d="M6.6 3h3l1.5 4-2 1.4a12 12 0 0 0 5.5 5.5l1.4-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.6 5.2 2 2 0 0 1 6.6 3Z" stroke-linejoin="round"/></svg>',
+};
+
+function kartaHtml(x) {
+  const h = HOLAT[x.status] || { matn: x.status, sinf: '' };
+  const foiz = x.progress == null ? null : Math.round(x.progress);
+  return `
+    <div class="karta ${h.sinf}" data-id="${x.student.id}">
+      <div class="karta-bosh">
+        <div class="avatar">${bosh(x.student.fullName || x.student.firstName)}</div>
+        <div class="karta-ism">
+          <b>${x.student.fullName || x.student.firstName || 'Noma‘lum'}</b>
+          <div class="sana">${sanaQisqa(x.startDate)}${x.endDate ? ' → ' + sanaQisqa(x.endDate) : ''}</div>
+        </div>
+        <span class="holat"><i></i>${h.matn}</span>
+      </div>
+
+      ${foiz == null ? '' : `
+      <div class="progress">
+        <span class="yol"><i style="width:${Math.min(100, foiz)}%"></i></span>
+        <b>${foiz}%</b>
+      </div>`}
+
+      <div class="karta-past">
+        <span class="yorliq">${h.matn}</span>
+        <span class="osma"></span>
+        <button class="dumaloq" data-amal="chat">${IKON.chat}</button>
+        <button class="dumaloq qongiroq" data-amal="qongiroq">${IKON.qongiroq}</button>
+      </div>
+    </div>`;
+}
+
+function chiz() {
+  const q = $('#qidiruv').value.trim().toLowerCase();
+  let ro = HAMMASI;
+  if (FILTR !== 'all') ro = ro.filter((x) => x.status === FILTR);
+  if (q) ro = ro.filter((x) => (x.student.fullName || '').toLowerCase().includes(q));
+
+  $('#royxat').innerHTML = ro.length
+    ? ro.map(kartaHtml).join('')
+    : `<div class="bosh-holat"><b>O‘quvchilar topilmadi</b>
+         <span>Boshqa filter yoki qidiruvni sinab ko‘ring</span></div>`;
+
+  document.querySelectorAll('.karta').forEach((k) => {
+    k.onclick = (e) => {
+      const amal = e.target.closest('[data-amal]');
+      if (amal) { e.stopPropagation(); return amalBajar(amal.dataset.amal, k.dataset.id); }
+      location.href = `/oquvchi.html?id=${encodeURIComponent(k.dataset.id)}`;
+    };
+  });
+}
+
+function amalBajar(amal, id) {
+  // Qo'ng'iroq va chat — ilovaning o'z ekranlari. WebView'dan native tomonga xabar beramiz.
+  const xabar = { turi: amal, studentId: id };
+  if (window.MyTeacher?.postMessage) window.MyTeacher.postMessage(JSON.stringify(xabar));
+  else if (window.flutter_inappwebview?.callHandler) window.flutter_inappwebview.callHandler('mentorAction', xabar);
+  else location.href = `/oquvchi.html?id=${encodeURIComponent(id)}`;
+}
+
+function sanoqlarniYangila() {
+  const son = (t) => t === 'all' ? HAMMASI.length : HAMMASI.filter((x) => x.status === t).length;
+  document.querySelectorAll('.chip').forEach((c) => {
+    const t = c.dataset.t;
+    const nom = { all: 'Barchasi', active: 'Faol', completed: 'Yakunlangan', cancelled: 'Bekor qilingan' }[t];
+    c.textContent = `${nom} (${son(t)})`;
+  });
+}
+
+document.querySelectorAll('.chip').forEach((c) => {
+  c.onclick = () => {
+    FILTR = c.dataset.t;
+    document.querySelectorAll('.chip').forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
+    chiz();
+  };
+});
+$('#qidiruv').oninput = chiz;
+
+(async () => {
+  await WebViewAuth.tayyorla();
+  const r = await api('/api/ai/assignments/my-students');
+  if (!r) return;
+  if (!r.ok) {
+    $('#izoh').textContent = '';
+    $('#royxat').innerHTML = '<div class="bosh-holat"><b>Ro‘yxatni yuklab bo‘lmadi</b>'
+      + `<span>${r.data.message || 'Qaytadan urinib ko‘ring'}</span></div>`;
+    return;
+  }
+  HAMMASI = Array.isArray(r.data) ? r.data : [];
+  $('#izoh').textContent = `${HAMMASI.length} ta o‘quvchi biriktirilgan`;
+  sanoqlarniYangila();
+  chiz();
+})();
+</script>
+</body>
+</html>

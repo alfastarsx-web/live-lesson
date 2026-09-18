@@ -216,6 +216,35 @@ app.all(/^\/api\/booking(\/.*)?$/, (req, res) => {
 
 app.get('/api/my-mentor', (req, res) => aiProxy(req, res, '/assignments/my-mentor'));
 
+// Mentor ekranlari uchun o'qish endpointlari — ruxsat etilganlar ro'yxati bo'yicha.
+// Ochiq proksi qilmaymiz: faqat kerakli yo'llar o'tadi.
+const RUXSAT = [
+  /^assignments\/my-students$/,
+  /^assignments\/my-students\/active$/,
+  /^assignments\/my-students\/online-count$/,
+  /^student-activity\/students\/[0-9a-f-]{36}\/logs$/,
+  /^calls$/,
+];
+
+app.get(/^\/api\/ai\/(.+)$/, (req, res) => {
+  const yol = req.path.replace(/^\/api\/ai\//, '');
+  if (!RUXSAT.some((re) => re.test(yol))) return res.status(404).json({ error: 'topilmadi' });
+  aiProxy(req, res, `/${yol}`);
+});
+
+// Ilova WebView'ni #ai=<token> bilan ochadi — sahifa tokenni shu yerga uzatib,
+// cookie'ga aylantiradi. Hash serverga umuman yuborilmaydi, ya'ni loglarga tushmaydi.
+app.post('/api/adopt', (req, res) => {
+  const token = String(req.body?.token || '');
+  const payload = aiteacher.jwtPayload(token);
+  if (!payload || !payload.exp || payload.exp * 1000 < Date.now()) {
+    return res.status(400).json({ error: 'token yaroqsiz' });
+  }
+  res.setHeader('Set-Cookie', cookieHeader(req, AI_COOKIE, token, 12 * 3600));
+  const roles = aiteacher.collectRoles(payload);
+  res.json({ ok: true, role: roles.includes('mentor') || roles.includes('admin') ? 'mentor' : 'student' });
+});
+
 // Kim kirgan — sahifalar shundan biladi
 app.get('/api/whoami', (req, res) => {
   const ai = cookies(req)[AI_COOKIE];

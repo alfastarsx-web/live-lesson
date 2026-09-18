@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>O'quvchi</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="orqa-bosh">
+    <button class="orqa" id="orqa"><svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button>
+    <h2 id="sarlavha">…</h2>
+  </div>
+
+  <div class="bosh-karta" id="boshKarta">
+    <div class="bosh-qator">
+      <div class="avatar" id="avatar">…</div>
+      <div class="ism" id="ism">…</div>
+      <span class="pill" id="pill">…</span>
+    </div>
+    <div class="foiz" id="foizBlok" hidden>
+      <b id="foiz">—</b><span>PROGRESS</span>
+    </div>
+  </div>
+
+  <div class="amallar">
+    <button class="amal" data-amal="qongiroq">
+      <svg viewBox="0 0 24 24"><path d="M6.6 3h3l1.5 4-2 1.4a12 12 0 0 0 5.5 5.5l1.4-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.6 5.2 2 2 0 0 1 6.6 3Z"/></svg>
+      <span>Qo‘ng‘iroq</span>
+    </button>
+    <button class="amal" data-amal="chat">
+      <svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3 1.2-4.2A8 8 0 1 1 21 12Z"/></svg>
+      <span>Chat</span>
+    </button>
+    <button class="amal" id="faollikTugma">
+      <svg viewBox="0 0 24 24"><path d="M3 12h3l3 8 6-16 3 8h3"/></svg>
+      <span>Faollik</span>
+    </button>
+  </div>
+
+  <div class="royxat">
+    <h3>Qo‘ng‘iroqlar</h3>
+    <div id="qongiroqlar"><div class="qator"><span class="matn" style="color:#94a3b8">Yuklanmoqda…</span></div></div>
+  </div>
+</div>
+
+<div class="parda" id="parda"></div>
+<div class="sheet" id="sheet">
+  <div class="tutqich"></div>
+  <div class="bosh">
+    <b>Faollik tarixi</b>
+    <span id="sheetIsm"></span>
+  </div>
+  <div class="tana" id="faollik"></div>
+</div>
+
+<script src="/auth-webview.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+const ID = new URLSearchParams(location.search).get('id');
+let TALABA = null;
+
+const TUR = {
+  course:  {nom: 'Dars sessiya', rang: '#2563eb', fon: '#eff4ff', ikon: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5V5.5Z"/>'},
+  speaking:{nom: 'Suhbat',       rang: '#7c3aed', fon: '#ede9fe', ikon: '<path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3ZM5 11a7 7 0 0 0 14 0M12 18v3"/>'},
+  battle:  {nom: 'So‘z jangi',   rang: '#7c3aed', fon: '#ede9fe', ikon: '<path d="M6 8h12v8H6zM9 12h.01M15 12h.01"/>'},
+};
+const turBilan = (t) => TUR[t] || {nom: t || 'Faoliyat', rang: '#64748b', fon: '#f1f5f9', ikon: '<circle cx="12" cy="12" r="7"/>'};
+
+function nativeGa(amal) {
+  const xabar = { turi: amal, studentId: ID };
+  if (window.MyTeacher?.postMessage) window.MyTeacher.postMessage(JSON.stringify(xabar));
+  else if (window.flutter_inappwebview?.callHandler) window.flutter_inappwebview.callHandler('mentorAction', xabar);
+}
+
+$('#orqa').onclick = () => (history.length > 1 ? history.back() : location.href = '/oquvchilar.html');
+document.querySelectorAll('.amal[data-amal]').forEach((b) => { b.onclick = () => nativeGa(b.dataset.amal); });
+
+// --- pastdan chiquvchi oyna ---
+const sheetOch = (ochiq) => {
+  $('#sheet').classList.toggle('ochiq', ochiq);
+  $('#parda').classList.toggle('ochiq', ochiq);
+};
+$('#faollikTugma').onclick = () => { sheetOch(true); faollikniYukla(); };
+$('#parda').onclick = () => sheetOch(false);
+
+let faollikYuklandi = false;
+async function faollikniYukla() {
+  if (faollikYuklandi) return;
+  const r = await api(`/api/ai/student-activity/students/${ID}/logs`);
+  if (!r) return;
+  faollikYuklandi = true;
+  const ro = Array.isArray(r.data) ? r.data : [];
+  $('#faollik').innerHTML = ro.length ? ro.map((x) => {
+    const t = turBilan(x.actionType);
+    return `<div class="element">
+      <span class="belgi" style="background:${t.fon}">
+        <svg viewBox="0 0 24 24" style="stroke:${t.rang}">${t.ikon}</svg>
+      </span>
+      <span class="matn">
+        <b>${t.nom}</b>
+        <span>${sanaVaqt(x.startDate)} → ${x.endDate ? soatQisqa(x.endDate) : '…'}</span>
+      </span>
+      <span class="davom">${davomiylik(x.startDate, x.endDate)}</span>
+    </div>`;
+  }).join('') : '<div class="bosh-holat"><b>Faollik yo‘q</b><span>Bu o‘quvchi hali dars boshlamagan</span></div>';
+}
+
+function qongiroqHtml(c) {
+  const tugagan = !!c.endedAt;
+  const rang = tugagan ? '#16a34a' : '#2563eb';
+  const matn = tugagan ? 'Qo‘ng‘iroq tugadi' : 'Qo‘ng‘iroq davom etmoqda';
+  const d = new Date(c.createdAt);
+  return `<div class="qator">
+    <span class="nuqta" style="background:${rang}"></span>
+    <span class="vaqt">${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}<br>${soatQisqa(c.createdAt)}</span>
+    <span class="matn" style="color:${rang}">${matn}</span>
+    <span class="oxiri">${tugagan ? davomiylik(c.acceptedAt || c.createdAt, c.endedAt) : soatQisqa(c.createdAt)}</span>
+  </div>`;
+}
+
+(async () => {
+  await WebViewAuth.tayyorla();
+  if (!ID) return (location.href = '/oquvchilar.html');
+
+  const r = await api('/api/ai/assignments/my-students');
+  if (!r || !r.ok) return;
+
+  TALABA = (r.data || []).find((x) => x.student.id === ID);
+  if (!TALABA) {
+    $('#sarlavha').textContent = 'Topilmadi';
+    return;
+  }
+
+  const ism = TALABA.student.fullName || TALABA.student.firstName || 'O‘quvchi';
+  const h = HOLAT[TALABA.status] || { matn: TALABA.status };
+  $('#sarlavha').textContent = ism;
+  $('#ism').textContent = ism;
+  $('#avatar').textContent = bosh(ism);
+  $('#pill').textContent = h.matn;
+  $('#sheetIsm').textContent = ism;
+  document.title = ism;
+
+  if (TALABA.progress != null) {
+    $('#foizBlok').hidden = false;
+    $('#foiz').textContent = `${Math.round(TALABA.progress)}%`;
+  }
+
+  const c = await api('/api/ai/calls');
+  const hammasi = c && c.ok && Array.isArray(c.data) ? c.data : [];
+  const meniki = hammasi.filter((x) => x.calleeId === ID || x.callerId === ID);
+  $('#qongiroqlar').innerHTML = meniki.length
+    ? meniki.map(qongiroqHtml).join('')
+    : '<div class="qator"><span class="matn" style="color:#94a3b8;font-weight:500">Qo‘ng‘iroqlar yo‘q</span></div>';
+})();
+</script>
+</body>
+</html>

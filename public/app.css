@@ -1,0 +1,163 @@
+/* Mentor ilovasining "O'quvchilar" bo'limi — mobil ilova dizayniga moslangan */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --bg:#f4f5f7;
+  --card:#ffffff;
+  --ink:#0f172a;
+  --mut:#94a3b8;
+  --mut2:#64748b;
+  --line:#eef0f4;
+
+  --blue:#2563eb;
+  --blue-dark:#1d4ed8;
+  --blue-soft:#eff4ff;
+
+  --green:#16a34a;  --green-soft:#ecfdf5;
+  --amber:#d97706;  --amber-soft:#fffbeb;
+  --red:#e11d48;    --red-soft:#fff1f2;
+  --violet:#7c3aed; --violet-soft:#ede9fe;
+
+  --r:16px;
+  --shadow:0 1px 2px rgba(15,23,42,.04), 0 4px 16px rgba(15,23,42,.04);
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  font-size:15px;line-height:1.45;
+  padding:0 0 32px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px}
+
+/* ---------- sarlavhalar ---------- */
+.sahifa-bosh{padding:20px 0 6px}
+.sahifa-bosh h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.5px}
+.sahifa-bosh .izoh{color:var(--mut);font-size:14px;margin-top:2px}
+
+.orqa-bosh{display:flex;align-items:center;gap:14px;padding:16px 0}
+.orqa{width:42px;height:42px;border-radius:50%;background:var(--card);border:1px solid var(--line);
+      display:grid;place-items:center;cursor:pointer;flex:0 0 auto;box-shadow:var(--shadow)}
+.orqa svg{width:18px;height:18px;stroke:var(--ink);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.orqa-bosh h2{margin:0;font-size:21px;font-weight:700;letter-spacing:-.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- qidiruv ---------- */
+.qidiruv{position:relative;margin:14px 0 14px}
+.qidiruv input{width:100%;padding:15px 16px 15px 46px;border-radius:999px;border:0;background:var(--card);
+               font:inherit;font-size:15px;color:var(--ink);box-shadow:var(--shadow);outline:none}
+.qidiruv input::placeholder{color:#c3cad6}
+.qidiruv svg{position:absolute;left:17px;top:50%;transform:translateY(-50%);width:19px;height:19px;
+             stroke:var(--mut);fill:none;stroke-width:2.2}
+
+/* ---------- filtr chiplari ---------- */
+.chiplar{display:flex;gap:10px;overflow-x:auto;padding:2px 0 14px;scrollbar-width:none}
+.chiplar::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;padding:10px 18px;border-radius:999px;border:1.5px solid var(--line);
+      background:var(--card);font:inherit;font-size:14px;font-weight:600;color:var(--mut2);cursor:pointer}
+.chip[data-t="all"][aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.chip[data-t="active"]{border-color:#bbf7d0;color:var(--green)}
+.chip[data-t="active"][aria-pressed="true"]{background:var(--green-soft)}
+.chip[data-t="completed"]{border-color:#fde68a;color:var(--amber)}
+.chip[data-t="completed"][aria-pressed="true"]{background:var(--amber-soft)}
+.chip[data-t="cancelled"]{border-color:#fecdd3;color:var(--red)}
+.chip[data-t="cancelled"][aria-pressed="true"]{background:var(--red-soft)}
+
+/* ---------- o'quvchi kartasi ---------- */
+.karta{background:var(--card);border-radius:20px;padding:16px;margin-bottom:14px;
+       box-shadow:var(--shadow);border:1.5px solid var(--line)}
+.karta.s-active{border-color:#bbf7d0}
+.karta.s-completed{border-color:#fde68a}
+.karta.s-cancelled{border-color:#fecdd3}
+
+.karta-bosh{display:flex;align-items:flex-start;gap:12px}
+.avatar{width:50px;height:50px;border-radius:15px;background:var(--violet-soft);color:var(--violet);
+        display:grid;place-items:center;font-size:19px;font-weight:800;flex:0 0 auto}
+.karta-ism{flex:1;min-width:0}
+.karta-ism b{display:block;font-size:17px;font-weight:700;letter-spacing:-.2px;
+             overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.karta-ism .sana{color:var(--mut);font-size:12.5px;font-weight:500;margin-top:1px;
+                 white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.holat{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;flex:0 0 auto;
+       white-space:nowrap;padding-top:2px}
+.holat i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.s-active .holat{color:var(--green)} .s-completed .holat{color:var(--amber)} .s-cancelled .holat{color:var(--red)}
+
+.progress{display:flex;align-items:center;gap:10px;margin:14px 0 12px}
+.progress .yol{flex:1;height:7px;border-radius:999px;background:var(--line);overflow:hidden}
+.progress .yol i{display:block;height:100%;border-radius:999px}
+.s-active .yol i{background:var(--green)} .s-completed .yol i{background:var(--amber)} .s-cancelled .yol i{background:var(--red)}
+.progress b{font-size:14px;font-weight:700}
+
+.karta-past{display:flex;align-items:center;gap:8px}
+.yorliq{padding:7px 12px;border-radius:10px;font-size:13px;font-weight:700}
+.s-active .yorliq{background:var(--green-soft);color:var(--green)}
+.s-completed .yorliq{background:var(--amber-soft);color:var(--amber)}
+.s-cancelled .yorliq{background:var(--red-soft);color:var(--red)}
+.karta-past .osma{flex:1}
+.dumaloq{width:40px;height:40px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);
+         display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+.dumaloq svg{width:18px;height:18px;fill:none;stroke-width:2;stroke:var(--mut2)}
+.dumaloq.qongiroq{border-color:#fecdd3}
+.dumaloq.qongiroq svg{stroke:var(--red)}
+
+/* ---------- o'quvchi sahifasi ---------- */
+.bosh-karta{background:linear-gradient(135deg,#1e40af 0%,#2f6ae0 100%);border-radius:22px;
+            padding:22px;color:#fff;box-shadow:0 8px 24px rgba(37,99,235,.22)}
+.bosh-qator{display:flex;align-items:center;gap:14px}
+.bosh-karta .avatar{background:rgba(255,255,255,.18);color:#fff;width:46px;height:46px;font-size:18px}
+.bosh-karta .ism{flex:1;min-width:0;font-size:18px;font-weight:800;letter-spacing:-.3px;
+                 overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bosh-karta .pill{padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.2);
+                  font-size:12px;font-weight:700;flex:0 0 auto;white-space:nowrap}
+.bosh-karta .foiz{text-align:center;margin-top:18px}
+.bosh-karta .foiz b{display:block;font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1.1}
+.bosh-karta .foiz span{font-size:12px;font-weight:700;letter-spacing:1.4px;opacity:.72}
+
+.amallar{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.amal{background:var(--card);border:0;border-radius:18px;padding:16px 8px;box-shadow:var(--shadow);
+      display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;font:inherit}
+.amal svg{width:22px;height:22px;fill:none;stroke:var(--blue);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.amal span{font-size:14px;font-weight:600;color:var(--ink)}
+
+.royxat{background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.royxat h3{margin:0;padding:16px 18px;font-size:16px;font-weight:700;border-bottom:1px solid var(--line)}
+.qator{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.qator:last-child{border-bottom:0}
+.qator .nuqta{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.qator .vaqt{font-size:13px;color:var(--mut);font-weight:600;min-width:52px;line-height:1.25}
+.qator .matn{flex:1;font-size:14px;font-weight:600;min-width:0}
+.qator .oxiri{font-size:14px;font-weight:700;color:var(--ink)}
+
+.belgi{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto}
+.belgi svg{width:19px;height:19px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- bo'sh holat / yuklanish ---------- */
+.bosh-holat{text-align:center;padding:56px 20px;color:var(--mut)}
+.bosh-holat b{display:block;font-size:17px;font-weight:700;color:var(--mut2);margin-bottom:6px}
+.bosh-holat span{font-size:14px}
+.skelet{height:132px;border-radius:20px;background:linear-gradient(90deg,#eef0f4 25%,#f7f8fa 50%,#eef0f4 75%);
+        background-size:200% 100%;animation:sk 1.3s infinite;margin-bottom:14px}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ---------- pastdan chiquvchi oyna ---------- */
+.parda{position:fixed;inset:0;background:rgba(15,23,42,.45);opacity:0;pointer-events:none;
+       transition:opacity .22s;z-index:40}
+.parda.ochiq{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#f7f8fa;
+       border-radius:24px 24px 0 0;max-height:82dvh;display:flex;flex-direction:column;
+       transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1)}
+.sheet.ochiq{transform:translateY(0)}
+.sheet .tutqich{width:44px;height:5px;border-radius:999px;background:#d7dce5;margin:10px auto 4px;flex:0 0 auto}
+.sheet .bosh{padding:8px 20px 12px;flex:0 0 auto}
+.sheet .bosh b{display:block;font-size:22px;font-weight:800;letter-spacing:-.4px}
+.sheet .bosh span{font-size:14px;color:var(--mut)}
+.sheet .tana{overflow-y:auto;padding:0 16px calc(20px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.sheet .element{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:16px;
+                padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.sheet .element .matn{flex:1;min-width:0}
+.sheet .element .matn b{display:block;font-size:15px;font-weight:700}
+.sheet .element .matn span{font-size:13px;color:var(--mut);font-weight:500}
+.sheet .element .davom{font-size:15px;font-weight:700;color:var(--blue)}
