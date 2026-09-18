@@ -108,10 +108,10 @@ body{
             padding:22px;color:#fff;box-shadow:0 8px 24px rgba(37,99,235,.22)}
 .bosh-qator{display:flex;align-items:center;gap:14px}
 .bosh-karta .avatar{background:rgba(255,255,255,.18);color:#fff;width:46px;height:46px;font-size:18px}
-.bosh-karta .ism{flex:1;min-width:0;font-size:18px;font-weight:800;letter-spacing:-.3px;
+.bosh-karta .ism{flex:1;min-width:0;font-size:17px;font-weight:800;letter-spacing:-.3px;
                  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bosh-karta .pill{padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.2);
-                  font-size:12px;font-weight:700;flex:0 0 auto;white-space:nowrap}
+.bosh-karta .pill{padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.2);
+                  font-size:11.5px;font-weight:700;flex:0 0 auto;white-space:nowrap}
 .bosh-karta .foiz{text-align:center;margin-top:18px}
 .bosh-karta .foiz b{display:block;font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1.1}
 .bosh-karta .foiz span{font-size:12px;font-weight:700;letter-spacing:1.4px;opacity:.72}
@@ -161,3 +161,18 @@ body{
 .sheet .element .matn b{display:block;font-size:15px;font-weight:700}
 .sheet .element .matn span{font-size:13px;color:var(--mut);font-weight:500}
 .sheet .element .davom{font-size:15px;font-weight:700;color:var(--blue)}
+
+/* ---------- keyingi dars bloki ---------- */
+.dars-karta{background:var(--card);border-radius:20px;padding:16px;margin-bottom:16px;
+            box-shadow:var(--shadow);display:flex;align-items:center;gap:14px}
+.dars-karta .belgi{background:var(--blue-soft)}
+.dars-karta .belgi svg{stroke:var(--blue)}
+.dars-karta .matn{flex:1;min-width:0}
+.dars-karta .matn b{display:block;font-size:15px;font-weight:700}
+.dars-karta .matn span{font-size:13px;color:var(--mut);font-weight:500}
+.kirish{padding:11px 18px;border:0;border-radius:12px;background:var(--blue);color:#fff;
+        font:inherit;font-size:14px;font-weight:700;cursor:pointer;flex:0 0 auto}
+.kirish:disabled{background:#e2e8f0;color:var(--mut);cursor:not-allowed}
+.dars-karta.bosh-dars{color:var(--mut)}
+.dars-karta.bosh-dars .belgi{background:#f1f5f9}
+.dars-karta.bosh-dars .belgi svg{stroke:var(--mut)}

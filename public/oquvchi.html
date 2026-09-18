@@ -39,6 +39,8 @@
     </button>
   </div>
 
+  <div id="darsBlok"></div>
+
   <div class="royxat">
     <h3>Qo‘ng‘iroqlar</h3>
     <div id="qongiroqlar"><div class="qator"><span class="matn" style="color:#94a3b8">Yuklanmoqda…</span></div></div>
@@ -107,6 +109,79 @@ async function faollikniYukla() {
   }).join('') : '<div class="bosh-holat"><b>Faollik yo‘q</b><span>Bu o‘quvchi hali dars boshlamagan</span></div>';
 }
 
+// --- keyingi dars ---
+const DARS_IKON = '<svg viewBox="0 0 24 24"><path d="M15 10l5-3v10l-5-3v-4Z"/><rect x="3" y="6" width="12" height="12" rx="2.5"/></svg>';
+const SOAT_IKON = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
+
+let darsTimer = null;
+
+async function darsniYukla() {
+  const r = await api('/api/booking/mentor/my');
+  const blok = document.getElementById('darsBlok');
+  if (!r) return;
+
+  if (!r.ok) {
+    // Jadval moduli ulanmagan bo'lsa blokni umuman ko'rsatmaymiz
+    blok.innerHTML = '';
+    return;
+  }
+
+  const darslar = (Array.isArray(r.data) ? r.data : [])
+    .filter((d) => d.studentUserId === ID || d.studentId === ID)
+    .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+
+  const dars = darslar[0];
+  if (!dars) {
+    blok.innerHTML = `<div class="dars-karta bosh-dars">
+      <span class="belgi">${SOAT_IKON}</span>
+      <span class="matn"><b>Rejalashtirilgan dars yo‘q</b>
+        <span>O‘quvchi jadvaldan vaqt band qilishi kerak</span></span>
+    </div>`;
+    return;
+  }
+
+  blok.innerHTML = `<div class="dars-karta">
+    <span class="belgi">${DARS_IKON}</span>
+    <span class="matn"><b id="darsVaqt"></b><span id="darsHolat"></span></span>
+    <button class="kirish" id="darsKirish">Kirish</button>
+  </div>`;
+
+  const vaqt = new Date(dars.startsAt);
+  document.getElementById('darsVaqt').textContent = sanaVaqt(dars.startsAt);
+
+  document.getElementById('darsKirish').onclick = async () => {
+    const btn = document.getElementById('darsKirish');
+    btn.disabled = true;
+    const e = await api(`/api/booking/${dars.id}/entry`);
+    btn.disabled = false;
+    if (!e) return;
+    if (e.ok && e.data.url) location.href = e.data.url;
+    else alert(e.data.message || 'Hozircha kirib bo‘lmaydi');
+  };
+
+  // Kirish darsdan 10 daqiqa oldin ochiladi — holatni jonli yangilab turamiz
+  const yangila = () => {
+    const qolgan = vaqt.getTime() - Date.now();
+    const ochiq = qolgan <= 10 * 60_000;
+    const btn = document.getElementById('darsKirish');
+    const holat = document.getElementById('darsHolat');
+    if (!btn || !holat) return clearInterval(darsTimer);
+
+    btn.disabled = !ochiq;
+    const izoh = `${dars.durationMin} daqiqa · `;
+    if (ochiq) {
+      holat.textContent = izoh + (qolgan > 0 ? 'kirish ochiq' : 'dars boshlandi');
+    } else {
+      const daq = Math.round(qolgan / 60_000);
+      holat.textContent = izoh + (daq < 60
+        ? `${daq} daqiqadan keyin ochiladi`
+        : `${Math.round(daq / 60)} soatdan keyin`);
+    }
+  };
+  yangila();
+  darsTimer = setInterval(yangila, 20_000);
+}
+
 function qongiroqHtml(c) {
   const tugagan = !!c.endedAt;
   const rang = tugagan ? '#16a34a' : '#2563eb';
@@ -146,6 +221,8 @@ function qongiroqHtml(c) {
     $('#foizBlok').hidden = false;
     $('#foiz').textContent = `${Math.round(TALABA.progress)}%`;
   }
+
+  darsniYukla();
 
   const c = await api('/api/ai/calls');
   const hammasi = c && c.ok && Array.isArray(c.data) ? c.data : [];
