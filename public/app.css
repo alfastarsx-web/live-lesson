@@ -176,3 +176,49 @@ body{
 .dars-karta.bosh-dars{color:var(--mut)}
 .dars-karta.bosh-dars .belgi{background:#f1f5f9}
 .dars-karta.bosh-dars .belgi svg{stroke:var(--mut)}
+
+/* ---------- bo'limlar orasida o'tish ---------- */
+.nav{display:flex;gap:8px;padding:14px 0 4px}
+.nav a{flex:1;text-align:center;padding:11px 6px;border-radius:12px;text-decoration:none;
+       font-size:14px;font-weight:700;color:var(--mut2);background:var(--card);box-shadow:var(--shadow)}
+.nav a[aria-current="page"]{background:var(--blue);color:#fff}
+
+/* ---------- jadval ---------- */
+.kun-qator{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.kun-qator:last-child{border-bottom:0}
+.kun-qator .nom{width:96px;font-size:14px;font-weight:600;flex:0 0 auto}
+.kun-qator input[type=checkbox]{width:20px;height:20px;accent-color:var(--blue);flex:0 0 auto}
+.kun-qator select{padding:8px 9px;border-radius:10px;border:1.5px solid var(--line);background:#fff;
+                  color:var(--ink);font:inherit;font-size:14px;font-weight:600}
+.kun-qator select:disabled{opacity:.4}
+.kun-qator .ora{color:var(--mut);font-size:13px}
+
+.karta-oq{background:var(--card);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.karta-oq h2{margin:0 0 4px;font-size:17px;font-weight:700}
+.karta-oq .izoh{color:var(--mut);font-size:13.5px;margin-bottom:14px}
+
+.tugma{padding:13px 20px;border:0;border-radius:13px;background:var(--blue);color:#fff;
+       font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+.tugma:disabled{opacity:.5;cursor:not-allowed}
+.tugma.ikkilamchi{background:var(--blue-soft);color:var(--blue-dark)}
+.xabar2{font-size:13.5px;font-weight:600}
+.xabar2.ok{color:var(--green)} .xabar2.err{color:var(--red)}
+
+.havola-quti{display:flex;align-items:center;gap:10px;background:var(--blue-soft);border-radius:13px;
+             padding:12px 14px;margin-top:12px}
+.havola-quti code{flex:1;min-width:0;font-size:12.5px;color:var(--blue-dark);font-weight:600;
+                  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:inherit}
+.havola-quti button{border:0;background:var(--blue);color:#fff;border-radius:9px;padding:8px 12px;
+                    font:inherit;font-size:13px;font-weight:700;cursor:pointer;flex:0 0 auto}
+
+.slot-setka{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:9px;margin-top:12px}
+.slot{padding:12px 4px;text-align:center;border-radius:12px;border:1.5px solid var(--line);
+      background:#fff;font:inherit;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer}
+.slot:disabled{opacity:.35;cursor:not-allowed;text-decoration:line-through}
+.sana-lenta{display:flex;gap:9px;overflow-x:auto;padding:2px 0 2px;scrollbar-width:none}
+.sana-lenta::-webkit-scrollbar{display:none}
+.sana-tug{flex:0 0 auto;padding:10px 14px;border-radius:13px;border:1.5px solid var(--line);
+          background:#fff;font:inherit;font-size:13px;font-weight:600;color:var(--mut2);cursor:pointer;min-width:62px}
+.sana-tug b{display:block;font-size:16px;color:var(--ink);font-weight:800}
+.sana-tug[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.sana-tug[aria-pressed="true"] b{color:#fff}

@@ -73,3 +73,12 @@ window.HOLAT = {
   completed: { matn: 'Yakunlangan', sinf: 's-completed' },
   cancelled: { matn: 'Bekor qilingan', sinf: 's-cancelled' },
 };
+
+// uz-UZ lokali oyni "M09" deb yozadi — o'zimiz formatlaymiz
+const OYLAR = ['yan','fev','mar','apr','may','iyn','iyl','avg','sen','okt','noy','dek'];
+
+window.sanaChiroyli = (iso) => {
+  const d = new Date(iso);
+  return `${d.getDate()} ${OYLAR[d.getMonth()]}, `
+    + `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+};

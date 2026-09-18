@@ -3,69 +3,56 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Mening jadvalim — Jonli dars</title>
-<link rel="stylesheet" href="/jadval.css">
+<title>Jadval</title>
+<link rel="stylesheet" href="/app.css">
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>Mening jadvalim</h1>
-    <span class="who" id="who"></span>
-    <button class="ghost kichik" id="chiqish">Chiqish</button>
-  </header>
-
-  <div class="card">
-    <h2>Kelgusi darslar</h2>
-    <div id="darslar"><div class="bosh">Yuklanmoqda…</div></div>
+  <div class="sahifa-bosh">
+    <h1>Jadval</h1>
+    <div class="izoh" id="kim">…</div>
   </div>
 
-  <div class="card">
+  <nav class="nav">
+    <a href="/jadval.html" aria-current="page">Jadval</a>
+    <a href="/oquvchilar.html">O‘quvchilar</a>
+  </nav>
+
+  <div class="karta-oq">
+    <h2>Kelgusi darslar</h2>
+    <div id="darslar"><div class="izoh">Yuklanmoqda…</div></div>
+  </div>
+
+  <div class="karta-oq">
     <h2>Haftalik bo‘sh vaqtlarim</h2>
-    <p class="sub">O‘quvchilar faqat shu oraliqlardan 30 daqiqalik dars band qila oladi.</p>
+    <div class="izoh">O‘quvchilar faqat shu oraliqlardan 30 daqiqalik dars band qila oladi.</div>
     <div id="kunlar"></div>
-    <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
-      <button id="saqla">Saqlash</button>
-      <span class="xabar" id="xabar"></span>
+    <div style="margin-top:16px;display:flex;gap:12px;align-items:center">
+      <button class="tugma" id="saqla">Saqlash</button>
+      <span class="xabar2" id="xabar"></span>
     </div>
+  </div>
+
+  <div class="karta-oq" id="keyingi">
+    <h2>Keyingi qadam</h2>
+    <div class="izoh">Jadval saqlangach, o‘quvchi shu havoladan kirib o‘zi vaqt band qiladi.</div>
+    <div class="havola-quti">
+      <code id="oqHavola">…</code>
+      <button id="nusxa">Nusxa</button>
+    </div>
+    <div class="izoh" style="margin:16px 0 8px">Yoki hozir dars xonasini ochib sinab ko‘ring:</div>
+    <button class="tugma ikkilamchi" id="xona">Dars xonasini ochish</button>
   </div>
 </div>
 
+<script src="/auth-webview.js"></script>
 <script>
 const KUNLAR = ['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'];
 const $ = (s) => document.querySelector(s);
+let SESSIYA_BOR = false;
 
-function vaqtVariantlari(sel, tanlangan) {
-  for (let m = 0; m <= 1440; m += 30) {
-    const o = document.createElement('option');
-    o.value = m;
-    o.textContent = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
-    if (m === tanlangan) o.selected = true;
-    sel.appendChild(o);
-  }
-}
-
-function kunQatori(i) {
-  const row = document.createElement('div');
-  row.className = 'kun';
-  row.innerHTML = `<input type="checkbox" data-k="${i}">
-    <span class="nom">${KUNLAR[i]}</span>
-    <select data-b="${i}"></select><span class="ora">—</span><select data-t="${i}"></select>`;
-  vaqtVariantlari(row.querySelector(`[data-b="${i}"]`), 540);
-  vaqtVariantlari(row.querySelector(`[data-t="${i}"]`), 1080);
-  const cb = row.querySelector('input');
-  const yangila = () => row.querySelectorAll('select').forEach((s) => { s.disabled = !cb.checked; });
-  cb.onchange = yangila; yangila();
-  return row;
-}
-
-for (let i = 1; i <= 6; i++) $('#kunlar').appendChild(kunQatori(i));
-$('#kunlar').appendChild(kunQatori(0));   // yakshanba oxirida
-
-let SESSIYA_BOR = false;   // whoami tasdiqlagach true bo'ladi
-
-async function api(yol, opts) {
+async function so(yol, opts) {
   const r = await fetch(yol, opts);
-  // Sessiya bor-u, lekin jadval API 401 bersa — login'ga otmaymiz, aks holda aylanma bo'ladi
   if (r.status === 401 && !SESSIYA_BOR) {
     location.href = '/login.html?keyin=' + encodeURIComponent(location.pathname);
     return null;
@@ -73,18 +60,36 @@ async function api(yol, opts) {
   return { ok: r.ok, data: await r.json().catch(() => ({})) };
 }
 
-async function jadvalniYukla() {
-  const r = await api('/api/booking/availability');
-  if (!r) return;
-  if (!r.ok) return;
-  for (const item of r.data) {
-    const cb = document.querySelector(`input[data-k="${item.weekday}"]`);
-    if (!cb) continue;
-    cb.checked = true;
-    document.querySelector(`select[data-b="${item.weekday}"]`).value = item.startMinute;
-    document.querySelector(`select[data-t="${item.weekday}"]`).value = item.endMinute;
-    cb.dispatchEvent(new Event('change'));
+function vaqtlar(sel, tanlangan) {
+  for (let m = 0; m <= 1440; m += 30) {
+    const o = document.createElement('option');
+    o.value = m;
+    o.textContent = `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+    if (m === tanlangan) o.selected = true;
+    sel.appendChild(o);
   }
+}
+
+function kunQatori(i) {
+  const row = document.createElement('div');
+  row.className = 'kun-qator';
+  row.innerHTML = `<input type="checkbox" data-k="${i}">
+    <span class="nom">${KUNLAR[i]}</span>
+    <select data-b="${i}"></select><span class="ora">—</span><select data-t="${i}"></select>`;
+  vaqtlar(row.querySelector(`[data-b="${i}"]`), 540);
+  vaqtlar(row.querySelector(`[data-t="${i}"]`), 1080);
+  const cb = row.querySelector('input');
+  const yangila = () => row.querySelectorAll('select').forEach((s) => { s.disabled = !cb.checked; });
+  cb.onchange = yangila; yangila();
+  return row;
+}
+for (let i = 1; i <= 6; i++) $('#kunlar').appendChild(kunQatori(i));
+$('#kunlar').appendChild(kunQatori(0));
+
+function xabar(t, turi) {
+  $('#xabar').textContent = t;
+  $('#xabar').className = 'xabar2 ' + (turi || '');
+  if (turi === 'ok') setTimeout(() => { $('#xabar').textContent = ''; }, 3500);
 }
 
 $('#saqla').onclick = async () => {
@@ -102,78 +107,96 @@ $('#saqla').onclick = async () => {
   if (yomon) return xabar(`${KUNLAR[yomon.weekday]}: tugash vaqti boshlanishdan keyin bo‘lsin`, 'err');
 
   $('#saqla').disabled = true;
-  const r = await api('/api/booking/availability', {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items }),
+  const r = await so('/api/booking/availability', {
+    method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({items}),
   });
   $('#saqla').disabled = false;
   if (!r) return;
-  xabar(r.ok ? 'Saqlandi' : (r.data.message || 'Saqlab bo‘lmadi'), r.ok ? 'ok' : 'err');
+  if (r.ok) {
+    xabar('Saqlandi — endi o‘quvchi vaqt band qila oladi', 'ok');
+    $('#keyingi').scrollIntoView({behavior:'smooth', block:'nearest'});
+  } else {
+    xabar(r.data.message || 'Saqlab bo‘lmadi', 'err');
+  }
 };
 
-function xabar(t, turi) {
-  $('#xabar').textContent = t;
-  $('#xabar').className = 'xabar ' + (turi || '');
-  if (turi === 'ok') setTimeout(() => { $('#xabar').textContent = ''; }, 3000);
-}
-
-function vaqtMatni(iso) {
-  const d = new Date(iso);
-  return d.toLocaleString('uz-UZ', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-}
+const vaqtMatni = (iso) => sanaChiroyli(iso);
 
 async function darslarniYukla() {
-  const r = await api('/api/booking/mentor/my');
+  const r = await so('/api/booking/mentor/my');
   if (!r) return;
   const box = $('#darslar');
   if (!r.ok || !Array.isArray(r.data) || !r.data.length) {
-    box.innerHTML = '<div class="bosh">Hozircha band qilingan dars yo‘q</div>';
+    box.innerHTML = '<div class="izoh">Hozircha band qilingan dars yo‘q</div>';
     return;
   }
   box.innerHTML = '';
   for (const d of r.data) {
     const row = document.createElement('div');
-    row.className = 'dars';
-    row.innerHTML = `<span class="vaqt">${vaqtMatni(d.startsAt)}</span>
-      <span class="kim">${d.studentName || 'O‘quvchi'}</span>`;
+    row.className = 'dars-karta';
+    row.style.margin = '0 0 10px';
+    row.style.padding = '12px';
+    row.innerHTML = `<span class="matn"><b>${vaqtMatni(d.startsAt)}</b>
+      <span>${d.studentName || 'O‘quvchi'}</span></span>`;
     const btn = document.createElement('button');
-    btn.className = 'kichik';
+    btn.className = 'kirish';
     btn.textContent = 'Kirish';
-    btn.onclick = () => kirish(d.id, btn);
+    btn.onclick = async () => {
+      btn.disabled = true;
+      const e = await so(`/api/booking/${d.id}/entry`);
+      btn.disabled = false;
+      if (!e) return;
+      if (e.ok && e.data.url) location.href = e.data.url;
+      else xabar(e.data.message || 'Hozircha kirib bo‘lmaydi', 'err');
+    };
     row.appendChild(btn);
     box.appendChild(row);
   }
 }
 
-async function kirish(id, btn) {
-  btn.disabled = true;
-  const r = await api(`/api/booking/${id}/entry`);
-  btn.disabled = false;
-  if (!r) return;
-  if (r.ok && r.data.url) location.href = r.data.url;
-  else xabar(r.data.message || 'Hozircha kirib bo‘lmaydi', 'err');
-}
-
-$('#chiqish').onclick = async () => {
-  await fetch('/api/logout', { method: 'POST' });
-  location.href = '/login.html';
+$('#xona').onclick = () => { location.href = '/room.html'; };
+$('#nusxa').onclick = () => {
+  const t = $('#oqHavola').textContent;
+  navigator.clipboard.writeText(t).then(
+    () => { $('#nusxa').textContent = 'Nusxalandi'; setTimeout(() => { $('#nusxa').textContent = 'Nusxa'; }, 2000); },
+    () => xabar('Nusxalab bo‘lmadi', 'err'),
+  );
 };
 
 (async () => {
-  const w = await api('/api/whoami');
+  await WebViewAuth.tayyorla();
+
+  // Avval whoami — u ikkala kirish usulini ham taniydi (cookie yoki WebView tokeni)
+  const w = await so('/api/whoami');
   if (!w) return;
   SESSIYA_BOR = w.ok;
-  if (w.ok && w.data.name) $('#who').textContent = w.data.name;
+  $('#kim').textContent = w.data.name || '';
 
-  // Zaxira hisob (teachers.json) bilan kirilgan bo'lsa jadval mavjud emas
-  if (w.ok && !w.data.hasSchedule) {
-    $('#darslar').innerHTML = '<div class="bosh">Jadval faqat MyTeacher hisobi bilan ishlaydi. '
-      + 'Telefon raqamingiz va parolingiz bilan qayta kiring.</div>';
-    $('#kunlar').style.opacity = '.4';
+  // Xona havolasi faqat login qilgan ustozda bo'ladi (WebView'da xona darsdan olinadi)
+  const ses = await so('/api/session');
+  if (ses && ses.ok && ses.data.room) {
+    $('#oqHavola').textContent = `${location.origin}/dars/${ses.data.room}`;
+  } else {
+    $('#keyingi').hidden = true;
+  }
+
+  const a = await so('/api/booking/availability');
+  if (a && a.ok) {
+    for (const item of a.data) {
+      const cb = document.querySelector(`input[data-k="${item.weekday}"]`);
+      if (!cb) continue;
+      cb.checked = true;
+      document.querySelector(`select[data-b="${item.weekday}"]`).value = item.startMinute;
+      document.querySelector(`select[data-t="${item.weekday}"]`).value = item.endMinute;
+      cb.dispatchEvent(new Event('change'));
+    }
+  } else if (a && !a.ok) {
+    $('#darslar').innerHTML = '<div class="izoh">Jadval faqat MyTeacher hisobi bilan ishlaydi</div>';
     $('#saqla').disabled = true;
     return;
   }
 
-  await Promise.all([jadvalniYukla(), darslarniYukla()]);
+  await darslarniYukla();
 })();
 </script>
 </body>
