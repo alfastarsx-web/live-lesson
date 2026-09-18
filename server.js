@@ -10,6 +10,7 @@ const { WebSocketServer } = require('ws');
 const { AUTH_ON, sign, verify, ROOM_RE } = require('./lib/token');
 const { TURN_ON, TURN_HOST, iceServers } = require('./lib/turn');
 const teachers = require('./lib/teachers');
+const aiteacher = require('./lib/aiteacher');
 
 const PORT = process.env.PORT || 4300;
 const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
@@ -112,20 +113,35 @@ function cookies(req) {
   );
 }
 
-app.post('/api/login', (req, res) => {
-  const { login, password } = req.body || {};
-  const t = teachers.find(login);
-  // Parol noto'g'ri bo'lsa ham, login topilmasa ham bir xil javob — qaysi login mavjudligi bilinmasin
-  if (!t || !teachers.check(String(password || ''), t.pass)) {
-    return res.status(401).json({ error: 'Login yoki parol noto\u2018g\u2018ri' });
-  }
-  if (!AUTH_ON) return res.status(500).json({ error: 'server sozlanmagan (LESSON_TOKEN_SECRET yo\u2018q)' });
-
-  const token = sign({ room: t.room, role: 'teacher', name: t.name }, 12 * 3600);
+function setSession(req, res, { room, name }) {
+  const token = sign({ room, role: 'teacher', name }, 12 * 3600);
   res.setHeader('Set-Cookie',
     `${COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${12 * 3600}`
     + (req.secure || req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : ''));
-  res.json({ ok: true, room: t.room, name: t.name });
+  res.json({ ok: true, room, name });
+}
+
+app.post('/api/login', async (req, res) => {
+  const { login, password } = req.body || {};
+  if (!AUTH_ON) return res.status(500).json({ error: 'server sozlanmagan (LESSON_TOKEN_SECRET yo‘q)' });
+  if (!login || !password) return res.status(400).json({ error: 'Login va parol kiriting' });
+
+  // 1) Asosiy yo'l — ai.myteacher.uz dagi mavjud mentor hisobi
+  if (aiteacher.AITEACHER_ON) {
+    const r = await aiteacher.signIn(login, password);
+    if (r.ok) return setSession(req, res, { room: `mentor-${r.id}`, name: r.name });
+    // Mentor emas yoki xizmat javob bermadi — shuni aytamiz.
+    // Parol xato bo'lsa, quyidagi zaxira ro'yxati ham sinaladi.
+    if (r.status === 403 || r.status === 502) return res.status(r.status).json({ error: r.message });
+  }
+
+  // 2) Zaxira — lokal teachers.json (ai.myteacher.uz ishlamay qolsa ham dars o'tilsin)
+  const t = teachers.find(login);
+  if (t && teachers.check(String(password), t.pass)) {
+    return setSession(req, res, { room: t.room, name: t.name });
+  }
+
+  res.status(401).json({ error: 'Login yoki parol noto‘g‘ri' });
 });
 
 app.post('/api/logout', (req, res) => {
@@ -138,7 +154,7 @@ app.get('/api/session', (req, res) => {
   const token = cookies(req)[COOKIE];
   const c = verify(token);
   if (!c) return res.status(401).json({ error: 'kirilmagan' });
-  res.json({ token, room: c.room, role: c.role, name: c.name });
+  res.json({ token, room: c.room, role: c.role, name: c.name, studentUrl: `/dars/${c.room}` });
 });
 
 // ---------- O'quvchi kirishi (havola bilan, parolsiz) ----------

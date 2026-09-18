@@ -68,7 +68,17 @@ function interfeysniSozla() {
     document.body.classList.remove('viewer');
     document.body.classList.add('can-draw');
     el.toolbar.hidden = false;
-    el.emptyHint.textContent = 'PDF ochish uchun 📄 tugmasini bosing';
+    el.emptyHint.innerHTML = 'PDF ochish uchun 📄 tugmasini bosing'
+      + (ROOM ? `<br><br><span style="opacity:.75">O‘quvchi havolasi:</span><br>`
+        + `<code id="oqHavola" style="cursor:pointer;color:#60a5fa" title="Nusxalash">`
+        + `${location.origin}/dars/${ROOM}</code>` : '');
+    const h = document.getElementById('oqHavola');
+    if (h) h.onclick = () => {
+      navigator.clipboard.writeText(h.textContent).then(
+        () => toast('Havola nusxalandi'),
+        () => toast('Nusxalab bo‘lmadi'),
+      );
+    };
   } else {
     document.body.classList.add('viewer');
     document.body.classList.remove('can-draw');
