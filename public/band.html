@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Dars band qilish — Jonli dars</title>
+<link rel="stylesheet" href="/jadval.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Dars band qilish</h1>
+    <span class="who" id="who"></span>
+    <button class="ghost kichik" id="chiqish">Chiqish</button>
+  </header>
+
+  <div class="card">
+    <h2>Mening darslarim</h2>
+    <div id="darslar"><div class="bosh">Yuklanmoqda…</div></div>
+  </div>
+
+  <div class="card">
+    <h2 id="mentorNomi">Ustozim</h2>
+    <p class="sub">Kun tanlang, so‘ng bo‘sh vaqtni bosing — dars 30 daqiqa davom etadi.</p>
+    <div class="sanalar" id="sanalar"></div>
+    <div class="slotlar" id="slotlar"></div>
+    <div class="xabar" id="xabar"></div>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let MENTOR_ID = null;
+let SANA = null;
+
+let SESSIYA_BOR = false;
+
+async function api(yol, opts) {
+  const r = await fetch(yol, opts);
+  if (r.status === 401 && !SESSIYA_BOR) {
+    location.href = '/login.html?keyin=' + encodeURIComponent(location.pathname);
+    return null;
+  }
+  return { ok: r.ok, data: await r.json().catch(() => ({})) };
+}
+
+function xabar(t, turi) {
+  $('#xabar').textContent = t;
+  $('#xabar').className = 'xabar ' + (turi || '');
+  if (turi === 'ok') setTimeout(() => { $('#xabar').textContent = ''; }, 3000);
+}
+
+function vaqtMatni(iso) {
+  return new Date(iso).toLocaleString('uz-UZ', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+// Toshkent vaqtidagi YYYY-MM-DD
+function sanaMatni(d) {
+  return new Date(d.getTime() + 5 * 3600_000).toISOString().slice(0, 10);
+}
+
+function sanalarniChiz() {
+  const box = $('#sanalar');
+  box.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(Date.now() + i * 86400_000);
+    const key = sanaMatni(d);
+    const btn = document.createElement('button');
+    btn.className = 'sana' + (i === 0 ? ' tanlangan' : '');
+    btn.innerHTML = `${d.toLocaleDateString('uz-UZ', { weekday: 'short' })}<b>${d.getDate()}</b>`;
+    btn.onclick = () => {
+      document.querySelectorAll('.sana').forEach((x) => x.classList.remove('tanlangan'));
+      btn.classList.add('tanlangan');
+      SANA = key;
+      slotlarniYukla();
+    };
+    if (i === 0) SANA = key;
+    box.appendChild(btn);
+  }
+}
+
+async function slotlarniYukla() {
+  const box = $('#slotlar');
+  if (!MENTOR_ID) { box.innerHTML = '<div class="bosh">Sizga ustoz biriktirilmagan</div>'; return; }
+  box.innerHTML = '<div class="bosh">Yuklanmoqda…</div>';
+
+  const r = await api(`/api/booking/slots?mentorId=${MENTOR_ID}&date=${SANA}`);
+  if (!r) return;
+  if (!r.ok || !Array.isArray(r.data) || !r.data.length) {
+    box.innerHTML = '<div class="bosh">Bu kunda bo‘sh vaqt yo‘q</div>';
+    return;
+  }
+
+  box.innerHTML = '';
+  for (const slot of r.data) {
+    const btn = document.createElement('button');
+    btn.className = 'slot';
+    btn.textContent = new Date(slot.startsAt)
+      .toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+    btn.disabled = !slot.available;
+    btn.onclick = () => bandQil(slot.startsAt, btn);
+    box.appendChild(btn);
+  }
+}
+
+async function bandQil(startsAt, btn) {
+  btn.disabled = true;
+  const r = await api('/api/booking', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mentorId: MENTOR_ID, startsAt }),
+  });
+  if (!r) return;
+  if (r.ok) {
+    xabar('Dars band qilindi', 'ok');
+    await Promise.all([darslarniYukla(), slotlarniYukla()]);
+  } else {
+    btn.disabled = false;
+    xabar(r.data.message || 'Band qilib bo‘lmadi', 'err');
+  }
+}
+
+async function darslarniYukla() {
+  const r = await api('/api/booking/my');
+  if (!r) return;
+  const box = $('#darslar');
+  if (!r.ok || !Array.isArray(r.data) || !r.data.length) {
+    box.innerHTML = '<div class="bosh">Band qilingan dars yo‘q</div>';
+    return;
+  }
+  box.innerHTML = '';
+  for (const d of r.data) {
+    const row = document.createElement('div');
+    row.className = 'dars';
+    row.innerHTML = `<span class="vaqt">${vaqtMatni(d.startsAt)}</span>
+      <span class="kim">${d.mentorName || 'Ustoz'}</span>`;
+
+    const kir = document.createElement('button');
+    kir.className = 'kichik';
+    kir.textContent = 'Kirish';
+    kir.onclick = async () => {
+      kir.disabled = true;
+      const e = await api(`/api/booking/${d.id}/entry`);
+      kir.disabled = false;
+      if (!e) return;
+      if (e.ok && e.data.url) location.href = e.data.url;
+      else xabar(e.data.message || 'Hozircha kirib bo‘lmaydi', 'err');
+    };
+
+    const bekor = document.createElement('button');
+    bekor.className = 'ghost kichik';
+    bekor.textContent = 'Bekor';
+    bekor.onclick = async () => {
+      if (!confirm('Darsni bekor qilasizmi?')) return;
+      await api(`/api/booking/${d.id}/cancel`, { method: 'PATCH' });
+      await Promise.all([darslarniYukla(), slotlarniYukla()]);
+    };
+
+    row.append(kir, bekor);
+    box.appendChild(row);
+  }
+}
+
+$('#chiqish').onclick = async () => {
+  await fetch('/api/logout', { method: 'POST' });
+  location.href = '/login.html';
+};
+
+(async () => {
+  const w = await api('/api/whoami');
+  if (!w) return;
+  SESSIYA_BOR = w.ok;
+
+  const m = await api('/api/my-mentor');
+  if (m && m.ok && m.data) {
+    const a = m.data;
+    MENTOR_ID = a.mentorId || a.mentor?.id || null;
+    const u = a.mentor?.user;
+    if (u) $('#mentorNomi').textContent = `Ustozim: ${[u.firstName, u.lastName].filter(Boolean).join(' ')}`;
+  }
+
+  sanalarniChiz();
+  await Promise.all([darslarniYukla(), slotlarniYukla()]);
+})();
+</script>
+</body>
+</html>

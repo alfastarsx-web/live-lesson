@@ -102,7 +102,8 @@ app.get('/api/lessons/:file', adminOnly, (req, res) => {
 app.use(express.json({ limit: '10kb' }));
 
 // ---------- Ustoz kirishi (login + parol) ----------
-const COOKIE = 'll_sessiya';
+const COOKIE = 'll_sessiya';        // ustozning dars xonasi tokeni
+const AI_COOKIE = 'll_aiteacher';   // ai.myteacher.uz kirish tokeni (jadval uchun)
 
 function cookies(req) {
   return Object.fromEntries(
@@ -113,12 +114,17 @@ function cookies(req) {
   );
 }
 
+function cookieHeader(req, name, value, maxAge) {
+  return `${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`
+    + (req.secure || req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : '');
+}
+
 function setSession(req, res, { room, name }) {
   const token = sign({ room, role: 'teacher', name }, 12 * 3600);
   res.setHeader('Set-Cookie',
     `${COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${12 * 3600}`
     + (req.secure || req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : ''));
-  res.json({ ok: true, room, name });
+  res.json({ ok: true, room, name, role: 'mentor', redirect: '/room.html' });
 }
 
 app.post('/api/login', async (req, res) => {
@@ -126,12 +132,26 @@ app.post('/api/login', async (req, res) => {
   if (!AUTH_ON) return res.status(500).json({ error: 'server sozlanmagan (LESSON_TOKEN_SECRET yo‘q)' });
   if (!login || !password) return res.status(400).json({ error: 'Login va parol kiriting' });
 
-  // 1) Asosiy yo'l — ai.myteacher.uz dagi mavjud mentor hisobi
+  // 1) Asosiy yo'l — ai.myteacher.uz dagi mavjud hisob (mentor ham, o'quvchi ham)
   if (aiteacher.AITEACHER_ON) {
     const r = await aiteacher.signIn(login, password);
-    if (r.ok) return setSession(req, res, { room: `mentor-${r.id}`, name: r.name });
-    // Mentor emas yoki xizmat javob bermadi — shuni aytamiz.
-    // Parol xato bo'lsa, quyidagi zaxira ro'yxati ham sinaladi.
+    if (r.ok) {
+      const headers = [cookieHeader(req, AI_COOKIE, r.token || '', 12 * 3600)];
+
+      if (r.isMentor) {
+        // Mentorga dars xonasi tokeni ham beriladi
+        const token = sign({ room: `mentor-${r.id}`, role: 'teacher', name: r.name }, 12 * 3600);
+        headers.push(cookieHeader(req, COOKIE, token, 12 * 3600));
+      }
+
+      res.setHeader('Set-Cookie', headers);
+      return res.json({
+        ok: true,
+        name: r.name,
+        role: r.isMentor ? 'mentor' : 'student',
+        redirect: r.isMentor ? '/jadval.html' : '/band.html',
+      });
+    }
     if (r.status === 403 || r.status === 502) return res.status(r.status).json({ error: r.message });
   }
 
@@ -145,7 +165,10 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/logout', (req, res) => {
-  res.setHeader('Set-Cookie', `${COOKIE}=; Path=/; HttpOnly; Max-Age=0`);
+  res.setHeader('Set-Cookie', [
+    `${COOKIE}=; Path=/; HttpOnly; Max-Age=0`,
+    `${AI_COOKIE}=; Path=/; HttpOnly; Max-Age=0`,
+  ]);
   res.json({ ok: true });
 });
 
@@ -155,6 +178,56 @@ app.get('/api/session', (req, res) => {
   const c = verify(token);
   if (!c) return res.status(401).json({ error: 'kirilmagan' });
   res.json({ token, room: c.room, role: c.role, name: c.name, studentUrl: `/dars/${c.room}` });
+});
+
+// ---------- ai.myteacher.uz ga proksi (jadval va band qilish) ----------
+// Brauzer ai.myteacher.uz ga to'g'ridan-to'g'ri murojaat qilmaydi: token HttpOnly
+// cookie'da yotadi va JS uni o'qiy olmaydi. Shu sabab so'rovlar shu yerdan o'tadi.
+async function aiProxy(req, res, targetPath) {
+  const token = cookies(req)[AI_COOKIE];
+  if (!token) return res.status(401).json({ error: 'kirilmagan' });
+  if (!aiteacher.AITEACHER_ON) return res.status(500).json({ error: 'AITEACHER_API sozlanmagan' });
+
+  const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
+  const qs = req.originalUrl.includes('?') ? `?${req.originalUrl.split('?')[1]}` : '';
+  const hasBody = ['POST', 'PUT', 'PATCH'].includes(req.method);
+
+  try {
+    const r = await fetch(`${base}${targetPath}${qs}`, {
+      method: req.method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
+      },
+      ...(hasBody ? { body: JSON.stringify(req.body ?? {}) } : {}),
+      signal: AbortSignal.timeout(15000),
+    });
+    const data = await r.json().catch(() => ({}));
+    res.status(r.status).json(data);
+  } catch {
+    res.status(502).json({ error: 'ai.myteacher.uz javob bermadi' });
+  }
+}
+
+app.all(/^\/api\/booking(\/.*)?$/, (req, res) => {
+  const sub = req.path.replace(/^\/api\/booking/, '');
+  aiProxy(req, res, `/lesson-booking${sub}`);
+});
+
+app.get('/api/my-mentor', (req, res) => aiProxy(req, res, '/assignments/my-mentor'));
+
+// Kim kirgan — sahifalar shundan biladi
+app.get('/api/whoami', (req, res) => {
+  const ai = cookies(req)[AI_COOKIE];
+  const lesson = verify(cookies(req)[COOKIE]);
+  if (!ai && !lesson) return res.status(401).json({ error: 'kirilmagan' });
+  const payload = ai ? aiteacher.jwtPayload(ai) : null;
+  const roles = payload ? aiteacher.collectRoles(payload) : [];
+  res.json({
+    name: lesson?.name || null,
+    role: roles.includes('mentor') || roles.includes('admin') || lesson ? 'mentor' : 'student',
+    hasSchedule: Boolean(ai),
+  });
 });
 
 // ---------- O'quvchi kirishi (havola bilan, parolsiz) ----------

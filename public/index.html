@@ -68,11 +68,11 @@
   fetch('/api/config').then((r) => r.json()).then((c) => {
     CFG = c;
     if (c.auth === 'token' && !c.devTokens) {
-      $('#go').disabled = true;
-      $('#go').textContent = 'Kirish ilova orqali';
+      $('#go').textContent = 'Hisobim bilan kirish';
+      $('#go').onclick = () => { location.href = '/login.html'; };
       document.querySelector('.hint').innerHTML =
-        '<b>Bu xona yopiq.</b> Darsga MyTeacher ilovasidan kiriladi — ilova sizga '
-        + 'shaxsiy kirish havolasini beradi. Bu sahifadan to‘g‘ridan-to‘g‘ri kirib bo‘lmaydi.';
+        'Ustoz ham, o‘quvchi ham MyTeacher telefon raqami va paroli bilan kiradi. '
+        + 'Darsga kirish havolasi jadvaldan olinadi.';
     }
   }).catch(() => {});
 

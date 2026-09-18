@@ -36,7 +36,7 @@
     <button type="submit" id="go">Kirish</button>
     <div class="err" id="err"></div>
 
-    <p class="hint">O‘quvchilar bu sahifadan kirmaydi — ular kurs havolasidan to‘g‘ridan-to‘g‘ri xonaga tushadi.</p>
+    <p class="hint">Ustoz ham, o‘quvchi ham shu yerdan kiradi — jadval o‘zi mos sahifani ochadi.</p>
   </form>
 
 <script>
@@ -56,7 +56,7 @@
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || 'Kirib bo‘lmadi');
-      location.href = keyin && keyin.startsWith('/') ? keyin : '/room.html';
+      location.href = keyin && keyin.startsWith('/') ? keyin : (d.redirect || '/room.html');
     } catch (err) {
       $('#err').textContent = err.message;
       $('#go').disabled = false;
