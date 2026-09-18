@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const express = require('express');
 const multer = require('multer');
 const { WebSocketServer } = require('ws');
+const { AUTH_ON, sign, verify, ROOM_RE } = require('./lib/token');
 
 const PORT = process.env.PORT || 4300;
 const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
@@ -29,13 +30,45 @@ const upload = multer({
   fileFilter: (req, file, cb) => cb(null, file.mimetype === 'application/pdf'),
 });
 
-app.post('/api/upload', upload.single('file'), (req, res) => {
+// Tokendagi rolni tekshiradi (AUTH_ON bo'lmasa — lokal rejim, hamma narsa ochiq)
+function claimsFrom(req) {
+  const bearer = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  return verify(req.query.t || bearer);
+}
+
+app.post('/api/upload', (req, res, next) => {
+  if (!AUTH_ON) return next();
+  const c = claimsFrom(req);
+  if (!c || c.role !== 'teacher') return res.status(403).json({ error: 'ruxsat yo\u2018q' });
+  next();
+}, upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Faqat PDF fayl, 25MB gacha' });
   res.json({ url: `/uploads/${req.file.filename}`, name: req.file.originalname });
 });
 
+// Sinov uchun token yasash — faqat DEV_TOKENS=true bo'lganda ochiladi
+app.get('/api/dev-token', (req, res) => {
+  if (!AUTH_ON) return res.status(400).json({ error: 'LESSON_TOKEN_SECRET yo\u2018q' });
+  if (process.env.DEV_TOKENS !== 'true') return res.status(404).json({ error: 'topilmadi' });
+  const room = String(req.query.room || '').toLowerCase();
+  if (!ROOM_RE.test(room)) return res.status(400).json({ error: 'xona nomi noto\u2018g\u2018ri' });
+  const role = req.query.role === 'teacher' ? 'teacher' : 'student';
+  const name = String(req.query.name || '').slice(0, 40);
+  res.json({ token: sign({ room, role, name }) });
+});
+
 // ---------- Dars jurnallari (keyinchalik replay / AI tahlil uchun) ----------
-app.get('/api/lessons', (req, res) => {
+// Jurnallar — ustoz/admin uchun. AUTH_ON bo'lsa ADMIN_KEY talab qilinadi.
+function adminOnly(req, res, next) {
+  if (!AUTH_ON) return next();
+  const key = process.env.ADMIN_KEY || '';
+  if (!key || req.headers['x-admin-key'] !== key) {
+    return res.status(403).json({ error: 'ruxsat yo\u2018q' });
+  }
+  next();
+}
+
+app.get('/api/lessons', adminOnly, (req, res) => {
   fs.readdir(LOG_DIR, (err, files) => {
     if (err) return res.status(500).json({ error: 'o\u2018qib bo\u2018lmadi' });
     const list = files
@@ -49,7 +82,7 @@ app.get('/api/lessons', (req, res) => {
   });
 });
 
-app.get('/api/lessons/:file', (req, res) => {
+app.get('/api/lessons/:file', adminOnly, (req, res) => {
   const f = req.params.file;
   if (!/^[\w.\-]+\.jsonl$/.test(f)) return res.status(400).json({ error: 'noto\u2018g\u2018ri nom' });
   fs.readFile(path.join(LOG_DIR, f), 'utf8', (err, txt) => {
@@ -112,11 +145,24 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 
 wss.on('connection', (ws, req) => {
   const url = new URL(req.url, 'http://localhost');
-  const roomId = (url.searchParams.get('room') || '').trim().toLowerCase();
-  const role = url.searchParams.get('role') === 'teacher' ? 'teacher' : 'student';
-  const name = (url.searchParams.get('name') || '').slice(0, 40);
 
-  if (!/^[a-z0-9\-]{3,40}$/.test(roomId)) {
+  // Token rejimida xona, rol va ism faqat imzolangan tokendan olinadi —
+  // mijoz yuborgan query parametrlariga ishonilmaydi.
+  let roomId, role, name;
+  if (AUTH_ON) {
+    const claims = verify(url.searchParams.get('t'));
+    if (!claims) {
+      send(ws, { type: 'error', message: 'Kirish tokeni yaroqsiz yoki muddati tugagan' });
+      return ws.close();
+    }
+    ({ room: roomId, role, name } = claims);
+  } else {
+    roomId = (url.searchParams.get('room') || '').trim().toLowerCase();
+    role = url.searchParams.get('role') === 'teacher' ? 'teacher' : 'student';
+    name = (url.searchParams.get('name') || '').slice(0, 40);
+  }
+
+  if (!ROOM_RE.test(roomId)) {
     send(ws, { type: 'error', message: 'Xona nomi noto‘g‘ri' });
     return ws.close();
   }
@@ -233,4 +279,7 @@ wss.on('connection', (ws, req) => {
 
 server.listen(PORT, () => {
   console.log(`Jonli dars: http://127.0.0.1:${PORT}`);
+  console.log(AUTH_ON
+    ? 'Rejim: TOKEN — kirish faqat imzolangan token bilan'
+    : 'Rejim: OCHIQ — LESSON_TOKEN_SECRET yo‘q, havola bilan kiriladi (faqat ishlab chiqish uchun)');
 });

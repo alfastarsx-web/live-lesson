@@ -29,6 +29,24 @@ Sinash: bitta brauzerda ustoz, boshqa oynada (yoki incognito'da) o‘quvchi:
 
 Yoki bosh sahifadan (`/`) xona nomi va rolni tanlab kiring.
 
+## Kirish tokeni
+
+Ikki rejim bor, `LESSON_TOKEN_SECRET` ni bor-yo'qligi hal qiladi (`.env.example` ga qarang):
+
+- **Ochiq rejim** (sekret yo'q) — xonaga havola bilan kiriladi. Faqat lokal ishlab chiqish uchun.
+- **Token rejimi** (sekret bor) — kirish faqat imzolangan token bilan:
+  `room.html?t=<TOKEN>`. Xona, rol va ism **faqat tokendan** olinadi; mijoz yuborgan
+  `role=teacher` kabi parametrlar e'tiborga olinmaydi. Ustoz PDF yuklashi ham,
+  jurnallarni o'qish ham shu tekshiruvdan o'tadi.
+
+```bash
+LESSON_TOKEN_SECRET=<uzun-tasodifiy-satr> DEV_TOKENS=true npm start
+curl "http://127.0.0.1:4300/api/dev-token?room=dars-1&role=teacher&name=Ustoz"
+```
+
+Tokenni odatda MyTeacher backend'i imzolaydi — batafsil va Flutter integratsiyasi:
+[INTEGRATION.md](INTEGRATION.md).
+
 ## Muhim: HTTPS shart
 
 `getUserMedia` (kamera/mikrofon) faqat **https** yoki **localhost** da ishlaydi.
@@ -68,6 +86,8 @@ O‘z serveringizga `coturn` o‘rnatish yetarli.
 
 ## Ilovaga ulash (WebView)
 
+To'liq qo'llanma: **[INTEGRATION.md](INTEGRATION.md)** (Flutter kodi, token formati, platforma sozlamalari).
+
 Xona sahifasini ilova ichida WebView orqali ochish mumkin:
 
 - **Android** — `WebChromeClient.onPermissionRequest` da `request.grant(request.getResources())`,
@@ -105,9 +125,9 @@ Shu ma’lumot bilan keyinchalik darsni **video yozmasdan** qayta o‘ynatish mu
 qaysi sahifada qancha turilgan, nima belgilangan, qaysi tartibda. Audio yozish va
 transcript qo‘shilganda, transcript ham shu vaqt o‘qiga tushadi.
 
-> Diqqat: bu endpointlar hozircha ochiq — auth qo‘shilgunga qadar prodakshnga chiqarmang.
+> Token rejimida bu endpointlar `x-admin-key: $ADMIN_KEY` sarlavhasini talab qiladi.
 
 ## Keyingi bosqich
 
-Booking (time slot), auth, audio yozish va transcript — hali yo‘q (dars jurnali esa yozilmoqda). Xona nomi hozircha ochiq havola;
-prodakshnda qisqa muddatli token bilan almashtirish kerak.
+Booking (time slot), audio yozish va transcript — hali yo‘q (dars jurnali esa yozilmoqda).
+Kirish tokeni tayyor; TURN server hali qo‘yilmagan.

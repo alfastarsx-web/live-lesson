@@ -3,12 +3,25 @@
 
 // ---------- Parametrlar ----------
 const Q = new URLSearchParams(location.search);
-const ROOM = (Q.get('room') || '').toLowerCase();
-const ROLE = Q.get('role') === 'teacher' ? 'teacher' : 'student';
-const NAME = Q.get('name') || (ROLE === 'teacher' ? 'Ustoz' : 'O‘quvchi');
+const TOKEN = Q.get('t') || '';
+
+// Token ichidagi ma'lumot faqat interfeysni to'g'ri chizish uchun o'qiladi —
+// haqiqiy tekshiruv serverda, imzo bo'yicha bo'ladi.
+function peekToken(tok) {
+  try {
+    const p = tok.split('.')[1];
+    const json = atob(p.replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(decodeURIComponent(escape(json)));
+  } catch { return null; }
+}
+
+const CLAIMS = TOKEN ? peekToken(TOKEN) : null;
+const ROOM = (CLAIMS ? CLAIMS.room : Q.get('room') || '').toLowerCase();
+const ROLE = (CLAIMS ? CLAIMS.role : Q.get('role')) === 'teacher' ? 'teacher' : 'student';
+const NAME = (CLAIMS && CLAIMS.name) || Q.get('name') || (ROLE === 'teacher' ? 'Ustoz' : 'O‘quvchi');
 const IS_TEACHER = ROLE === 'teacher';
 
-if (!ROOM) location.replace('index.html');
+if (!ROOM && !TOKEN) location.replace('index.html');
 
 const $ = (s) => document.querySelector(s);
 const el = {
@@ -59,8 +72,10 @@ function flushOutbox() {
 
 function connect() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const url = `${proto}://${location.host}/ws?room=${encodeURIComponent(ROOM)}`
-            + `&role=${ROLE}&name=${encodeURIComponent(NAME)}`;
+  const url = TOKEN
+    ? `${proto}://${location.host}/ws?t=${encodeURIComponent(TOKEN)}`
+    : `${proto}://${location.host}/ws?room=${encodeURIComponent(ROOM)}`
+      + `&role=${ROLE}&name=${encodeURIComponent(NAME)}`;
   ws = new WebSocket(url);
 
   ws.onopen = () => { retry = 0; setStatus('Xonada'); flushOutbox(); };
@@ -81,8 +96,9 @@ async function onSignal(m) {
       break;
 
     case 'error':
-      alert(m.message || 'Xatolik');
-      location.href = 'index.html';
+      setStatus(m.message || 'Xatolik');
+      toast(m.message || 'Xatolik', 8000);
+      if (!TOKEN) location.href = 'index.html';
       break;
 
     case 'joined':
@@ -348,7 +364,8 @@ el.fileInput.onchange = async () => {
   const fd = new FormData();
   fd.append('file', f);
   try {
-    const r = await fetch('/api/upload', { method: 'POST', body: fd });
+    const r = await fetch(TOKEN ? `/api/upload?t=${encodeURIComponent(TOKEN)}` : '/api/upload',
+                          { method: 'POST', body: fd });
     const j = await r.json();
     if (!r.ok) throw new Error(j.error || 'upload');
     strokes = []; liveRemote = null;
