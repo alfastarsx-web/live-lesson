@@ -30,7 +30,16 @@ const upload = multer({
     },
   }),
   limits: { fileSize: 25 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => cb(null, file.mimetype === 'application/pdf'),
+  // Telefondan fayl tanlanganda brauzer ko'pincha application/octet-stream yoki
+  // bo'sh tur yuboradi — faqat mimetype'ga ishonsak, haqiqiy PDF ham rad etiladi.
+  // Shuning uchun kengaytma ham tekshiriladi.
+  fileFilter: (req, file, cb) => {
+    const pdfTur = file.mimetype === 'application/pdf';
+    const pdfNom = /\.pdf$/i.test(file.originalname || '');
+    if (pdfTur || pdfNom) return cb(null, true);
+    console.warn(`PDF emas deb rad etildi: nom="${file.originalname}" tur="${file.mimetype}"`);
+    cb(null, false);
+  },
 });
 
 // Tokendagi rolni tekshiradi (AUTH_ON bo'lmasa — lokal rejim, hamma narsa ochiq)
@@ -39,13 +48,27 @@ function claimsFrom(req) {
   return verify(req.query.t || bearer);
 }
 
+const pdfYukla = upload.single('file');
+
 app.post('/api/upload', (req, res, next) => {
   if (!AUTH_ON) return next();
   const c = claimsFrom(req);
   if (!c || c.role !== 'teacher') return res.status(403).json({ error: 'ruxsat yo\u2018q' });
   next();
-}, upload.single('file'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'Faqat PDF fayl, 25MB gacha' });
+}, (req, res, next) => {
+  // Multer xatosini o'zimiz ushlaymiz — aks holda hajm chegarasida 500 qaytardi
+  pdfYukla(req, res, (err) => {
+    if (!err) return next();
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: 'Fayl 25MB dan katta' });
+    }
+    console.warn('PDF yuklash xatosi:', err.message);
+    res.status(400).json({ error: 'Faylni yuklab bo\u2018lmadi, qaytadan urinib ko\u2018ring' });
+  });
+}, (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'Fayl PDF emas. PDF formatdagi faylni tanlang' });
+  }
   res.json({ url: `/uploads/${req.file.filename}`, name: req.file.originalname });
 });
 
