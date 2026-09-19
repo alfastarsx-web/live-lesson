@@ -445,7 +445,10 @@ el.fileInput.onchange = async () => {
     await loadDoc(j.url, j.name);
     wsSend({ type: 'doc', url: j.url, name: j.name });
   } catch (e) {
-    console.warn(e); toast('Yuklab bo‘lmadi');
+    console.warn(e);
+    // Serverdan kelgan aniq sababni ko'rsatamiz: "Yuklab bo'lmadi" ustozga
+    // nima qilishni aytmaydi
+    toast(e.message && e.message !== 'upload' ? e.message : 'Yuklab bo‘lmadi');
   }
   el.fileInput.value = '';
 };
