@@ -22,13 +22,20 @@ function peekToken(tok) {
 async function tokenTop() {
   if (TOKEN) return TOKEN;
 
-  const m = location.pathname.match(/^\/dars\/([a-z0-9-]{3,40})\/?$/i);
+  // Chegara server bilan bir xil bo'lishi shart: mentor xonasi
+  // "mentor-<uuid>" 43 belgi, ilgari bu yerda 40 turgani uchun o'quvchi
+  // ustoz login sahifasiga tushib qolardi
+  const m = location.pathname.match(/^\/dars\/([a-z0-9-]{3,64})\/?$/i);
   if (m) {
     const nomi = Q.get('name') ? `?name=${encodeURIComponent(Q.get('name'))}` : '';
     const r = await fetch(`/api/join/${m[1].toLowerCase()}${nomi}`);
     if (r.ok) return (await r.json()).token;
     return null;
   }
+
+  // /dars/ dan kelgan-u, xona nomi yaroqsiz — o'quvchini login sahifasiga
+  // yubormaymiz, unda hisob yo'q
+  if (location.pathname.startsWith('/dars/')) return null;
 
   const r = await fetch('/api/session');
   if (r.ok) return (await r.json()).token;
@@ -700,8 +707,16 @@ let AKTIV_TOKEN = TOKEN;
     AKTIV_TOKEN = await tokenTop();
   } catch { AKTIV_TOKEN = null; }
 
-  // Ustoz kirmagan bo'lsa — login sahifasiga
   if (!AKTIV_TOKEN && !ROOM) {
+    // Kurs havolasidan kelgan o'quvchida hisob yo'q — login so'ramaymiz
+    if (location.pathname.startsWith('/dars/')) {
+      el.remotePh.hidden = false;
+      el.remotePh.innerHTML = '<b>Dars xonasi topilmadi</b>'
+        + '<span>Havola eskirgan bo\u2018lishi mumkin. Ustozdan yangi havola so\u2018rang.</span>';
+      setStatus('Xona topilmadi');
+      return;
+    }
+    // Ustoz — login sahifasiga
     location.replace('/login.html?keyin=' + encodeURIComponent(location.pathname + location.search));
     return;
   }
