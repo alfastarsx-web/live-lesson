@@ -214,6 +214,11 @@ app.all(/^\/api\/booking(\/.*)?$/, (req, res) => {
   aiProxy(req, res, `/lesson-booking${sub}`);
 });
 
+// Mentor veb sahifada ishlayotganini bildiradi — aks holda tizim uni oflayn
+// deb biladi va lid bermaydi (mobil ilova soket orqali ulanadi, veb esa shu yo'l bilan)
+app.post('/api/mentor-session/heartbeat', (req, res) =>
+  aiProxy(req, res, '/mentor-session/heartbeat'));
+
 app.get('/api/my-mentor', (req, res) => aiProxy(req, res, '/assignments/my-mentor'));
 
 // Mentor ekranlari uchun o'qish endpointlari — ruxsat etilganlar ro'yxati bo'yicha.

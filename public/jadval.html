@@ -166,6 +166,9 @@ $('#nusxa').onclick = () => {
 
 (async () => {
   await WebViewAuth.tayyorla();
+  // Mentor shu sahifada ishlayotganini bildirib turamiz — aks holda tizim uni
+  // oflayn deb biladi va avtomatik lid bermaydi
+  mentorNabzi();
 
   // Avval whoami — u ikkala kirish usulini ham taniydi (cookie yoki WebView tokeni)
   const w = await so('/api/whoami');

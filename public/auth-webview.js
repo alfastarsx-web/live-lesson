@@ -34,6 +34,47 @@ window.api = async function api(yol, opts) {
   return { ok: r.ok, data: await r.json().catch(() => ({})) };
 };
 
+/**
+ * Mentor veb sahifada ishlayotganini tizimga bildiradi.
+ *
+ * Mobil ilova soket orqali ulanadi va shu bilan onlayn hisoblanadi. Kompyuterda
+ * ishlayotgan mentorda bunday ulanish yo'q edi, ya'ni ishlab turib ham tizim
+ * uchun oflayn bo'lib qolardi: avtomatik lid kelmasdi va qo'lidagi tegilmagan
+ * lidlar tortib olinardi.
+ *
+ * Signal faqat sahifa ko'rinib turganda yuboriladi — mentor boshqa ilovaga
+ * o'tsa yoki brauzerni yopsa, sessiya server tomonda bir necha daqiqada yopiladi.
+ * Shuning uchun ochiq qoldirilgan oynaning o'zi mentorni onlayn qilib turmaydi.
+ */
+window.mentorNabzi = function mentorNabzi() {
+  const ORALIQ = 60_000;
+  let taymer = null;
+
+  const yubor = () => {
+    if (document.visibilityState !== 'visible') return;
+    // Sahifa yopilayotgan bo'lsa ham xato chiqmasin
+    fetch('/api/mentor-session/heartbeat', { method: 'POST' }).catch(() => {});
+  };
+
+  const boshla = () => {
+    if (taymer) return;
+    yubor();
+    taymer = setInterval(yubor, ORALIQ);
+  };
+  const toxtat = () => {
+    if (!taymer) return;
+    clearInterval(taymer);
+    taymer = null;
+  };
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') boshla();
+    else toxtat();
+  });
+
+  boshla();
+};
+
 // --- umumiy yordamchilar ---
 window.bosh = (ism) => (ism || '?').trim().charAt(0).toUpperCase();
 

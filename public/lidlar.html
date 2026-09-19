@@ -214,6 +214,9 @@ document.querySelectorAll('.chip').forEach((c) => {
 
 (async () => {
   await WebViewAuth.tayyorla();
+  // Mentor shu sahifada ishlayotganini bildirib turamiz — aks holda tizim uni
+  // oflayn deb biladi va avtomatik lid bermaydi
+  mentorNabzi();
   const r = await api('/api/ai/leads/my');
   if (!r) return;
   if (!r.ok) {
