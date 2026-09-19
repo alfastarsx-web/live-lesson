@@ -261,6 +261,9 @@ function qongiroqHtml(c) {
 
 (async () => {
   await WebViewAuth.tayyorla();
+  // Mentor shu sahifada ishlayotganini bildirib turamiz — aks holda tizim uni
+  // oflayn deb biladi va avtomatik lid bermaydi
+  mentorNabzi();
   if (!ID) return (location.href = '/oquvchilar.html');
 
   const r = await api('/api/ai/assignments/my-students');
