@@ -38,6 +38,7 @@ let FILTR = 'all';
 
 const HOLATLAR = {
   new:             { matn: 'Yangi' },
+  assigned:        { matn: 'Yangi' },
   unreachable:     { matn: 'Ulanib bo‘lmadi' },
   negotiating:     { matn: 'Muzokarada' },
   trial_scheduled: { matn: 'Sinov darsi belgilandi' },
@@ -98,8 +99,15 @@ function kartaHtml(l) {
     </div>`;
 }
 
+// Admin qo'lda biriktirgan lid `assigned` bo'lib keladi — mentor uchun u ham yangi ish
+function tegishli(x, t) {
+  if (t === 'all') return true;
+  if (t === 'new') return x.status === 'new' || x.status === 'assigned';
+  return x.status === t;
+}
+
 function sanoq() {
-  const son = (t) => t === 'all' ? HAMMASI.length : HAMMASI.filter((x) => x.status === t).length;
+  const son = (t) => t === 'all' ? HAMMASI.length : HAMMASI.filter((x) => tegishli(x, t)).length;
   document.querySelectorAll('.chip').forEach((c) => {
     const nom = {
       all: 'Barchasi', new: 'Yangi', negotiating: 'Muzokarada',
@@ -110,7 +118,7 @@ function sanoq() {
 }
 
 function chiz() {
-  let ro = FILTR === 'all' ? HAMMASI : HAMMASI.filter((x) => x.status === FILTR);
+  let ro = HAMMASI.filter((x) => tegishli(x, FILTR));
   $('#royxat').innerHTML = ro.length
     ? ro.map(kartaHtml).join('')
     : '<div class="bosh-holat"><b>Lid yo‘q</b><span>Bu bo‘limda hozircha lid yo‘q</span></div>';
