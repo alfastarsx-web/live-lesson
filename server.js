@@ -20,7 +20,8 @@ fs.mkdirSync(LOG_DIR, { recursive: true });
 
 const app = express();
 
-// ---------- PDF yuklash ----------
+// ---------- Hujjat yuklash (PDF va rasm) ----------
+const RASM_TURLARI = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => cb(null, UPLOAD_DIR),
@@ -34,10 +35,12 @@ const upload = multer({
   // bo'sh tur yuboradi — faqat mimetype'ga ishonsak, haqiqiy PDF ham rad etiladi.
   // Shuning uchun kengaytma ham tekshiriladi.
   fileFilter: (req, file, cb) => {
-    const pdfTur = file.mimetype === 'application/pdf';
-    const pdfNom = /\.pdf$/i.test(file.originalname || '');
-    if (pdfTur || pdfNom) return cb(null, true);
-    console.warn(`PDF emas deb rad etildi: nom="${file.originalname}" tur="${file.mimetype}"`);
+    const tur = file.mimetype || '';
+    const nom = file.originalname || '';
+    const mosTur = tur === 'application/pdf' || RASM_TURLARI.includes(tur);
+    const mosNom = /\.(pdf|png|jpe?g|webp|gif)$/i.test(nom);
+    if (mosTur || mosNom) return cb(null, true);
+    console.warn(`Qabul qilinmadi: nom="${nom}" tur="${tur}"`);
     cb(null, false);
   },
 });
@@ -67,7 +70,7 @@ app.post('/api/upload', (req, res, next) => {
   });
 }, (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ error: 'Fayl PDF emas. PDF formatdagi faylni tanlang' });
+    return res.status(400).json({ error: 'Fayl mos emas. PDF yoki rasm (JPG, PNG) tanlang' });
   }
   res.json({ url: `/uploads/${req.file.filename}`, name: req.file.originalname });
 });

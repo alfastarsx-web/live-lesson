@@ -1,5 +1,5 @@
 'use strict';
-/* Jonli dars xonasi: 1:1 WebRTC video + PDF ustida sinxron chizish. */
+/* Jonli dars xonasi: 1:1 WebRTC video + hujjat (PDF yoki rasm) ustida sinxron chizish. */
 
 // ---------- Parametrlar ----------
 const Q = new URLSearchParams(location.search);
@@ -76,7 +76,7 @@ function interfeysniSozla() {
     document.body.classList.remove('viewer');
     document.body.classList.add('can-draw');
     el.toolbar.hidden = false;
-    el.emptyHint.innerHTML = 'PDF ochish uchun 📄 tugmasini bosing'
+    el.emptyHint.innerHTML = 'PDF yoki rasm ochish uchun 📄 tugmasini bosing'
       + (ROOM ? `<br><br><span style="opacity:.75">O‘quvchi havolasi:</span><br>`
         + `<code id="oqHavola" style="cursor:pointer;color:#60a5fa" title="Nusxalash">`
         + `${location.origin}/dars/${ROOM}</code>` : '');
@@ -91,7 +91,7 @@ function interfeysniSozla() {
     document.body.classList.add('viewer');
     document.body.classList.remove('can-draw');
     el.toolbar.hidden = true;
-    el.emptyHint.textContent = 'Ustoz PDF ochishini kuting';
+    el.emptyHint.textContent = 'Ustoz hujjat ochishini kuting';
   }
 }
 interfeysniSozla();
@@ -359,24 +359,56 @@ el.btnLeave.onclick = () => {
   location.href = IS_TEACHER ? '/jadval.html' : '/band.html';
 };
 
-// ================= 3. PDF =================
+// ================= 3. Hujjat (PDF yoki rasm) =================
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 let pdfDoc = null, pageNum = 1, rendering = false, pendingPage = null, currentDocUrl = null;
+
+const RASM_KENGAYTMA = /\.(png|jpe?g|webp|gif)$/i;
+
+/**
+ * Rasmni PDF hujjati kabi ko'rsatadi: bitta sahifa, xuddi shu interfeys.
+ * Shunda renderPage/gotoPage va ink qatlami o'zgarmaydi.
+ */
+async function rasmHujjati(url) {
+  const img = new Image();
+  await new Promise((ok, xato) => {
+    img.onload = ok;
+    img.onerror = () => xato(new Error('rasm ochilmadi'));
+    img.src = url;
+  });
+  return {
+    numPages: 1,
+    getPage: async () => ({
+      getViewport: ({ scale }) => ({
+        width: img.naturalWidth * scale,
+        height: img.naturalHeight * scale,
+      }),
+      render: ({ canvasContext, viewport }) => ({
+        promise: Promise.resolve().then(() => {
+          canvasContext.drawImage(img, 0, 0, viewport.width, viewport.height);
+        }),
+      }),
+    }),
+  };
+}
 
 async function loadDoc(url, name, page = 1) {
   if (!url || url === currentDocUrl) { if (pdfDoc) gotoPage(page, false); return; }
   currentDocUrl = url;
   setStatus('Hujjat yuklanmoqda…');
   try {
-    pdfDoc = await pdfjsLib.getDocument(url).promise;
+    pdfDoc = RASM_KENGAYTMA.test(url)
+      ? await rasmHujjati(url)
+      : await pdfjsLib.getDocument(url).promise;
   } catch (e) {
-    console.warn(e); toast('PDF ochilmadi'); currentDocUrl = null; return;
+    console.warn(e); toast('Hujjat ochilmadi'); currentDocUrl = null; return;
   }
   el.empty.hidden = true;
   el.pdfbox.hidden = false;
-  el.pagePill.hidden = false;
+  // Rasmda sahifa yo'q — tugmalarni ko'rsatmaymiz
+  el.pagePill.hidden = pdfDoc.numPages < 2;
   setStatus(pc && pc.connectionState === 'connected' ? 'Aloqa o‘rnatildi' : 'Xonada');
   if (name) toast(`Hujjat: ${name}`);
   await gotoPage(page, false);
@@ -428,7 +460,7 @@ async function gotoPage(n, broadcast = true) {
 el.btnPrev.onclick = () => { if (IS_TEACHER) gotoPage(pageNum - 1); };
 el.btnNext.onclick = () => { if (IS_TEACHER) gotoPage(pageNum + 1); };
 
-// Ustoz PDF yuklaydi
+// Ustoz hujjat yuklaydi (PDF yoki rasm)
 el.fileInput.onchange = async () => {
   const f = el.fileInput.files[0];
   if (!f) return;
