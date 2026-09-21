@@ -73,6 +73,27 @@
   </section>
 </div>
 
+<!-- O'quvchi dars oxirida baho qoldiradi -->
+<div class="baho-fon" id="bahoFon" hidden>
+  <div class="baho-oyna">
+    <h2>Dars qanday o‘tdi?</h2>
+    <p>Bahoyingiz ustozga yaxshilanishga yordam beradi</p>
+    <div class="yulduzlar" id="yulduzlar">
+      <button type="button" data-y="1" aria-label="1 yulduz">★</button>
+      <button type="button" data-y="2" aria-label="2 yulduz">★</button>
+      <button type="button" data-y="3" aria-label="3 yulduz">★</button>
+      <button type="button" data-y="4" aria-label="4 yulduz">★</button>
+      <button type="button" data-y="5" aria-label="5 yulduz">★</button>
+    </div>
+    <textarea id="bahoIzoh" rows="3" maxlength="1000"
+              placeholder="Qisqacha fikringiz (ixtiyoriy)"></textarea>
+    <div class="baho-amallar">
+      <button class="baho-yubor" id="bahoYubor" disabled>Yuborish</button>
+      <button class="baho-otkaz" id="bahoOtkaz">O‘tkazib yuborish</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>

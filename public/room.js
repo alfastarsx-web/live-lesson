@@ -351,12 +351,53 @@ el.btnCam.onclick = () => {
   el.localVideo.classList.toggle('off', !t.enabled);
   el.localPh.hidden = t.enabled;
 };
+// --- Dars oxirida o'quvchining bahosi ---
+let TANLANGAN_BAHO = 0;
+
+function bahoOynasi() {
+  const fon = document.getElementById('bahoFon');
+  const yulduzlar = document.getElementById('yulduzlar');
+  const yubor = document.getElementById('bahoYubor');
+  fon.hidden = false;
+
+  yulduzlar.querySelectorAll('button').forEach((b) => {
+    b.onclick = () => {
+      TANLANGAN_BAHO = Number(b.dataset.y);
+      yulduzlar.querySelectorAll('button').forEach((x) => {
+        x.classList.toggle('tanlangan', Number(x.dataset.y) <= TANLANGAN_BAHO);
+      });
+      yubor.disabled = false;
+    };
+  });
+
+  const chiq = () => { location.href = '/band.html'; };
+  document.getElementById('bahoOtkaz').onclick = chiq;
+  yubor.onclick = async () => {
+    yubor.disabled = true;
+    yubor.textContent = 'Yuborilmoqda…';
+    try {
+      await fetch(AKTIV_TOKEN ? `/api/baho?t=${encodeURIComponent(AKTIV_TOKEN)}` : '/api/baho', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rating: TANLANGAN_BAHO,
+          comment: document.getElementById('bahoIzoh').value,
+        }),
+      });
+    } catch { /* baho ketmasa ham dars tugagan — o'quvchini ushlab turmaymiz */ }
+    chiq();
+  };
+}
+
 el.btnLeave.onclick = () => {
   if (!confirm('Darsdan chiqasizmi?')) return;
   try { ws && ws.close(); } catch {}
   teardownPeer();
   if (localStream) localStream.getTracks().forEach((t) => t.stop());
-  location.href = IS_TEACHER ? '/jadval.html' : '/band.html';
+
+  // Ustoz jadvalga qaytadi, o'quvchidan esa avval baho so'raymiz
+  if (IS_TEACHER) { location.href = '/jadval.html'; return; }
+  bahoOynasi();
 };
 
 // ================= 3. Hujjat (PDF yoki rasm) =================
