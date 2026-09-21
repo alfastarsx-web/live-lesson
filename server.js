@@ -541,6 +541,13 @@ wss.on('connection', (ws, req) => {
         broadcast(room, { ...msg, from: clientId }, clientId);
         break;
 
+      // --- Ustoz darsni yakunladi: o'quvchida baho oynasi ochiladi ---
+      case 'dars-tugadi':
+        if (role !== 'teacher') return;
+        broadcast(room, { type: 'dars-tugadi' }, clientId);
+        logEvent(room, { type: 'lesson-end-by-teacher' });
+        break;
+
       // --- Workspace (faqat ustoz o'zgartiradi) ---
       case 'doc':
         if (role !== 'teacher') return;

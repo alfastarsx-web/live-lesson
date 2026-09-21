@@ -44,6 +44,8 @@ async function tokenTop() {
 
 let CLAIMS = TOKEN ? peekToken(TOKEN) : null;
 let ROOM = '', ROLE = 'student', NAME = '', IS_TEACHER = false;
+// Dars tugadi: ws yopilganda qayta ulanish kerak emas
+let DARS_TUGADI = false;
 
 function rolniQoy(claims) {
   CLAIMS = claims;
@@ -130,6 +132,9 @@ function connect() {
   ws.onopen = () => { retry = 0; setStatus('Xonada'); flushOutbox(); };
   ws.onmessage = (e) => { let m; try { m = JSON.parse(e.data); } catch { return; } onSignal(m); };
   ws.onclose = () => {
+    // Dars tugagan bo'lsa qayta ulanmaymiz: aks holda o'quvchi xonaga qaytib
+    // kirib qoladi va sinov darsi hisoboti kechikadi (u xona bo'shaganda ketadi)
+    if (DARS_TUGADI) return;
     setStatus('Uzildi, qayta ulanmoqda…');
     retry += 1;
     if (retry < 40) setTimeout(connect, Math.min(1000 * retry, 8000));
@@ -170,6 +175,17 @@ async function onSignal(m) {
       peerId = m.peer.id;
       isInitiator = false;
       onPeerReady(m.peer);
+      break;
+
+    // Ustoz darsni yakunladi — o'quvchidan darhol baho so'raymiz
+    case 'dars-tugadi':
+      if (!IS_TEACHER) {
+        DARS_TUGADI = true;
+        teardownPeer();
+        if (localStream) localStream.getTracks().forEach((t) => t.stop());
+        try { ws && ws.close(); } catch {}
+        bahoOynasi();
+      }
       break;
 
     case 'peer-leave':
@@ -411,12 +427,25 @@ function bahoOynasi() {
 
 el.btnLeave.onclick = () => {
   if (!confirm('Darsdan chiqasizmi?')) return;
+
+  DARS_TUGADI = true;
+
+  if (IS_TEACHER) {
+    // O'quvchida baho oynasi o'zi ochilsin — u chiqish tugmasini bosmasligi mumkin
+    wsSend({ type: 'dars-tugadi' });
+    // Xabar ketib ulgursin, keyin yopamiz
+    setTimeout(() => {
+      try { ws && ws.close(); } catch {}
+      teardownPeer();
+      if (localStream) localStream.getTracks().forEach((t) => t.stop());
+      location.href = '/jadval.html';
+    }, 200);
+    return;
+  }
+
   try { ws && ws.close(); } catch {}
   teardownPeer();
   if (localStream) localStream.getTracks().forEach((t) => t.stop());
-
-  // Ustoz jadvalga qaytadi, o'quvchidan esa avval baho so'raymiz
-  if (IS_TEACHER) { location.href = '/jadval.html'; return; }
   bahoOynasi();
 };
 
