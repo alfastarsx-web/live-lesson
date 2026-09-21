@@ -237,10 +237,24 @@ async function sinovBelgila(id, quti) {
     lid.akkauntHolati = a.holat === 'created' ? 'kod' : (a.holat === 'existing' ? 'bor' : lid.akkauntHolati);
     lid.kirishKodi = a.kod || null;
   }
+  // Telegram havolasi bo'lsa — asosiy yo'l: o'quvchi kod termaydi
+  const tgBolimi = a.telegramUrl
+    ? `<div class="akkaunt akkaunt-tg" style="margin:10px 0 0">
+         <b>Telegram havolasi — shuni yuboring</b>
+         <span>O‘quvchi bosadi, raqamini tasdiqlaydi va darsiga o‘tadi. Kod terish shart emas.</span>
+         <div class="havola-quti" style="margin-top:8px">
+           <code>${a.telegramUrl}</code><button type="button" id="tg-${id}">Nusxa</button>
+         </div>
+       </div>`
+    : '';
+
   const akkauntBolimi = a.kod
     ? `<div class="akkaunt akkaunt-kod" style="margin:10px 0 0">
-         <b>Ilovaga kirish kodi</b><div class="kod">${a.kod}</div>
-         <span>O‘quvchiga ayting: telefon raqami va shu kod bilan kirsin</span>
+         <b>${a.telegramUrl ? 'Zaxira: SMS kodi' : 'Ilovaga kirish kodi'}</b>
+         <div class="kod">${a.kod}</div>
+         <span>${a.telegramUrl
+           ? 'Telegram ishlatmasa — telefon raqami va shu kod bilan kiradi'
+           : 'O‘quvchiga ayting: telefon raqami va shu kod bilan kirsin'}</span>
        </div>`
     : (a.holat === 'existing'
       ? `<div class="akkaunt" style="margin:10px 0 0"><b>Ilovada akkaunti bor</b>
@@ -249,12 +263,19 @@ async function sinovBelgila(id, quti) {
 
   quti.innerHTML = `<b>Sinov darsi belgilandi</b>
     <div class="izoh" style="margin-bottom:8px">${sanaChiroyli(r.data.startsAt)} — o‘quvchi darsni ilovadan ochadi</div>
+    ${tgBolimi}
     ${akkauntBolimi}
     <div class="izoh" style="margin:10px 0 6px">Ilovasiz kirish uchun zaxira havola:</div>
     <div class="havola-quti"><code>${r.data.joinUrl}</code><button type="button" id="n-${id}">Nusxa</button></div>`;
   document.getElementById(`n-${id}`).onclick = (e) => {
     navigator.clipboard.writeText(r.data.joinUrl).then(() => { e.target.textContent = 'Nusxalandi'; }, () => {});
   };
+  const tgTugma = document.getElementById(`tg-${id}`);
+  if (tgTugma) {
+    tgTugma.onclick = (e) => {
+      navigator.clipboard.writeText(a.telegramUrl).then(() => { e.target.textContent = 'Nusxalandi'; }, () => {});
+    };
+  }
   sanoq();
 }
 
