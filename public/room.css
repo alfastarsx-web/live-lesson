@@ -130,6 +130,9 @@ body.can-draw #inkCanvas{cursor:crosshair}
 /* ---------- Dars oxiridagi baho ---------- */
 .baho-fon{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
   background:rgba(8,12,20,.72);padding:20px}
+/* display:flex brauzerning [hidden] qoidasini bosib ketadi — shuning uchun
+   yashirishni o'zimiz aytamiz. Aks holda oyna dars boshlanmasdan turib chiqadi. */
+.baho-fon[hidden]{display:none}
 .baho-oyna{background:#fff;border-radius:22px;padding:26px 22px;width:100%;max-width:380px;text-align:center}
 .baho-oyna h2{margin:0 0 6px;font-size:19px;color:#0f1b2d}
 .baho-oyna p{margin:0 0 18px;font-size:13.5px;color:#64748b}
