@@ -410,6 +410,42 @@ function broadcast(room, msg, exceptId) {
  * qancha turdi. Shunga qarab lid holati o'zi "o'tildi" yoki "kelmadi" bo'ladi.
  * Faqat "sinov-" bilan boshlanadigan xonalar uchun.
  */
+// O'quvchi dars oxirida baho qoldiradi. Token xonani aniqlaydi, ya'ni
+// o'quvchi faqat o'zi qatnashgan darsni baholay oladi.
+app.post('/api/baho', async (req, res) => {
+  const c = claimsFrom(req);
+  if (AUTH_ON && !c) return res.status(403).json({ error: 'ruxsat yo\u2018q' });
+
+  const room = (c && c.room) || req.body?.room;
+  const rating = Number(req.body?.rating);
+  const comment = typeof req.body?.comment === 'string' ? req.body.comment.slice(0, 1000) : '';
+
+  if (!room) return res.status(400).json({ error: 'xona aniqlanmadi' });
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return res.status(400).json({ error: 'Bahoni tanlang' });
+  }
+
+  const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
+  const secret = process.env.LESSON_TOKEN_SECRET || '';
+  if (!base || !secret) return res.status(500).json({ error: 'server sozlanmagan' });
+
+  try {
+    const r = await fetch(`${base}/lesson-booking/feedback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-lesson-secret': secret },
+      body: JSON.stringify({ room, rating, comment }),
+      signal: AbortSignal.timeout(10000),
+    });
+    const d = await r.json().catch(() => ({}));
+    console.log(`Dars bahosi: ${room} yulduz=${rating} -> ${r.ok ? (d.matched ? 'saqlandi' : 'dars topilmadi') : `xato ${r.status}`}`);
+    // Baho saqlanmasa ham o'quvchiga xato ko'rsatmaymiz — dars tugagan
+    res.json({ ok: true });
+  } catch (e) {
+    console.warn('Baho yuborilmadi:', e.message);
+    res.json({ ok: true });
+  }
+});
+
 async function sinovHisoboti(roomId, room) {
   if (!roomId.startsWith('sinov-')) return;
 
