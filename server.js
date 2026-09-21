@@ -175,6 +175,7 @@ app.post('/api/login', async (req, res) => {
         ok: true,
         name: r.name,
         role: r.isMentor ? 'mentor' : 'student',
+        mustChangePassword: Boolean(r.mustChangePassword),
         redirect: r.isMentor ? '/jadval.html' : '/band.html',
       });
     }
@@ -246,6 +247,9 @@ app.post('/api/mentor-session/heartbeat', (req, res) =>
   aiProxy(req, res, '/mentor-session/heartbeat'));
 
 app.get('/api/my-mentor', (req, res) => aiProxy(req, res, '/assignments/my-mentor'));
+
+// Mentor bergan bir martalik kod bilan kirgan o'quvchi o'z parolini qo'yadi
+app.post('/api/parol', (req, res) => aiProxy(req, res, '/auth/set-initial-password'));
 
 // Mentor ekranlari uchun o'qish endpointlari — ruxsat etilganlar ro'yxati bo'yicha.
 // Ochiq proksi qilmaymiz: faqat kerakli yo'llar o'tadi.

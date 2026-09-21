@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sinov darsi — MyTeacher</title>
+<link rel="stylesheet" href="sinov.css">
+</head>
+<body>
+
+<main class="qobiq">
+
+  <!-- 1. Kirish -->
+  <section class="karta" id="kirishBolimi" hidden>
+    <div class="nishon">🎓</div>
+    <h1>Bepul sinov darsi</h1>
+    <p class="izoh">Ustozingiz bergan kod bilan kiring</p>
+
+    <form id="kirishForma" novalidate>
+      <label class="maydon">
+        <span>Telefon raqamingiz</span>
+        <input id="telefon" type="tel" inputmode="tel" autocomplete="username"
+               placeholder="+998 90 123 45 67" required>
+      </label>
+      <label class="maydon">
+        <span>Kod yoki parol</span>
+        <input id="parol" type="password" inputmode="numeric" autocomplete="current-password"
+               placeholder="6 xonali kod" required>
+      </label>
+      <p class="xato" id="kirishXato" hidden></p>
+      <button class="asosiy" type="submit" id="kirishTugma">Kirish</button>
+    </form>
+    <p class="mayda">Kodni bilmasangiz ustozingizga yozing.</p>
+  </section>
+
+  <!-- 2. O'z parolini qo'yish -->
+  <section class="karta" id="parolBolimi" hidden>
+    <div class="nishon">🔒</div>
+    <h1>O‘z parolingizni qo‘ying</h1>
+    <p class="izoh">Ustoz bergan kod vaqtinchalik. Endi faqat o‘zingiz biladigan parol qo‘ying.</p>
+
+    <form id="parolForma" novalidate>
+      <label class="maydon">
+        <span>Yangi parol</span>
+        <input id="yangiParol" type="password" autocomplete="new-password"
+               placeholder="Kamida 6 belgi" minlength="6" required>
+      </label>
+      <label class="maydon">
+        <span>Takror kiriting</span>
+        <input id="yangiParol2" type="password" autocomplete="new-password"
+               placeholder="Yana bir marta" minlength="6" required>
+      </label>
+      <p class="xato" id="parolXato" hidden></p>
+      <button class="asosiy" type="submit" id="parolTugma">Saqlash</button>
+    </form>
+  </section>
+
+  <!-- 3. Dars -->
+  <section class="karta" id="darsBolimi" hidden>
+    <div class="salom" id="salom"></div>
+    <div id="darsRoyxati"></div>
+    <button class="ikkilamchi" id="chiqish" type="button">Chiqish</button>
+  </section>
+
+  <div class="yuklanmoqda" id="yuklanmoqda">Yuklanmoqda…</div>
+
+</main>
+
+<script src="sinov.js"></script>
+</body>
+</html>

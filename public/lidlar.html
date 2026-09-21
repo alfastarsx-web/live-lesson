@@ -62,6 +62,8 @@ function kartaHtml(l) {
         <span class="holat-yorliq">${h.matn}</span>
       </div>
 
+      ${akkauntHtml(l)}
+
       <div class="izohi" data-izoh-korinish ${l.note ? '' : 'hidden'}>${l.note || ''}</div>
       <div data-izoh-tahrir hidden style="margin-top:10px">
         <textarea data-izoh-matn rows="3" placeholder="Nima gaplashildi, qachon qayta bog‘lanish kerak…"
@@ -100,6 +102,27 @@ function kartaHtml(l) {
         <div class="xabar2" data-xabar style="margin-top:10px"></div>
       </div>
     </div>`;
+}
+
+/**
+ * O'quvchining ilovadagi holati. Mentor telefonda nima deyishini shu belgilaydi:
+ * kod bo'lsa aytadi, akkaunt avvaldan bo'lsa "o'z parolingiz bilan kiring" deydi.
+ */
+function akkauntHtml(l) {
+  if (l.akkauntHolati === 'kod' && l.kirishKodi) {
+    return `<div class="akkaunt akkaunt-kod">
+      <b>Ilovaga kirish kodi</b>
+      <div class="kod">${l.kirishKodi}</div>
+      <span>O‘quvchiga ayting: telefon raqami va shu kod bilan kirsin</span>
+    </div>`;
+  }
+  if (l.akkauntHolati === 'bor') {
+    return `<div class="akkaunt">
+      <b>Ilovada akkaunti bor</b>
+      <span>O‘z paroli bilan kiradi. Esidan chiqqan bo‘lsa — “Parolni unutdingizmi?”</span>
+    </div>`;
+  }
+  return '';
 }
 
 /**
@@ -209,8 +232,25 @@ async function sinovBelgila(id, quti) {
 
   const lid = HAMMASI.find((x) => x.id === id);
   if (lid) lid.status = 'trial_scheduled';
+  const a = r.data.akkaunt || {};
+  if (lid) {
+    lid.akkauntHolati = a.holat === 'created' ? 'kod' : (a.holat === 'existing' ? 'bor' : lid.akkauntHolati);
+    lid.kirishKodi = a.kod || null;
+  }
+  const akkauntBolimi = a.kod
+    ? `<div class="akkaunt akkaunt-kod" style="margin:10px 0 0">
+         <b>Ilovaga kirish kodi</b><div class="kod">${a.kod}</div>
+         <span>O‘quvchiga ayting: telefon raqami va shu kod bilan kirsin</span>
+       </div>`
+    : (a.holat === 'existing'
+      ? `<div class="akkaunt" style="margin:10px 0 0"><b>Ilovada akkaunti bor</b>
+           <span>O‘z paroli bilan kiradi</span></div>`
+      : '');
+
   quti.innerHTML = `<b>Sinov darsi belgilandi</b>
-    <div class="izoh" style="margin-bottom:8px">${sanaChiroyli(r.data.startsAt)} — havolani lidga yuboring</div>
+    <div class="izoh" style="margin-bottom:8px">${sanaChiroyli(r.data.startsAt)} — o‘quvchi darsni ilovadan ochadi</div>
+    ${akkauntBolimi}
+    <div class="izoh" style="margin:10px 0 6px">Ilovasiz kirish uchun zaxira havola:</div>
     <div class="havola-quti"><code>${r.data.joinUrl}</code><button type="button" id="n-${id}">Nusxa</button></div>`;
   document.getElementById(`n-${id}`).onclick = (e) => {
     navigator.clipboard.writeText(r.data.joinUrl).then(() => { e.target.textContent = 'Nusxalandi'; }, () => {});
