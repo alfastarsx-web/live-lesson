@@ -272,3 +272,5 @@ body{
   font-size:27px; font-weight:800; letter-spacing:4px; color:var(--blue-dark);
   margin:5px 0 2px; font-variant-numeric:tabular-nums;
 }
+.akkaunt-tg{background:#eff6ff;border-color:#93c5fd}
+.akkaunt-tg code{font-size:11.5px}

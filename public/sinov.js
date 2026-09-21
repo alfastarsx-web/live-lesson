@@ -225,7 +225,31 @@ el('chiqish').addEventListener('click', async () => {
 
 // ---------- Boshlanish ----------
 
+/**
+ * Telegram botdan kelgan bir bosishlik havola: ?k=<imzolangan token>.
+ * Tokenni sessiyaga almashtiramiz va manzil qatoridan darhol o'chiramiz —
+ * u boshqaga ko'rsatilgan ekranda yoki tarixda qolib ketmasin.
+ */
+async function telegramdanKirish() {
+  const p = new URLSearchParams(location.search);
+  const k = p.get('k');
+  if (!k) return false;
+
+  history.replaceState(null, '', location.pathname);
+  try {
+    await api('/api/kirish', { method: 'POST', body: JSON.stringify({ token: k }) });
+    return true;
+  } catch (err) {
+    korsat('kirishBolimi');
+    xatoKorsat('kirishXato', `${err.message}. Telefon va kod bilan kiring.`);
+    return 'xato';
+  }
+}
+
 (async function boshla() {
+  const tg = await telegramdanKirish();
+  if (tg === 'xato') return;
+
   // Allaqachon kirgan bo'lsa (cookie bor) — to'g'ridan-to'g'ri darslarga
   try {
     await api('/api/whoami');

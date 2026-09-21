@@ -251,6 +251,39 @@ app.get('/api/my-mentor', (req, res) => aiProxy(req, res, '/assignments/my-mento
 // Mentor bergan bir martalik kod bilan kirgan o'quvchi o'z parolini qo'yadi
 app.post('/api/parol', (req, res) => aiProxy(req, res, '/auth/set-initial-password'));
 
+/**
+ * Telegram botda raqamini tasdiqlagan odam uchun bir bosishlik kirish.
+ * Token ai.myteacher.uz tomonidan imzolangan — biz uni tekshirmaymiz,
+ * almashtiramiz: API tokenni qabul qilsa, sessiya cookie'si qo'yiladi.
+ */
+app.post('/api/kirish', async (req, res) => {
+  const { token } = req.body || {};
+  if (!token) return res.status(400).json({ error: 'Havola topilmadi' });
+  if (!aiteacher.AITEACHER_ON) return res.status(500).json({ error: 'AITEACHER_API sozlanmagan' });
+
+  const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
+  try {
+    const r = await fetch(`${base}/auth/one-time-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+      signal: AbortSignal.timeout(12000),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      return res.status(r.status === 400 ? 401 : r.status)
+        .json({ error: data.message || 'Havola eskirgan' });
+    }
+    const jwt = aiteacher.findJwt(data);
+    if (!jwt) return res.status(502).json({ error: 'Kirish tokeni kelmadi' });
+
+    res.setHeader('Set-Cookie', [cookieHeader(req, AI_COOKIE, jwt, 12 * 3600)]);
+    return res.json({ ok: true });
+  } catch {
+    return res.status(502).json({ error: 'ai.myteacher.uz javob bermadi' });
+  }
+});
+
 // Mentor ekranlari uchun o'qish endpointlari — ruxsat etilganlar ro'yxati bo'yicha.
 // Ochiq proksi qilmaymiz: faqat kerakli yo'llar o'tadi.
 const RUXSAT = [
