@@ -51,7 +51,8 @@ const HOLATLAR = {
 function kartaHtml(l) {
   const h = HOLATLAR[l.status] || { matn: l.status };
   return `
-    <div class="lid l-${l.status}" data-id="${l.id}">
+    <div class="lid l-${l.status}${javobKutmoqda(l) ? ' kutmoqda' : ''}" data-id="${l.id}">
+      ${javobKutmoqda(l) ? '<div class="kutmoqda-belgi">Dars o\u2018tdi — natijasini belgilang</div>' : ''}
       <div class="tepa">
         <div class="avatar">${bosh(l.name)}</div>
         <div class="ism">
@@ -80,6 +81,7 @@ function kartaHtml(l) {
         <button data-h="unreachable">Ulanib bo‘lmadi</button>
         <button data-h="negotiating">Muzokarada</button>
         ${l.status === 'trial_scheduled' ? '<button data-h="trial_completed" class="asosiy">Sinov darsi o‘tildi</button>' : ''}
+        ${l.status === 'trial_scheduled' ? '<button data-h="trial_no_show">Kelmadi</button>' : ''}
         ${l.status === 'trial_completed' ? '<button data-h="converted" class="asosiy">O‘quvchiga aylandi</button>' : ''}
         <button data-izoh>Izoh</button>
         <button class="asosiy" data-sinov="1">Sinov darsi</button>
@@ -98,6 +100,16 @@ function kartaHtml(l) {
         <div class="xabar2" data-xabar style="margin-top:10px"></div>
       </div>
     </div>`;
+}
+
+/**
+ * Sinov darsi vaqti o'tgan, lekin mentor hali natijasini belgilamagan.
+ * Bunday lidlar ro'yxat boshida va ajralib turadi — aks holda ular
+ * "belgilandi" holatida osilib qoladi va konversiya noto'g'ri chiqadi.
+ */
+function javobKutmoqda(l) {
+  if (l.status !== 'trial_scheduled' || !l.trialEndsAt) return false;
+  return new Date(l.trialEndsAt).getTime() < Date.now();
 }
 
 // Admin qo'lda biriktirgan lid `assigned` bo'lib keladi — mentor uchun u ham yangi ish
@@ -120,6 +132,8 @@ function sanoq() {
 
 function chiz() {
   let ro = HAMMASI.filter((x) => tegishli(x, FILTR));
+  // Javob kutayotganlar tepada — ular bir bosishda yopiladi
+  ro = [...ro].sort((a, b) => (javobKutmoqda(b) ? 1 : 0) - (javobKutmoqda(a) ? 1 : 0));
   $('#royxat').innerHTML = ro.length
     ? ro.map(kartaHtml).join('')
     : '<div class="bosh-holat"><b>Lid yo‘q</b><span>Bu bo‘limda hozircha lid yo‘q</span></div>';

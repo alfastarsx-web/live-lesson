@@ -227,6 +227,9 @@ body{
 /* ---------- lidlar ---------- */
 .lid{background:var(--card);border-radius:20px;padding:16px;margin-bottom:14px;
      box-shadow:var(--shadow);border:1.5px solid var(--line)}
+.lid.kutmoqda{border-color:#f0a020;box-shadow:0 0 0 3px rgba(240,160,32,.12)}
+.kutmoqda-belgi{background:#fff8e6;color:#8a5a00;font-size:12.5px;font-weight:700;
+  padding:7px 12px;border-radius:10px;margin-bottom:12px}
 .lid.l-new{border-color:#bfdbfe}
 .lid.l-unreachable{border-color:#e2e8f0}
 .lid.l-negotiating{border-color:#fde68a}
