@@ -146,3 +146,5 @@ body.can-draw #inkCanvas{cursor:crosshair}
 .baho-yubor:disabled{background:#cbd5e1;cursor:default}
 .baho-otkaz{padding:11px;border-radius:12px;border:0;background:none;color:#64748b;
   font:inherit;font-size:14px;cursor:pointer}
+/* Past baho qo'yilganda izoh maydoni e'tiborni tortsin */
+.baho-oyna textarea.sorab-turibdi{border-color:#f0a020;background:#fffdf7}

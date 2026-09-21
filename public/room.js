@@ -360,6 +360,24 @@ function bahoOynasi() {
   const yubor = document.getElementById('bahoYubor');
   fon.hidden = false;
 
+  const sarlavha = document.getElementById('bahoSarlavha');
+  const tavsif = document.getElementById('bahoTavsif');
+  const izoh = document.getElementById('bahoIzoh');
+
+  // 4 va undan past baho — nimani yaxshilash kerakligini so'raymiz.
+  // Quruq yulduzcha sababni aytmaydi, izoh esa aytadi.
+  const savolniMoslash = () => {
+    const past = TANLANGAN_BAHO > 0 && TANLANGAN_BAHO <= 4;
+    sarlavha.textContent = past ? 'Nimani yaxshilashimiz kerak?' : 'Dars qanday o\u2018tdi?';
+    tavsif.textContent = past
+      ? 'Fikringiz aynan nimani tuzatish kerakligini ko\u2018rsatadi'
+      : 'Bahoyingiz ustozga yaxshilanishga yordam beradi';
+    izoh.placeholder = past
+      ? 'Nima yoqmadi yoki nima yetishmadi?'
+      : 'Qisqacha fikringiz (ixtiyoriy)';
+    izoh.classList.toggle('sorab-turibdi', past);
+  };
+
   yulduzlar.querySelectorAll('button').forEach((b) => {
     b.onclick = () => {
       TANLANGAN_BAHO = Number(b.dataset.y);
@@ -367,6 +385,8 @@ function bahoOynasi() {
         x.classList.toggle('tanlangan', Number(x.dataset.y) <= TANLANGAN_BAHO);
       });
       yubor.disabled = false;
+      savolniMoslash();
+      if (TANLANGAN_BAHO <= 4) izoh.focus();
     };
   });
 
@@ -381,7 +401,7 @@ function bahoOynasi() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           rating: TANLANGAN_BAHO,
-          comment: document.getElementById('bahoIzoh').value,
+          comment: izoh.value,
         }),
       });
     } catch { /* baho ketmasa ham dars tugagan — o'quvchini ushlab turmaymiz */ }
