@@ -114,6 +114,8 @@ el('kirishForma').addEventListener('submit', async (e) => {
       method: 'POST',
       body: JSON.stringify({ login, password }),
     });
+    // Parol qo'yish taklif qilinadi, majburlanmaydi: kod SMS'da turibdi,
+    // odam uni istalgan vaqtda topib kiraveradi
     if (r.mustChangePassword) return korsat('parolBolimi');
     await darslarniKorsat();
   } catch (err) {
@@ -213,6 +215,8 @@ async function darslarniKorsat() {
 
   korsat('darsBolimi');
 }
+
+el('keyinroq').addEventListener('click', () => { darslarniKorsat(); });
 
 el('chiqish').addEventListener('click', async () => {
   try { await fetch('/api/logout', { method: 'POST' }); } catch { /* baribir chiqaramiz */ }
