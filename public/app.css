@@ -259,3 +259,16 @@ body{
 
 .sinov-quti{background:var(--blue-soft);border-radius:13px;padding:12px;margin-top:12px}
 .sinov-quti b{display:block;font-size:14px;font-weight:700;color:var(--blue-dark);margin-bottom:8px}
+
+/* ---------- Lid kartasida ilova akkaunti ---------- */
+.akkaunt{
+  margin:10px 0 0; padding:11px 13px; border-radius:12px;
+  background:#f8fafc; border:1.5px solid var(--line);
+}
+.akkaunt b{display:block; font-size:13px; font-weight:700; color:var(--blue-dark)}
+.akkaunt span{display:block; font-size:12.5px; color:var(--mut2); margin-top:3px}
+.akkaunt-kod{background:#eff6ff; border-color:#bfdbfe}
+.akkaunt .kod{
+  font-size:27px; font-weight:800; letter-spacing:4px; color:var(--blue-dark);
+  margin:5px 0 2px; font-variant-numeric:tabular-nums;
+}
