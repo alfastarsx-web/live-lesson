@@ -33,6 +33,8 @@
 <script src="/auth-webview.js"></script>
 <script>
 const $ = (s) => document.querySelector(s);
+// Telegramdagi ism foydalanuvchi kiritgan matn — HTML sifatida talqin qilinmasin
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 let HAMMASI = [];
 let FILTR = 'all';
 
@@ -86,8 +88,10 @@ function kartaHtml(l) {
         ${l.status === 'trial_scheduled' ? '<button data-h="trial_no_show">Kelmadi</button>' : ''}
         ${l.status === 'trial_completed' ? '<button data-h="converted" class="asosiy">O‘quvchiga aylandi</button>' : ''}
         <button data-izoh>Izoh</button>
+        ${l.akkauntHolati === 'yoq' ? '<button class="asosiy" data-akkaunt>Akkaunt ochish</button>' : ''}
         <button class="asosiy" data-sinov="1">Sinov darsi</button>
       </div>
+      <div class="xabar2" data-akkaunt-xabar hidden style="margin-top:10px"></div>
 
       <div class="sinov-quti" data-sinov-quti hidden>
         <b>Sinov darsi vaqti</b>
@@ -120,6 +124,15 @@ function akkauntHtml(l) {
     return `<div class="akkaunt">
       <b>Ilovada akkaunti bor</b>
       <span>O‘z paroli bilan kiradi. Esidan chiqqan bo‘lsa — “Parolni unutdingizmi?”</span>
+    </div>`;
+  }
+  // Botga raqamini yuborgan, lekin akkaunti hali yo'q — mentor "Akkaunt ochish" ni bosadi
+  if (l.trialTgId) {
+    return `<div class="akkaunt akkaunt-tg">
+      <b>Telegramda kutmoqda${l.trialTgName ? ` — ${esc(l.trialTgName)}` : ''}</b>
+      <span>${l.trialTgVerified
+        ? 'Raqami Telegram orqali tasdiqlangan ✅ “Akkaunt ochish” bosilsa login va parol shu yerga boradi.'
+        : 'Raqamni o‘zi yozib yubordi (tasdiqlanmagan). Telefonda gaplashayotgan odam shu ekanini tekshiring, so‘ng “Akkaunt ochish” ni bosing.'}</span>
     </div>`;
   }
   return '';
@@ -191,6 +204,8 @@ function chiz() {
       korinish.hidden = !matn.trim();
       tahrir.hidden = true;
     };
+    const akkauntTugma = k.querySelector('[data-akkaunt]');
+    if (akkauntTugma) akkauntTugma.onclick = () => akkauntOch(id, akkauntTugma, k);
     quti.querySelector('[data-bekor]').onclick = () => { quti.hidden = true; };
     quti.querySelector('[data-tasdiq]').onclick = () => sinovBelgila(id, quti);
   });
@@ -208,6 +223,45 @@ async function holatQoy(id, status, btn) {
   const lid = HAMMASI.find((x) => x.id === id);
   if (lid) lid.status = status;
   sanoq(); chiz();
+}
+
+/** Bitta tugma: akkaunt ochiladi, login va parol o'quvchiga Telegram (yoki SMS) orqali ketadi. */
+async function akkauntOch(id, tugma, karta) {
+  const xabar = karta.querySelector('[data-akkaunt-xabar]');
+  tugma.disabled = true;
+  tugma.textContent = 'Ochilmoqda…';
+  const r = await api(`/api/ai/leads/${id}/create-account`, { method: 'POST' });
+  if (!r) return;
+  if (!r.ok) {
+    tugma.disabled = false;
+    tugma.textContent = 'Akkaunt ochish';
+    xabar.hidden = false;
+    xabar.className = 'xabar2 err';
+    xabar.textContent = r.data.message || 'Akkaunt ochib bo‘lmadi';
+    return;
+  }
+
+  const d = r.data;
+  const lid = HAMMASI.find((x) => x.id === id);
+  if (lid) {
+    lid.akkauntHolati = d.holat === 'created' ? 'kod' : 'bor';
+    lid.kirishKodi = d.kod || null;
+  }
+  chiz();
+
+  // chiz() kartani qayta yasadi — xabarni yangi kartaga qo'yamiz
+  const yangi = document.querySelector(`.lid[data-id="${id}"] [data-akkaunt-xabar]`);
+  if (!yangi) return;
+  const yetdi = d.telegram === 'sent'
+    ? 'Login va parol o‘quvchiga Telegramga yuborildi ✅'
+    : d.sms
+      ? 'Telegram ulanmagan — parol SMS bilan yuborildi. Kod yuqorida ko‘rinib turibdi.'
+      : d.holat === 'created' ? 'Yuborib bo‘lmadi — kodni o‘quvchiga o‘zingiz ayting.' : '';
+  yangi.hidden = false;
+  yangi.className = 'xabar2';
+  yangi.textContent = d.holat === 'existing'
+    ? `Akkaunt avvaldan bor edi — parolga tegilmadi.${d.telegram === 'sent' ? ' Telegramga eslatma yuborildi.' : ''}`
+    : `Akkaunt ochildi. Login: ${d.login}. ${yetdi}`;
 }
 
 async function sinovBelgila(id, quti) {
