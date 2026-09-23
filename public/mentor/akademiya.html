@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MyTeacher Mentor Akademiyasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Onest:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ink:#0A1747; --brand:#0A47DB; --brand-soft:#E8EEFD; --signal:#2F7BFF;
+  --orange:#FF9A1F; --orange-soft:#FFF2E0; --red:#D64545; --red-soft:#FDECEC;
+  --green:#1E8E5A; --green-soft:#E6F5EE;
+  --bg:#F5F7FC; --card:#FFFFFF; --line:#E1E7F5; --line-2:#CDD8EF;
+  --text:#0A1747; --mute:#5C6A90;
+  --display:"Lexend","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Onest","Segoe UI",system-ui,-apple-system,sans-serif;
+  --shadow:0 1px 2px rgba(10,23,71,.05),0 8px 24px rgba(10,23,71,.06);
+  --r:0px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#E8EDFB; --brand:#5C8DFF; --brand-soft:#16224A; --signal:#7AA7FF;
+    --orange:#FFB454; --orange-soft:#3A2A12; --red:#FF7A7A; --red-soft:#3A1C1C;
+    --green:#4FD198; --green-soft:#12301F;
+    --bg:#070C1E; --card:#0E1633; --line:#1E2A4E; --line-2:#2C3A66;
+    --text:#E8EDFB; --mute:#9BA9CF;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E8EDFB; --brand:#5C8DFF; --brand-soft:#16224A; --signal:#7AA7FF;
+  --orange:#FFB454; --orange-soft:#3A2A12; --red:#FF7A7A; --red-soft:#3A1C1C;
+  --green:#4FD198; --green-soft:#12301F;
+  --bg:#070C1E; --card:#0E1633; --line:#1E2A4E; --line-2:#2C3A66;
+  --text:#E8EDFB; --mute:#9BA9CF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.6}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.02em;text-wrap:balance}
+p{margin:0}
+button{font-family:var(--display);cursor:pointer}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.hex{clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+
+/* ---------- shell ---------- */
+.app{min-height:100vh;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line)}
+.topbar .row{max-width:860px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:-.01em;white-space:nowrap}
+.brand svg{display:block}
+.steps{margin-left:auto;display:flex;gap:4px}
+.steps i{width:12px;height:11px;background:var(--line-2);display:block}
+.steps i.done{background:var(--brand)}
+.steps i.now{background:var(--orange)}
+.bar{height:3px;background:var(--line)}
+.bar span{display:block;height:100%;background:var(--brand);width:0;transition:width .4s ease}
+main{flex:1;width:100%;max-width:860px;margin:0 auto;padding:0 20px 140px}
+.screen{display:block;padding-top:28px}
+body.js .screen{display:none;animation:in .45s cubic-bezier(.2,.7,.2,1) both}
+body.js .screen.on{display:block}
+body:not(.js) .dock{display:none}
+body:not(.js) main{padding-bottom:60px}
+body:not(.js) .nojs{display:block}
+.nojs{display:none;background:var(--orange-soft);border-left:3px solid var(--orange);padding:14px 16px;font-size:15px;margin:20px 0}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.screen{animation:none}}
+
+/* ---------- intro ---------- */
+.hero{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:0 0 32px;overflow:hidden}
+.hero .art{background:linear-gradient(140deg,#0B34B8,#07227E 55%,#04124A);padding:36px 28px 0;position:relative}
+.hero .art svg{display:block;width:100%;height:auto;max-width:420px;margin:0 auto}
+.hero .txt{padding:28px 28px 0}
+.eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--brand)}
+.eyebrow::before{content:"";width:14px;height:12px;background:var(--orange);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.hero h1{font-size:clamp(28px,7vw,40px);font-weight:700;line-height:1.1;margin:14px 0 12px}
+.hero p{color:var(--mute);font-size:17px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);margin:26px 0 0}
+.facts div{background:var(--card);padding:18px 20px}
+.facts b{display:block;font-family:var(--display);font-size:24px;font-weight:600;color:var(--brand);letter-spacing:-.03em}
+.facts span{font-size:13px;color:var(--mute);line-height:1.35;display:block;margin-top:2px}
+.howto{margin-top:20px;display:grid;gap:10px}
+.howto div{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start;font-size:15px;color:var(--mute)}
+.howto i{width:30px;height:26px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-style:normal;font-family:var(--display);font-weight:600;font-size:13px}
+
+/* ---------- module ---------- */
+.mod-head{margin-bottom:20px}
+.mod-head .n{font-family:var(--display);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+.mod-head h2{font-size:clamp(24px,5.5vw,32px);font-weight:700;margin-top:8px;line-height:1.15}
+.mod-head p{color:var(--mute);margin-top:10px;font-size:17px}
+.illus{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:22px;margin:0 0 22px}
+.illus svg{display:block;width:100%;height:auto}
+.block{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:22px 22px;margin-bottom:14px}
+.block h3{font-size:19px;font-weight:600;margin-bottom:10px}
+.block p + p{margin-top:10px}
+.block p, .block li{font-size:16px}
+.list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.list li{display:block;position:relative;padding-left:28px}
+.list li::before{content:"";position:absolute;left:0;top:9px;width:16px;height:14px;background:var(--brand);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.kv{display:grid;gap:0;margin:0}
+.kv div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+.kv div:last-child{border-bottom:0}
+.kv dt{color:var(--mute);font-size:15px}
+.kv dd{margin:0;font-family:var(--display);font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.note{border-left:3px solid var(--orange);background:var(--orange-soft);padding:14px 16px;font-size:15px;margin-top:14px}
+.note b{font-family:var(--display)}
+.warn{border-left:3px solid var(--red);background:var(--red-soft);padding:14px 16px;font-size:15px;margin-top:14px}
+.good{border-left:3px solid var(--green);background:var(--green-soft);padding:14px 16px;font-size:15px;margin-top:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chips span{font-family:var(--display);font-size:13px;font-weight:500;padding:7px 12px;background:var(--brand-soft);color:var(--brand)}
+.script{background:var(--ink);color:var(--bg);padding:20px;margin-top:14px;font-size:16px;line-height:1.5}
+:root[data-theme="dark"] .script,:root:not([data-theme="light"]) .script{background:#16224A;color:#E8EDFB}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .script{background:#0A1747;color:#F5F7FC}}
+.script .who{font-family:var(--display);font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.7;margin-bottom:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}}
+
+/* ---------- viz components ---------- */
+.viz{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:18px;margin-bottom:22px}
+.viz .cap{font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:14px}
+.flow{display:grid;gap:8px}
+.flow .st{display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:baseline;padding:12px 14px;background:var(--bg);border-left:3px solid var(--brand)}
+.flow .st i{font-style:normal;font-family:var(--display);font-weight:700;color:var(--brand);font-size:14px}
+.flow .st b{font-family:var(--display);font-size:15px;display:block}
+.flow .st span{font-size:13px;color:var(--mute);display:block;margin-top:2px}
+.flow .st.hot{border-left-color:var(--orange);background:var(--orange-soft)}
+@media(min-width:760px){.flow{grid-template-columns:repeat(5,1fr)}.flow .st{grid-template-columns:1fr;gap:4px}}
+.week{display:grid;gap:6px}
+.week .row{display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:center}
+.week .row .d{font-family:var(--display);font-size:12px;color:var(--mute)}
+.week .track{display:flex;gap:3px;height:16px}
+.week .seg{flex:1;background:var(--line)}
+.week .seg.on{background:var(--brand)}
+.week .seg.hot{background:var(--orange)}
+.week .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--mute)}
+.week .legend span{display:flex;align-items:center;gap:7px}
+.week .legend i{width:16px;height:11px;display:block}
+.points{display:grid;gap:8px}
+.points .big{background:var(--brand-soft);padding:16px 18px}
+.points .big b{font-family:var(--display);font-size:38px;font-weight:700;color:var(--brand);letter-spacing:-.04em;line-height:1;display:block}
+.points .big span{font-size:13px;color:var(--brand)}
+.points .row{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--bg);font-size:15px}
+.points .row b{font-family:var(--display);color:var(--brand);font-variant-numeric:tabular-nums}
+.points .hint{font-size:13px;color:var(--mute);padding:4px 2px}
+.scale{display:grid;gap:6px}
+.scale .s{display:grid;grid-template-columns:86px 1fr;gap:10px;align-items:center;padding:11px 14px;color:#fff;font-size:13px}
+.scale .s b{font-family:var(--display);font-size:15px}
+.scale .g{background:var(--green)}.scale .b2{background:var(--signal)}.scale .n2{background:var(--line-2);color:var(--text)}.scale .r2{background:var(--red)}
+.scale .note2{font-size:13px;color:var(--mute);margin-top:10px}
+.compare{display:grid;gap:12px}
+@media(min-width:760px){.compare{grid-template-columns:1fr 1fr}}
+.compare > div{padding:16px 18px;background:var(--bg);border-top:3px solid var(--line-2)}
+.compare .no2{border-top-color:var(--red);background:var(--red-soft)}
+.compare .yes2{border-top-color:var(--green);background:var(--green-soft)}
+.compare h4{font-family:var(--display);font-size:16px;margin:0 0 6px}
+.compare p{font-size:14px;color:var(--mute)}
+.tl{display:grid;gap:8px}
+.tl .t{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:12px 14px;background:var(--bg);font-size:15px;align-items:baseline}
+.tl .t b{font-family:var(--display);font-size:13px;color:var(--brand)}
+.tl .t.hot{background:var(--orange-soft)}
+.lad{display:grid;gap:8px}
+.lad .r{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:13px 16px;background:var(--brand-soft);font-family:var(--display);font-weight:600;color:var(--brand);font-size:15px}
+.lad .r span{font-size:20px;letter-spacing:-.02em}
+.lad .r.top{background:var(--orange);color:#fff}
+.progs{display:grid;gap:12px}
+@media(min-width:760px){.progs{grid-template-columns:1fr 1fr}}
+.prog{padding:18px;background:var(--brand-soft)}
+.prog.pro{background:var(--orange);color:#fff}
+.prog h4{font-family:var(--display);font-size:18px;margin:0 0 4px;color:var(--brand)}
+.prog.pro h4{color:#fff}
+.prog .who{font-size:13px;color:var(--mute);margin-bottom:14px}
+.prog.pro .who{color:rgba(255,255,255,.9)}
+.prog .price{font-family:var(--display);font-size:28px;font-weight:700;color:var(--brand);letter-spacing:-.03em;line-height:1}
+.prog.pro .price{color:#fff}
+.prog .price small{display:block;font-family:var(--body);font-size:13px;font-weight:400;color:var(--mute);margin-top:4px;letter-spacing:0}
+.prog.pro .price small{color:rgba(255,255,255,.9)}
+.prog .req{font-size:12px;color:var(--mute);margin-top:12px;padding-top:10px;border-top:1px solid rgba(10,23,71,.12)}
+.prog.pro .req{color:rgba(255,255,255,.9);border-top-color:rgba(255,255,255,.3)}
+
+/* ---------- test ---------- */
+.q{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:24px 22px}
+.q .meta{font-family:var(--display);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.q h2{font-size:clamp(20px,4.6vw,26px);font-weight:600;margin:10px 0 20px;line-height:1.25}
+.opts{display:grid;gap:10px}
+.opt{display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start;text-align:left;width:100%;background:var(--bg);border:1px solid var(--line-2);color:var(--text);padding:14px 16px;font:500 15px var(--body);line-height:1.45}
+.opt i{font-style:normal;font-family:var(--display);font-weight:600;font-size:13px;width:24px;height:22px;display:grid;place-items:center;background:var(--card);border:1px solid var(--line-2);color:var(--mute)}
+.opt:hover{border-color:var(--brand)}
+.opt.sel{border-color:var(--brand);background:var(--brand-soft)}
+.opt.sel i{background:var(--brand);border-color:var(--brand);color:#fff}
+.qnav{display:flex;gap:10px;margin-top:18px}
+.dots{display:flex;gap:4px;flex-wrap:wrap;margin-top:16px}
+.dots i{width:22px;height:4px;background:var(--line-2);display:block}
+.dots i.ans{background:var(--brand)}
+.dots i.now{background:var(--orange)}
+
+/* result */
+.res{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:28px 22px;text-align:center}
+.res .score{font-family:var(--display);font-size:64px;font-weight:700;letter-spacing:-.04em;line-height:1}
+.res.pass .score{color:var(--green)}
+.res.fail .score{color:var(--red)}
+.res h2{font-size:26px;font-weight:700;margin:12px 0 8px}
+.res p{color:var(--mute)}
+.review{margin-top:22px;display:grid;gap:10px;text-align:left}
+.review .item{border:1px solid var(--line);padding:14px 16px;background:var(--bg)}
+.review .item b{display:block;font-family:var(--display);font-size:15px;font-weight:600;margin-bottom:6px}
+.review .item span{font-size:14px;color:var(--mute);display:block}
+.review .item .ok{color:var(--green)}
+.review .item .no{color:var(--red)}
+.unlock{margin-top:22px;background:linear-gradient(140deg,#0B34B8,#07227E 55%,#04124A);color:#fff;padding:26px 22px;text-align:left}
+.unlock h3{font-size:22px;font-weight:700;margin-bottom:10px}
+.unlock p{color:#C9D6F8;font-size:15px}
+.unlock ol{margin:16px 0 0;padding-left:20px;display:grid;gap:8px;font-size:15px}
+
+/* ---------- bottom nav ---------- */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:1px solid var(--line);padding:12px 20px calc(12px + env(safe-area-inset-bottom))}
+.dock .row{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.btn{font:600 16px var(--display);padding:15px 22px;border:0;background:var(--brand);color:#fff;flex:1;text-align:center}
+.btn:hover{background:var(--signal)}
+.btn.ghost{background:transparent;color:var(--mute);border:1px solid var(--line-2);flex:0 0 auto;padding:15px 18px}
+.btn.ghost:hover{color:var(--brand);border-color:var(--brand);background:transparent}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.warn-btn{background:var(--orange)}
+.hint{font-size:13px;color:var(--mute);text-align:center;max-width:860px;margin:8px auto 0}
+@media (max-width:430px){.brand .t{display:none}}
+@media (max-width:520px){
+  main{padding-inline:14px}
+  .block,.q,.illus,.res{padding:18px 16px}
+  .hero .txt{padding:22px 18px 0}
+  .hero .art{padding:26px 18px 0}
+  .facts{grid-template-columns:1fr;gap:1px}
+  .facts div{display:flex;align-items:baseline;gap:10px}
+  .facts b{font-size:20px}
+  .btn{padding:14px 16px;font-size:15px}
+}
+</style>
+
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="logo" viewBox="0 0 2000 534">
+  <polygon fill="#D40000" points="131,0 233,0 284,89 233,178 131,178 80,89"/>
+  <polygon fill="currentColor" points="340,55 493,55 569,188 493,321 340,321 264,188"/>
+  <polygon fill="currentColor" points="76,213 229,213 305,346 229,479 76,479 0,346"/>
+  <polygon fill="currentColor" points="336,357 436,357 487,445 436,534 336,534 285,445"/>
+</symbol>
+</defs></svg>
+
+<div class="app">
+<header class="topbar">
+  <div class="row">
+    <span class="brand"><svg width="24" height="24" viewBox="0 0 600 534" style="color:var(--brand)"><use href="#logo"/></svg><span class="t">Mentor Akademiyasi</span></span>
+    <span class="steps" id="steps" aria-hidden="true"></span>
+  </div>
+  <div class="bar"><span id="bar"></span></div>
+</header>
+
+<main id="main">
+<p class="nojs">Bu sahifa brauzerda ochilsa, modullar birma-bir ko'rsatiladi va oxirida test topshiriladi. Hozir siz hamma modulni ketma-ket o'qiy olasiz — testni topshirish uchun faylni Chrome yoki Safari brauzerida oching.</p>
+
+<!-- ===== INTRO ===== -->
+<section class="screen on" id="s0">
+  <div class="hero">
+    <div class="art">
+      <svg viewBox="0 0 420 220" role="img" aria-label="Talabgordan o'quvchigacha bo'lgan yo'l">
+        <g fill="none" stroke="#2F7BFF" stroke-width="2" opacity=".35">
+          <path d="M20 180 C 110 180, 110 60, 200 60 S 290 180, 400 120"/>
+        </g>
+        <g>
+          <polygon points="36,150 66,150 81,176 66,202 36,202 21,176" fill="#2F7BFF" opacity=".9"/>
+          <polygon points="170,30 210,30 230,65 210,100 170,100 150,65" fill="#fff"/>
+          <polygon points="360,90 396,90 414,121 396,152 360,152 342,121" fill="#FF9A1F"/>
+        </g>
+        <g font-family="Lexend, sans-serif" font-size="13" fill="#C9D6F8">
+          <text x="14" y="215">Talabgor</text>
+          <text x="152" y="120">Birinchi dars</text>
+          <text x="336" y="172">O'quvchi</text>
+        </g>
+        <g fill="#fff" font-family="Lexend, sans-serif" font-size="12" font-weight="600">
+          <text x="176" y="70">45'</text>
+        </g>
+      </svg>
+    </div>
+    <div class="txt">
+      <p class="eyebrow">Ishga tayyorgarlik</p>
+      <h1>Birinchi talabgoringizni olishdan oldin</h1>
+      <p>Sakkizta qisqa modul — ish qanday tashkil qilingani, qancha ishlashingiz va nima talab qilinishi. Oxirida qisqa test. Testdan o'tgan zahoti sizga talabgorlar oqimi ochiladi.</p>
+    </div>
+    <div class="facts">
+      <div><b>8</b><span>modul, taxminan 12 daqiqa</span></div>
+      <div><b>16</b><span>savol, o'tish bali 13</span></div>
+      <div><b>60–85%</b><span>o'quvchi to'lovidan sizning ulushingiz</span></div>
+    </div>
+    <div class="txt">
+      <div class="howto">
+        <div><i>1</i><span>Modullarni ketma-ket o'qing — hamma javob shu yerda.</span></div>
+        <div><i>2</i><span>Testni topshiring. Xato qilsangiz, qaysi modulga qaytish kerakligi ko'rsatiladi.</span></div>
+        <div><i>3</i><span>O'tgach — ilovada onlayn bo'ling va birinchi talabgoringizni qabul qiling.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MODULE 1 ===== -->
+<section class="screen" id="s1">
+  <div class="mod-head">
+    <p class="n">1-modul · Rol</p>
+    <h2>Siz butun yo'lni o'zingiz olib borasiz</h2>
+    <p>Talabgor kelganidan to'lovgacha bo'lgan zanjirni bir odam bajaradi — siz. Barcha uchrashuvlar bitta so'z bilan ataladi: <b>dars</b>.</p>
+  </div>
+  <div class="viz">
+    <p class="cap">Ishning zanjiri</p>
+    <div class="flow">
+      <div class="st"><i>1</i><div><b>Talabgor</b><span>tizim biriktiradi</span></div></div>
+      <div class="st"><i>2</i><div><b>Qo'ng'iroq</b><span>darsga yozasiz</span></div></div>
+      <div class="st hot"><i>3</i><div><b>Birinchi dars</b><span>30–45 daqiqa</span></div></div>
+      <div class="st"><i>4</i><div><b>To'lov</b><span>narxni siz aytasiz</span></div></div>
+      <div class="st"><i>5</i><div><b>O'quvchi</b><span>har oy daromad</span></div></div>
+    </div>
+  </div>
+  <div class="block">
+    <h3>Darsni siz o'tasiz — o'z metodingiz bilan</h3>
+    <p>O'quvchini bitta qat'iy dasturga majburlamaymiz. Har bir odam boshqa narsa xohlaydi, shuning uchun qaysi material va usul unga mos kelishini o'zingiz tanlaysiz. O'quvchining o'z kitobi bo'lsa — o'shandan davom etish afzal.</p>
+    <p>Ilova va undagi AI suhbatdosh — qo'shimcha imkoniyat: o'quvchi darslar orasida mustaqil mashq qiladi. Bu majburiy emas, lekin natijani tezlashtiradi.</p>
+    <div class="note"><b>Esda tuting:</b> darsni siz olib borasiz, lekin u monolog bo'lmasin. Vaqtning ko'p qismida o'quvchi gapirsin — til shunda ochiladi.</div>
+  </div>
+
+  <div class="block">
+    <h3>Nega narxni ham siz aytasiz</h3>
+    <p>Qaror darsdan olgan taassurot issiq turganda qabul qilinadi. Dars tugab, o'quvchi telefonini qo'ysa, o'sha his tez soviydi: ertangi kun boshqa tashvishlar bilan boshlanadi va u "keyinroq" deb qo'yadi. Shuning uchun to'lov darsning oxirida, siz bilan birga rasmiylashtiriladi.</p>
+    <p>Oflayn markazda o'quvchiga birinchi taassurotni bino, uning dizayni va bezagi beradi. Onlaynda bularning hech biri yo'q. Bu yerda birinchi taassurotni faqat bitta narsa beradi — siz uyg'otgan <b>wow effekt va emotsiya</b>.</p>
+  </div>
+</section>
+
+<!-- ===== MODULE 2 ===== -->
+<section class="screen" id="s2">
+  <div class="mod-head">
+    <p class="n">2-modul · Kalendar</p>
+    <h2>Qachon ishlashni o'zingiz tanlaysiz</h2>
+    <p>Bo'sh vaqtingizni kalendarda belgilaysiz — tizim o'sha vaqtga odam yo'naltiradi.</p>
+  </div>
+  <div class="viz">
+    <p class="cap">Sizning haftangiz</p>
+    <div class="week">
+      <div class="row"><span class="d">Du</span><div class="track"><i class="seg on"></i><i class="seg on"></i><i class="seg"></i><i class="seg"></i><i class="seg hot"></i><i class="seg hot"></i></div></div>
+      <div class="row"><span class="d">Se</span><div class="track"><i class="seg on"></i><i class="seg"></i><i class="seg"></i><i class="seg"></i><i class="seg hot"></i><i class="seg hot"></i></div></div>
+      <div class="row"><span class="d">Ch</span><div class="track"><i class="seg"></i><i class="seg"></i><i class="seg on"></i><i class="seg on"></i><i class="seg hot"></i><i class="seg hot"></i></div></div>
+      <div class="row"><span class="d">Pa</span><div class="track"><i class="seg on"></i><i class="seg on"></i><i class="seg"></i><i class="seg"></i><i class="seg"></i><i class="seg"></i></div></div>
+      <div class="legend">
+        <span><i style="background:var(--brand)"></i> siz belgilagan vaqt</span>
+        <span><i style="background:var(--orange)"></i> kechqurun — odam ko'p</span>
+        <span><i style="background:var(--line)"></i> bo'sh</span>
+      </div>
+    </div>
+  </div>
+  <div class="block">
+    <h3>Uchta oddiy qoida</h3>
+    <ul class="list">
+      <li><b>Bo'sh vaqtingizni belgilang.</b> Qaysi kun, qaysi soat ishlay olsangiz — o'shani kalendarda ochasiz. Kuniga 2 soat ham, 8 soat ham bo'lishi mumkin.</li>
+      <li><b>Belgilagan vaqtingizda ilovada bo'ling.</b> Ochiq vaqt — bu bergan va'dangiz. O'sha paytda sizga talabgor va dars biriktiriladi.</li>
+      <li><b>Rejangiz o'zgarsa, oldindan yoping.</b> Kamida 12 soat oldin yopsangiz hech qanday muammo yo'q.</li>
+    </ul>
+    <div class="warn"><b>Belgilangan vaqtda yo'q bo'lsangiz</b> ball ayiriladi va ertangi kunga kamroq talabgor keladi. Sababi oddiy: o'sha vaqtga odam yozilgan bo'lishi mumkin.</div>
+  </div>
+
+  <div class="block">
+    <h3>Ko'proq vaqt — ko'proq daromad</h3>
+    <p>Hech kimdan ma'lum soat talab qilinmaydi. Talaba bo'lsangiz, darslaringizdan bo'sh vaqtni belgilaysiz. Vaqtingiz ko'p bo'lsa, ko'proq ochasiz va ko'proq o'quvchi olasiz.</p>
+    <div class="note"><b>Kechki vaqt eng foydali.</b> Odamlar ishdan va o'qishdan keyin bo'sh bo'ladi — kechqurun ochilgan vaqtga ko'proq odam yoziladi. Kalendarda qaysi soatda talab yuqoriligi ko'rsatib turiladi.</div>
+  </div>
+</section>
+
+<!-- ===== MODULE 3 ===== -->
+<section class="screen" id="s3">
+  <div class="mod-head">
+    <p class="n">3-modul · Kunlik norma</p>
+    <h2>Kuniga 100 ball — hammasi shu</h2>
+    <p>Bu ball qanday yig'iladi, o'zingiz tanlaysiz.</p>
+  </div>
+  <div class="viz">
+    <p class="cap">Ball qanday yig'iladi</p>
+    <div class="points">
+      <div class="big"><b>100</b><span>ball — kunlik norma</span></div>
+      <div class="row"><span>Bitta qo'ng'iroq</span><b>8</b></div>
+      <div class="row"><span>Darsga vaqt kelishildi</span><b>15</b></div>
+      <div class="row"><span>Birinchi dars o'tildi</span><b>30</b></div>
+      <div class="row"><span>Keyingi darslar</span><b>10</b></div>
+      <div class="row"><span>Belgilagan vaqtda onlayn</span><b>20</b></div>
+      <p class="hint">100 ballga chiqishning yo'llari: onlayn + 10 ta qo'ng'iroq, yoki onlayn + 2 ta birinchi dars + 2 ta dars.</p>
+    </div>
+  </div>
+  <div class="block">
+    <h3>Ikki narsa har doim majburiy</h3>
+    <ul class="list">
+      <li>Gaplashilgan <b>har bir talabgorda status va izoh</b> bo'lishi shart.</li>
+      <li>Belgilangan <b>darsga chiqish</b> — uni o'tkazmaslik eng og'ir jarima.</li>
+    </ul>
+    <div class="good"><b>Norma bajarilsa:</b> +50 ball va seriya davom etadi. Ketma-ket kunlar ballaringizni ko'paytiradi: 7 kun ×1.2, 30 kun ×1.5.</div>
+    <div class="warn"><b>Bajarilmasa:</b> ball ayiriladi va seriya uziladi. Haftada ikki kun dam olish esa normal — buni kalendarda belgilab qo'ysangiz, seriya uzilmaydi.</div>
+  </div>
+
+</section>
+
+<!-- ===== MODULE 4 ===== -->
+<section class="screen" id="s4">
+  <div class="mod-head">
+    <p class="n">4-modul · Talabgorlar oqimi</p>
+    <h2>Talabgorni siz tanlamaysiz — tizim beradi</h2>
+    <p>Kim ko'proq oladi degan savolga prioritet javob beradi.</p>
+  </div>
+  <div class="viz">
+    <p class="cap">Prioritet — har kuni qayta hisoblanadi</p>
+    <div class="scale">
+      <div class="s g"><b>90–100</b><span>birinchi navbat, "issiq" talabgorlar</span></div>
+      <div class="s b2"><b>70–89</b><span>odatiy navbat</span></div>
+      <div class="s n2"><b>50–69</b><span>navbatning oxiri, kamroq talabgor</span></div>
+      <div class="s r2"><b>50 dan past</b><span>yangi talabgor berilmaydi</span></div>
+      <p class="note2">Nimadan yig'iladi: norma bajarilgan kunlar 40% · talabgorni tez qabul qilish 25% · darsga chiqish intizomi 20% · status va izoh to'liqligi 15%.</p>
+    </div>
+  </div>
+  <div class="block">
+    <h3>Oqim qoidalari</h3>
+    <ul class="list">
+      <li><b>Faqat onlayn mentorga</b> talabgor biriktiriladi.</li>
+      <li>Bir vaqtda qo'lingizda ko'pi bilan <b>3 ta</b> ishlanmagan talabgor turadi.</li>
+      <li><b>45 daqiqa</b> tegmasangiz, talabgor qaytarib olinadi va boshqasiga o'tadi.</li>
+      <li>Tizim taklif qilgan talabgorni qabul qilish shart — skip qilsangiz ball ayiriladi.</li>
+      <li>Administrator qo'lda biriktirgan talabgor sizda qoladi, oflayn bo'lsangiz ham olinmaydi.</li>
+    </ul>
+  </div>
+  <div class="block">
+    <h3>Ikki oqim</h3>
+    <p>Har bir talabgor o'zi tanlagan dastur bo'yicha keladi va kartada shu ko'rinib turadi:</p>
+    <dl class="kv">
+      <div><dt>Gapirish, ish, sayohat, noldan</dt><dd>Speaking oqimi</dd></div>
+      <div><dt>Sertifikat, hujjat, chet el, imtihon</dt><dd>IELTS oqimi</dd></div>
+    </dl>
+    <p style="margin-top:12px">Speaking oqimida hamma mentor ishlaydi. IELTS oqimiga esa faqat darajasi tasdiqlangan mentorlar qo'yiladi — u talabgor sizga kelgan bo'lsa, demak sizda ruxsat bor.</p>
+  </div>
+  <div class="block">
+    <h3>IELTS talabgori sizga kelib qolsa</h3>
+    <p>Bunday bo'ladi: odam formada "gapirish uchun" deb belgilaydi, suhbatda esa sertifikat kerakligi ma'lum bo'ladi. Yoki bu birinchi darsning o'rtasida ochiladi.</p>
+    <ul class="list">
+      <li><b>Yashirmang va o'zingizda ushlab qolmang.</b> Sertifikat tayyorgarligi alohida mahorat talab qiladi: imtihon formati, ball strategiyasi, vaqt taqsimoti.</li>
+      <li><b>Rostini ayting.</b> "IELTS tayyorgarligi bo'yicha alohida ustozlarimiz bor — sizni o'shalardan biriga ulayman, u imtihon bo'yicha kuchliroq."</li>
+      <li><b>Ilovada "IELTS oqimiga o'tkazish" tugmasini bosing.</b> Talabgor sertifikatli mentorlar navbatiga tushadi va izohingiz u bilan birga ketadi.</li>
+      <li><b>Dars boshlangan bo'lsa, uni oxirigacha o'tkazing.</b> Darajasini aniqlab, yo'l xaritasini bering, keyin yangi ustozga ulang. Yarim yo'lda tashlab ketilgan odam umuman qaytmaydi.</li>
+    </ul>
+    <div class="good"><b>O'tkazish sizga zarar qilmaydi — aksincha, to'lanadi:</b>
+      <dl class="kv" style="margin-top:10px">
+        <div><dt>Suhbatda aniqlab, o'tkazdingiz</dt><dd>+15 ball</dd></div>
+        <div><dt>O'sha odam 14 kun ichida to'lov qildi</dt><dd>+20 000 so'm</dd></div>
+        <div><dt>Birinchi darsni o'zingiz o'tib, keyin o'tkazdingiz</dt><dd>dars balli + 40 000 so'm</dd></div>
+      </dl>
+      <p style="margin-top:10px;font-size:14px">Prioritetingizga ta'sir qilmaydi. Noto'g'ri o'tkazilgan talabgor uchun (yangi mentor tekshiradi) ball berilmaydi.</p>
+    </div>
+    <div class="note"><b>Har doim o'tkazish shart emas.</b> Ko'pchilik "IELTS kerak" deydi, lekin imtihonga hali bir yil bor va aslida gapirishni o'rganishi kerak. Savol bering: "Imtihonni qachon topshirmoqchisiz va qancha ball kerak?" Aniq sana va ball bo'lsa — o'tkazasiz. Bo'lmasa, siz bilan Speaking dasturida boshlaydi.</div>
+    <div class="warn"><b>Qilmang:</b> IELTS tayyorgarligini Speaking narxida va'da qilish yoki "imtihonni ham o'zim tayyorlayman" deb o'zingizda qoldirish. Bir-ikki darsdan keyin o'quvchi farqni sezadi va ketadi.</div>
+  </div>
+  <div class="block">
+    <h3>Statuslar</h3>
+    <dl class="kv">
+      <div><dt>Telefon ko'tarilmadi</dt><dd>Ulanib bo'lmadi</dd></div>
+      <div><dt>O'ylab ko'rmoqchi</dt><dd>Muzokarada</dd></div>
+      <div><dt>Vaqt kelishildi</dt><dd>Birinchi dars</dd></div>
+      <div><dt>Dars bo'lib o'tdi</dt><dd>Birinchi dars o'tildi</dd></div>
+      <div><dt>To'lov qilindi</dt><dd>O'quvchiga aylandi</dd></div>
+    </dl>
+    <div class="note"><b>Izohni ham yozing.</b> Talabgor boshqa mentorga o'tsa, u sizning izohingizni o'qiydi va odamdan bir xil narsani qayta so'ramaydi.</div>
+  </div>
+
+</section>
+
+<!-- ===== MODULE 5 ===== -->
+<section class="screen" id="s5">
+  <div class="mod-head">
+    <p class="n">5-modul · Qo'ng'iroq</p>
+    <h2>Telefonda sotmaysiz — birinchi darsga yozasiz</h2>
+    <p>Bu farq butun natijani belgilaydi.</p>
+  </div>
+  <div class="viz">
+    <p class="cap">Qo'ng'iroqning maqsadi</p>
+    <div class="compare">
+      <div class="no2"><h4>Telefonda narx aytish</h4><p>Odam himoyaga o'tadi va suhbat tugaydi.</p></div>
+      <div class="yes2"><h4>Bepul birinchi darsga yozish</h4><p>Yo'qotadigan narsasi yo'q — rozi bo'lishi oson.</p></div>
+    </div>
+  </div>
+  <div class="block">
+    <h3>Boshlanish — hamma holatda bir xil</h3>
+    <div class="script">
+      <p class="who">Ochilish</p>
+      <p>Assalomu alaykum, men MyTeacher'dan [ISM]. Siz bizning saytimizda ingliz tili kursiga qiziqib, raqamingizni qoldirgan ekansiz. Bezovta qilmadimmi?</p>
+    </div>
+    <p style="margin-top:14px">Qo'ng'iroq qilishdan oldin izohni o'qing: odam to'lov oynasigacha borganmi, video ko'rganmi yoki umuman havolani ochmaganmi — suhbat shunga qarab quriladi.</p>
+    <div class="note"><b>Ikkinchi savol har doim bitta:</b> "Ingliz tili sizga nima uchun kerak — gapirish uchunmi yoki sertifikat uchunmi?" Javob dasturni va narxni belgilaydi, shuning uchun uni birinchi darsdan oldin aniqlab oling.</div>
+  </div>
+
+  <div class="block">
+    <h3>Tayyor javoblar</h3>
+    <dl class="kv">
+      <div><dt>"Vaqtim yo'q"</dt><dd>30–45 daqiqa, vaqtini o'zingiz tanlaysiz</dd></div>
+      <div><dt>"Qimmat"</dt><dd>Birinchi dars bepul, majburiyat yo'q</dd></div>
+      <div><dt>"Pulim yo'q"</dt><dd>Birinchi dars bepul — vaqt belgilaymiz</dd></div>
+      <div><dt>"O'zim o'rganyapman"</dt><dd>Darajangizni bepul aniqlab beraylikmi?</dd></div>
+    </dl>
+    <div class="warn"><b>Telefonda narx bo'yicha tortishmang.</b> Narx faqat birinchi darsdan keyin gaplashiladi.</div>
+    <div class="note"><b>Kutish to'g'ri bo'lsin:</b> ko'pchilik rad qiladi. 20 ta odam bilan gaplashib, 2 tasi yozilsa — bu yaxshi kun.</div>
+  </div>
+</section>
+
+<!-- ===== MODULE 6 ===== -->
+<section class="screen" id="s6">
+  <div class="mod-head">
+    <p class="n">6-modul · Birinchi dars</p>
+    <h2>Birinchi dars — bu diagnostika</h2>
+    <p>30–45 daqiqa. O'quvchining darajasini va ehtiyojini aniqlaysiz, keyin unga mos yo'lni ko'rsatasiz. Aynan shu darsda u "men shu odam bilan o'rganaman" degan qarorga keladi.</p>
+  </div>
+  <div class="viz">
+    <p class="cap">Birinchi darsning tuzilishi · 30–45 daqiqa</p>
+    <div class="tl">
+      <div class="t"><b>3–5 daq</b><span>Tanishuv va ishonch</span></div>
+      <div class="t"><b>5–7 daq</b><span>Ehtiyoj: nima uchun va qachongacha kerak</span></div>
+      <div class="t"><b>3–5 daq</b><span>Usul va material tanlash</span></div>
+      <div class="t"><b>15–20 daq</b><span>Diagnostika: daraja va yo'l xaritasi</span></div>
+      <div class="t hot"><b>5–10 daq</b><span>Narx va to'lov</span></div>
+    </div>
+  </div>
+  <div class="block">
+    <h3>XEI — uch o'q</h3>
+    <ul class="list">
+      <li><b>Xohish</b> — o'rganishni sevadimi? O'z materiali bo'lsa, qiziqib gapirsa — yuqori.</li>
+      <li><b>Ehtiyoj</b> — qanchalik zarur? "Chetga chiqsam deyman" — orzu; "hujjatlarim topshirilgan, iyunda ketaman" — qaror.</li>
+      <li><b>Imkoniyat</b> — to'lay oladimi? Hudud, ish, qurilma — gap orasida bilinadi.</li>
+    </ul>
+    <div class="warn"><b>Ehtiyoj juda past bo'lsa narx aytmang.</b> Bu odam hozir sotib olmaydi — avval ehtiyojni oching.</div>
+    <div class="good"><b>Material — sizning tanlovingiz.</b> O'quvchida o'zi o'qiyotgan kitob bo'lsa, o'shandan davom eting: yangi materialni o'quvchi har doim ham iliq qabul qilavermaydi.</div>
+    <div class="note"><b>Diagnostikaning natijasi — yo'l xaritasi.</b> "Sizning holatingizda birinchi oyda bunga yetamiz, uchinchi oyda bunga" deb aniq ayting. O'quvchi nimani sotib olayotganini shundan tushunadi.</div>
+  </div>
+
+</section>
+
+<!-- ===== MODULE 7 ===== -->
+<section class="screen" id="s7">
+  <div class="mod-head">
+    <p class="n">7-modul · Dasturlar va narx</p>
+    <h2>Ikki dastur, ikki narx jadvali</h2>
+    <p>Narx ustozga emas, o'quvchi tanlagan dasturga bog'langan.</p>
+  </div>
+  <div class="viz">
+    <p class="cap">Narx dasturga bog'langan, ustozga emas</p>
+    <div class="progs">
+      <div class="prog">
+        <h4>Speaking</h4>
+        <p class="who">Kundalik ingliz tili, suhbat, noldan boshlash</p>
+        <p class="price">350 000<small>so'mdan · haftada 1 marta</small></p>
+        <p class="req">Ustoz talabi: B2 · IELTS 6.0–6.5 dan yuqori</p>
+      </div>
+      <div class="prog pro">
+        <h4>IELTS / CEFR tayyorgarlik</h4>
+        <p class="who">Sertifikat, ball, imtihon strategiyasi</p>
+        <p class="price">550 000<small>so'mdan · haftada 1 marta</small></p>
+        <p class="req">Ustoz talabi: C1 · IELTS 7.5+, tasdiqlangan</p>
+      </div>
+    </div>
+  </div>
+  <div class="block">
+    <h3>Narxni qanday tushuntirasiz</h3>
+    <p>Oylik summani quruq aytish eng katta xato. Odam "500 000" ni eshitadi va uni bitta to'lov deb tasavvur qiladi. Narxni <b>bitta darsga bo'lib</b> ayting — shunda u taqqoslay oladigan raqamga aylanadi.</p>
+    <div class="script">
+      <p class="who">Narx aytish</p>
+      <p>[ISM], sizning holatingizda haftada ikki marta eng to'g'ri bo'ladi. Bu oyiga 500 000 so'm — ya'ni bitta dars 57 000 so'mga tushadi. Yakkama-yakka, faqat siz bilan, sizning materialingiz bo'yicha.</p>
+    </div>
+    <p style="margin-top:14px">Shundan keyin <b>jim turing.</b> Birinchi gapirgan yon beradi.</p>
+  </div>
+  <div class="block">
+    <h3>Narx ichida nima borligini ayting</h3>
+    <ul class="list">
+      <li><b>Yakkama-yakka dars.</b> Guruhda emas — butun vaqt faqat sizga tegishli.</li>
+      <li><b>Sizga moslangan dastur.</b> Material sizning darajangiz va maqsadingizga qarab tanlanadi, bitta umumiy kitob emas.</li>
+      <li><b>Vaqtni o'zingiz tanlaysiz.</b> Markazga borish, yo'l vaqti va yo'lkira yo'q.</li>
+      <li><b>Doimiy nazorat.</b> Har darsda xatolaringiz yopiladi, darslar orasida ilovada mashq qilasiz.</li>
+    </ul>
+    <div class="note"><b>Taqqoslash kuchli ishlaydi:</b> "Shahardagi guruh kursi oyiga 600–800 ming so'm, u yerda 12 kishi bilan o'tirasiz. Bu yerda esa dars faqat sizniki."</div>
+  </div>
+  <div class="block">
+    <h3>"Qimmat" deyilsa</h3>
+    <p>Bu darsdan keyingi eng ko'p uchraydigan e'tiroz. Uchta javob bor, shu tartibda:</p>
+    <dl class="kv">
+      <div><dt>1. Sababni aniqlang</dt><dd>"Nimasi qimmat tuyuldi — summasimi yoki hozircha qiyinmi?"</dd></div>
+      <div><dt>2. Bitta darsga bo'ling</dt><dd>"Bitta dars 57 000 so'm — repetitor narxidan past"</dd></div>
+      <div><dt>3. Tarifni pasaytiring</dt><dd>"Haftada 1 martadan boshlaymiz — 350 000"</dd></div>
+    </dl>
+    <div class="warn"><b>Narxni tushirmang.</b> Chegirma bermaysiz — dars sonini kamaytirasiz. Narxni bir marta tushirsangiz, o'quvchi uni haqiqiy narx deb qabul qilmay qo'yadi va keyingi oyda yana so'raydi.</div>
+    <div class="good"><b>Pul bo'lmasa:</b> "Tushundim. Sizga haftada 1 martalik variantni ochib qo'yaman, keyinroq kuchaytirasiz." O'quvchini yo'qotgandan ko'ra, arzon tarifda boshlagan yaxshi.</div>
+  </div>
+  <div class="block">
+    <h3>Promokod: chegirma faqat sizning hisobingizdan</h3>
+    <p>Ba'zan o'quvchi rozi bo'lish uchun kichik chegirma so'raydi. Siz unga <b>10% yoki 15%</b> chegirma bera olasiz — lekin bu pul kompaniyadan emas, <b>sizning ulushingizdan</b> chiqadi.</p>
+    <dl class="kv">
+      <div><dt>Tarif (Speaking, haftada 2)</dt><dd>500 000</dd></div>
+      <div><dt>O'quvchi 10% chegirma bilan to'laydi</dt><dd>450 000</dd></div>
+      <div><dt>Kompaniya ulushi o'zgarmaydi</dt><dd>170 000</dd></div>
+      <div><dt>Sizga qoladi (330 000 o'rniga)</dt><dd>280 000</dd></div>
+    </dl>
+    <p style="margin-top:12px">Ya'ni 50 000 so'm aynan sizning cho'ntagingizdan chiqadi. Shuning uchun chegirma — oxirgi dalil, birinchi taklif emas.</p>
+    <ul class="list" style="margin-top:14px">
+      <li><b>Faqat 10% yoki 15%.</b> Boshqa raqam yo'q, savdolashish ham yo'q.</li>
+      <li><b>Kod sizning nomingizga biriktirilgan</b> va o'quvchi uni ilovada qo'lda teradi.</li>
+      <li><b>24 soat amal qiladi.</b> Muddat o'tsa, kod kuchini yo'qotadi va narx to'liq bo'ladi.</li>
+      <li><b>Faqat birinchi to'lovga.</b> Keyingi oylarda narx to'liq hisoblanadi.</li>
+      <li><b>Oyiga cheklangan:</b> Pro uchun 2 ta, Senior va undan yuqori uchun 4 ta kod. Bitta o'quvchiga bir marta.</li>
+    </ul>
+    <div class="note"><b>Avval boshqa yo'lni sinang.</b> Chegirma o'rniga haftadagi dars sonini kamaytirish ko'p hollarda yaxshiroq ishlaydi: o'quvchi arzonroq tarifga tushadi, sizning bir darsdan oladigan pulingiz esa saqlanadi.</div>
+  </div>
+  <div class="block">
+    <h3>To'rt qoida</h3>
+    <ul class="list">
+      <li><b>Narxni aytib bo'lgach jim turing.</b> Birinchi gapirgan — yon beradi.</li>
+      <li><b>Uzr so'ramang.</b> "Atigi", "jami-yo'g'i" kerak emas.</li>
+      <li><b>Chegirma so'ralsa</b> narxni emas, haftadagi dars sonini kamaytiring. Eng past narx — 350 000 so'm.</li>
+      <li><b>To'lovni hoziroq</b>, o'quvchi ekranda turganida qildiring.</li>
+    </ul>
+    <div class="good"><b>24 soat bonusi:</b> o'quvchi birinchi darsdan keyin 24 soat ichida to'lov qilsa, sizga o'sha dars uchun ham <b>bitta dars puli miqdorida bonus</b> shu zahoti tushadi.</div>
+  </div>
+</section>
+
+<!-- ===== MODULE 8 ===== -->
+<section class="screen" id="s8">
+  <div class="mod-head">
+    <p class="n">8-modul · Daromad va o'sish</p>
+    <h2>O'quvchi to'lovining 60% dan 85% gachasi sizniki</h2>
+    <p>Ulush rankka bog'liq, rank esa ball, reyting va o'quvchi soniga.</p>
+  </div>
+  <div class="viz">
+    <p class="cap">Rank — obunadan oladigan ulushingiz</p>
+    <div class="lad">
+      <div class="r"><span>Pro</span><span>60%</span></div>
+      <div class="r"><span>Senior</span><span>66%</span></div>
+      <div class="r"><span>Expert</span><span>72%</span></div>
+      <div class="r"><span>Master</span><span>78%</span></div>
+      <div class="r top"><span>Legend</span><span>85%</span></div>
+    </div>
+  </div>
+  <div class="block">
+    <h3>Uchta raqam</h3>
+    <ul class="list">
+      <li><b>Ball</b> — qancha ishladingiz. Rank va leaderboard uchun.</li>
+      <li><b>Reyting (0–100 ball)</b> — qanday ishladingiz. Retention 35, kunlik norma 25, o'quvchi bahosi 25, progress 15. Rank shartlari: Senior 92, Expert 94, Master 96, Legend 98.</li>
+      <li><b>Prioritet</b> — ertaga qancha talabgor olasiz.</li>
+    </ul>
+    <div class="chips"><span>Leaderboard: haftalik jonli reyting</span><span>Missiyalar: pul mukofoti</span><span>Referral: 40 000 so'm</span><span>Seriya: ×1.5 gacha</span></div>
+  </div>
+
+  <div class="block">
+    <h3>O'quvchi bahosi</h3>
+    <p>Har darsdan keyin o'quvchi 1 dan 5 gacha yulduz qo'yadi. Bu reytingingizning to'rtdan birini tashkil qiladi.</p>
+    <dl class="kv">
+      <div><dt>5 yulduz</dt><dd>+10 ball</dd></div>
+      <div><dt>4 yulduz</dt><dd>+3 ball</dd></div>
+      <div><dt>1–2 yulduz</dt><dd>−20 ball</dd></div>
+    </dl>
+    <div class="good"><b>Bitta past baho ko'rsatkichingizni buzmaydi:</b> oxirgi 20 ta bahodan eng past va eng yuqorisi tashlanadi, qolganining o'rtachasi olinadi. Birinchi 5 ta bahogacha esa bu ko'rsatkich rankka umuman ta'sir qilmaydi.</div>
+    <div class="note"><b>Adolatsiz baho bo'lsa e'tiroz bildiring</b> — administrator 24 soat ichida ko'rib chiqadi. 10 daqiqadan kam qatnashgan o'quvchining bahosi esa avtomatik hisobga olinmaydi.</div>
+  </div>
+  <div class="block">
+    <h3>Qat'iy qoidalar</h3>
+    <div class="warn"><b>Platformadan tashqari hisob-kitob taqiqlanadi.</b> O'quvchi bilan shaxsiy kelishuv — darhol blok, barcha bonuslar bekor va qonun oldida javobgarlik.</div>
+    <ul class="list" style="margin-top:14px">
+      <li>Tizim so'raganda 10 soniyalik 360 graduslik video yuborasiz.</li>
+      <li>Texnik talab: zamonaviy smartfon, barqaror internet, tinch muhit.</li>
+      <li>Hamyondagi pulni ishlagan kuningizning ertasiyoq yechib olasiz.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== TEST ===== -->
+<section class="screen" id="test">
+  <div class="mod-head">
+    <p class="n">Yakuniy test</p>
+    <h2 id="qTitleTop">16 savol · o'tish uchun 13 ta to'g'ri javob</h2>
+    <p>Hamma javob modullar ichida bor. Xato qilsangiz, qaysi modulga qaytish kerakligi ko'rsatiladi.</p>
+  </div>
+  <div class="q" id="qBox">
+    <p class="meta" id="qMeta">Savol 1 / 12</p>
+    <h2 id="qText">…</h2>
+    <div class="opts" id="qOpts"></div>
+    <div class="dots" id="qDots" aria-hidden="true"></div>
+  </div>
+</section>
+
+<!-- ===== RESULT ===== -->
+<section class="screen" id="result"></section>
+
+</main>
+
+<div class="dock">
+  <div class="row">
+    <button class="btn ghost" id="prev" type="button">Orqaga</button>
+    <button class="btn" id="next" type="button">Boshlash</button>
+  </div>
+  <p class="hint" id="hint">8 ta modul · taxminan 12 daqiqa</p>
+</div>
+</div>
+
+<script>
+(function(){
+  const MODS = ["s0","s1","s2","s3","s4","s5","s6","s7","s8"];
+  const LABELS = ["Kirish","Rol","Kalendar","Norma","Oqim","Qo'ng'iroq","Birinchi dars","Dastur va narx","Daromad"];
+  const QUESTIONS = [
+    {q:"Ochilgan slotda onlayn bo'lmasangiz nima bo'ladi?",o:["Hech narsa, slot shunchaki yopiladi","Bo'sh qolgan har 30 daqiqa uchun ball ayiriladi","Hisobingiz darhol bloklanadi","Keyingi hafta kalendar yopiladi"],a:1,m:2},
+    {q:"Bir vaqtda qo'lingizda nechta ishlanmagan talabgor tura oladi?",o:["Cheklov yo'q","10 ta","5 ta","3 ta"],a:3,m:4},
+    {q:"Talabgorga necha daqiqa tegmasangiz, u qaytarib olinadi?",o:["15 daqiqa","45 daqiqa","2 soat","Kun oxirigacha"],a:1,m:4},
+    {q:"Kunlik norma nimaga teng?",o:["Kuniga 100 ball","Kuniga 8 soat onlayn","12 ta qo'ng'iroq, boshqa hech narsa","Norma yo'q"],a:0,m:3},
+    {q:"O'tkazilgan birinchi dars (diagnostika) necha ball beradi?",o:["8","15","30","50"],a:2,m:3},
+    {q:"Telefon qo'ng'irog'ining maqsadi nima?",o:["Kursni sotish va to'lov qildirish","Narxni aytib, o'ylab ko'rishini so'rash","Bepul birinchi darsga vaqt kelishish","Darajasini telefonda aniqlash"],a:2,m:5},
+    {q:"Odam telefonda \"qimmat\" desa, to'g'ri javob qaysi?",o:["Chegirma taklif qilaman","\"Birinchi dars bepul, majburiyat yo'q. Avval ko'ring\"","Narxni batafsil asoslab beraman","Arzonroq kurslar borligini aytaman"],a:1,m:5},
+    {q:"XEI nimani anglatadi?",o:["Xohish, Ehtiyoj, Imkoniyat","Xulosa, Eksperiment, Intizom","Xarid, Ehtimol, Investitsiya","Xohish, Ehtiyotkorlik, Ishonch"],a:0,m:6},
+    {q:"O'quvchi \"sertifikat olishim kerak\" desa, qaysi dastur va narx?",o:["Speaking dasturi, 350 000 so'mdan","IELTS / CEFR tayyorgarlik, 550 000 so'mdan","Farqi yo'q, ikkalasi ham bir xil","O'quvchi o'zi tanlaydi"],a:1,m:7},
+    {q:"Promokod bilan bergan chegirmangizni kim to'laydi?",o:["Kompaniya","Siz — chegirma sizning ulushingizdan chiqadi","Kompaniya va siz teng bo'lasiz","Chegirma o'quvchining keyingi oyidan ushlanadi"],a:1,m:7},
+    {q:"O'quvchi chegirma so'rasa nima qilasiz?",o:["Narxni 300 000 gacha tushiraman","Narxni emas, haftadagi dars sonini kamaytiraman","Administratordan ruxsat so'rayman","Birinchi oyni bepul qilaman"],a:1,m:7},
+    {q:"Birinchi darsdan keyin o'quvchi 24 soat ichida to'lasa, sizga nima beriladi?",o:["Hech narsa, faqat obunadan ulush","Bitta dars puli miqdorida bonus","Ikki barobar obuna ulushi","Keyingi oyda rank ko'tariladi"],a:1,m:7},
+    {q:"Prioritet raqami nimani belgilaydi?",o:["Oyliq maoshingizni","Ertaga qancha talabgor olishingizni","O'quvchining darajasini","Qaysi smenada ishlashingizni"],a:1,m:4},
+    {q:"Darsni qanday material bilan o'tasiz?",o:["Faqat ilovadagi dastur bo'yicha","O'quvchiga mos materialni o'zim tanlayman, o'z kitobi bo'lsa o'shandan davom etaman","Har safar yangi material beraman","Material kerak emas, faqat suhbat"],a:1,m:1},
+    {q:"Sizga kelgan talabgor sertifikat kerakligini aytdi, lekin sizda IELTS darajasi yo'q. Nima qilasiz?",o:["O'zim tayyorlayman, farqi yo'q","Ilovada IELTS oqimiga o'tkazaman va sababini tushuntiraman","Talabgorni yopib qo'yaman","Speaking narxida IELTS tayyorlashni va'da qilaman"],a:1,m:4},
+    {q:"O'quvchi bilan platformadan tashqarida kelishsangiz nima bo'ladi?",o:["Ogohlantirish beriladi","Ball ayiriladi","Darhol blok, bonuslar bekor va qonuniy javobgarlik","Administrator komissiya oladi"],a:2,m:8}
+  ];
+  const PASS = 13;
+
+  const screens = [...MODS, "test", "result"];
+  let idx = 0, qi = 0, answers = new Array(QUESTIONS.length).fill(null), finished = false;
+
+  const $ = id => document.getElementById(id);
+  const stepsEl = $("steps"), barEl = $("bar"), prevBtn = $("prev"), nextBtn = $("next"), hintEl = $("hint");
+
+  MODS.forEach((_,i)=>{ const i2=document.createElement("i"); stepsEl.appendChild(i2); });
+
+  function save(){ try{ localStorage.setItem("mt_academy", JSON.stringify({idx,answers,finished})); }catch(e){} }
+  function load(){ try{ const d=JSON.parse(localStorage.getItem("mt_academy")||"null"); if(d && typeof d.idx==="number"){ idx=Math.min(d.idx, MODS.length-1); if(Array.isArray(d.answers)&&d.answers.length===QUESTIONS.length) answers=d.answers; } }catch(e){} }
+
+  function show(id){
+    document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on", s.id===id));
+    window.scrollTo({top:0,behavior:"instant" in window ? "instant" : "auto"});
+  }
+
+  function paintSteps(){
+    [...stepsEl.children].forEach((el,i)=>{
+      el.className = i < idx ? "done" : (i === idx ? "now" : "");
+    });
+    const total = MODS.length + 1;
+    const pos = Math.min(idx, MODS.length) + (idx >= MODS.length ? 1 : 0);
+    barEl.style.width = Math.round((pos/total)*100) + "%";
+  }
+
+  function renderModule(){
+    show(MODS[idx]);
+    paintSteps();
+    prevBtn.style.display = idx === 0 ? "none" : "";
+    nextBtn.textContent = idx === 0 ? "Boshlash" : (idx === MODS.length-1 ? "Testni boshlash" : "Keyingisi");
+    nextBtn.disabled = false;
+    nextBtn.className = idx === MODS.length-1 ? "btn warn-btn" : "btn";
+    hintEl.textContent = idx === 0 ? "8 ta modul · taxminan 12 daqiqa" : (LABELS[idx] + " · " + idx + " / " + (MODS.length-1));
+    save();
+  }
+
+  function renderQuestion(){
+    show("test");
+    const q = QUESTIONS[qi];
+    $("qMeta").textContent = "Savol " + (qi+1) + " / " + QUESTIONS.length;
+    $("qText").textContent = q.q;
+    const box = $("qOpts"); box.innerHTML = "";
+    q.o.forEach((text,i)=>{
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt" + (answers[qi] === i ? " sel" : "");
+      b.innerHTML = '<i>' + "ABCD"[i] + '</i><span></span>';
+      b.querySelector("span").textContent = text;
+      b.addEventListener("click", ()=>{ answers[qi] = i; save(); renderQuestion(); nextBtn.disabled = false; });
+      box.appendChild(b);
+    });
+    const dots = $("qDots"); dots.innerHTML = "";
+    QUESTIONS.forEach((_,i)=>{ const d=document.createElement("i"); d.className = i===qi ? "now" : (answers[i]!==null ? "ans" : ""); dots.appendChild(d); });
+    prevBtn.style.display = "";
+    nextBtn.textContent = qi === QUESTIONS.length-1 ? "Yakunlash" : "Keyingisi";
+    nextBtn.className = "btn";
+    nextBtn.disabled = answers[qi] === null;
+    hintEl.textContent = "Javob berilgan: " + answers.filter(a=>a!==null).length + " / " + QUESTIONS.length;
+    barEl.style.width = Math.round(((MODS.length + (qi+1)/QUESTIONS.length)/(MODS.length+1))*100) + "%";
+    [...stepsEl.children].forEach(el=>el.className="done");
+  }
+
+  function renderResult(){
+    const score = answers.reduce((n,a,i)=> n + (a === QUESTIONS[i].a ? 1 : 0), 0);
+    const pass = score >= PASS;
+    finished = true; save();
+    const wrong = QUESTIONS.map((q,i)=>({q,i})).filter(({q,i})=> answers[i] !== q.a);
+    let html = '<div class="res ' + (pass ? "pass" : "fail") + '">' +
+      '<p class="score">' + score + '<span style="font-size:24px;color:var(--mute)"> / ' + QUESTIONS.length + '</span></p>' +
+      '<h2>' + (pass ? "Testdan o'tdingiz" : "Bu safar o'tmadingiz") + '</h2>' +
+      '<p>' + (pass ? "Endi ilovada onlayn bo'lsangiz, birinchi talabgoringiz biriktiriladi." : "O'tish uchun " + PASS + " ta to'g'ri javob kerak. Xato qilingan modullarni qayta o'qing va urinib ko'ring.") + '</p>';
+    if(wrong.length){
+      html += '<div class="review">';
+      wrong.forEach(({q,i})=>{
+        html += '<div class="item"><b>' + (i+1) + '. ' + q.q + '</b>' +
+          '<span class="no">Sizning javobingiz: ' + (answers[i]===null ? "javob berilmadi" : q.o[answers[i]]) + '</span>' +
+          '<span class="ok">To\'g\'ri javob: ' + q.o[q.a] + '</span>' +
+          '<span style="margin-top:6px">Qayta o\'qing: ' + q.m + '-modul · ' + LABELS[q.m] + '</span></div>';
+      });
+      html += '</div>';
+    }
+    if(pass){
+      html += '<div class="unlock"><h3>Talabgorlar oqimi ochildi</h3><p>Keyingi uch qadam:</p><ol>' +
+        '<li>Ilovadagi jadvalda smenangizni belgilang — kamida 20 ta bo\'sh slot.</li>' +
+        '<li>Ilovaga kiring va onlayn bo\'ling. Onlayn bo\'lmasangiz talabgor kelmaydi.</li>' +
+        '<li>Birinchi talabgor kelganda izohni o\'qing, qo\'ng\'iroq qiling va status qo\'ying.</li>' +
+        '</ol></div>';
+    }
+    html += '</div>';
+    $("result").innerHTML = html;
+    show("result");
+    prevBtn.style.display = "none";
+    nextBtn.textContent = pass ? "Modullarni qayta ko'rish" : "Testni qayta topshirish";
+    nextBtn.className = pass ? "btn ghost" : "btn warn-btn";
+    nextBtn.style.flex = "1";
+    nextBtn.disabled = false;
+    hintEl.textContent = pass ? "Natijangiz saqlandi" : "Har bir urinishda savollar bir xil qoladi";
+    barEl.style.width = "100%";
+  }
+
+  let mode = "mod";
+  nextBtn.addEventListener("click", ()=>{
+    if(mode === "mod"){
+      if(idx < MODS.length-1){ idx++; renderModule(); }
+      else { mode = "test"; qi = 0; renderQuestion(); }
+    } else if(mode === "test"){
+      if(qi < QUESTIONS.length-1){ qi++; renderQuestion(); }
+      else { mode = "res"; renderResult(); }
+    } else {
+      const score = answers.reduce((n,a,i)=> n + (a === QUESTIONS[i].a ? 1 : 0), 0);
+      if(score >= PASS){ mode="mod"; idx = 0; renderModule(); }
+      else { answers = new Array(QUESTIONS.length).fill(null); mode="test"; qi=0; save(); renderQuestion(); }
+    }
+  });
+  prevBtn.addEventListener("click", ()=>{
+    if(mode === "mod"){ if(idx > 0){ idx--; renderModule(); } }
+    else if(mode === "test"){
+      if(qi > 0){ qi--; renderQuestion(); }
+      else { mode="mod"; idx = MODS.length-1; renderModule(); }
+    }
+  });
+  document.addEventListener("keydown", e=>{
+    if(e.key === "ArrowRight" && !nextBtn.disabled) nextBtn.click();
+    if(e.key === "ArrowLeft" && prevBtn.style.display !== "none") prevBtn.click();
+  });
+
+  document.body.classList.add('js');
+  load();
+  renderModule();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mentor gamifikatsiyasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Onest:wght@400;500;600&display=swap">
+<style>
+:root{--ink:#04124A;--brand:#0A47DB;--orange:#FF9A1F;--red:#D40000;--paper:#F2F5FC;--line:#D3DCF1;--text:#0A1747;--mute:#56648A;
+--display:"Lexend","Avenir Next",system-ui,sans-serif;--body:"Onest",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--text);font-family:var(--body);font-size:17px;line-height:1.6}
+header{background:linear-gradient(140deg,#0B34B8,#07227E 48%,#04124A);color:#fff;padding:56px 24px 48px}
+.wrap{max-width:900px;margin:0 auto;padding-inline:24px}
+header .wrap{padding-inline:0}
+header h1{font-family:var(--display);font-size:clamp(34px,6vw,54px);font-weight:700;letter-spacing:-.03em;margin:0 0 12px}
+header p{color:#D5DEFA;margin:0 0 32px;font-size:19px;max-width:38em}
+.toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.toc a{display:block;padding:16px 18px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none;border-left:3px solid var(--orange);font-family:var(--display);font-weight:600;font-size:16px}
+.toc a span{display:block;font-family:var(--body);font-weight:400;font-size:14px;color:#C5D2F5;margin-top:4px}
+main{padding:0 0 80px}
+.part{padding-top:56px}
+.part-label{font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--brand);padding-bottom:10px;border-bottom:3px solid var(--ink);margin-bottom:8px}
+h2{font-family:var(--display);font-size:clamp(25px,4vw,33px);font-weight:700;letter-spacing:-.02em;margin:40px 0 14px;text-wrap:balance}
+h3{font-family:var(--display);font-size:21px;font-weight:600;margin:32px 0 10px}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:8px}
+strong{font-weight:600}
+.tablewrap{overflow-x:auto;margin:18px 0 26px}
+table{border-collapse:collapse;width:100%;background:#fff;font-size:16px;min-width:460px}
+th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);border-bottom:2px solid var(--text)}
+tr:last-child td{border-bottom:0}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:15px;background:#E7EDFA;padding:2px 6px}
+footer{padding:30px 0 60px;color:var(--mute);font-size:15px;border-top:1px solid var(--line);margin-top:56px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>Mentor gamifikatsiyasi</h1>
+<p>MyTeacher mentorlari uchun ball, prioritet, missiya, seriya, liga va rank tizimi. 23-sentabr, 2026.</p>
+<nav class="toc">
+<a href="#t1">1 · Tizim<span>Mantiq, smenalar, norma, prioritet, missiyalar</span></a>
+<a href="#t2">2 · Ball jadvali<span>Nimaga qancha qo'shiladi va ayiriladi</span></a>
+<a href="#t3">3 · Ranklar<span>Shartlar, darajalar, yo'l xaritasi</span></a>
+<a href="#t4">4 · Ilova spetsifikatsiyasi<span>Hodisalar, hisoblash, ekranlar</span></a>
+</nav>
+</div></header>
+<main>
+<section id="t1" class="part"><div class="wrap"><p class="part-label">1-qism · Tizim</p>
+<h2>Tizimning mantig&#x27;i</h2>
+<p>Mentorning ishida ikki xil narsa bor: <strong>qancha ishladi</strong> va <strong>qanday ishladi</strong>. Bitta raqam ikkalasini ham o&#x27;lchay olmaydi — shuning uchun tizim ikki o&#x27;lchovga quriladi.</p>
+<div class="tablewrap"><table><thead><tr><th></th><th>Ball (XP)</th><th>Reyting</th></tr></thead><tbody><tr><td>Nimani o&#x27;lchaydi</td><td>Mehnat hajmi</td><td>Ish sifati</td></tr><tr><td>Qanday yig&#x27;iladi</td><td>Har bir harakat uchun qo&#x27;shiladi yoki ayiriladi</td><td>Oxirgi 30 kun bo&#x27;yicha 0–100 ball</td></tr><tr><td>Xotirasi</td><td>Umrbod jamlanadi, nolga tushmaydi</td><td>Har kuni qayta hisoblanadi</td></tr><tr><td>Nimaga ta&#x27;sir qiladi</td><td>Rank darajasi, liga, nishonlar</td><td>Rank shartlari, talabgor oqimi</td></tr><tr><td>Kimga bog&#x27;liq</td><td>To&#x27;liq mentorning o&#x27;ziga</td><td>Qisman o&#x27;quvchiga</td></tr></tbody></table></div>
+<p><strong>Rank — ikkalasining kesishmasi.</strong> Pro&#x27;dan Legend&#x27;gacha ko&#x27;tarilish uchun uchta shart bir vaqtda bajarilishi kerak: yetarli ball, reyting chegarasi va faol o&#x27;quvchilar soni. Rank esa to&#x27;g&#x27;ridan-to&#x27;g&#x27;ri pulga aylanadi — obunadan oladigan ulushingiz 60% dan 85% gacha o&#x27;sadi.</p>
+<h3>Nega shunday</h3>
+<ul><li><strong>Ball tezroq o&#x27;sadi, rank sekinroq.</strong> Mentor har kuni o&#x27;sishni ko&#x27;radi, lekin rank uchun barqaror natija ham kerak. Bir hafta ko&#x27;p ishlab, keyin yo&#x27;qolib qolgan odam Legend bo&#x27;lmaydi.</li><li><strong>Jarima ham ball bilan.</strong> Bekor qilingan dars yoki bo&#x27;sh qolgan slot — bu faqat ogohlantirish emas, ko&#x27;rinadigan yo&#x27;qotish.</li><li><strong>Reyting o&#x27;quvchi tomonidan quriladi, ball mentor tomonidan.</strong> Ikkalasi ham kerak: faqat ball bilan ishlagan odam ko&#x27;p qo&#x27;ng&#x27;iroq qiladi-yu, o&#x27;quvchi ushlab qola olmaydi; faqat reyting bilan ishlagan odam bir nechta o&#x27;quvchi bilan qolib ketadi.</li></ul>
+<h3>Mentor ilovada nimani ko&#x27;radi</h3>
+<p>Bosh ekranda to&#x27;rt narsa: <strong>bugungi ball</strong>, <strong>seriya (streak)</strong>, <strong>rankgacha qolgan masofa</strong> va <strong>haftalik ligadagi o&#x27;rin</strong>. Boshqa hamma narsa — shu to&#x27;rttasining tafsiloti.</p>
+<h2>Kunlik sikl</h2>
+<p>Hamma narsa kalendardan boshlanadi. <strong>Slot ochish — bu va&#x27;da.</strong> Mentor o&#x27;zi tanlagan vaqtni ochadi, tizim esa o&#x27;sha vaqtga talabgor va o&#x27;quvchi yo&#x27;naltiradi. Shuning uchun ochilgan slotda onlayn bo&#x27;lish majburiy.</p>
+<h3>Vaqtni mentor o&#x27;zi tanlaydi</h3>
+<p>Mentorlarimizning aksariyati — talabalar, ularning darslari yo tushgacha, yo tushdan keyin. Shuning uchun hech kimdan belgilangan soat talab qilinmaydi. Har bir mentor <strong>o&#x27;zi bo&#x27;sh vaqtini kalendarda belgilaydi</strong>: kuniga ikki soat ham, sakkiz soat ham bo&#x27;lishi mumkin.</p>
+<p>Qoida bitta: <strong>ochilgan vaqt — bu va&#x27;da.</strong> Tizim o&#x27;sha vaqtga talabgor va dars yo&#x27;naltiradi, shuning uchun o&#x27;sha paytda ilovada bo&#x27;lish shart.</p>
+<p>Ko&#x27;proq vaqt ochgan mentor ko&#x27;proq o&#x27;quvchi oladi va tezroq yuqori rankka chiqadi. Kam vaqt ochgani uchun esa hech kim jazolanmaydi — u shunchaki sekinroq boradi.</p>
+<h2>Prioritet</h2>
+<p>Yandex Taksi haydovchida ikkita raqamni yuritadi: <strong>reyting</strong> (yo&#x27;lovchi bahosi) va <strong>faollik</strong> (buyurtmani qabul qilish intizomi). Buyurtma kimga borishini reyting emas, aynan faollik hal qiladi. Biz ham shunday qilamiz.</p>
+<p><strong>Prioritet — 0 dan 100 gacha raqam.</strong> U talabgor kimga birinchi borishini belgilaydi va har kuni qayta hisoblanadi.</p>
+<div class="tablewrap"><table><thead><tr><th>Nima ta&#x27;sir qiladi</th><th>Ulush</th></tr></thead><tbody><tr><td>Norma bajarilgan kunlar (oxirgi 14 kun)</td><td>40%</td></tr><tr><td>Talabgorni qabul qilish va tez ishlash</td><td>25%</td></tr><tr><td>Sinov darsiga chiqish intizomi</td><td>20%</td></tr><tr><td>Status va izoh to&#x27;liqligi</td><td>15%</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>Prioritet</th><th>Talabgor oqimi</th></tr></thead><tbody><tr><td>90–100</td><td>Birinchi navbat, &quot;issiq&quot; talabgorlar</td></tr><tr><td>70–89</td><td>Odatiy navbat</td></tr><tr><td>50–69</td><td>Navbatning oxiri, kuniga kamroq talabgor</td></tr><tr><td>50 dan past</td><td>Yangi talabgor berilmaydi, mavjudlari saqlanadi</td></tr></tbody></table></div>
+<p><strong>Nega jarima emas, oqim.</strong> Taksida ham haydovchi jarima bilan emas, buyurtmani kamaytirish bilan tarbiyalanadi — bu adolatliroq va tushunarliroq. Prioritet tez tiklanadi: ikki kun normani bajarish kifoya.</p>
+<p><strong>Uchta raqam — uchta vazifa:</strong> <strong>Ball</strong> — qancha ishladingiz (rank va liga uchun). <strong>Reyting</strong> — qanday ishladingiz (rank sharti uchun). <strong>Prioritet</strong> — ertaga qancha talabgor olasiz.</p>
+<h2>Missiyalar</h2>
+<p>Taksining eng kuchli mexanikasi — &quot;bugun 15 ta buyurtma bajaring, +50 000 so&#x27;m olasiz&quot;. Aniq maqsad, ko&#x27;rinadigan progress va ball emas, <strong>pul</strong>.</p>
+<div class="tablewrap"><table><thead><tr><th>Tur</th><th>Misol</th><th>Mukofot</th></tr></thead><tbody><tr><td>Kunlik</td><td>Bugun 2 ta sinov darsi o&#x27;tkazing</td><td>+30 000 so&#x27;m</td></tr><tr><td>Kunlik</td><td>Kechki vaqtda to&#x27;liq 4 soat onlayn turing</td><td>+25 000 so&#x27;m</td></tr><tr><td>Haftalik</td><td>10 ta sinov darsi o&#x27;tkazing</td><td>+150 000 so&#x27;m</td></tr><tr><td>Haftalik</td><td>3 ta yangi o&#x27;quvchi to&#x27;lov qilsin</td><td>+250 000 so&#x27;m</td></tr><tr><td>Oylik</td><td>Reytingni 4.8 dan yuqori saqlang</td><td>+300 000 so&#x27;m</td></tr></tbody></table></div>
+<ul><li>Bir vaqtda 2 tadan ko&#x27;p missiya bo&#x27;lmaydi — aks holda ular shovqinga aylanadi.</li><li>Missiya mentorning hozirgi natijasiga qarab beriladi: yangi boshlaganga yengilrog&#x27;i, tajribaliga kattarog&#x27;i.</li><li>Missiya kompaniyaga kerak bo&#x27;lgan joyga yo&#x27;naltiriladi: kam qamrab olingan soatlar, sovuq baza, yangi yo&#x27;nalish.</li><li>Bajarilgan missiya puli darhol hamyonga tushadi — oy oxirini kutish yo&#x27;q.</li></ul>
+<h2>Talab xaritasi</h2>
+<p>Taksidagi &quot;yuqori talab zonalari&quot; xaritasi kabi, mentor kalendarida ham talab ko&#x27;rinadi. Har soat uchun uch holat: <strong>ko&#x27;p talabgor</strong>, <strong>o&#x27;rtacha</strong>, <strong>kam</strong>.</p>
+<ul><li>Mentor kalendarda vaqt tanlayotganda qaysi soatda odam ko&#x27;pligini ko&#x27;radi — taxmin qilmaydi.</li><li>Xarita o&#x27;tgan 4 haftaning haqiqiy ma&#x27;lumotiga asoslanadi va har dushanba yangilanadi.</li></ul>
+<h2>Kafolat va imtiyozlar</h2>
+<p><strong>Birinchi ikki hafta kafolati.</strong> Yangi mentor normani 10 kun bajarsa, daromadi kelishilgan minimal summadan kam bo&#x27;lmaydi — farqi kompaniya tomonidan to&#x27;ldiriladi. Taksida yangi haydovchiga aynan shunday kafolat beriladi, chunki eng ko&#x27;p odam birinchi haftada ketib qoladi.</p>
+<p><strong>Rank imtiyozlari — faqat foiz emas.</strong></p>
+<div class="tablewrap"><table><thead><tr><th>Rank</th><th>Imtiyoz</th></tr></thead><tbody><tr><td>Senior</td><td>Qo&#x27;llab-quvvatlashda navbatsiz javob</td></tr><tr><td>Expert</td><td>&quot;Issiq&quot; talabgorlar birinchi navbatda, bepul metodik treninglar va &quot;Yilning eng yaxshi mentori&quot; poygasiga nomzodlik</td></tr><tr><td>Master</td><td>Yangi mentorlarga ustozlik va undan qo&#x27;shimcha daromad</td></tr><tr><td>Legend</td><td>Eng issiq oqim, alohida mukofot fondi, metodikaga ta&#x27;sir qilish huquqi va IELTS yoki CEFR imtihoni to&#x27;lovi to&#x27;liq kompaniya hisobidan</td></tr></tbody></table></div>
+<h2>Seriya</h2>
+<p>Seriya — ketma-ket normani bajargan kunlar soni. U ballni ko&#x27;paytiradi, shuning uchun uzoq ishlagan mentor bir xil mehnat uchun ko&#x27;proq oladi.</p>
+<div class="tablewrap"><table><thead><tr><th>Seriya</th><th>Koeffitsient</th><th>Qo&#x27;shimcha</th></tr></thead><tbody><tr><td>3 kun</td><td>×1.1</td><td>—</td></tr><tr><td>7 kun</td><td>×1.2</td><td>+100 ball</td></tr><tr><td>14 kun</td><td>×1.3</td><td>+250 ball</td></tr><tr><td>30 kun</td><td>×1.5</td><td>+500 ball va &quot;Temir intizom&quot; nishoni</td></tr><tr><td>60 kun</td><td>×1.5 saqlanadi</td><td>+1 000 ball va talabgor oqimida doimiy ustunlik</td></tr></tbody></table></div>
+<p>Koeffitsient faqat <strong>qo&#x27;shiladigan</strong> ballarga ta&#x27;sir qiladi. Jarimalar har doim to&#x27;liq hajmda ayiriladi — aks holda yuqori seriyali mentor jarimadan qutulib qolardi.</p>
+<h3>Seriya qachon uzilmaydi</h3>
+<ul><li><strong>Dam olish kuni.</strong> Haftada ikki kunni oldindan dam olish deb belgilasangiz, ular seriyani uzmaydi. Talaba mentorlar uchun bu odatiy holat.</li><li><strong>Himoya kuni.</strong> Oyiga bitta. Norma bajarilmagan kunni &quot;yopib&quot; qo&#x27;yadi. Ertasi kuni ertalabgacha o&#x27;zingiz bosishingiz kerak.</li><li><strong>Muzlatish.</strong> Kasallik, ta&#x27;til yoki universitet sessiyasi uchun: oddiy holatda 7 kun, sessiya davrida 14 kungacha — seriya ham, reyting ham joyida qoladi, talabgor kelmaydi.</li></ul>
+<h3>Seriya uzilsa</h3>
+<p>Koeffitsient birdaniga 1.0 ga tushmaydi — bir pog&#x27;ona pasayadi. 30 kunlik seriyani uzgan mentor ×1.3 dan boshlaydi va uch kunda o&#x27;z pog&#x27;onasini qaytarib olishi mumkin.</p>
+<h2>Ligalar</h2>
+<p>Rank — uzoq masofa poygasi, liga esa har haftalik. Mentor Legend bo&#x27;lishni kutib o&#x27;tirmasdan, har dushanba yangi imkoniyat oladi.</p>
+<p><strong>Qanday tuzilgan.</strong> Mentorlar 15 kishilik guruhlarga bo&#x27;linadi va faqat o&#x27;sha hafta yig&#x27;gan balli bo&#x27;yicha o&#x27;zaro raqobatlashadi. Hafta dushanba 00:00 da boshlanib, yakshanba 23:59 da tugaydi.</p>
+<div class="tablewrap"><table><thead><tr><th>Liga</th><th>Kim tushadi</th><th>Haftalik mukofot fondi</th></tr></thead><tbody><tr><td>Bronza</td><td>Yangi mentorlar</td><td>1-o&#x27;rin +300 ball</td></tr><tr><td>Kumush</td><td>Bronzadan ko&#x27;tarilganlar</td><td>1-o&#x27;rin +500 ball</td></tr><tr><td>Oltin</td><td>Kumushdan ko&#x27;tarilganlar</td><td>1-o&#x27;rin +800 ball va pul mukofoti</td></tr></tbody></table></div>
+<p><strong>Har hafta yakunida:</strong> yuqoridagi 3 mentor keyingi ligaga ko&#x27;tariladi, quyidagi 3 mentor bir pog&#x27;ona tushadi.</p>
+<div class="tablewrap"><table><thead><tr><th>O&#x27;rin</th><th>Mukofot</th></tr></thead><tbody><tr><td>1-o&#x27;rin</td><td>Liga fondi + &quot;Hafta yulduzi&quot; nishoni + keyingi haftada talabgor oqimida ustunlik</td></tr><tr><td>2–3-o&#x27;rin</td><td>Fondning yarmi</td></tr><tr><td>4–12-o&#x27;rin</td><td>Ball saqlanadi, o&#x27;zgarish yo&#x27;q</td></tr><tr><td>Oxirgi 3</td><td>Bir liga pastga</td></tr></tbody></table></div>
+<p><strong>Talabgor oqimida ustunlik</strong> — eng qimmatli mukofot: g&#x27;olib mentor keyingi hafta davomida navbatda birinchi turadi va kuniga 3 tagacha qo&#x27;shimcha talabgor oladi.</p>
+<h3>Oy va yil</h3>
+<ul><li><strong>Oyning mentori:</strong> oylik ball bo&#x27;yicha birinchi o&#x27;rin — +1 000 ball, pul mukofoti va ilovada e&#x27;lon.</li><li><strong>Yilning mentori:</strong> yillik ball, reyting va retention birgalikda hisoblanadi. Poygada Expert, Master va Legend ranklari qatnashadi. Alohida katta mukofot.</li><li><strong>Oy yakunida hisobot kartasi:</strong> yig&#x27;ilgan ball, ligadagi o&#x27;rin, eng kuchli va eng zaif ko&#x27;rsatkich — bitta aniq maslahat bilan.</li></ul>
+<h2>Nishonlar</h2>
+<p>Nishon — bir marta olinadi va mentor sahifasida umrbod qoladi. Har biri mentor xulq-atvorining bir yaxshi odatini mustahkamlaydi.</p>
+<div class="tablewrap"><table><thead><tr><th>Nishon</th><th>Shart</th><th>Ball</th></tr></thead><tbody><tr><td>Birinchi qadam</td><td>Birinchi sinov darsini o&#x27;tkazdingiz</td><td>+50</td></tr><tr><td>Birinchi o&#x27;quvchi</td><td>Birinchi to&#x27;lov qilingan o&#x27;quvchi</td><td>+150</td></tr><tr><td>Kalendar egasi</td><td>Birinchi hafta kalendarni to&#x27;liq to&#x27;ldirdingiz</td><td>+50</td></tr><tr><td>Temir intizom</td><td>30 kunlik seriya</td><td>+500</td></tr><tr><td>Kechki qahramon</td><td>20 kun kechki vaqtda to&#x27;liq onlayn</td><td>+200</td></tr><tr><td>Soatdek aniq</td><td>50 ta sinov darsi kechikishsiz boshlandi</td><td>+300</td></tr><tr><td>Toza daftar</td><td>30 kun barcha talabgorda status va izoh to&#x27;liq</td><td>+250</td></tr><tr><td>Snayper</td><td>Bir kunda 3 ta sinov darsining 3 tasi ham to&#x27;lovga aylandi</td><td>+300</td></tr><tr><td>Ishonchli qo&#x27;l</td><td>Ketma-ket 10 ta sinov darsidan 5 tasi to&#x27;lovga aylandi</td><td>+400</td></tr><tr><td>Qutqaruvchi</td><td>Ketish xavfidagi o&#x27;quvchini ushlab qoldingiz</td><td>+200</td></tr><tr><td>Marafonchi</td><td>100 ta sinov darsi</td><td>+500</td></tr><tr><td>Ustoz</td><td>10 ta o&#x27;quvchingiz 3 oydan ortiq o&#x27;qidi</td><td>+600</td></tr><tr><td>Do&#x27;st</td><td>5 ta referral to&#x27;lov qildi</td><td>+300</td></tr><tr><td>Daraja ko&#x27;targan</td><td>O&#x27;quvchingiz CEFR darajasini oshirdi</td><td>+150 har safar</td></tr></tbody></table></div>
+<p>Hamma nishonlar mentor sahifasida ko&#x27;rinadi: olinganlari rangda, olinmaganlari kulrang va shart yozilgan holda. Har chorakda bitta <strong>mavsumiy nishon</strong> e&#x27;lon qilinadi.</p>
+<h2>Adolat qoidalari</h2>
+<h3>Mentor aybdor bo&#x27;lmagan holatlar</h3>
+<ul><li><strong>Talabgor yetmasa, norma pasayadi.</strong> Tizim o&#x27;sha kuni 12 ta talabgor bera olmagan bo&#x27;lsa, norma real songa moslashadi.</li><li><strong>O&#x27;quvchi darsga kelmasa,</strong> mentor ball yo&#x27;qotmaydi: dars o&#x27;tkazilgan deb hisoblanadi.</li><li><strong>Texnik nosozlik</strong> administrator tomonidan tasdiqlansa, o&#x27;sha kun hisobdan chiqariladi.</li><li><strong>Muzlatish:</strong> kasallik yoki ta&#x27;til uchun 7 kun, sessiya uchun 14 kungacha. Yiliga 21 kun.</li><li><strong>Universitet jadvali o&#x27;zgarsa,</strong> kalendardagi vaqtingizni hafta boshida jarimasiz o&#x27;zgartirasiz.</li></ul>
+<h3>Har bir ball ko&#x27;rinadi</h3>
+<p>Mentor ilovada har bir yozuvni ko&#x27;ra oladi: qachon, nima uchun, qancha ball qo&#x27;shildi yoki ayirildi. Tushunarsiz yozuvga e&#x27;tiroz bildiriladi — administrator 24 soat ichida javob beradi. Ko&#x27;rinmaydigan jarima bo&#x27;lmaydi.</p>
+<h3>Suiiste&#x27;molga qarshi</h3>
+<div class="tablewrap"><table><thead><tr><th>Xatti-harakat</th><th>Tizim javobi</th></tr></thead><tbody><tr><td>60 soniyadan qisqa qo&#x27;ng&#x27;iroq</td><td>Ball berilmaydi</td></tr><tr><td>Bir raqamga bir kunda takroriy qo&#x27;ng&#x27;iroq</td><td>Faqat birinchisi hisoblanadi</td></tr><tr><td>25 daqiqadan qisqa &quot;sinov darsi&quot;</td><td>Ball berilmaydi</td></tr><tr><td>Ikki tomon ham ovozsiz o&#x27;tgan dars</td><td>Ball berilmaydi, tekshiruvga tushadi</td></tr><tr><td>Soxta status</td><td>−200 ball va ogohlantirish; takrorlansa blok</td></tr><tr><td>Ilovani ochib qo&#x27;yish, lekin ishlamaslik</td><td>Faoliyatsiz 30 daqiqadan keyin onlayn hisoblanmaydi</td></tr><tr><td>Soxta referral</td><td>Ball bekor, takrorlansa blok</td></tr><tr><td>Platformadan tashqari hisob-kitob</td><td>Darhol blok, barcha ball va bonuslar bekor</td></tr></tbody></table></div>
+<h3>Yangi mentor uchun yumshoq boshlanish</h3>
+<p>Birinchi 14 kun — <strong>o&#x27;rganish davri</strong>: jarimalar yarim hajmda ishlaydi, norma esa 12 qo&#x27;ng&#x27;iroq o&#x27;rniga 6 tadan boshlanadi va ikkinchi haftada to&#x27;liq normaga chiqadi.</p>
+</div></section>
+<section id="t2" class="part"><div class="wrap"><p class="part-label">2-qism · Ball jadvali</p>
+<p><strong>Kunlik norma — kuniga 100 ball.</strong></p>
+<p>To&#x27;liq ro&#x27;yxat. Ball qo&#x27;shiladigan hamma narsa seriya koeffitsientiga ko&#x27;paytiriladi; jarimalar har doim to&#x27;liq hajmda ayiriladi.</p>
+<h2>Qo&#x27;shiladi</h2>
+<h3>Kalendar va onlayn vaqt</h3>
+<div class="tablewrap"><table><thead><tr><th>Harakat</th><th>Ball</th><th>Cheklov</th></tr></thead><tbody><tr><td>Ochilgan slotda onlayn</td><td>+5</td><td>Har 30 daqiqa, kuniga maks +40</td></tr><tr><td>Haftalik kalendar o&#x27;z vaqtida to&#x27;ldirildi</td><td>+30</td><td>Juma 18:00 gacha, kamida 20 slot</td></tr><tr><td>Kunlik norma to&#x27;liq bajarildi</td><td>+50</td><td>Kuniga bir marta</td></tr><tr><td>Haftalik norma to&#x27;liq (5 kun)</td><td>+150</td><td>Haftada bir marta</td></tr></tbody></table></div>
+<h3>Talabgor bilan ishlash</h3>
+<div class="tablewrap"><table><thead><tr><th>Harakat</th><th>Ball</th><th>Cheklov</th></tr></thead><tbody><tr><td>Haqiqiy suhbat (60 soniyadan uzun, status va izoh bilan)</td><td>+3</td><td>Kuniga maks 20 ta</td></tr><tr><td>Sinov darsiga vaqt kelishildi</td><td>+15</td><td>—</td></tr><tr><td>Va&#x27;da qilingan qayta qo&#x27;ng&#x27;iroq o&#x27;z kunida bajarildi</td><td>+5</td><td>—</td></tr><tr><td>Talabgor 15 daqiqa ichida ishlandi</td><td>+2</td><td>Tezkorlik uchun</td></tr><tr><td>Sinov darsi o&#x27;tkazildi (25 daqiqadan uzun)</td><td>+30</td><td>—</td></tr><tr><td>Sinov darsi 24 soat ichida to&#x27;lovga aylandi</td><td>+100</td><td>Pul bonusi alohida</td></tr><tr><td>Sinov darsi 24–72 soat ichida to&#x27;lovga aylandi</td><td>+50</td><td>—</td></tr></tbody></table></div>
+<h3>O&#x27;quvchi bilan ishlash</h3>
+<div class="tablewrap"><table><thead><tr><th>Harakat</th><th>Ball</th><th>Cheklov</th></tr></thead><tbody><tr><td>Rejalashtirilgan dars o&#x27;tkazildi</td><td>+10</td><td>—</td></tr><tr><td>O&#x27;quvchidan 5 yulduz</td><td>+10</td><td>Har baho</td></tr><tr><td>O&#x27;quvchidan 4 yulduz</td><td>+3</td><td>Har baho</td></tr><tr><td>O&#x27;quvchi keyingi oyga uzaytirdi</td><td>+80</td><td>Har o&#x27;quvchi, har oy</td></tr><tr><td>O&#x27;quvchi uzluksiz 3 oy o&#x27;qidi</td><td>+150</td><td>Bir marta, har o&#x27;quvchi</td></tr><tr><td>O&#x27;quvchi CEFR darajasini oshirdi</td><td>+150</td><td>Har daraja</td></tr><tr><td>Referral to&#x27;lov qildi</td><td>+120</td><td>—</td></tr><tr><td>IELTS talabgorini to&#x27;g&#x27;ri oqimga o&#x27;tkazish</td><td>+15</td><td>Suhbatda aniqlangan holat</td></tr><tr><td>O&#x27;tkazilgan talabgor 14 kun ichida to&#x27;lov qildi</td><td>+60</td><td>Pul bonusi alohida: 20 000 so&#x27;m</td></tr><tr><td>Birinchi darsni o&#x27;tib, keyin o&#x27;tkazgan bo&#x27;lsa</td><td>dars balli</td><td>Pul bonusi: 40 000 so&#x27;m</td></tr><tr><td>Ketish xavfidagi o&#x27;quvchi ushlab qolindi</td><td>+60</td><td>Tizim xavf belgisini qo&#x27;ygan bo&#x27;lsa</td></tr></tbody></table></div>
+<h3>Birinchi darslar tizimi</h3>
+<div class="tablewrap"><table><thead><tr><th>Harakat</th><th>Ball</th><th>Cheklov</th></tr></thead><tbody><tr><td>Haftalik &quot;Sinov darslari qiroli&quot; unvoni</td><td>+1 000</td><td>Eng ko&#x27;p muvaffaqiyatli birinchi dars; toj bir hafta turadi</td></tr><tr><td>20 ta birinchi dars bosqichi</td><td>+300</td><td>O&#x27;sha yigirmatalikda konversiya 25% dan past bo&#x27;lmasin</td></tr><tr><td>40 ta bosqich</td><td>+600</td><td>Shu shart bilan</td></tr><tr><td>60 ta bosqich</td><td>+900</td><td>Shu shart bilan, &quot;Marafonchi&quot; nishoni</td></tr><tr><td>100 ta bosqich</td><td>+1 500</td><td>Shu shart bilan, doimiy oqim ustunligi</td></tr><tr><td>3 ta ketma-ket konversiya</td><td>+200</td><td>Uzilsa noldan boshlanadi</td></tr><tr><td>5 ta ketma-ket konversiya</td><td>+400</td><td>Bir kunlik oqim ustunligi</td></tr></tbody></table></div>
+<h3>O&#x27;zini rivojlantirish</h3>
+<div class="tablewrap"><table><thead><tr><th>Harakat</th><th>Ball</th><th>Cheklov</th></tr></thead><tbody><tr><td>Akademiya moduli ko&#x27;rildi va test topshirildi</td><td>+50</td><td>Har modul, bir marta</td></tr><tr><td>Oylik malaka testi 90% dan yuqori</td><td>+100</td><td>Oyiga bir marta</td></tr><tr><td>Yangi mentorga ustozlik</td><td>+200</td><td>Administrator tasdiqlaydi</td></tr></tbody></table></div>
+<h2>Ayiriladi</h2>
+<h3>Kalendar va intizom</h3>
+<div class="tablewrap"><table><thead><tr><th>Xatti-harakat</th><th>Ball</th></tr></thead><tbody><tr><td>Ochilgan slotda yo&#x27;q (5 daqiqadan ortiq)</td><td>−10 har 30 daqiqa</td></tr><tr><td>Slot 12 soatdan kech yopildi</td><td>−15</td></tr><tr><td>Kunlik norma bajarilmadi</td><td>−30</td></tr><tr><td>Ketma-ket 3 kun norma bajarilmadi</td><td>−100 va talabgor oqimi kamayadi</td></tr><tr><td>Kalendar bo&#x27;sh qoldirilgan hafta</td><td>−20 va talabgor oqimi to&#x27;xtaydi</td></tr></tbody></table></div>
+<h3>Talabgor bilan ishlashda</h3>
+<div class="tablewrap"><table><thead><tr><th>Xatti-harakat</th><th>Ball</th></tr></thead><tbody><tr><td>Talabgorga 45 daqiqa tegilmadi va qaytarib olindi</td><td>−15</td></tr><tr><td>Tizim taklif qilgan talabgor qabul qilinmadi (skip)</td><td>−25</td></tr><tr><td>Gaplashildi, lekin status qo&#x27;yilmadi</td><td>−5 har biri</td></tr><tr><td>Izoh bo&#x27;sh qoldirildi</td><td>−5 har biri</td></tr><tr><td>Sinov darsiga mentor kechikdi (5 daqiqadan ortiq)</td><td>−20</td></tr><tr><td>Sinov darsiga mentor umuman chiqmadi</td><td>−80</td></tr></tbody></table></div>
+<h3>O&#x27;quvchi bilan ishlashda</h3>
+<div class="tablewrap"><table><thead><tr><th>Xatti-harakat</th><th>Ball</th></tr></thead><tbody><tr><td>Darsni 24 soatdan kam qolganda bekor qildi</td><td>−40</td></tr><tr><td>Darsga chiqmadi</td><td>−100</td></tr><tr><td>O&#x27;quvchidan 1–2 yulduz</td><td>−20</td></tr><tr><td>O&#x27;quvchi keyingi oyga uzaytirmadi</td><td>−60</td></tr><tr><td>O&#x27;quvchi shikoyat yozdi va tasdiqlandi</td><td>−150</td></tr></tbody></table></div>
+<h3>Qo&#x27;pol buzilishlar</h3>
+<div class="tablewrap"><table><thead><tr><th>Xatti-harakat</th><th>Natija</th></tr></thead><tbody><tr><td>Soxta status yoki soxta dars</td><td>−200 va ogohlantirish</td></tr><tr><td>Soxta referral</td><td>Ball bekor, takrorlansa blok</td></tr><tr><td>Platformadan tashqari hisob-kitob</td><td>Blok, barcha ball va bonuslar bekor, qonuniy javobgarlik</td></tr></tbody></table></div>
+<h2>Hisoblash tartibi</h2>
+<p>Kun yakunida tizim shu tartibda hisoblaydi:</p>
+<ol><li>Kun davomidagi barcha qo&#x27;shimcha ballar yig&#x27;iladi.</li><li>Norma bajarilgan bo&#x27;lsa, +50 qo&#x27;shiladi va seriya bir kunga o&#x27;sadi.</li><li>Yig&#x27;indi seriya koeffitsientiga ko&#x27;paytiriladi.</li><li>Jarimalar ayiriladi (koeffitsientsiz).</li><li>Natija hisobga yoziladi va mentorga kun yakuni bildirishnomasi boradi.</li></ol>
+<p><strong>Misol.</strong> Kun davomida 240 ball yig&#x27;ildi, norma bajarildi (+50), seriya 14 kun (×1.3), bitta dars kech bekor qilindi (−40):</p>
+<p>(240 + 50) × 1.3 − 40 = <strong>337 ball</strong>.</p>
+</div></section>
+<section id="t3" class="part"><div class="wrap"><p class="part-label">3-qism · Ranklar</p>
+<h2>Rank shartlari</h2>
+<p>Rank ko&#x27;tarilishi uchun <strong>uchta shart ham</strong> bajarilishi kerak: yig&#x27;ilgan ball, reyting va faol o&#x27;quvchilar soni. Bittasi yetmasa, rank kutib turadi.</p>
+<p>Chegaralar real imkoniyatga moslangan: kuniga 4 soat ishlaydigan mentor haftasiga taxminan 20 ta darsga ulguradi, ya&#x27;ni 10–20 ta doimiy o&#x27;quvchi olib boradi.</p>
+<div class="tablewrap"><table><thead><tr><th>Rank</th><th>Ball</th><th>Reyting (0–100)</th><th>Faol o&#x27;quvchi</th><th>Obunadan ulushingiz</th></tr></thead><tbody><tr><td>Pro</td><td>0</td><td>—</td><td>1–5</td><td>60%</td></tr><tr><td>Senior</td><td>2 000</td><td>92</td><td>6–10</td><td>66%</td></tr><tr><td>Expert</td><td>6 000</td><td>94</td><td>11–16</td><td>72%</td></tr><tr><td>Master</td><td>14 000</td><td>96</td><td>17–24</td><td>78%</td></tr><tr><td>Legend</td><td>28 000</td><td>98</td><td>25+</td><td>85%</td></tr></tbody></table></div>
+<p><strong>Reyting 0 dan 100 gacha o&#x27;lchanadi</strong> — yulduzlar bilan aralashtirmaslik uchun. Yulduz faqat o&#x27;quvchi bahosi, u esa reytingning 25 ballini tashkil qiladi.</p>
+<p><strong>Faol o&#x27;quvchi</strong> — shu oy uchun to&#x27;lov qilgan va darslarga chiqayotgan o&#x27;quvchi.</p>
+<h3>Har rank ichida beshta daraja</h3>
+<p>Rank uzoq masofa bo&#x27;lgani uchun uning ichida beshta daraja bor: Senior I, II, III, IV, V. Har daraja — rank oralig&#x27;ining beshdan bir qismi. Ilovadagi shkala shu darajani ko&#x27;rsatadi.</p>
+<div class="tablewrap"><table><thead><tr><th>Daraja</th><th>Senior misolida (2 000–6 000 ball)</th></tr></thead><tbody><tr><td>Senior I</td><td>2 000</td></tr><tr><td>Senior II</td><td>2 800</td></tr><tr><td>Senior III</td><td>3 600</td></tr><tr><td>Senior IV</td><td>4 400</td></tr><tr><td>Senior V</td><td>5 200</td></tr></tbody></table></div>
+<h3>Rank pasayishi</h3>
+<ul><li><strong>Reyting 30 kun davomida rank chegarasidan past</strong> (masalan Senior uchun 92 balldan past) bo&#x27;lsa, rank bir pog&#x27;ona pasayadi va foiz ham pasayadi.</li><li><strong>Ball hech qachon kamaymaydi</strong> — jarima bugungi hisobni kamaytiradi, umumiy yig&#x27;indini nolga tushirmaydi.</li><li><strong>Rank qaytarib olinadi:</strong> reyting tiklansa, keyingi hisob-kitobda rank avtomatik qaytadi.</li><li><strong>Faol o&#x27;quvchi soni kamaysa,</strong> rank bir oy himoya davri bilan saqlanadi.</li></ul>
+<h2>Yo&#x27;l xaritasi</h2>
+<p>Kuniga 4 soat, haftasiga 5 kun ishlaydigan mentor uchun taxminiy jadval:</p>
+<div class="tablewrap"><table><thead><tr><th>Vaqt</th><th>Ball</th><th>Faol o&#x27;quvchi</th><th>Rank</th></tr></thead><tbody><tr><td>1-hafta</td><td>~900</td><td>0–1</td><td>Pro I–II</td></tr><tr><td>1-oy</td><td>~4 000</td><td>3–5</td><td>Pro V</td></tr><tr><td>2-oy</td><td>~9 000</td><td>6–9</td><td>Senior IV</td></tr><tr><td>4-oy</td><td>~20 000</td><td>12–16</td><td>Expert V</td></tr><tr><td>8-oy</td><td>~42 000</td><td>20–25</td><td>Master V – Legend</td></tr><tr><td>12-oy</td><td>~65 000</td><td>25+</td><td>Legend</td></tr></tbody></table></div>
+<p>Raqamlar taxminiy: birinchi oy — o&#x27;lchov oyi, haqiqiy nisbatlar aniqlangach jadval aniqlashtiriladi.</p>
+<h3>Nima o&#x27;zgaradi</h3>
+<div class="tablewrap"><table><thead><tr><th>Rank</th><th>Yangi imkoniyat</th></tr></thead><tbody><tr><td>Pro</td><td>Standart talabgor oqimi</td></tr><tr><td>Senior</td><td>Oqimda ustunlik: kuniga +1 talabgor</td></tr><tr><td>Expert</td><td>&quot;Issiq&quot; talabgorlar birinchi navbatda</td></tr><tr><td>Master</td><td>Yangi mentorlarga ustozlik qilish va qo&#x27;shimcha ball olish huquqi</td></tr><tr><td>Legend</td><td>Eng issiq oqim, alohida mukofot fondi va metodikaga ta&#x27;sir qilish huquqi</td></tr></tbody></table></div>
+<p><strong>Ko&#x27;proq vaqt ochsangiz</strong> chegaralar o&#x27;zgarmaydi — shunchaki tezroq yetasiz.</p>
+<p><strong>Legend faqat unvon emas.</strong> 85% ulush, eng yaxshi talabgorlar va yillik mukofot poygasida birinchi qator.</p>
+</div></section>
+<section id="t4" class="part"><div class="wrap"><p class="part-label">4-qism · Ilova spetsifikatsiyasi</p>
+<p>Tizimni MentorAPP ichida qurish uchun texnik qism.</p>
+<h2>Hodisalar</h2>
+<p>Har bir ball bitta hodisadan tug&#x27;iladi. Backend shu hodisalarni yozadi, ball esa ular ustida hisoblanadi — ball qo&#x27;lda yozilmaydi.</p>
+<div class="tablewrap"><table><thead><tr><th>Hodisa</th><th>Qachon yoziladi</th><th>Tekshiriladigan shart</th></tr></thead><tbody><tr><td><code>presence.tick</code></td><td>Har 5 daqiqada, mentor onlayn bo&#x27;lsa</td><td>Slot ochiq va ilovada faollik bor</td></tr><tr><td><code>call.finished</code></td><td>Qo&#x27;ng&#x27;iroq tugaganda</td><td>Davomiyligi, status, izoh</td></tr><tr><td><code>lead.status_set</code></td><td>Status qo&#x27;yilganda</td><td>Status turi</td></tr><tr><td><code>trial.scheduled</code></td><td>Sinov darsi belgilanganda</td><td>Sana kelajakda</td></tr><tr><td><code>trial.completed</code></td><td>Sinov darsi tugaganda</td><td>Davomiyligi ≥ 25 daq, ikki tomon faol</td></tr><tr><td><code>payment.received</code></td><td>To&#x27;lov tushganda</td><td>Sinov darsidan keyin o&#x27;tgan vaqt</td></tr><tr><td><code>lesson.completed</code></td><td>Doimiy dars tugaganda</td><td>Davomiyligi</td></tr><tr><td><code>rating.received</code></td><td>O&#x27;quvchi baho berganda</td><td>Yulduz soni</td></tr><tr><td><code>subscription.renewed</code></td><td>O&#x27;quvchi uzaytirganda</td><td>Oy raqami</td></tr><tr><td><code>subscription.churned</code></td><td>O&#x27;quvchi uzaytirmaganda</td><td>Oxirgi dars sanasi</td></tr><tr><td><code>slot.missed</code></td><td>Slot tugaganda, onlayn bo&#x27;lmasa</td><td>Bo&#x27;sh qolgan daqiqalar</td></tr><tr><td><code>lead.expired</code></td><td>Talabgor 45 daqiqada ishlanmasa</td><td>—</td></tr><tr><td><code>lead.transferred</code></td><td>Mentor talabgorni boshqa oqimga o&#x27;tkazganda</td><td>Sabab tegi, izoh to&#x27;ldirilgan</td></tr><tr><td><code>transfer.converted</code></td><td>O&#x27;tkazilgan talabgor 14 kun ichida to&#x27;lov qilganda</td><td>Kim o&#x27;tkazgan, kim sotgan</td></tr></tbody></table></div>
+<h2>Hisoblash</h2>
+<ul><li><strong>Kunlik yopilish:</strong> har kuni 23:59 da (mentor vaqt mintaqasida).</li><li><strong>Formula:</strong> <code>kun_balli = (yig&#x27;indi + norma_bonusi) × seriya_koeffitsienti − jarimalar</code></li><li><strong>Reyting:</strong> har kuni qayta hisoblanadi, oxirgi 30 kun oynasi bo&#x27;yicha. Ustunlar: Retention 35, Norma 25, Baho 25, Progress 15.</li><li><strong>Rank tekshiruvi:</strong> kunlik yopilishdan keyin. Pasayish 30 kunlik oynada tekshiriladi.</li><li><strong>Liga:</strong> dushanba 00:00 da yopiladi, guruhlar qayta tuziladi.</li></ul>
+<p><strong>Idempotentlik:</strong> har hodisa <code>event_id</code> bilan yoziladi va bir marta hisoblanadi.</p>
+<p><strong>Tarix:</strong> har ball yozuvi <code>{sana, hodisa, tavsif, ball, koeffitsient, natija}</code> ko&#x27;rinishida saqlanadi va mentorga ochiq ko&#x27;rinadi.</p>
+<h2>Ekranlar</h2>
+<ol><li><strong>Bosh ekran:</strong> bugungi ball, seriya, rank shkalasi, ligadagi o&#x27;rin.</li><li><strong>Bugun:</strong> normaning beshta ko&#x27;rsatkichi progress ko&#x27;rinishida.</li><li><strong>Ball tarixi:</strong> kun bo&#x27;yicha ro&#x27;yxat, har yozuvda sabab va e&#x27;tiroz tugmasi.</li><li><strong>Liga:</strong> 15 kishilik jadval, o&#x27;z o&#x27;rningiz ajratilgan.</li><li><strong>Nishonlar:</strong> olingan va olinmagan, har birida shart yozilgan.</li><li><strong>Rank:</strong> hozirgi rank, uchta shart holati, keyingi rankda nima o&#x27;zgarishi.</li></ol>
+<h2>Bildirishnomalar</h2>
+<div class="tablewrap"><table><thead><tr><th>Vaqt</th><th>Xabar</th></tr></thead><tbody><tr><td>Slotdan 10 daqiqa oldin</td><td>&quot;Slotingiz boshlanmoqda. Ilovaga kiring.&quot;</td></tr><tr><td>Slot boshlanib 5 daqiqa o&#x27;tgach, onlayn bo&#x27;lmasa</td><td>&quot;Slot ochiq, lekin siz yo&#x27;qsiz. Har 30 daqiqa uchun −10 ball.&quot;</td></tr><tr><td>20:00 da, norma bajarilmagan bo&#x27;lsa</td><td>&quot;Normagacha 4 ta qo&#x27;ng&#x27;iroq qoldi.&quot;</td></tr><tr><td>Kun yakunida</td><td>&quot;Bugun +337 ball. Seriya: 14 kun. Senior IV gacha 800 ball.&quot;</td></tr><tr><td>Seriya uzilish xavfi</td><td>&quot;Seriyangiz bugun uziladi. Himoya kuningizni ishlatasizmi?&quot;</td></tr><tr><td>Rank ko&#x27;tarilganda</td><td>&quot;Tabriklaymiz, Expert! Ulushingiz 72% ga oshdi.&quot;</td></tr><tr><td>Dushanba ertalab</td><td>&quot;Yangi hafta boshlandi. O&#x27;tgan haftada Kumush ligada 4-o&#x27;rin.&quot;</td></tr></tbody></table></div>
+<h2>Bosqichma-bosqich joriy qilish</h2>
+<ol><li><strong>Birinchi bosqich:</strong> ball, kunlik norma, seriya, ball tarixi.</li><li><strong>Ikkinchi bosqich:</strong> rank shartlari va foizga bog&#x27;lash, rank ekrani.</li><li><strong>Uchinchi bosqich:</strong> liga va haftalik musobaqa.</li><li><strong>To&#x27;rtinchi bosqich:</strong> nishonlar, mavsumiy nishonlar, oy va yil mukofotlari.</li></ol>
+<p>Har bosqichdan keyin raqamlar qayta ko&#x27;riladi: ball miqdorlari birinchi oy ma&#x27;lumoti asosida aniqlashtiriladi.</p>
+<h2>Dasturlar va marshrutlash</h2>
+<p>Tizimda ikki dastur bor. Narx dasturga bog&#x27;langan, mentorga emas — shuning uchun o&#x27;quvchi &quot;arzon ustoz / qimmat ustoz&quot; degan tanlov oldida qolmaydi.</p>
+<div class="tablewrap"><table><thead><tr><th>Dastur</th><th>Ustoz talabi</th><th>Narx</th></tr></thead><tbody><tr><td>Speaking</td><td>B2 · IELTS 6.0–6.5 dan yuqori</td><td>350 000 dan 1 100 000 gacha</td></tr><tr><td>IELTS / CEFR tayyorgarlik</td><td>C1 · IELTS 7.5+, tasdiqlangan</td><td>550 000 dan 1 300 000 gacha</td></tr></tbody></table></div>
+<h3>Narx jadvali</h3>
+<div class="tablewrap"><table><thead><tr><th>Haftada</th><th>Speaking</th><th>IELTS / CEFR</th></tr></thead><tbody><tr><td>1 marta</td><td>350 000</td><td>550 000</td></tr><tr><td>2 marta</td><td>500 000</td><td>700 000</td></tr><tr><td>3 marta</td><td>650 000</td><td>850 000</td></tr><tr><td>4 marta</td><td>800 000</td><td>1 000 000</td></tr><tr><td>5 marta</td><td>950 000</td><td>1 150 000</td></tr><tr><td>6 marta</td><td>1 100 000</td><td>1 300 000</td></tr></tbody></table></div>
+<h3>Talabgorga teg qo&#x27;yish</h3>
+<p>Har bir talabgor <code>goal</code> maydoni bilan keladi: <code>speaking</code> yoki <code>sertifikat</code>. Manbalari: reklama formasidagi savol, SMS kampaniyasining qaysi biri ekani, yoki qo&#x27;ng&#x27;iroq paytida mentor qo&#x27;ygan teg.</p>
+<h3>Marshrutlash qoidalari</h3>
+<ul><li><strong><code>goal = sertifikat</code></strong> → faqat <code>mentor.level = certified</code> mentorlarga. Bo&#x27;sh mentor bo&#x27;lmasa, talabgor 2 soatgacha navbatda kutadi, keyin administratorga chiqadi. Oddiy mentorga tushmaydi.</li><li><strong><code>goal = speaking</code></strong> → barcha mentorlarga, sertifikatlilarga ham. Narx Speaking jadvalida qoladi.</li><li>Talabgor kartasida dastur va narx oralig&#x27;i ko&#x27;rinadi.</li><li>O&#x27;quvchi dasturni o&#x27;zgartirsa, sertifikatli mentorga o&#x27;tkaziladi.</li></ul>
+<h3>O&#x27;tkazish (transfer)</h3>
+<p>Mentor talabgorni boshqa oqimga o&#x27;tkazganda <code>lead.transferred</code> yoziladi va talabgor yangi navbatga tushadi. Izoh va suhbat tarixi u bilan birga ketadi.</p>
+<div class="tablewrap"><table><thead><tr><th>Holat</th><th>Mukofot</th></tr></thead><tbody><tr><td>O&#x27;tkazish (suhbatda aniqlangan)</td><td>+15 ball</td></tr><tr><td>O&#x27;tkazilgan talabgor 14 kun ichida to&#x27;lov qildi</td><td>+60 ball va 20 000 so&#x27;m</td></tr><tr><td>Birinchi dars o&#x27;tkazilib, keyin o&#x27;tkazilgan va to&#x27;lov bo&#x27;lgan</td><td>dars balli + 40 000 so&#x27;m</td></tr></tbody></table></div>
+<p>Yangi mentor o&#x27;tkazishni &quot;noto&#x27;g&#x27;ri&quot; deb belgilashi mumkin (masalan, odam aslida Speaking oqimiga tegishli edi) — bunda ball berilmaydi. Ketma-ket ikki marta noto&#x27;g&#x27;ri o&#x27;tkazgan mentorga ogohlantirish chiqadi.</p>
+<h3>Promokod (mentor chegirmasi)</h3>
+<p>Mentor o&#x27;quvchiga 10% yoki 15% chegirma berishi mumkin. Chegirma <strong>butunlay mentorning ulushidan</strong> ayiriladi: kompaniyaning so&#x27;mdagi ulushi ro&#x27;yxat narxidan hisoblanadi va o&#x27;zgarmaydi.</p>
+<div class="tablewrap"><table><thead><tr><th>Qoida</th><th>Qiymat</th></tr></thead><tbody><tr><td>Chegirma darajalari</td><td>10% yoki 15%, boshqa qiymat yo&#x27;q</td></tr><tr><td>Amal qilish muddati</td><td>Yaratilganidan 24 soat</td></tr><tr><td>Kiritish usuli</td><td>O&#x27;quvchi ilovada qo&#x27;lda teradi</td></tr><tr><td>Qamrovi</td><td>Faqat birinchi to&#x27;lov</td></tr><tr><td>Oylik limit</td><td>Pro — 2 ta, Senior va yuqori — 4 ta</td></tr><tr><td>Bir o&#x27;quvchiga</td><td>Bir marta, kod o&#x27;quvchi raqamiga biriktiriladi</td></tr><tr><td>Boshqa aksiyalar bilan</td><td>Birlashtirilmaydi</td></tr></tbody></table></div>
+<p>Hodisalar: <code>promo.issued</code> (kim, kimga, necha foiz), <code>promo.redeemed</code> (to&#x27;lov paytida), <code>promo.expired</code>.</p>
+<p>Hisob-kitob: <code>mentor_ulushi = (ro&#x27;yxat_narxi × rank_foizi) − chegirma_summasi</code>, <code>kompaniya_ulushi = ro&#x27;yxat_narxi × (1 − rank_foizi)</code>.</p>
+<p>O&#x27;lchov: chegirma bergan va bermagan mentorlarning konversiyasi solishtiriladi. Chegirma konversiyani oshirmasa, mentorga ko&#x27;rsatiladi — taqiqlanmaydi, lekin ko&#x27;rinadi.</p>
+<h3>Daraja tasdiqlash</h3>
+<p><code>mentor.level</code>: <code>standard</code> yoki <code>certified</code>. <code>certified</code> uchun sertifikat nusxasi (2 yildan eski emas) va administrator bilan suhbat. Har 2 yilda qayta ko&#x27;riladi.</p>
+<h2>O&#x27;quvchi bahosi (yulduzlar)</h2>
+<p>Baho — reytingning 25 ballini beradi va rank shartiga bevosita ta&#x27;sir qiladi. Shuning uchun uning qoidalari aniq yozilishi kerak.</p>
+<div class="tablewrap"><table><thead><tr><th>Qoida</th><th>Qiymat</th></tr></thead><tbody><tr><td>Qachon so&#x27;raladi</td><td>Har darsdan keyin, bitta ekran: 1–5 yulduz va ixtiyoriy izoh</td></tr><tr><td>O&#x27;tkazib yuborish</td><td>Mumkin, lekin keyingi darsni ochishdan oldin yana so&#x27;raladi</td></tr><tr><td>Hisob oynasi</td><td>Oxirgi 20 ta baho</td></tr><tr><td>Minimal son</td><td>5 ta bahogacha mentor &quot;yangi&quot; holatida; bu ko&#x27;rsatkich rankga ta&#x27;sir qilmaydi</td></tr><tr><td>O&#x27;rtacha hisoblash</td><td>Oxirgi 20 tadan eng past va eng yuqori bittasi tashlanadi, qolganining o&#x27;rtachasi olinadi</td></tr><tr><td>Hisobga olinmaydi</td><td>O&#x27;quvchi darsda 10 daqiqadan kam qatnashgan bo&#x27;lsa</td></tr><tr><td>E&#x27;tiroz</td><td>Mentor bahoga e&#x27;tiroz bildira oladi; administrator 24 soat ichida ko&#x27;radi</td></tr><tr><td>Past baho signali</td><td>Oxirgi 10 darsning o&#x27;rtachasi 3.5 dan past — prioritet tushadi va administrator bilan suhbat belgilanadi</td></tr></tbody></table></div>
+<p><strong>Ikki shkalani aralashtirmaslik.</strong> Umumiy reyting 0–100 ball shaklida ko&#x27;rsatiladi (rank chegaralari: 92, 94, 96, 98). Yulduz esa faqat o&#x27;quvchi bahosi, 1–5. Ikkalasi bir ekranda 5 ballik raqam sifatida ko&#x27;rinmasligi kerak.</p>
+<p><strong>Mentorga ko&#x27;rinadigan qism:</strong> baho o&#x27;zgarish grafigi (oxirgi 20 dars), o&#x27;rtacha ko&#x27;rsatkich va izohlar ro&#x27;yxati. Faqat raqam ko&#x27;rsatilsa, mentor nimani tuzatishni bilmaydi.</p>
+<p>Hodisalar: <code>rating.received</code> (yulduz, izoh, dars davomiyligi), <code>rating.disputed</code> (mentor e&#x27;tirozi), <code>rating.low_streak</code> (ketma-ket past baholar signali).</p>
+<h2>Liga jadvali (leaderboard)</h2>
+<div class="tablewrap"><table><thead><tr><th>Qoida</th><th>Qiymat</th></tr></thead><tbody><tr><td>Guruh</td><td>15 mentor, bitta liga ichida</td></tr><tr><td>Hisob</td><td>Hafta davomida yig&#x27;ilgan ball (dushanba 00:00 — yakshanba 23:59)</td></tr><tr><td>Ko&#x27;tarilish</td><td>1–3-o&#x27;rin keyingi ligaga</td></tr><tr><td>Tushish</td><td>13–15-o&#x27;rin oldingi ligaga</td></tr><tr><td>Teng ball</td><td>Retentioni yuqori mentor oldinda; u ham teng bo&#x27;lsa — ballga birinchi yetgan</td></tr><tr><td>Yangi mentor</td><td>Bronza ligadan boshlaydi, birinchi hafta tushish zonasiga kirmaydi</td></tr><tr><td>Muzlatish</td><td>Haftada qatnashmaydi, ligasi saqlanadi</td></tr><tr><td>Faolsizlik</td><td>Ketma-ket 3 hafta 0 ball — ligadan chiqariladi, faollashganda Bronzadan qaytadi</td></tr></tbody></table></div>
+<p>Ko&#x27;rsatiladigan ma&#x27;lumot: o&#x27;rin, ism (familiya bosh harfi bilan), haftalik ball, o&#x27;tgan haftaga nisbatan siljish, qisqa izoh (nechta dars, nechta yangi o&#x27;quvchi). Mentorning o&#x27;z qatori ajratib ko&#x27;rsatiladi.</p>
+<p>Oylik jadval barcha ligalar bo&#x27;ylab umumiy hisoblanadi. Yillik jadvalda ball, reyting va retention birgalikda olinadi va faqat Expert, Master, Legend ranklari qatnashadi.</p>
+<p>Hodisalar: <code>league.week_closed</code> (natijalar, ko&#x27;tarilish va tushish), <code>league.group_formed</code> (yangi guruhlar), <code>league.reward_granted</code>.</p>
+<h2>Birinchi darslar tizimi (qirol va bosqichlar)</h2>
+<p>Birinchi dars bepul bo&#x27;lgani uchun mentorda uni o&#x27;tishga alohida turtki kerak. Tizim uchta mexanikaga tayanadi va hammasi <strong>natijaga</strong> bog&#x27;langan, sonning o&#x27;ziga emas.</p>
+<div class="tablewrap"><table><thead><tr><th>Mexanika</th><th>Qoida</th><th>Mukofot</th></tr></thead><tbody><tr><td>Haftalik unvon</td><td>Eng ko&#x27;p muvaffaqiyatli birinchi dars (72 soat ichida to&#x27;lovga aylangan). Teng bo&#x27;lsa — konversiya foizi</td><td>Toj (liga jadvalida, 1 hafta), +1 000 ball, kuniga +1 issiq talabgor</td></tr><tr><td>Bosqichlar</td><td>Har 20 ta o&#x27;tkazilgan birinchi dars. Shart: o&#x27;sha 20 talikda konversiya ≥ 25%</td><td>20 → +300, 40 → +600, 60 → +900 va nishon, 100 → +1 500 va doimiy oqim ustunligi</td></tr><tr><td>Ketma-ketlik</td><td>Ketma-ket konversiyalar</td><td>3 ta → +200, 5 ta → +400 va bir kunlik oqim ustunligi</td></tr></tbody></table></div>
+<p>Bosqich sharti bajarilmasa, bosqich yopiq qoladi va hisob keyingi 20 talikda davom etadi (ball yo&#x27;qolmaydi, faqat mukofot berilmaydi).</p>
+<p>Hodisalar: <code>trial.king_awarded</code> (hafta, g&#x27;olib, muvaffaqiyatli darslar soni), <code>trial.milestone_reached</code> (bosqich, konversiya foizi), <code>trial.streak</code> (uzunlik).</p>
+<p>Ilovada ko&#x27;rsatiladi: progres chizig&#x27;i (&quot;17 / 20&quot;), joriy konversiya foizi va qirol poygasidagi o&#x27;rin.</p>
+<h2>O&#x27;lchanadigan ko&#x27;rsatkichlar</h2>
+<div class="tablewrap"><table><thead><tr><th>Ko&#x27;rsatkich</th><th>Nima deydi</th></tr></thead><tbody><tr><td>Tariflar taqsimoti (dastur va dars soni bo&#x27;yicha)</td><td>Mentorlar qimmat tarifni taklif qilyaptimi</td></tr><tr><td>Mentorning soatlik daromadi (rank va dastur kesimida)</td><td>40 000 so&#x27;mdan pastga tushsa — mentorlar keta boshlaydi</td></tr><tr><td>Intensiv tarifdagi o&#x27;quvchilarning retentioni</td><td>Narxni oshirish o&#x27;zini oqlaydimi</td></tr></tbody></table></div>
+<p>Bu uchtasi birinchi oydan yig&#x27;iladi: narx bo&#x27;yicha keyingi qarorlar shu raqamlarga asoslanadi.</p>
+</div></section>
+<div class="wrap"><footer>MyTeacher · ichki hujjat · 23-sentabr, 2026</footer></div>
+</main>
+</body>
+</html>

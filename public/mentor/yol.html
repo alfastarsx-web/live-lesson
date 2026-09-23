@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mentor yo'li</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Onest:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ink:#0A1747; --deep:#04124A; --brand:#0A47DB; --brand-soft:#E8EEFD; --signal:#2F7BFF;
+  --gold:#FF9A1F; --gold-soft:#FFF2E0; --red:#D64545; --red-soft:#FDECEC; --green:#1E8E5A; --green-soft:#E6F5EE;
+  --bg:#F4F6FC; --card:#FFFFFF; --line:#E3E8F6; --line-2:#CBD6EF; --text:#0A1747; --mute:#5C6A90;
+  --display:"Lexend","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Onest","Segoe UI",system-ui,-apple-system,sans-serif;
+  --shadow:0 1px 2px rgba(10,23,71,.05),0 10px 30px rgba(10,23,71,.07);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ink:#E8EDFB; --deep:#050B20; --brand:#5C8DFF; --brand-soft:#151F42; --signal:#7AA7FF;
+  --gold:#FFB454; --gold-soft:#36260F; --red:#FF7A7A; --red-soft:#3A1C1C; --green:#4FD198; --green-soft:#12301F;
+  --bg:#070C1E; --card:#0D1530; --line:#1C2749; --line-2:#2B3765; --text:#E8EDFB; --mute:#9BA9CF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --ink:#E8EDFB; --deep:#050B20; --brand:#5C8DFF; --brand-soft:#151F42; --signal:#7AA7FF;
+  --gold:#FFB454; --gold-soft:#36260F; --red:#FF7A7A; --red-soft:#3A1C1C; --green:#4FD198; --green-soft:#12301F;
+  --bg:#070C1E; --card:#0D1530; --line:#1C2749; --line-2:#2B3765; --text:#E8EDFB; --mute:#9BA9CF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
+h1,h2,h3,h4{font-family:var(--display);margin:0;letter-spacing:-.02em;text-wrap:balance}
+p{margin:0}
+button,select,input{font-family:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding-inline:18px}
+.hexbullet{width:15px;height:13px;background:var(--brand);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:inline-block}
+
+/* hero */
+.hero{background:linear-gradient(150deg,#0B34B8 0%,#07227E 50%,#04124A 100%);color:#fff;padding:44px 0 36px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-40px;width:260px;height:225px;background:rgba(255,255,255,.06);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.hero .eyebrow{font-family:var(--display);font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#AFC0F0;display:flex;align-items:center;gap:10px}
+.hero .eyebrow::before{content:"";width:14px;height:12px;background:var(--gold);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.hero h1{font-size:clamp(32px,8.5vw,46px);font-weight:800;line-height:1.02;margin:16px 0 14px;position:relative}
+.hero p{color:#D5DEFA;font-size:17px;max-width:30em;position:relative}
+.hero .now{margin-top:26px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.18);position:relative}
+.hero .now div{background:#081C63;padding:14px 12px}
+.hero .now b{display:block;font-family:var(--display);font-size:21px;font-weight:700;letter-spacing:-.02em}
+.hero .now span{font-size:12px;color:#AFC0F0;display:block;margin-top:2px;line-height:1.3}
+
+/* sections */
+section{padding:38px 0 6px}
+.slabel{font-family:var(--display);font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--brand);display:flex;align-items:center;gap:9px}
+.slabel i{width:13px;height:11px;background:var(--gold);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:block}
+h2{font-size:clamp(25px,6vw,32px);font-weight:700;margin:12px 0 10px}
+.lede{color:var(--mute);font-size:17px;margin-bottom:22px}
+.card{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:20px;margin-bottom:12px}
+.card h3{font-size:18px;font-weight:600;margin-bottom:10px}
+.muted{color:var(--mute);font-size:15px}
+
+/* rank ladder */
+.ladder{display:grid;gap:10px}
+.rank{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden}
+.rank .top{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;padding:16px 18px}
+.rank .badge{width:44px;height:38px;background:var(--brand);color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:16px;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.rank h3{font-size:19px;font-weight:700}
+.rank .who{font-size:13px;color:var(--mute);margin-top:1px}
+.rank .pct{font-family:var(--display);font-size:30px;font-weight:800;color:var(--brand);letter-spacing:-.04em;line-height:1}
+.rank .pct small{display:block;font-family:var(--body);font-size:11px;font-weight:400;color:var(--mute);letter-spacing:0;margin-top:2px;text-align:right}
+.rank .meter{height:6px;background:var(--line)}
+.rank .meter i{display:block;height:100%;background:var(--brand)}
+.rank .perk{padding:12px 18px 16px;font-size:14px;color:var(--mute);border-top:1px solid var(--line)}
+.rank.legend{border-color:var(--gold)}
+.rank.legend .badge{background:var(--gold)}
+.rank.legend .pct{color:var(--gold)}
+.rank.legend .meter i{background:var(--gold)}
+
+/* calculator */
+.calc{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:20px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--bg);padding:5px;margin-bottom:18px}
+.seg button{border:0;background:transparent;color:var(--mute);font:600 14px var(--display);padding:11px 8px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--brand);color:#fff}
+label.fld{display:block;margin-bottom:16px}
+label.fld .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:var(--display);font-size:14px;font-weight:500;color:var(--mute)}
+label.fld output{font-family:var(--display);font-size:26px;font-weight:700;color:var(--text);letter-spacing:-.03em}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;background:var(--line);margin-top:12px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:30px;background:var(--brand);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);cursor:grab}
+input[type=range]::-moz-range-thumb{width:34px;height:30px;background:var(--brand);border:0;cursor:grab}
+.result{background:var(--deep);color:#fff;padding:20px;margin-top:4px}
+.result .lbl{font-family:var(--display);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#AFC0F0}
+.result .sum{font-family:var(--display);font-size:clamp(34px,10vw,46px);font-weight:800;letter-spacing:-.04em;line-height:1.05;margin-top:6px;font-variant-numeric:tabular-nums}
+.result .sum span{font-size:18px;font-weight:500;color:#AFC0F0;margin-left:6px}
+.result .rows{margin-top:16px;border-top:1px solid rgba(255,255,255,.2)}
+.result .rows div{display:flex;justify-content:space-between;gap:14px;padding:10px 0;font-size:14px;color:#D5DEFA;border-bottom:1px solid rgba(255,255,255,.1)}
+.result .rows div:last-child{border-bottom:0}
+.result .rows b{font-family:var(--display);color:#fff;font-variant-numeric:tabular-nums}
+.rankpill{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#fff;font:700 13px var(--display);padding:7px 12px;margin-top:14px;letter-spacing:.04em}
+
+/* points */
+.plist{display:grid;gap:8px}
+.plist .p{display:flex;justify-content:space-between;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);padding:13px 16px}
+.plist .p b{font-family:var(--display);color:var(--brand);font-size:17px;font-variant-numeric:tabular-nums}
+.big100{background:var(--brand);color:#fff;padding:18px 20px;display:flex;align-items:baseline;gap:12px;margin-bottom:10px}
+.big100 b{font-family:var(--display);font-size:40px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.streak{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.streak div{background:var(--gold-soft);padding:12px 10px;text-align:center}
+.streak b{display:block;font-family:var(--display);font-size:18px;font-weight:700;color:#B35C00}
+:root[data-theme="dark"] .streak b,:root:not([data-theme="light"]) .streak b{color:var(--gold)}
+.streak span{font-size:11px;color:var(--mute);display:block;margin-top:2px}
+
+/* priority */
+.pri{display:grid;gap:5px}
+.pri .lvl{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;padding:12px 15px;color:#fff;font-size:14px}
+.pri .lvl b{font-family:var(--display);font-size:15px}
+.pri .l1{background:var(--green)}.pri .l2{background:var(--signal)}.pri .l3{background:var(--line-2);color:var(--text)}.pri .l4{background:var(--red)}
+
+/* rewards */
+.rew{display:grid;gap:12px}
+@media(min-width:620px){.rew{grid-template-columns:1fr 1fr}}
+.rew .r{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:18px}
+.rew .r .k{font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.rew .r h3{font-size:19px;margin:8px 0 8px}
+.rew .r p{font-size:15px;color:var(--mute)}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.badges span{font:500 13px var(--body);background:var(--brand-soft);color:var(--brand);padding:8px 12px}
+.missions{display:grid;gap:8px;margin-top:12px}
+.missions div{display:flex;justify-content:space-between;gap:12px;background:var(--gold-soft);padding:12px 14px;font-size:14px}
+.missions b{font-family:var(--display);color:#B35C00;white-space:nowrap}
+:root[data-theme="dark"] .missions b,:root:not([data-theme="light"]) .missions b{color:var(--gold)}
+
+/* fair */
+.fair{display:grid;gap:10px}
+.fair div{background:var(--card);border-left:3px solid var(--green);padding:14px 16px;font-size:15px}
+.fair b{font-family:var(--display)}
+
+/* quiz */
+.quiz{background:var(--deep);color:#fff;padding:24px 20px;margin-top:8px}
+.quiz h2{color:#fff;margin-bottom:8px}
+.quiz .lede{color:#AFC0F0}
+.qwrap{margin-top:18px}
+.qq{margin-bottom:20px}
+.qq p{font-family:var(--display);font-weight:600;font-size:16px;margin-bottom:10px}
+.qq button{display:block;width:100%;text-align:left;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;padding:12px 14px;font-size:15px;margin-bottom:7px;cursor:pointer}
+.qq button[aria-pressed="true"]{background:#fff;color:var(--deep);border-color:#fff;font-weight:600}
+.qq button.ok{background:var(--green);border-color:var(--green);color:#fff}
+.qq button.no{background:var(--red);border-color:var(--red);color:#fff}
+.qbtn{width:100%;background:var(--gold);color:#fff;border:0;padding:16px;font:700 17px var(--display);cursor:pointer;margin-top:6px}
+.qbtn[disabled]{opacity:.5;cursor:not-allowed}
+.qres{margin-top:16px;padding:18px;background:rgba(255,255,255,.1);font-size:16px}
+.qres b{font-family:var(--display);font-size:22px;display:block;margin-bottom:6px}
+footer{padding:34px 0 60px;color:var(--mute);font-size:14px;text-align:center}
+</style>
+
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">MyTeacher mentorlari uchun</p>
+    <h1>Mentor yo'li</h1>
+    <p>Pro'dan Legend'gacha. Har bir pog'onada o'quvchi to'lovidan oladigan ulushingiz oshadi — 60% dan 85% gacha.</p>
+    <div class="now">
+      <div><b>60→85%</b><span>obunadan ulushingiz</span></div>
+      <div><b>100</b><span>kunlik ball normasi</span></div>
+      <div><b>Har kuni</b><span>pulni yechib olasiz</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section class="wrap">
+  <p class="slabel"><i></i>Yo'lingiz</p>
+  <h2>Besh pog'ona</h2>
+  <p class="lede">Rank uchta shart bir vaqtda bajarilganda ko'tariladi: ball, reyting va faol o'quvchilar soni. Uchtasidan biri yetmasa, rank kutib turadi.</p>
+  <div class="ladder">
+    <article class="rank">
+      <div class="top"><span class="badge">P</span><div><h3>Pro</h3><p class="who">1–5 o'quvchi · boshlang'ich</p></div><p class="pct">60%<small>ulush</small></p></div>
+      <div class="meter"><i style="width:20%"></i></div>
+      <p class="perk">Standart talabgor oqimi. Birinchi ikki hafta daromad kafolati ostida ishlaysiz.</p>
+    </article>
+    <article class="rank">
+      <div class="top"><span class="badge">S</span><div><h3>Senior</h3><p class="who">6–10 o'quvchi · reyting 92 · 2 000 ball</p></div><p class="pct">66%<small>ulush</small></p></div>
+      <div class="meter"><i style="width:40%"></i></div>
+      <p class="perk">Qo'llab-quvvatlashda navbatsiz javob. Oqimda ustunlik: kuniga bitta qo'shimcha talabgor.</p>
+    </article>
+    <article class="rank">
+      <div class="top"><span class="badge">E</span><div><h3>Expert</h3><p class="who">11–16 o'quvchi · reyting 94 · 6 000 ball</p></div><p class="pct">72%<small>ulush</small></p></div>
+      <div class="meter"><i style="width:60%"></i></div>
+      <p class="perk">"Issiq" talabgorlar birinchi navbatda va bepul metodik treninglar. Shu pog'onadan boshlab "Yilning eng yaxshi mentori" poygasiga nomzod bo'lasiz.</p>
+    </article>
+    <article class="rank">
+      <div class="top"><span class="badge">M</span><div><h3>Master</h3><p class="who">17–24 o'quvchi · reyting 96 · 14 000 ball</p></div><p class="pct">78%<small>ulush</small></p></div>
+      <div class="meter"><i style="width:80%"></i></div>
+      <p class="perk">Yangi mentorlarga ustozlik qilish va undan qo'shimcha daromad olish huquqi.</p>
+    </article>
+    <article class="rank legend">
+      <div class="top"><span class="badge">L</span><div><h3>Legend</h3><p class="who">25+ o'quvchi · reyting 98 · 28 000 ball</p></div><p class="pct">85%<small>ulush</small></p></div>
+      <div class="meter"><i style="width:100%"></i></div>
+      <p class="perk">Eng issiq oqim, alohida mukofot fondi va metodikaga ta'sir qilish huquqi. IELTS yoki CEFR imtihoni to'lovi to'liq kompaniya hisobidan.</p>
+    </article>
+  </div>
+  <p class="muted" style="margin-top:14px">Rank pasayishi ham bor: reyting 30 kun davomida chegaradan past bo'lsa, pog'ona bir qadam tushadi. Ball esa hech qachon yo'qolmaydi — reyting tiklanishi bilan rank o'zi qaytadi.</p>
+</section>
+
+<section class="wrap">
+  <p class="slabel"><i></i>Hisob-kitob</p>
+  <h2>Sizning daromadingiz</h2>
+  <p class="lede">Surib ko'ring: o'quvchi soni va tarif o'zgarganda oylik daromad qanday o'zgaradi.</p>
+  <div class="calc">
+    <div class="seg" role="group" aria-label="Dastur">
+      <button type="button" id="pSpeak" aria-pressed="true">Speaking</button>
+      <button type="button" id="pIelts" aria-pressed="false">IELTS / CEFR</button>
+    </div>
+    <label class="fld" for="students">
+      <span class="row">O'quvchilar soni <output id="stOut">10</output></span>
+      <input id="students" type="range" min="1" max="30" value="10">
+    </label>
+    <label class="fld" for="lessons">
+      <span class="row">Haftada dars <output id="lsOut">2 marta</output></span>
+      <input id="lessons" type="range" min="1" max="6" value="2">
+    </label>
+    <div class="result">
+      <p class="lbl">Oyiga, sizning hisobingizga</p>
+      <p class="sum" id="sum">3 300 000<span>so'm</span></p>
+      <p class="rankpill" id="pill">SENIOR · 66%</p>
+      <div class="rows">
+        <div><span id="tarLbl">Tarif: 500 000 so'm</span><b id="tarVal">×10</b></div>
+        <div><span>Bitta o'quvchidan</span><b id="perOne">330 000</b></div>
+        <div><span>Ustiga qo'shiladi</span><b>bonuslar</b></div>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:12px">Hisobda faqat obuna ulushi bor. Birinchi darsdan keyin 24 soat ichida to'lov bo'lsa bitta dars puli, referral uchun 40 000 so'm, missiyalar uchun alohida pul mukofoti qo'shiladi.</p>
+  </div>
+</section>
+
+<section class="wrap">
+  <p class="slabel"><i></i>Kuningiz</p>
+  <h2>Kuniga 100 ball</h2>
+  <p class="lede">Ball qanday yig'ilishini o'zingiz tanlaysiz. Norma bajarilgan kun — seriyangizni davom ettiradigan kun.</p>
+  <div class="big100"><b>100</b><span>ball — kunlik norma</span></div>
+  <div class="plist">
+    <div class="p"><span>Bitta qo'ng'iroq</span><b>8</b></div>
+    <div class="p"><span>Darsga vaqt kelishildi</span><b>15</b></div>
+    <div class="p"><span>Birinchi dars o'tildi</span><b>30</b></div>
+    <div class="p"><span>Keyingi darslar</span><b>10</b></div>
+    <div class="p"><span>Belgilagan vaqtda onlayn</span><b>20</b></div>
+    <div class="p"><span>Norma bajarildi</span><b>+50</b></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3>Seriya ballaringizni ko'paytiradi</h3>
+    <div class="streak">
+      <div><b>×1.1</b><span>3 kun</span></div>
+      <div><b>×1.2</b><span>7 kun</span></div>
+      <div><b>×1.3</b><span>14 kun</span></div>
+      <div><b>×1.5</b><span>30 kun</span></div>
+    </div>
+    <p class="muted" style="margin-top:12px">Haftada ikki kun dam olish seriyani uzmaydi — kalendarda belgilab qo'ying. Oyiga bitta "himoya kuni" bor: bajarilmagan kunni yopib qo'yadi.</p>
+  </div>
+</section>
+
+<section class="wrap">
+  <p class="slabel"><i></i>Baho</p>
+  <h2>O'quvchi qo'yadigan yulduzlar</h2>
+  <p class="lede">Har darsdan keyin o'quvchi 1 dan 5 gacha yulduz qo'yadi. Bu reytingingizning 25 ballini beradi — ya'ni rankka va foizingizga bevosita ta'sir qiladi.</p>
+  <div class="card">
+    <h3>Qanday hisoblanadi</h3>
+    <div class="missions">
+      <div><span>Hisob oynasi</span><b>oxirgi 20 ta baho</b></div>
+      <div><span>Eng past va eng yuqori baho</span><b>tashlab yuboriladi</b></div>
+      <div><span>Birinchi 5 ta bahogacha</span><b>rankka ta'sir qilmaydi</b></div>
+    </div>
+    <p class="muted" style="margin-top:10px">Ya'ni bitta tasodifiy past baho ko'rsatkichingizni buzmaydi. Muhimi — o'rtacha holat.</p>
+  </div>
+  <div class="card">
+    <h3>Sizni himoya qiladigan qoidalar</h3>
+    <ul style="margin:0;padding-left:20px;font-size:15px;color:var(--mute)">
+      <li style="margin-bottom:6px">Darsda 10 daqiqadan kam qatnashgan o'quvchining bahosi hisobga olinmaydi.</li>
+      <li style="margin-bottom:6px">Har bir bahoga e'tiroz bildira olasiz — administrator 24 soat ichida ko'rib chiqadi.</li>
+      <li>Ballaringiz ham, reytingingiz ham har bir yozuvda ko'rinadi: qachon, kim, qancha.</li>
+    </ul>
+  </div>
+  <div class="note">Oxirgi 10 darsning o'rtachasi 3.5 dan pasaysa, prioritetingiz tushadi va administrator siz bilan bog'lanadi. Bu jarima emas — nimadir noto'g'ri ketayotganini bildiradigan signal.</div>
+  <p class="muted" style="margin-top:12px">Ikki shkalani aralashtirmang: <b>reyting 0 dan 100 gacha</b> (rank sharti), <b>yulduz esa 1 dan 5 gacha</b> (o'quvchi bahosi).</p>
+</section>
+
+<section class="wrap">
+  <p class="slabel"><i></i>Oqimingiz</p>
+  <h2>Prioritet — ertangi talabgorlaringiz</h2>
+  <p class="lede">Kim ko'proq talabgor olishini prioritet hal qiladi. U har kuni qayta hisoblanadi va ikki kunda tiklanadi.</p>
+  <div class="pri">
+    <div class="lvl l1"><b>90–100</b><span>birinchi navbat, "issiq" talabgorlar</span></div>
+    <div class="lvl l2"><b>70–89</b><span>odatiy navbat</span></div>
+    <div class="lvl l3"><b>50–69</b><span>navbatning oxiri, kamroq talabgor</span></div>
+    <div class="lvl l4"><b>50 dan past</b><span>yangi talabgor berilmaydi</span></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h3>Nimadan yig'iladi</h3>
+    <p class="muted">Norma bajarilgan kunlar 40% · talabgorni tez qabul qilish 25% · darsga chiqish intizomi 20% · status va izoh to'liqligi 15%.</p>
+  </div>
+</section>
+
+<section class="wrap">
+  <p class="slabel"><i></i>Mukofotlar</p>
+  <h2>Ballardan tashqari</h2>
+  <p class="lede">Ba'zi narsalar to'g'ridan-to'g'ri pul bilan qaytadi.</p>
+  <div class="rew">
+    <div class="r">
+      <p class="k">Missiyalar</p>
+      <h3>Haftalik vazifalar</h3>
+      <p>Bir vaqtda ikkitadan ko'p bo'lmaydi. Bajarilgan missiya puli darhol hamyonga tushadi.</p>
+      <div class="missions">
+        <div><span>Bugun 2 ta birinchi dars</span><b>+30 000</b></div>
+        <div><span>Haftada 10 ta dars</span><b>+150 000</b></div>
+        <div><span>3 ta yangi o'quvchi</span><b>+250 000</b></div>
+      </div>
+    </div>
+    <div class="r">
+      <p class="k">Liga</p>
+      <h3>Har hafta yangi imkoniyat</h3>
+      <p>15 kishilik guruhda haftalik ball bo'yicha raqobat. Bronza, Kumush, Oltin. Yuqoridagi uchtasi ko'tariladi. Yillik poygada esa Expert va undan yuqori ranklar qatnashadi.</p>
+      <div class="missions">
+        <div><span>1-o'rin</span><b>+300…800 ball</b></div>
+        <div><span>G'olibga</span><b>oqimda ustunlik</b></div>
+      </div>
+    </div>
+    <div class="r">
+      <p class="k">Nishonlar</p>
+      <h3>Bir marta olinadi, umrbod qoladi</h3>
+      <p>Har biri aniq bir odatni mustahkamlaydi. Olinmaganlari kulrang turadi — keyingi maqsadingiz.</p>
+      <div class="badges"><span>Birinchi o'quvchi</span><span>Temir intizom</span><span>Snayper</span><span>Marafonchi</span><span>Ustoz</span><span>Kechki qahramon</span></div>
+    </div>
+    <div class="r">
+      <p class="k">Promokod</p>
+      <h3>Chegirma — sizning qaroringiz</h3>
+      <p>O'quvchiga 10% yoki 15% chegirma bera olasiz. Kod sizning nomingizga biriktiriladi, o'quvchi uni qo'lda teradi va u <b>24 soat</b> amal qiladi.</p>
+      <div class="missions">
+        <div><span>Chegirmani kim to'laydi</span><b>siz</b></div>
+        <div><span>Oyiga</span><b>2–4 ta kod</b></div>
+      </div>
+      <p class="muted" style="margin-top:10px">Kompaniyaning ulushi o'zgarmaydi — chegirma sizning ulushingizdan chiqadi. Shuning uchun uni oxirgi dalil sifatida ishlating.</p>
+    </div>
+    <div class="r">
+      <p class="k">Doimiy</p>
+      <h3>Har oy takrorlanadigan</h3>
+      <p>Bu raqamlar rankdan qat'i nazar ishlaydi.</p>
+      <div class="missions">
+        <div><span>Referral</span><b>+40 000</b></div>
+        <div><span>24 soat bonusi</span><b>bitta dars puli</b></div>
+        <div><span>O'quvchi 3 oy o'qidi</span><b>+150 ball</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <p class="slabel"><i></i>Birinchi darslar</p>
+  <h2>Sinov darslari qiroli</h2>
+  <p class="lede">Birinchi dars bepul — lekin u sizning eng kuchli qurolingiz. Uni ko'p va yaxshi o'tgan mentor uchun alohida tizim bor.</p>
+
+  <div class="card">
+    <h3>Haftalik unvon</h3>
+    <p>G'olib — eng ko'p <b>muvaffaqiyatli</b> birinchi dars o'tkazgan mentor: 72 soat ichida to'lovga aylangan darslar hisobga olinadi. Ball teng bo'lsa, konversiya foizi yuqori bo'lgani g'olib.</p>
+    <div class="missions" style="margin-top:12px">
+      <div><span>Liga jadvalida ismingiz yonida</span><b>toj</b></div>
+      <div><span>Unvon uchun</span><b>+1 000 ball</b></div>
+      <div><span>Bir hafta davomida</span><b>kuniga +1 issiq talabgor</b></div>
+    </div>
+    <p class="muted" style="margin-top:10px">Toj bir hafta turadi. Keyingi dushanba yangi g'olib aniqlanadi.</p>
+  </div>
+
+  <div class="card">
+    <h3>Bosqichlar — har 20 ta darsda</h3>
+    <p>Har 20 ta o'tkazilgan birinchi dars bosqich ochadi. Lekin bitta sharti bor: <b>o'sha yigirmatalikda konversiya 25% dan past bo'lmasin.</b> Past bo'lsa, bosqich yopiq qoladi va hisob davom etadi.</p>
+    <div class="missions" style="margin-top:12px">
+      <div><span>20 ta dars</span><b>+300 ball</b></div>
+      <div><span>40 ta dars</span><b>+600 ball</b></div>
+      <div><span>60 ta dars</span><b>+900 ball va "Marafonchi" nishoni</b></div>
+      <div><span>100 ta dars</span><b>+1 500 ball va doimiy oqim ustunligi</b></div>
+    </div>
+    <p class="muted" style="margin-top:10px">Ilovada progres chizig'i turadi: "17 / 20 — yana uchtasi".</p>
+  </div>
+
+  <div class="card">
+    <h3>Ketma-ketlik</h3>
+    <div class="missions">
+      <div><span>3 ta ketma-ket konversiya</span><b>+200 ball</b></div>
+      <div><span>5 ta ketma-ket konversiya</span><b>+400 ball va bir kunlik oqim ustunligi</b></div>
+    </div>
+    <p class="muted" style="margin-top:10px">Ketma-ketlik uzilsa, hisob noldan boshlanadi — lekin bosqichlar saqlanadi.</p>
+  </div>
+
+  <div class="note">Nega sondan emas, natijadan hisoblanadi: 20 ta yuzaki dars o'tish oson, lekin undan hech kim yutmaydi. Shuning uchun har bir mukofot konversiya bilan bog'langan.</div>
+</section>
+
+<section class="wrap">
+  <p class="slabel"><i></i>Adolat</p>
+  <h2>Sizni himoya qiladigan qoidalar</h2>
+  <p class="lede">Tizim faqat adolatli bo'lsa ishlaydi. Shuning uchun quyidagilar yozib qo'yilgan.</p>
+  <div class="fair">
+    <div><b>Talabgor yetmasa, norma pasayadi.</b> Tizim o'sha kuni yetarli talabgor bera olmagan bo'lsa, norma real songa moslashadi.</div>
+    <div><b>O'quvchi darsga kelmasa, siz yo'qotmaysiz.</b> Dars o'tkazilgan deb hisoblanadi.</div>
+    <div><b>Kasallik, ta'til yoki sessiya — muzlatish.</b> 7 kun, sessiya davrida 14 kungacha. Seriya ham, reyting ham joyida qoladi.</div>
+    <div><b>Har bir ball ko'rinadi.</b> Qachon, nima uchun, qancha. Tushunarsiz yozuvga e'tiroz bildirasiz — 24 soat ichida javob beriladi.</div>
+    <div><b>Birinchi ikki hafta kafolati.</b> Normani 10 kun bajarsangiz, daromadingiz kelishilgan minimal summadan kam bo'lmaydi.</div>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="quiz">
+    <h2>Tizimni qanchalik bilasiz?</h2>
+    <p class="lede">Besh savol, bir daqiqa. Hammasiga to'g'ri javob bersangiz — <b style="color:#fff">+100 ball</b>. Bu majburiy emas va hech narsani cheklamaydi.</p>
+    <div class="qwrap" id="qwrap"></div>
+    <button class="qbtn" id="qcheck" disabled>Javoblarni tekshirish</button>
+    <div id="qres"></div>
+  </div>
+</section>
+
+<footer class="wrap">MyTeacher · Mentor yo'li · qoidalar birinchi oy natijalaridan keyin aniqlashtiriladi</footer>
+</main>
+
+<script>
+(function(){
+  var PRICES = {speak:[350000,500000,650000,800000,950000,1100000], ielts:[550000,700000,850000,1000000,1150000,1300000]};
+  var RANKS = [{n:"PRO",max:5,p:.60},{n:"SENIOR",max:10,p:.66},{n:"EXPERT",max:16,p:.72},{n:"MASTER",max:24,p:.78},{n:"LEGEND",max:Infinity,p:.85}];
+  var prog = "speak";
+  var st = document.getElementById("students"), ls = document.getElementById("lessons");
+  function fmt(v){ return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g," "); }
+  function calc(){
+    var s = +st.value, l = +ls.value;
+    var price = PRICES[prog][l-1];
+    var r = RANKS.find(function(x){ return s <= x.max; });
+    var perOne = price * r.p, total = perOne * s;
+    document.getElementById("stOut").textContent = s;
+    document.getElementById("lsOut").textContent = l + " marta";
+    document.getElementById("sum").firstChild.textContent = fmt(total);
+    document.getElementById("pill").textContent = r.n + " · " + Math.round(r.p*100) + "%";
+    document.getElementById("tarLbl").textContent = "Tarif: " + fmt(price) + " so'm";
+    document.getElementById("tarVal").textContent = "×" + s;
+    document.getElementById("perOne").textContent = fmt(perOne);
+  }
+  st.addEventListener("input", calc); ls.addEventListener("input", calc);
+  document.getElementById("pSpeak").addEventListener("click", function(){ prog="speak"; this.setAttribute("aria-pressed","true"); document.getElementById("pIelts").setAttribute("aria-pressed","false"); calc(); });
+  document.getElementById("pIelts").addEventListener("click", function(){ prog="ielts"; this.setAttribute("aria-pressed","true"); document.getElementById("pSpeak").setAttribute("aria-pressed","false"); calc(); });
+  calc();
+
+  var QS = [
+    {q:"Kunlik norma nimaga teng?", o:["Kuniga 100 ball","Kuniga 8 soat onlayn","Haftada 10 ta dars"], a:0},
+    {q:"Prioritet nimani belgilaydi?", o:["Oylik maoshni","Ertaga qancha talabgor olishingizni","O'quvchining darajasini"], a:1},
+    {q:"Seriya 30 kunga yetsa, ballaringiz nechchiga ko'payadi?", o:["×1.2","×1.5","×2"], a:1},
+    {q:"Rank ko'tarilishi uchun nechta shart bajarilishi kerak?", o:["Faqat ball","Ball va reyting","Ball, reyting va o'quvchilar soni"], a:2},
+    {q:"Legend rankida obunadan ulushingiz qancha?", o:["75%","85%","100%"], a:1}
+  ];
+  var chosen = new Array(QS.length).fill(null), locked = false;
+  var wrap = document.getElementById("qwrap"), btn = document.getElementById("qcheck");
+  function paint(){
+    wrap.innerHTML = "";
+    QS.forEach(function(item, qi){
+      var d = document.createElement("div"); d.className = "qq";
+      var p = document.createElement("p"); p.textContent = (qi+1) + ". " + item.q; d.appendChild(p);
+      item.o.forEach(function(txt, oi){
+        var b = document.createElement("button"); b.type = "button"; b.textContent = txt;
+        b.setAttribute("aria-pressed", chosen[qi] === oi ? "true" : "false");
+        if(locked){
+          b.disabled = true;
+          if(oi === item.a) b.className = "ok";
+          else if(chosen[qi] === oi) b.className = "no";
+        } else {
+          b.addEventListener("click", function(){ chosen[qi] = oi; paint(); });
+        }
+        d.appendChild(b);
+      });
+      wrap.appendChild(d);
+    });
+    btn.disabled = locked || chosen.indexOf(null) !== -1;
+  }
+  btn.addEventListener("click", function(){
+    if(locked){ chosen = new Array(QS.length).fill(null); locked = false; btn.textContent = "Javoblarni tekshirish"; document.getElementById("qres").innerHTML = ""; paint(); return; }
+    locked = true;
+    var score = chosen.reduce(function(n, c, i){ return n + (c === QS[i].a ? 1 : 0); }, 0);
+    document.getElementById("qres").innerHTML = '<div class="qres"><b>' + score + ' / ' + QS.length + '</b>' +
+      (score === QS.length ? "Hammasi to'g'ri. +100 ball hisobingizga yoziladi." : "To'g'ri javoblar yashil rangda. Qayta urinib ko'rsangiz bo'ladi.") + '</div>';
+    btn.textContent = "Qaytadan";
+    paint();
+    btn.disabled = false;
+  });
+  paint();
+})();
+</script>
+
+</body>
+</html>
