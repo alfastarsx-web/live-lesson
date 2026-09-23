@@ -301,6 +301,12 @@ app.patch(/^\/api\/ai\/leads\/([0-9a-f-]{36})\/(status|note)$/, (req, res) => {
   aiProxy(req, res, `/leads/${id}/${amal}`);
 });
 
+// O'quvchi akkauntini bitta tugma bilan ochish (login+parol Telegramga yoki SMS'ga ketadi)
+app.post(/^\/api\/ai\/leads\/([0-9a-f-]{36})\/create-account$/, (req, res) => {
+  const id = req.path.split('/')[4];
+  aiProxy(req, res, `/leads/${id}/create-account`);
+});
+
 app.get(/^\/api\/ai\/(.+)$/, (req, res) => {
   const yol = req.path.replace(/^\/api\/ai\//, '');
   if (!RUXSAT.some((re) => re.test(yol))) return res.status(404).json({ error: 'topilmadi' });
