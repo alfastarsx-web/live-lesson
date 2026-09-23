@@ -119,32 +119,22 @@ document.getElementById('videoTugma').onclick = async () => {
 
   // 1) Jadvaldagi dars kirish oynasida bo'lsa — o'shanga
   if (DARS && new Date(DARS.startsAt).getTime() - Date.now() <= 10 * 60_000) {
-    const e = await api(`/api/booking/${DARS.id}/entry`);
+    const e = await api(`/api/booking/${DARS.id}/start`, { method: 'POST' });
     btn.disabled = false;
-    if (e && e.ok && e.data.url) return (location.href = e.data.url);
+    if (e && e.ok && e.data.teacherUrl) return (location.href = e.data.teacherUrl);
+    return alert(e?.data?.message || 'Darsni boshlab bo‘lmadi');
   }
 
   // 2) Aks holda — hoziroq chaqiruv: xona ochiladi va o'quvchiga push boradi
-  let r = await api('/api/booking/invite', {
+  const r = await api('/api/booking/invite', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ studentUserId: ID }),
   });
 
-  let pushKetdi = Boolean(r && r.ok);
-
-  // Chaqiruv ishlamasa (masalan zaxira hisob) — kamida xonani ochamiz
-  if (!r || !r.ok) {
-    r = await api('/api/tezkor', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentId: ID }),
-    });
-  }
-
   btn.disabled = false;
   if (!r) return;
-  if (!r.ok) return alert(r.data.message || r.data.error || 'Xonani ochib bo‘lmadi');
+  if (!r.ok) return alert(r.data.message || r.data.error || 'O‘quvchiga darsni ochib bo‘lmadi');
 
   const havola = r.data.studentUrl.startsWith('http')
     ? r.data.studentUrl
@@ -152,10 +142,8 @@ document.getElementById('videoTugma').onclick = async () => {
 
   document.getElementById('tezkorBlok').innerHTML = `
     <div class="karta-oq" style="margin-bottom:16px">
-      <h2>${pushKetdi ? 'O‘quvchi chaqirildi' : 'Dars xonasi tayyor'}</h2>
-      <div class="izoh">${pushKetdi
-        ? 'Telefoniga bildirishnoma yuborildi. Havolani qo‘shimcha yuborsangiz ham bo‘ladi.'
-        : 'O‘quvchiga shu havolani yuboring — u parolsiz kiradi.'}</div>
+      <h2>O‘quvchi chaqirildi</h2>
+      <div class="izoh">Dars tugmasi o‘quvchining ilovasida paydo bo‘ladi.</div>
       <div class="havola-quti">
         <code id="tezkorHavola">${havola}</code>
         <button id="tezkorNusxa">Nusxa</button>
@@ -216,10 +204,10 @@ async function darsniYukla() {
   document.getElementById('darsKirish').onclick = async () => {
     const btn = document.getElementById('darsKirish');
     btn.disabled = true;
-    const e = await api(`/api/booking/${dars.id}/entry`);
+    const e = await api(`/api/booking/${dars.id}/start`, { method: 'POST' });
     btn.disabled = false;
     if (!e) return;
-    if (e.ok && e.data.url) location.href = e.data.url;
+    if (e.ok && e.data.teacherUrl) location.href = e.data.teacherUrl;
     else alert(e.data.message || 'Hozircha kirib bo‘lmaydi');
   };
 

@@ -144,10 +144,10 @@ async function darslarniYukla() {
     btn.textContent = 'Kirish';
     btn.onclick = async () => {
       btn.disabled = true;
-      const e = await so(`/api/booking/${d.id}/entry`);
+      const e = await so(`/api/booking/${d.id}/start`, { method: 'POST' });
       btn.disabled = false;
       if (!e) return;
-      if (e.ok && e.data.url) location.href = e.data.url;
+      if (e.ok && e.data.teacherUrl) location.href = e.data.teacherUrl;
       else xabar(e.data.message || 'Hozircha kirib bo‘lmaydi', 'err');
     };
     row.appendChild(btn);
