@@ -359,15 +359,24 @@ app.post('/api/tezkor', (req, res) => {
 });
 
 // ---------- O'quvchi kirishi (havola bilan, parolsiz) ----------
-// Kurs kartasidagi havola shu yerga olib keladi: /dars/<xona>
+// Sinov va eski ochiq havolalar shu yerga olib keladi: /dars/<xona>
 app.get('/dars/:room', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'room.html'));
 });
+
+function managedRoom(room) {
+  return room.startsWith('jonli-')
+    || /^dars-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(room);
+}
 
 app.get('/api/join/:room', (req, res) => {
   const room = String(req.params.room || '').toLowerCase();
   if (!ROOM_RE.test(room)) return res.status(400).json({ error: 'xona nomi noto\u2018g\u2018ri' });
   if (!AUTH_ON) return res.json({ token: null, room });
+  // Individual lessons use authenticated, student-bound tokens from the main API.
+  if (managedRoom(room)) {
+    return res.status(403).json({ error: 'Darsga ilovadan kiring' });
+  }
   const name = String(req.query.name || '').slice(0, 40) || 'O\u2018quvchi';
   res.json({ token: sign({ room, role: 'student', name }, 6 * 3600), room });
 });
@@ -401,6 +410,35 @@ const server = http.createServer(app);
 // rooms: Map<roomId, { peers: Map<clientId, ws>, state: {...} }>
 const rooms = new Map();
 
+async function liveApi(action, data) {
+  const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
+  const secret = process.env.LESSON_TOKEN_SECRET || '';
+  if (!base || !secret) throw new Error('Jonli dars API sozlanmagan');
+  const response = await fetch(`${base}/lesson-booking/live/${action}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-lesson-secret': secret },
+    body: JSON.stringify(data),
+    signal: AbortSignal.timeout(5000),
+  });
+  if (!response.ok) throw new Error(`Jonli dars API: ${response.status}`);
+  return response.json();
+}
+
+async function endActiveRoom(roomId, room) {
+  if (!room.lessonId || room.ended) return;
+  room.ended = true;
+  const report = async () => {
+    try {
+      await liveApi('end', { lessonId: room.lessonId, room: roomId });
+    } catch (err) {
+      console.warn('Darsni yakunlash xatosi:', err.message);
+      // Keep the room closed and retry until the invitation naturally expires.
+      if (Date.now() < room.expiresAt) setTimeout(report, 10_000);
+    }
+  };
+  await report();
+}
+
 function emptyState() {
   return { doc: null, page: 1, strokes: [], scroll: 0 };
 }
@@ -416,6 +454,10 @@ function getRoom(id) {
       logFile: path.join(LOG_DIR, `${id}__${stamp}.jsonl`),
       // Sinov darsi hisoboti uchun: o'quvchi qachon kirdi va qancha turdi
       ishtirok: { studentJoined: false, studentSeconds: 0, studentEnteredAt: null },
+      lessonId: null,
+      ended: false,
+      endTimer: null,
+      expiresAt: 0,
     };
     rooms.set(id, room);
     logEvent(room, { type: 'lesson-start', room: id });
@@ -510,14 +552,14 @@ async function sinovHisoboti(roomId, room) {
 
 const wss = new WebSocketServer({ server, path: '/ws' });
 
-wss.on('connection', (ws, req) => {
+wss.on('connection', async (ws, req) => {
   const url = new URL(req.url, 'http://localhost');
 
   // Token rejimida xona, rol va ism faqat imzolangan tokendan olinadi —
   // mijoz yuborgan query parametrlariga ishonilmaydi.
-  let roomId, role, name;
+  let roomId, role, name, claims = null;
   if (AUTH_ON) {
-    const claims = verify(url.searchParams.get('t'));
+    claims = verify(url.searchParams.get('t'));
     if (!claims) {
       send(ws, { type: 'error', message: 'Kirish tokeni yaroqsiz yoki muddati tugagan' });
       return ws.close();
@@ -534,7 +576,42 @@ wss.on('connection', (ws, req) => {
     return ws.close();
   }
 
+  if (AUTH_ON && managedRoom(roomId)) {
+    if (!claims?.userId || (!claims.lessonId && !claims.bookingId)) {
+      send(ws, { type: 'error', message: 'Darsga kirish ruxsati yo‘q' });
+      return ws.close();
+    }
+    try {
+      const result = await liveApi('validate', {
+        lessonId: claims.lessonId, bookingId: claims.bookingId,
+        room: roomId, userId: claims.userId, role,
+      });
+      if (!result.allowed) {
+        send(ws, { type: 'error', message: 'Bu dars siz uchun faol emas' });
+        return ws.close();
+      }
+    } catch (err) {
+      console.warn('Darsga kirishni tekshirish xatosi:', err.message);
+      send(ws, { type: 'error', message: 'Darsga kirishni tekshirib bo‘lmadi' });
+      return ws.close();
+    }
+  }
+
+  if (ws.readyState !== ws.OPEN) return;
+
   const room = getRoom(roomId);
+  if (room.ended) {
+    send(ws, { type: 'error', message: 'Dars tugagan' });
+    return ws.close();
+  }
+  if (claims?.lessonId) {
+    room.lessonId = claims.lessonId;
+    room.expiresAt = Math.max(room.expiresAt, claims.exp * 1000);
+  }
+  if (role === 'teacher' && room.endTimer) {
+    clearTimeout(room.endTimer);
+    room.endTimer = null;
+  }
   if (room.peers.size >= 2) {
     send(ws, { type: 'full' });
     return ws.close();
@@ -581,6 +658,7 @@ wss.on('connection', (ws, req) => {
       // --- Ustoz darsni yakunladi: o'quvchida baho oynasi ochiladi ---
       case 'dars-tugadi':
         if (role !== 'teacher') return;
+        void endActiveRoom(roomId, room);
         broadcast(room, { type: 'dars-tugadi' }, clientId);
         logEvent(room, { type: 'lesson-end-by-teacher' });
         break;
@@ -651,6 +729,13 @@ wss.on('connection', (ws, req) => {
     if (role === 'student' && room.ishtirok.studentEnteredAt) {
       room.ishtirok.studentSeconds += Math.round((Date.now() - room.ishtirok.studentEnteredAt) / 1000);
       room.ishtirok.studentEnteredAt = null;
+    }
+    if (role === 'teacher' && room.lessonId && !room.ended) {
+      room.endTimer = setTimeout(() => {
+        if (![...room.peers.values()].some((peer) => peer.meta.role === 'teacher')) {
+          void endActiveRoom(roomId, room);
+        }
+      }, 2 * 60 * 1000);
     }
     if (room.peers.size === 0) {
       logEvent(room, { type: 'lesson-end', strokes: room.state.strokes.length });
