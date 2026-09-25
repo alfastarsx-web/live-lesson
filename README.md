@@ -141,7 +141,7 @@ Mentor `/lidlar.html` da lid kartasidagi **“Akkaunt ochish”** tugmasini bosa
 `POST /api/ai/leads/:id/create-account` so‘rovini ai.myteacher.uz ga o‘tkazadi (mentor tokeni
 HttpOnly cookie’da turadi). Akkaunt ochiladi va login/parol o‘quvchiga **Telegram bot**
 (`TRIAL_BOT_TOKEN` API tomonida) orqali ilova ko‘rsatmasi va skrinshotlar bilan yuboriladi;
-Telegram bo‘lmasa SMS ketadi va kod kartada ko‘rinadi. Batafsil oqim: aiteacher-api `CLAUDE.md`
+Telegram bo‘lmasa SMS **yuborilmaydi**: kod kartada ko‘rinadi va mentor uni o‘quvchiga o‘zi aytadi. Batafsil oqim: aiteacher-api `CLAUDE.md`
 → “Trial lessons: Telegram bot”.
 
 Bu yo‘l ochiq proksi emas: `server.js` da faqat aynan shu POST manzili ruxsat etilgan.

@@ -225,7 +225,7 @@ async function holatQoy(id, status, btn) {
   sanoq(); chiz();
 }
 
-/** Bitta tugma: akkaunt ochiladi, login va parol o'quvchiga Telegram (yoki SMS) orqali ketadi. */
+/** Bitta tugma: akkaunt ochiladi, login va parol o'quvchiga Telegram orqali ketadi (SMS yubormaydi). */
 async function akkauntOch(id, tugma, karta) {
   const xabar = karta.querySelector('[data-akkaunt-xabar]');
   tugma.disabled = true;
@@ -254,9 +254,11 @@ async function akkauntOch(id, tugma, karta) {
   if (!yangi) return;
   const yetdi = d.telegram === 'sent'
     ? 'Login va parol o‘quvchiga Telegramga yuborildi ✅'
-    : d.sms
-      ? 'Telegram ulanmagan — parol SMS bilan yuborildi. Kod yuqorida ko‘rinib turibdi.'
-      : d.holat === 'created' ? 'Yuborib bo‘lmadi — kodni o‘quvchiga o‘zingiz ayting.' : '';
+    : d.holat === 'created'
+      ? (d.telegram === 'failed'
+        ? 'Telegramga yetib bormadi. SMS yuborilmadi — kodni o‘quvchiga o‘zingiz ayting (yuqorida ko‘rinib turibdi).'
+        : 'O‘quvchi Telegramga ulanmagan. SMS yuborilmadi — kodni o‘quvchiga o‘zingiz ayting (yuqorida ko‘rinib turibdi).')
+      : '';
   yangi.hidden = false;
   yangi.className = 'xabar2';
   yangi.textContent = d.holat === 'existing'
