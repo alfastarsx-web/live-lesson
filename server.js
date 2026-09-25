@@ -375,16 +375,46 @@ function managedRoom(room) {
     || /^dars-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(room);
 }
 
-app.get('/api/join/:room', (req, res) => {
+async function trialWindow(room) {
+  const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
+  const secret = process.env.LESSON_TOKEN_SECRET || '';
+  if (!base || !secret) throw new Error('Sinov darsi tekshiruvi sozlanmagan');
+  const response = await fetch(`${base}/lesson-booking/trial/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-lesson-secret': secret },
+    body: JSON.stringify({ room }),
+    signal: AbortSignal.timeout(5000),
+  });
+  if (!response.ok) throw new Error(`Sinov darsi API: ${response.status}`);
+  return response.json();
+}
+
+app.get('/api/join/:room', async (req, res) => {
   const room = String(req.params.room || '').toLowerCase();
   if (!ROOM_RE.test(room)) return res.status(400).json({ error: 'xona nomi noto\u2018g\u2018ri' });
-  if (!AUTH_ON) return res.json({ token: null, room });
+  let expiresIn = 6 * 3600;
   // Individual lessons use authenticated, student-bound tokens from the main API.
   if (managedRoom(room)) {
     return res.status(403).json({ error: 'Darsga ilovadan kiring' });
   }
+  if (room.startsWith('sinov-')) {
+    try {
+      const result = await trialWindow(room);
+      if (!result.allowed) {
+        return res.status(403).json({ error: 'Sinov darsi hali boshlanmadi yoki yakunlandi' });
+      }
+      const remaining = Date.parse(result.expiresAt) - Date.now();
+      if (!Number.isFinite(remaining) || remaining <= 0) {
+        return res.status(403).json({ error: 'Sinov darsi yakunlandi' });
+      }
+      expiresIn = Math.ceil(remaining / 1000);
+    } catch {
+      return res.status(503).json({ error: 'Sinov darsini tekshirib bo\u2018lmadi' });
+    }
+  }
+  if (!AUTH_ON) return res.json({ token: null, room });
   const name = String(req.query.name || '').slice(0, 40) || 'O\u2018quvchi';
-  res.json({ token: sign({ room, role: 'student', name }, 6 * 3600), room });
+  res.json({ token: sign({ room, role: 'student', name }, expiresIn), room });
 });
 
 // Ilova qaysi rejimda ishlayotganini bosh sahifa shundan biladi
@@ -531,20 +561,23 @@ app.post('/api/baho', async (req, res) => {
   }
 });
 
-async function sinovHisoboti(roomId, room) {
+async function sinovHisoboti(roomId, room, ended = false) {
   if (!roomId.startsWith('sinov-')) return;
 
   const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
   const secret = process.env.LESSON_TOKEN_SECRET || '';
   if (!base || !secret) return;
 
-  const { studentJoined, studentSeconds } = room.ishtirok;
+  const { studentJoined } = room.ishtirok;
+  const studentSeconds = room.ishtirok.studentSeconds +
+    (room.ishtirok.studentEnteredAt
+      ? Math.round((Date.now() - room.ishtirok.studentEnteredAt) / 1000) : 0);
 
   try {
     const r = await fetch(`${base}/lesson-booking/trial/report`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-lesson-secret': secret },
-      body: JSON.stringify({ room: roomId, studentJoined, studentSeconds }),
+      body: JSON.stringify({ room: roomId, studentJoined, studentSeconds, ended }),
       signal: AbortSignal.timeout(10000),
     });
     const d = await r.json().catch(() => ({}));
@@ -582,24 +615,38 @@ wss.on('connection', async (ws, req) => {
     return ws.close();
   }
 
-  if (AUTH_ON && managedRoom(roomId)) {
-    if (!claims?.userId || (!claims.lessonId && !claims.bookingId)) {
-      send(ws, { type: 'error', message: 'Darsga kirish ruxsati yo‘q' });
-      return ws.close();
-    }
-    try {
-      const result = await liveApi('validate', {
-        lessonId: claims.lessonId, bookingId: claims.bookingId,
-        room: roomId, userId: claims.userId, role,
-      });
-      if (!result.allowed) {
-        send(ws, { type: 'error', message: 'Bu dars siz uchun faol emas' });
+  if ((AUTH_ON && managedRoom(roomId)) || roomId.startsWith('sinov-')) {
+    if (roomId.startsWith('sinov-') && !claims?.userId) {
+      try {
+        const result = await trialWindow(roomId);
+        if (!result.allowed || role !== 'student') {
+          send(ws, { type: 'error', message: 'Bu sinov darsi hozir faol emas' });
+          return ws.close();
+        }
+      } catch (err) {
+        console.warn('Sinov darsiga kirishni tekshirish xatosi:', err.message);
+        send(ws, { type: 'error', message: 'Sinov darsini tekshirib bo‘lmadi' });
         return ws.close();
       }
-    } catch (err) {
-      console.warn('Darsga kirishni tekshirish xatosi:', err.message);
-      send(ws, { type: 'error', message: 'Darsga kirishni tekshirib bo‘lmadi' });
-      return ws.close();
+    } else {
+      if (!claims?.userId || (!claims.lessonId && !claims.bookingId)) {
+        send(ws, { type: 'error', message: 'Darsga kirish ruxsati yo‘q' });
+        return ws.close();
+      }
+      try {
+        const result = await liveApi('validate', {
+          lessonId: claims.lessonId, bookingId: claims.bookingId,
+          room: roomId, userId: claims.userId, role,
+        });
+        if (!result.allowed) {
+          send(ws, { type: 'error', message: 'Bu dars siz uchun faol emas' });
+          return ws.close();
+        }
+      } catch (err) {
+        console.warn('Darsga kirishni tekshirish xatosi:', err.message);
+        send(ws, { type: 'error', message: 'Darsga kirishni tekshirib bo‘lmadi' });
+        return ws.close();
+      }
     }
   }
 
@@ -664,7 +711,12 @@ wss.on('connection', async (ws, req) => {
       // --- Ustoz darsni yakunladi: o'quvchida baho oynasi ochiladi ---
       case 'dars-tugadi':
         if (role !== 'teacher') return;
-        void endActiveRoom(roomId, room);
+        if (roomId.startsWith('sinov-')) {
+          room.ended = true;
+          void sinovHisoboti(roomId, room, true);
+        } else {
+          void endActiveRoom(roomId, room);
+        }
         broadcast(room, { type: 'dars-tugadi' }, clientId);
         logEvent(room, { type: 'lesson-end-by-teacher' });
         break;
@@ -745,7 +797,7 @@ wss.on('connection', async (ws, req) => {
     }
     if (room.peers.size === 0) {
       logEvent(room, { type: 'lesson-end', strokes: room.state.strokes.length });
-      sinovHisoboti(roomId, room);
+      void sinovHisoboti(roomId, room, room.ended);
       setTimeout(() => {
         const r = rooms.get(roomId);
         if (r && r.peers.size === 0) rooms.delete(roomId);

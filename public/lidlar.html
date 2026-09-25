@@ -38,6 +38,40 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 let HAMMASI = [];
 let FILTR = 'all';
 
+function sinovKirishHtml(l) {
+  if (l.status !== 'trial_scheduled' || !l.trialBookingId || !l.trialStartsAt ||
+      Date.parse(l.trialEndsAt) + 10 * 60_000 <= Date.now()) return '';
+  return `<div class="sinov-kirish" data-trial-panel data-booking-id="${esc(l.trialBookingId)}" data-start="${esc(l.trialStartsAt)}" data-end="${esc(l.trialEndsAt)}">
+    <div class="sinov-kirish-bosh">
+      <span class="sinov-kirish-belgi" aria-hidden="true">▶</span>
+      <div class="sinov-kirish-matn">
+        <span class="sinov-kirish-yorliq">BELGILANGAN SINOV DARSI</span>
+        <strong>${esc(sanaChiroyli(l.trialStartsAt))}</strong>
+        <small data-trial-status></small>
+      </div>
+    </div>
+    <button type="button" data-sinov-kirish>Darsga kirish <span aria-hidden="true">↗</span></button>
+  </div>`;
+}
+
+function sinovVaqtiniYangila() {
+  document.querySelectorAll('[data-trial-panel]').forEach((panel) => {
+    const opensAt = Date.parse(panel.dataset.start) - 10 * 60_000;
+    const closesAt = Date.parse(panel.dataset.end) + 10 * 60_000;
+    const btn = panel.querySelector('[data-sinov-kirish]');
+    const status = panel.querySelector('[data-trial-status]');
+    if (!Number.isFinite(opensAt) || !Number.isFinite(closesAt) || Date.now() >= closesAt) {
+      panel.hidden = true;
+    } else if (Date.now() < opensAt) {
+      btn.disabled = true;
+      status.textContent = 'Kirish darsdan 10 daqiqa oldin ochiladi';
+    } else {
+      btn.disabled = false;
+      status.textContent = 'Dars xonasi ochiq';
+    }
+  });
+}
+
 const HOLATLAR = {
   new:             { matn: 'Yangi' },
   assigned:        { matn: 'Yangi' },
@@ -91,6 +125,7 @@ function kartaHtml(l) {
         ${l.akkauntHolati === 'yoq' ? '<button class="asosiy" data-akkaunt>Akkaunt ochish</button>' : ''}
         <button class="asosiy" data-sinov="1">Sinov darsi</button>
       </div>
+      ${sinovKirishHtml(l)}
       <div class="xabar2" data-akkaunt-xabar hidden style="margin-top:10px"></div>
 
       <div class="sinov-quti" data-sinov-quti hidden>
@@ -206,9 +241,26 @@ function chiz() {
     };
     const akkauntTugma = k.querySelector('[data-akkaunt]');
     if (akkauntTugma) akkauntTugma.onclick = () => akkauntOch(id, akkauntTugma, k);
+    const kirishTugma = k.querySelector('[data-sinov-kirish]');
+    if (kirishTugma) kirishTugma.onclick = () => sinovgaKir(id, kirishTugma);
     quti.querySelector('[data-bekor]').onclick = () => { quti.hidden = true; };
     quti.querySelector('[data-tasdiq]').onclick = () => sinovBelgila(id, quti);
   });
+  sinovVaqtiniYangila();
+}
+
+async function sinovgaKir(id, tugma) {
+  const lid = HAMMASI.find((x) => x.id === id);
+  if (!lid?.trialBookingId) return alert('Sinov darsi topilmadi. Sahifani yangilang.');
+  if (Date.now() < new Date(lid.trialStartsAt).getTime() - 10 * 60_000) {
+    return alert(`Sinov darsi ${sanaChiroyli(lid.trialStartsAt)} da boshlanadi. Kirish 10 daqiqa oldin ochiladi.`);
+  }
+  tugma.disabled = true;
+  const r = await api(`/api/booking/${lid.trialBookingId}/entry`);
+  tugma.disabled = false;
+  if (!r) return;
+  if (r.ok && r.data.url) location.href = r.data.url;
+  else alert(r.data.message || 'Hozircha darsga kirib bo‘lmaydi');
 }
 
 async function holatQoy(id, status, btn) {
@@ -288,6 +340,11 @@ async function sinovBelgila(id, quti) {
 
   const lid = HAMMASI.find((x) => x.id === id);
   if (lid) lid.status = 'trial_scheduled';
+  if (lid) {
+    lid.trialBookingId = r.data.id;
+    lid.trialStartsAt = r.data.startsAt;
+    lid.trialEndsAt = new Date(new Date(r.data.startsAt).getTime() + r.data.durationMin * 60_000).toISOString();
+  }
   const a = r.data.akkaunt || {};
   if (lid) {
     lid.akkauntHolati = a.holat === 'created' ? 'kod' : (a.holat === 'existing' ? 'bor' : lid.akkauntHolati);
@@ -319,6 +376,7 @@ async function sinovBelgila(id, quti) {
 
   quti.innerHTML = `<b>Sinov darsi belgilandi</b>
     <div class="izoh" style="margin-bottom:8px">${sanaChiroyli(r.data.startsAt)} — o‘quvchi darsni ilovadan ochadi</div>
+    ${sinovKirishHtml(lid)}
     ${tgBolimi}
     ${akkauntBolimi}
     <div class="izoh" style="margin:10px 0 6px">Ilovasiz kirish uchun zaxira havola:</div>
@@ -326,6 +384,8 @@ async function sinovBelgila(id, quti) {
   document.getElementById(`n-${id}`).onclick = (e) => {
     navigator.clipboard.writeText(r.data.joinUrl).then(() => { e.target.textContent = 'Nusxalandi'; }, () => {});
   };
+  quti.querySelector('[data-sinov-kirish]').onclick = (e) => sinovgaKir(id, e.target);
+  sinovVaqtiniYangila();
   const tgTugma = document.getElementById(`tg-${id}`);
   if (tgTugma) {
     tgTugma.onclick = (e) => {
@@ -357,9 +417,32 @@ document.querySelectorAll('.chip').forEach((c) => {
     return;
   }
   HAMMASI = Array.isArray(r.data) ? r.data : [];
+  // Existing production booking API already exposes the mentor's trial bookings.
+  // Use it when the lead response has not yet gained trialBookingId.
+  const bookings = await api('/api/booking/mentor/my');
+  if (bookings?.ok && Array.isArray(bookings.data)) {
+    const byLead = new Map(bookings.data.filter((b) => b.isTrial && b.leadId).map((b) => [b.leadId, b]));
+    for (const lead of HAMMASI) {
+      const booking = byLead.get(lead.id);
+      if (!booking) continue;
+      lead.trialBookingId = booking.id;
+      lead.trialStartsAt = booking.startsAt;
+      lead.trialEndsAt = new Date(Date.parse(booking.startsAt) + booking.durationMin * 60_000).toISOString();
+    }
+  }
   $('#izoh').textContent = `${HAMMASI.length} ta lid biriktirilgan`;
   sanoq(); chiz();
 })();
+setInterval(sinovVaqtiniYangila, 15_000);
+setInterval(async () => {
+  if (document.visibilityState !== 'visible') return;
+  const r = await api('/api/booking/mentor/my');
+  if (!r?.ok || !Array.isArray(r.data)) return;
+  const open = new Set(r.data.filter((b) => b.isTrial).map((b) => b.id));
+  document.querySelectorAll('[data-trial-panel]').forEach((panel) => {
+    if (!open.has(panel.dataset.bookingId)) panel.hidden = true;
+  });
+}, 15_000);
 </script>
 </body>
 </html>
