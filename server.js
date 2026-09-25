@@ -561,20 +561,23 @@ app.post('/api/baho', async (req, res) => {
   }
 });
 
-async function sinovHisoboti(roomId, room) {
+async function sinovHisoboti(roomId, room, ended = false) {
   if (!roomId.startsWith('sinov-')) return;
 
   const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
   const secret = process.env.LESSON_TOKEN_SECRET || '';
   if (!base || !secret) return;
 
-  const { studentJoined, studentSeconds } = room.ishtirok;
+  const { studentJoined } = room.ishtirok;
+  const studentSeconds = room.ishtirok.studentSeconds +
+    (room.ishtirok.studentEnteredAt
+      ? Math.round((Date.now() - room.ishtirok.studentEnteredAt) / 1000) : 0);
 
   try {
     const r = await fetch(`${base}/lesson-booking/trial/report`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-lesson-secret': secret },
-      body: JSON.stringify({ room: roomId, studentJoined, studentSeconds }),
+      body: JSON.stringify({ room: roomId, studentJoined, studentSeconds, ended }),
       signal: AbortSignal.timeout(10000),
     });
     const d = await r.json().catch(() => ({}));
@@ -708,7 +711,12 @@ wss.on('connection', async (ws, req) => {
       // --- Ustoz darsni yakunladi: o'quvchida baho oynasi ochiladi ---
       case 'dars-tugadi':
         if (role !== 'teacher') return;
-        void endActiveRoom(roomId, room);
+        if (roomId.startsWith('sinov-')) {
+          room.ended = true;
+          void sinovHisoboti(roomId, room, true);
+        } else {
+          void endActiveRoom(roomId, room);
+        }
         broadcast(room, { type: 'dars-tugadi' }, clientId);
         logEvent(room, { type: 'lesson-end-by-teacher' });
         break;
@@ -789,7 +797,7 @@ wss.on('connection', async (ws, req) => {
     }
     if (room.peers.size === 0) {
       logEvent(room, { type: 'lesson-end', strokes: room.state.strokes.length });
-      sinovHisoboti(roomId, room);
+      void sinovHisoboti(roomId, room, room.ended);
       setTimeout(() => {
         const r = rooms.get(roomId);
         if (r && r.peers.size === 0) rooms.delete(roomId);

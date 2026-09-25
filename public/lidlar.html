@@ -41,7 +41,7 @@ let FILTR = 'all';
 function sinovKirishHtml(l) {
   if (l.status !== 'trial_scheduled' || !l.trialBookingId || !l.trialStartsAt ||
       Date.parse(l.trialEndsAt) + 10 * 60_000 <= Date.now()) return '';
-  return `<div class="sinov-kirish" data-trial-panel data-start="${esc(l.trialStartsAt)}" data-end="${esc(l.trialEndsAt)}">
+  return `<div class="sinov-kirish" data-trial-panel data-booking-id="${esc(l.trialBookingId)}" data-start="${esc(l.trialStartsAt)}" data-end="${esc(l.trialEndsAt)}">
     <div class="sinov-kirish-bosh">
       <span class="sinov-kirish-belgi" aria-hidden="true">▶</span>
       <div class="sinov-kirish-matn">
@@ -432,6 +432,15 @@ document.querySelectorAll('.chip').forEach((c) => {
   sanoq(); chiz();
 })();
 setInterval(sinovVaqtiniYangila, 15_000);
+setInterval(async () => {
+  if (document.visibilityState !== 'visible') return;
+  const r = await api('/api/booking/mentor/my');
+  if (!r?.ok || !Array.isArray(r.data)) return;
+  const open = new Set(r.data.filter((b) => b.isTrial).map((b) => b.id));
+  document.querySelectorAll('[data-trial-panel]').forEach((panel) => {
+    if (!open.has(panel.dataset.bookingId)) panel.hidden = true;
+  });
+}, 15_000);
 </script>
 </body>
 </html>

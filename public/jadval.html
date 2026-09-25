@@ -123,6 +123,46 @@ $('#saqla').onclick = async () => {
 
 const vaqtMatni = (iso) => sanaChiroyli(iso);
 
+function sinovKarta(d) {
+  const row = document.createElement('div');
+  row.className = 'sinov-kirish';
+  row.style.margin = '0 0 10px';
+  row.innerHTML = `<div class="sinov-kirish-bosh">
+    <span class="sinov-kirish-belgi" aria-hidden="true">▶</span>
+    <div class="sinov-kirish-matn">
+      <span class="sinov-kirish-yorliq">BELGILANGAN SINOV DARSI</span>
+      <strong></strong><small class="sinov-oquvchi"></small><small class="sinov-holat"></small>
+    </div>
+  </div><button type="button">Darsga kirish <span aria-hidden="true">↗</span></button>`;
+  row.querySelector('strong').textContent = vaqtMatni(d.startsAt);
+  row.querySelector('.sinov-oquvchi').textContent = d.studentName || 'O‘quvchi';
+  const btn = row.querySelector('button');
+  const status = row.querySelector('.sinov-holat');
+  const opensAt = Date.parse(d.startsAt) - 10 * 60_000;
+  const closesAt = Date.parse(d.startsAt) + (d.durationMin + 10) * 60_000;
+  const update = () => {
+    if (Date.now() >= closesAt) { row.remove(); return; }
+    btn.disabled = Date.now() < opensAt;
+    status.textContent = btn.disabled
+      ? 'Kirish darsdan 10 daqiqa oldin ochiladi' : 'Dars xonasi ochiq';
+  };
+  update();
+  const timer = setInterval(() => {
+    if (!row.isConnected) { clearInterval(timer); return; }
+    update();
+  }, 15_000);
+  btn.onclick = async () => {
+    btn.disabled = true;
+    // Lidlar also uses /entry: both buttons must open the same sinov room.
+    const e = await so(`/api/booking/${d.id}/entry`);
+    update();
+    if (!e) return;
+    if (e.ok && e.data.url) location.href = e.data.url;
+    else xabar(e.data.message || 'Hozircha kirib bo‘lmaydi', 'err');
+  };
+  return row;
+}
+
 async function darslarniYukla() {
   const r = await so('/api/booking/mentor/my');
   if (!r) return;
@@ -133,6 +173,10 @@ async function darslarniYukla() {
   }
   box.innerHTML = '';
   for (const d of r.data) {
+    if (d.isTrial) {
+      box.appendChild(sinovKarta(d));
+      continue;
+    }
     const row = document.createElement('div');
     row.className = 'dars-karta';
     row.style.margin = '0 0 10px';
@@ -201,6 +245,9 @@ $('#nusxa').onclick = () => {
   }
 
   await darslarniYukla();
+  setInterval(() => {
+    if (document.visibilityState === 'visible') void darslarniYukla();
+  }, 15_000);
 })();
 </script>
 </body>
