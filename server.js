@@ -11,6 +11,7 @@ const { AUTH_ON, sign, verify, ROOM_RE } = require('./lib/token');
 const { TURN_ON, TURN_HOST, iceServers } = require('./lib/turn');
 const teachers = require('./lib/teachers');
 const aiteacher = require('./lib/aiteacher');
+const akademiya = require('./lib/akademiya');
 
 const PORT = process.env.PORT || 4300;
 const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
@@ -176,7 +177,9 @@ app.post('/api/login', async (req, res) => {
         name: r.name,
         role: r.isMentor ? 'mentor' : 'student',
         mustChangePassword: Boolean(r.mustChangePassword),
-        redirect: r.isMentor ? '/jadval.html' : '/band.html',
+        redirect: r.isMentor
+          ? (await akademiyaKerak(r.token) ? '/mentor/akademiya.html' : '/jadval.html')
+          : '/band.html',
       });
     }
     if (r.status === 403 || r.status === 502) return res.status(r.status).json({ error: r.message });
@@ -243,8 +246,13 @@ app.all(/^\/api\/booking(\/.*)?$/, (req, res) => {
 
 // Mentor veb sahifada ishlayotganini bildiradi — aks holda tizim uni oflayn
 // deb biladi va lid bermaydi (mobil ilova soket orqali ulanadi, veb esa shu yo'l bilan)
-app.post('/api/mentor-session/heartbeat', (req, res) =>
-  aiProxy(req, res, '/mentor-session/heartbeat'));
+// Akademiyadan o'tmagan mentor onlayn hisoblanmaydi — ya'ni unga lid tushmaydi
+app.post('/api/mentor-session/heartbeat', async (req, res) => {
+  if (await akademiyaKerak(cookies(req)[AI_COOKIE])) {
+    return res.status(403).json({ error: 'akademiya', redirect: '/mentor/akademiya.html' });
+  }
+  aiProxy(req, res, '/mentor-session/heartbeat');
+});
 
 app.get('/api/my-mentor', (req, res) => aiProxy(req, res, '/assignments/my-mentor'));
 
@@ -388,6 +396,84 @@ app.get('/api/ice', (req, res) => {
     return res.json({ iceServers: iceServers(c.room) });
   }
   res.json({ iceServers: iceServers('dev') });
+});
+
+// ---------- Mentor akademiyasi ----------
+// Yangi mentor ish sahifalariga kirishdan oldin akademiyani o'qib, testdan o'tadi.
+// Akademiyadan oldin ishlab kelgan mentorlar (kamida bitta o'quvchisi bor) bloklanmaydi.
+
+// ai.myteacher.uz tokenidan mentor id'si; mentor bo'lmasa (yoki admin bo'lsa) — null
+function akademiyaMentorId(aiToken) {
+  const p = aiToken ? aiteacher.jwtPayload(aiToken) : null;
+  if (!p || (p.exp && p.exp * 1000 < Date.now())) return null;
+  const roles = aiteacher.collectRoles(p);
+  if (!roles.includes('mentor') || roles.includes('admin')) return null;
+  const id = p.sub || p.id || p.userId;
+  const safe = String(id || '').toLowerCase().replace(/[^a-z0-9-]+/g, '').slice(0, 50);
+  return safe || null;
+}
+
+// O'quvchisi yo'q deb topilgan mentorni har sahifada qayta so'ramaslik uchun
+const OQUVCHISIZ = new Map(); // id -> tekshirilgan vaqt
+const OQUVCHISIZ_MS = 5 * 60 * 1000;
+
+async function akademiyaKerak(aiToken) {
+  const id = akademiyaMentorId(aiToken);
+  if (!id || akademiya.otganmi(id)) return false;
+
+  const oldin = OQUVCHISIZ.get(id);
+  if (oldin && Date.now() - oldin < OQUVCHISIZ_MS) return true;
+
+  // Allaqachon o'quvchisi bor mentor — akademiyadan oldin ishlab kelgan
+  const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
+  if (base) {
+    try {
+      const r = await fetch(`${base}/assignments/my-students`, {
+        headers: { Authorization: `Bearer ${aiToken}` },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (r.ok) {
+        const d = await r.json().catch(() => null);
+        if (Array.isArray(d) && d.length > 0) {
+          akademiya.ozod(id, 'oquvchisi-bor');
+          return false;
+        }
+      } else if (r.status >= 500) {
+        return false; // API ishlamasa, ishlayotgan mentorni to'sib qo'ymaymiz
+      }
+    } catch {
+      return false;
+    }
+  }
+  OQUVCHISIZ.set(id, Date.now());
+  return true;
+}
+
+app.get('/api/akademiya/holat', async (req, res) => {
+  const ai = cookies(req)[AI_COOKIE];
+  const id = akademiyaMentorId(ai);
+  const kerak = await akademiyaKerak(ai);
+  const y = id ? akademiya.yozuv(id) : null;
+  res.json({ kerak, otgan: Boolean(y?.passedAt), mentor: Boolean(id) });
+});
+
+app.get('/api/akademiya/savollar', (req, res) => res.json(akademiya.savollar()));
+
+app.post('/api/akademiya/natija', (req, res) => {
+  const id = akademiyaMentorId(cookies(req)[AI_COOKIE]);
+  if (!id) return res.status(401).json({ error: 'Testni topshirish uchun mentor sifatida kiring' });
+  const r = akademiya.tekshir(id, req.body?.answers);
+  if (!r) return res.status(400).json({ error: 'Javoblar to‘liq emas' });
+  if (r.pass) OQUVCHISIZ.delete(id);
+  res.json(r);
+});
+
+// Brauzerdan kirilganda ish sahifalari server tomonda yopiladi.
+// WebView birinchi ochilishda cookie hali yo'q — u holatni auth-webview.js tekshiradi.
+const AKADEMIYA_YOPIQ = /^\/(jadval|oquvchilar|oquvchi|lidlar|mentor\/yol|mentor\/liga)(\.html)?$/;
+app.get(AKADEMIYA_YOPIQ, async (req, res, next) => {
+  if (await akademiyaKerak(cookies(req)[AI_COOKIE])) return res.redirect('/mentor/akademiya.html');
+  next();
 });
 
 // Bosh sahifa — rol tanlash yo'q, rol hisobdan aniqlanadi

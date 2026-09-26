@@ -709,28 +709,15 @@ body:not(.js) .nojs{display:block}
 (function(){
   const MODS = ["s0","s1","s2","s3","s4","s5","s6","s7","s8"];
   const LABELS = ["Kirish","Rol","Kalendar","Norma","Oqim","Qo'ng'iroq","Birinchi dars","Dastur va narx","Daromad"];
-  const QUESTIONS = [
-    {q:"Ochilgan slotda onlayn bo'lmasangiz nima bo'ladi?",o:["Hech narsa, slot shunchaki yopiladi","Bo'sh qolgan har 30 daqiqa uchun ball ayiriladi","Hisobingiz darhol bloklanadi","Keyingi hafta kalendar yopiladi"],a:1,m:2},
-    {q:"Bir vaqtda qo'lingizda nechta ishlanmagan talabgor tura oladi?",o:["Cheklov yo'q","10 ta","5 ta","3 ta"],a:3,m:4},
-    {q:"Talabgorga necha daqiqa tegmasangiz, u qaytarib olinadi?",o:["15 daqiqa","45 daqiqa","2 soat","Kun oxirigacha"],a:1,m:4},
-    {q:"Kunlik norma nimaga teng?",o:["Kuniga 100 ball","Kuniga 8 soat onlayn","12 ta qo'ng'iroq, boshqa hech narsa","Norma yo'q"],a:0,m:3},
-    {q:"O'tkazilgan birinchi dars (diagnostika) necha ball beradi?",o:["8","15","30","50"],a:2,m:3},
-    {q:"Telefon qo'ng'irog'ining maqsadi nima?",o:["Kursni sotish va to'lov qildirish","Narxni aytib, o'ylab ko'rishini so'rash","Bepul birinchi darsga vaqt kelishish","Darajasini telefonda aniqlash"],a:2,m:5},
-    {q:"Odam telefonda \"qimmat\" desa, to'g'ri javob qaysi?",o:["Chegirma taklif qilaman","\"Birinchi dars bepul, majburiyat yo'q. Avval ko'ring\"","Narxni batafsil asoslab beraman","Arzonroq kurslar borligini aytaman"],a:1,m:5},
-    {q:"XEI nimani anglatadi?",o:["Xohish, Ehtiyoj, Imkoniyat","Xulosa, Eksperiment, Intizom","Xarid, Ehtimol, Investitsiya","Xohish, Ehtiyotkorlik, Ishonch"],a:0,m:6},
-    {q:"O'quvchi \"sertifikat olishim kerak\" desa, qaysi dastur va narx?",o:["Speaking dasturi, 350 000 so'mdan","IELTS / CEFR tayyorgarlik, 550 000 so'mdan","Farqi yo'q, ikkalasi ham bir xil","O'quvchi o'zi tanlaydi"],a:1,m:7},
-    {q:"Promokod bilan bergan chegirmangizni kim to'laydi?",o:["Kompaniya","Siz — chegirma sizning ulushingizdan chiqadi","Kompaniya va siz teng bo'lasiz","Chegirma o'quvchining keyingi oyidan ushlanadi"],a:1,m:7},
-    {q:"O'quvchi chegirma so'rasa nima qilasiz?",o:["Narxni 300 000 gacha tushiraman","Narxni emas, haftadagi dars sonini kamaytiraman","Administratordan ruxsat so'rayman","Birinchi oyni bepul qilaman"],a:1,m:7},
-    {q:"Birinchi darsdan keyin o'quvchi 24 soat ichida to'lasa, sizga nima beriladi?",o:["Hech narsa, faqat obunadan ulush","Bitta dars puli miqdorida bonus","Ikki barobar obuna ulushi","Keyingi oyda rank ko'tariladi"],a:1,m:7},
-    {q:"Prioritet raqami nimani belgilaydi?",o:["Oyliq maoshingizni","Ertaga qancha talabgor olishingizni","O'quvchining darajasini","Qaysi smenada ishlashingizni"],a:1,m:4},
-    {q:"Darsni qanday material bilan o'tasiz?",o:["Faqat ilovadagi dastur bo'yicha","O'quvchiga mos materialni o'zim tanlayman, o'z kitobi bo'lsa o'shandan davom etaman","Har safar yangi material beraman","Material kerak emas, faqat suhbat"],a:1,m:1},
-    {q:"Sizga kelgan talabgor sertifikat kerakligini aytdi, lekin sizda IELTS darajasi yo'q. Nima qilasiz?",o:["O'zim tayyorlayman, farqi yo'q","Ilovada IELTS oqimiga o'tkazaman va sababini tushuntiraman","Talabgorni yopib qo'yaman","Speaking narxida IELTS tayyorlashni va'da qilaman"],a:1,m:4},
-    {q:"O'quvchi bilan platformadan tashqarida kelishsangiz nima bo'ladi?",o:["Ogohlantirish beriladi","Ball ayiriladi","Darhol blok, bonuslar bekor va qonuniy javobgarlik","Administrator komissiya oladi"],a:2,m:8}
-  ];
-  const PASS = 13;
+  // Savollar serverdan javobsiz keladi — tekshirish ham serverda
+  let QUESTIONS = [], PASS = 13, lastResult = null;
+  const savollarTayyor = fetch("/api/akademiya/savollar").then(r=>r.json()).then(d=>{
+    QUESTIONS = d.questions; PASS = d.pass;
+    if(answers.length !== QUESTIONS.length) answers = new Array(QUESTIONS.length).fill(null);
+  });
 
   const screens = [...MODS, "test", "result"];
-  let idx = 0, qi = 0, answers = new Array(QUESTIONS.length).fill(null), finished = false;
+  let idx = 0, qi = 0, answers = [], finished = false;
 
   const $ = id => document.getElementById(id);
   const stepsEl = $("steps"), barEl = $("bar"), prevBtn = $("prev"), nextBtn = $("next"), hintEl = $("hint");
@@ -738,7 +725,7 @@ body:not(.js) .nojs{display:block}
   MODS.forEach((_,i)=>{ const i2=document.createElement("i"); stepsEl.appendChild(i2); });
 
   function save(){ try{ localStorage.setItem("mt_academy", JSON.stringify({idx,answers,finished})); }catch(e){} }
-  function load(){ try{ const d=JSON.parse(localStorage.getItem("mt_academy")||"null"); if(d && typeof d.idx==="number"){ idx=Math.min(d.idx, MODS.length-1); if(Array.isArray(d.answers)&&d.answers.length===QUESTIONS.length) answers=d.answers; } }catch(e){} }
+  function load(){ try{ const d=JSON.parse(localStorage.getItem("mt_academy")||"null"); if(d && typeof d.idx==="number"){ idx=Math.min(d.idx, MODS.length-1); if(Array.isArray(d.answers)) answers=d.answers; } }catch(e){} }
 
   function show(id){
     document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on", s.id===id));
@@ -791,22 +778,34 @@ body:not(.js) .nojs{display:block}
     [...stepsEl.children].forEach(el=>el.className="done");
   }
 
-  function renderResult(){
-    const score = answers.reduce((n,a,i)=> n + (a === QUESTIONS[i].a ? 1 : 0), 0);
-    const pass = score >= PASS;
+  async function renderResult(){
+    nextBtn.disabled = true;
+    let r;
+    try{
+      r = await fetch("/api/akademiya/natija", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({answers})});
+    }catch(e){ r = null; }
+    if(r && r.status === 401){ location.href = "/login.html?keyin=" + encodeURIComponent(location.pathname); return; }
+    const d = r ? await r.json().catch(()=>null) : null;
+    if(!r || !r.ok || !d){
+      mode = "test"; nextBtn.disabled = false;
+      hintEl.textContent = (d && d.error) || "Natijani yuborib bo'lmadi. Internetni tekshirib, qayta bosing.";
+      return;
+    }
+    lastResult = d;
+    const score = d.score, pass = d.pass;
     finished = true; save();
-    const wrong = QUESTIONS.map((q,i)=>({q,i})).filter(({q,i})=> answers[i] !== q.a);
+    const wrong = QUESTIONS.map((q,i)=>({q,i,rv:d.review[i]})).filter(({rv})=> !rv.correct);
     let html = '<div class="res ' + (pass ? "pass" : "fail") + '">' +
       '<p class="score">' + score + '<span style="font-size:24px;color:var(--mute)"> / ' + QUESTIONS.length + '</span></p>' +
       '<h2>' + (pass ? "Testdan o'tdingiz" : "Bu safar o'tmadingiz") + '</h2>' +
       '<p>' + (pass ? "Endi ilovada onlayn bo'lsangiz, birinchi talabgoringiz biriktiriladi." : "O'tish uchun " + PASS + " ta to'g'ri javob kerak. Xato qilingan modullarni qayta o'qing va urinib ko'ring.") + '</p>';
     if(wrong.length){
       html += '<div class="review">';
-      wrong.forEach(({q,i})=>{
+      wrong.forEach(({q,i,rv})=>{
         html += '<div class="item"><b>' + (i+1) + '. ' + q.q + '</b>' +
           '<span class="no">Sizning javobingiz: ' + (answers[i]===null ? "javob berilmadi" : q.o[answers[i]]) + '</span>' +
-          '<span class="ok">To\'g\'ri javob: ' + q.o[q.a] + '</span>' +
-          '<span style="margin-top:6px">Qayta o\'qing: ' + q.m + '-modul · ' + LABELS[q.m] + '</span></div>';
+          '<span class="ok">To\'g\'ri javob: ' + q.o[rv.answer] + '</span>' +
+          '<span style="margin-top:6px">Qayta o\'qing: ' + rv.module + '-modul · ' + LABELS[rv.module] + '</span></div>';
       });
       html += '</div>';
     }
@@ -820,9 +819,10 @@ body:not(.js) .nojs{display:block}
     html += '</div>';
     $("result").innerHTML = html;
     show("result");
-    prevBtn.style.display = "none";
-    nextBtn.textContent = pass ? "Modullarni qayta ko'rish" : "Testni qayta topshirish";
-    nextBtn.className = pass ? "btn ghost" : "btn warn-btn";
+    prevBtn.style.display = pass ? "" : "none";
+    prevBtn.textContent = "Modullarni qayta ko'rish";
+    nextBtn.textContent = pass ? "Ishni boshlash" : "Testni qayta topshirish";
+    nextBtn.className = pass ? "btn" : "btn warn-btn";
     nextBtn.style.flex = "1";
     nextBtn.disabled = false;
     hintEl.textContent = pass ? "Natijangiz saqlandi" : "Har bir urinishda savollar bir xil qoladi";
@@ -833,17 +833,21 @@ body:not(.js) .nojs{display:block}
   nextBtn.addEventListener("click", ()=>{
     if(mode === "mod"){
       if(idx < MODS.length-1){ idx++; renderModule(); }
-      else { mode = "test"; qi = 0; renderQuestion(); }
+      else {
+        nextBtn.disabled = true;
+        savollarTayyor.then(()=>{ mode = "test"; qi = 0; renderQuestion(); })
+          .catch(()=>{ nextBtn.disabled = false; hintEl.textContent = "Savollarni yuklab bo'lmadi. Qayta bosing."; });
+      }
     } else if(mode === "test"){
       if(qi < QUESTIONS.length-1){ qi++; renderQuestion(); }
       else { mode = "res"; renderResult(); }
     } else {
-      const score = answers.reduce((n,a,i)=> n + (a === QUESTIONS[i].a ? 1 : 0), 0);
-      if(score >= PASS){ mode="mod"; idx = 0; renderModule(); }
+      if(lastResult && lastResult.pass){ location.href = "/jadval.html"; }
       else { answers = new Array(QUESTIONS.length).fill(null); mode="test"; qi=0; save(); renderQuestion(); }
     }
   });
   prevBtn.addEventListener("click", ()=>{
+    if(mode === "res"){ prevBtn.textContent = "Orqaga"; nextBtn.style.flex = ""; mode="mod"; idx = 0; renderModule(); return; }
     if(mode === "mod"){ if(idx > 0){ idx--; renderModule(); } }
     else if(mode === "test"){
       if(qi > 0){ qi--; renderQuestion(); }
@@ -856,6 +860,12 @@ body:not(.js) .nojs{display:block}
   });
 
   document.body.classList.add('js');
+  // Ilova WebView'ni #ai=<token> bilan ochadi — tokenni cookie'ga aylantiramiz
+  const aiTok = new URLSearchParams(location.hash.slice(1)).get("ai");
+  if(aiTok){
+    fetch("/api/adopt",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:aiTok})}).catch(()=>{});
+    history.replaceState(null, "", location.pathname);
+  }
   load();
   renderModule();
 })();

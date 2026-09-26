@@ -22,6 +22,16 @@ window.WebViewAuth = {
       // Tokenni manzil satridan olib tashlaymiz
       history.replaceState(null, '', location.pathname);
     }
+
+    // Yangi mentor avval akademiyadan o'tadi. Brauzerda buni server qiladi,
+    // WebView esa birinchi ochilishda cookie'siz keladi — shuning uchun shu yerda ham.
+    try {
+      const h = await fetch('/api/akademiya/holat').then((r) => r.json());
+      if (h && h.kerak) {
+        location.replace('/mentor/akademiya.html');
+        await new Promise(() => {}); // sahifa qolgan kodini ishga tushirmasin
+      }
+    } catch { /* tekshirib bo'lmasa — to'smaymiz */ }
   },
 };
 
