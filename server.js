@@ -315,6 +315,8 @@ const RUXSAT = [
   /^calls$/,
   /^leads\/my$/,
   /^mentor\/salary$/,
+  /^mentor-gamification\/home$/,
+  /^mentor-gamification\/history$/,
 ];
 
 // Lid holati va izohi (PATCH) — ruxsat etilgan yozish amallari
@@ -327,6 +329,11 @@ app.patch(/^\/api\/ai\/leads\/([0-9a-f-]{36})\/(status|note)$/, (req, res) => {
 app.post(/^\/api\/ai\/leads\/([0-9a-f-]{36})\/create-account$/, (req, res) => {
   const id = req.path.split('/')[4];
   aiProxy(req, res, `/leads/${id}/create-account`);
+});
+
+// Ball yozuviga e'tiroz — mentorning o'z yozuviga (backend tekshiradi)
+app.post(/^\/api\/ai\/mentor-gamification\/entries\/([0-9a-f-]{36})\/dispute$/, (req, res) => {
+  aiProxy(req, res, `/mentor-gamification/entries/${req.params[0]}/dispute`);
 });
 
 app.get(/^\/api\/ai\/(.+)$/, (req, res) => {
