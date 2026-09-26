@@ -326,7 +326,7 @@ function sorovlarniChiz() {
     <div class="chipta" data-id="${esc(s.requestId)}" data-exp="${esc(s.expiresAt)}">
       <div class="chipta-ust">
         <div class="matn">
-          <b>${esc(s.leadName || 'Yangi lid')}</b>
+          <b>${esc(s.leadName || 'Yangi o‘quvchi')}</b>
           <div class="vaqt">${esc(vaqtYorliq(s.startsAt))} · ${s.durationMin || 30} daq</div>
           ${s.note ? `<div class="izoh2">${esc(s.note)}</div>` : ''}
         </div>
@@ -366,7 +366,7 @@ function chaqiruvOch(s) {
   ch.dataset.id = s.requestId;
   ch.dataset.exp = s.expiresAt;
   $('#chHarf').textContent = bosh(s.leadName);
-  $('#chIsm').textContent = s.leadName || 'Yangi lid';
+  $('#chIsm').textContent = s.leadName || 'Yangi o‘quvchi';
   $('#chVaqt').textContent = `${vaqtYorliq(s.startsAt)} · ${s.durationMin || 30} daqiqa`;
   $('#chIzoh').hidden = !s.note;
   $('#chIzoh').textContent = s.note || '';
@@ -436,7 +436,7 @@ async function darslarniYukla() {
 }
 
 function darsKarta(d, { tarix = false } = {}) {
-  const ism = esc(d.studentName || (d.isTrial ? 'Lid' : 'O‘quvchi'));
+  const ism = esc(d.studentName || 'O‘quvchi');
   const teg = d.isTrial ? '<span class="teg sinov">Sinov</span>' : '';
   const holat = tarix && d.isTrial && LID_HOLAT[d.leadStatus]
     ? `<span class="teg ${LID_HOLAT[d.leadStatus][1]}">${LID_HOLAT[d.leadStatus][0]}</span>` : '';
