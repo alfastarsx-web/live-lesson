@@ -11,7 +11,6 @@ const { AUTH_ON, sign, verify, ROOM_RE } = require('./lib/token');
 const { TURN_ON, TURN_HOST, iceServers } = require('./lib/turn');
 const teachers = require('./lib/teachers');
 const aiteacher = require('./lib/aiteacher');
-const akademiya = require('./lib/akademiya');
 
 const PORT = process.env.PORT || 4300;
 const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
@@ -412,73 +411,57 @@ app.get('/api/ice', (req, res) => {
 });
 
 // ---------- Mentor akademiyasi ----------
-// Yangi mentor ish sahifalariga kirishdan oldin akademiyani o'qib, testdan o'tadi.
-// Akademiyadan oldin ishlab kelgan mentorlar (kamida bitta o'quvchisi bor) bloklanmaydi.
+// Yangi mentor ish sahifalariga kirishdan oldin akademiya modullarini ketma-ket o'qib,
+// testdan o'tadi. Holat, savollar va tekshiruv ai.myteacher.uz da (/mentor-academy) —
+// bu server faqat sahifalarni yopadi va so'rovlarni uzatadi.
 
-// ai.myteacher.uz tokenidan mentor id'si; mentor bo'lmasa (yoki admin bo'lsa) — null
-function akademiyaMentorId(aiToken) {
+// ai.myteacher.uz tokenidan mentor bo'lishi mumkinmi (admin — tekshirilmaydi)
+function mentorTokeni(aiToken) {
   const p = aiToken ? aiteacher.jwtPayload(aiToken) : null;
   if (!p || (p.exp && p.exp * 1000 < Date.now())) return null;
   const roles = aiteacher.collectRoles(p);
   if (!roles.includes('mentor') || roles.includes('admin')) return null;
-  const id = p.sub || p.id || p.userId;
-  const safe = String(id || '').toLowerCase().replace(/[^a-z0-9-]+/g, '').slice(0, 50);
-  return safe || null;
+  return String(p.sub || p.id || p.userId || '') || null;
 }
 
-// O'quvchisi yo'q deb topilgan mentorni har sahifada qayta so'ramaslik uchun
-const OQUVCHISIZ = new Map(); // id -> tekshirilgan vaqt
-const OQUVCHISIZ_MS = 5 * 60 * 1000;
+// Har sahifada backend'ga bormaslik uchun: o'tganlar uzoqroq, o'tmaganlar qisqa eslanadi
+const AKADEMIYA_KESH = new Map(); // userId -> { kerak, vaqt }
+const KESH_OTGAN_MS = 10 * 60 * 1000;
+const KESH_KERAK_MS = 20 * 1000;
 
 async function akademiyaKerak(aiToken) {
-  const id = akademiyaMentorId(aiToken);
-  if (!id || akademiya.otganmi(id)) return false;
+  const id = mentorTokeni(aiToken);
+  if (!id || !aiteacher.AITEACHER_ON) return false;
 
-  const oldin = OQUVCHISIZ.get(id);
-  if (oldin && Date.now() - oldin < OQUVCHISIZ_MS) return true;
+  const k = AKADEMIYA_KESH.get(id);
+  if (k && Date.now() - k.vaqt < (k.kerak ? KESH_KERAK_MS : KESH_OTGAN_MS)) return k.kerak;
 
-  // Allaqachon o'quvchisi bor mentor — akademiyadan oldin ishlab kelgan
   const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
-  if (base) {
-    try {
-      const r = await fetch(`${base}/assignments/my-students`, {
-        headers: { Authorization: `Bearer ${aiToken}` },
-        signal: AbortSignal.timeout(8000),
-      });
-      if (r.ok) {
-        const d = await r.json().catch(() => null);
-        if (Array.isArray(d) && d.length > 0) {
-          akademiya.ozod(id, 'oquvchisi-bor');
-          return false;
-        }
-      } else if (r.status >= 500) {
-        return false; // API ishlamasa, ishlayotgan mentorni to'sib qo'ymaymiz
-      }
-    } catch {
-      return false;
-    }
+  try {
+    const r = await fetch(`${base}/mentor-academy/status`, {
+      headers: { Authorization: `Bearer ${aiToken}` },
+      signal: AbortSignal.timeout(8000),
+    });
+    // API ishlamasa yoki token eskirgan bo'lsa ishlayotgan mentorni to'smaymiz
+    if (!r.ok) return false;
+    const d = await r.json().catch(() => null);
+    const kerak = Boolean(d && d.required);
+    AKADEMIYA_KESH.set(id, { kerak, vaqt: Date.now() });
+    return kerak;
+  } catch {
+    return false;
   }
-  OQUVCHISIZ.set(id, Date.now());
-  return true;
 }
 
-app.get('/api/akademiya/holat', async (req, res) => {
-  const ai = cookies(req)[AI_COOKIE];
-  const id = akademiyaMentorId(ai);
-  const kerak = await akademiyaKerak(ai);
-  const y = id ? akademiya.yozuv(id) : null;
-  res.json({ kerak, otgan: Boolean(y?.passedAt), mentor: Boolean(id) });
-});
-
-app.get('/api/akademiya/savollar', (req, res) => res.json(akademiya.savollar()));
-
+app.get('/api/akademiya/holat', (req, res) => aiProxy(req, res, '/mentor-academy/status'));
+app.post('/api/akademiya/boshla', (req, res) => aiProxy(req, res, '/mentor-academy/start'));
+app.post('/api/akademiya/modul', (req, res) => aiProxy(req, res, '/mentor-academy/progress'));
+app.get('/api/akademiya/savollar', (req, res) => aiProxy(req, res, '/mentor-academy/questions'));
 app.post('/api/akademiya/natija', (req, res) => {
-  const id = akademiyaMentorId(cookies(req)[AI_COOKIE]);
-  if (!id) return res.status(401).json({ error: 'Testni topshirish uchun mentor sifatida kiring' });
-  const r = akademiya.tekshir(id, req.body?.answers);
-  if (!r) return res.status(400).json({ error: 'Javoblar to‘liq emas' });
-  if (r.pass) OQUVCHISIZ.delete(id);
-  res.json(r);
+  // O'tgan bo'lsa keshdagi eski "kerak" darhol unutilsin
+  const id = mentorTokeni(cookies(req)[AI_COOKIE]);
+  if (id) AKADEMIYA_KESH.delete(id);
+  aiProxy(req, res, '/mentor-academy/submit');
 });
 
 // Brauzerdan kirilganda ish sahifalari server tomonda yopiladi.

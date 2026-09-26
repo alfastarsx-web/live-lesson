@@ -711,10 +711,57 @@ body:not(.js) .nojs{display:block}
   const LABELS = ["Kirish","Rol","Kalendar","Norma","Oqim","Qo'ng'iroq","Birinchi dars","Dastur va narx","Daromad"];
   // Savollar serverdan javobsiz keladi — tekshirish ham serverda
   let QUESTIONS = [], PASS = 13, lastResult = null;
-  const savollarTayyor = fetch("/api/akademiya/savollar").then(r=>r.json()).then(d=>{
-    QUESTIONS = d.questions; PASS = d.pass;
-    if(answers.length !== QUESTIONS.length) answers = new Array(QUESTIONS.length).fill(null);
-  });
+  // Modullar majburiy: server nechta modul o'qilganini va joriy modulda yana
+  // qancha o'qish kerakligini biladi. Oldinga faqat server ruxsat berganda o'tiladi.
+  let HOLAT = { modulesRead: 0, waitSeconds: 0, passed: false, mentor: false };
+  let kutishTaymer = null, kutishTugaydi = 0;
+
+  async function holatOl(){
+    const r = await fetch("/api/akademiya/boshla", {method:"POST"}).catch(()=>null);
+    if(r && r.status === 401){ location.href = "/login.html?keyin=" + encodeURIComponent(location.pathname); return false; }
+    if(r && r.ok){ HOLAT = await r.json(); }
+    return true;
+  }
+  function savollarniOl(){
+    return fetch("/api/akademiya/savollar").then(async r=>{
+      const d = await r.json().catch(()=>({}));
+      if(!r.ok) throw new Error(d.message || "Savollarni yuklab bo'lmadi");
+      QUESTIONS = d.questions; PASS = d.pass;
+      if(answers.length !== QUESTIONS.length) answers = new Array(QUESTIONS.length).fill(null);
+    });
+  }
+  // Joriy (hali o'qilmagan) modulda "Keyingisi" tugmasi vaqt tugaguncha qulf
+  function kutishBoshla(sekund){
+    clearInterval(kutishTaymer);
+    kutishTugaydi = Date.now() + sekund*1000;
+    const yangila = ()=>{
+      const qoldi = Math.ceil((kutishTugaydi - Date.now())/1000);
+      if(mode !== "mod" || idx !== HOLAT.modulesRead){ clearInterval(kutishTaymer); return; }
+      if(qoldi > 0){
+        nextBtn.disabled = true;
+        hintEl.textContent = "Bo'limni o'qing · yana " + qoldi + " soniya";
+      } else {
+        clearInterval(kutishTaymer);
+        nextBtn.disabled = false;
+        hintEl.textContent = idx === 0 ? "8 ta modul · taxminan 12 daqiqa" : (LABELS[idx] + " · " + idx + " / " + (MODS.length-1));
+      }
+    };
+    yangila();
+    kutishTaymer = setInterval(yangila, 500);
+  }
+  async function modulOqildi(){
+    // Oldin o'qilgan modul — serverga bormaymiz
+    if(idx < HOLAT.modulesRead || HOLAT.passed || !HOLAT.mentor) return true;
+    nextBtn.disabled = true;
+    const r = await fetch("/api/akademiya/modul", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({module: idx})}).catch(()=>null);
+    const d = r ? await r.json().catch(()=>({})) : {};
+    if(r && r.ok){ HOLAT = d; return true; }
+    const kut = d.waitSeconds || (d.message && d.message.waitSeconds);
+    if(kut){ kutishBoshla(kut); return false; }
+    nextBtn.disabled = false;
+    hintEl.textContent = (typeof d.message === "string" ? d.message : d.message && d.message.message) || "Saqlab bo'lmadi, qayta bosing";
+    return false;
+  }
 
   const screens = [...MODS, "test", "result"];
   let idx = 0, qi = 0, answers = [], finished = false;
@@ -749,6 +796,11 @@ body:not(.js) .nojs{display:block}
     nextBtn.disabled = false;
     nextBtn.className = idx === MODS.length-1 ? "btn warn-btn" : "btn";
     hintEl.textContent = idx === 0 ? "8 ta modul · taxminan 12 daqiqa" : (LABELS[idx] + " · " + idx + " / " + (MODS.length-1));
+    if(HOLAT.passed){
+      hintEl.textContent = "Siz akademiyadan o'tgansiz · " + hintEl.textContent;
+      if(idx === MODS.length-1){ nextBtn.textContent = "Ishni boshlash"; nextBtn.className = "btn"; }
+    }
+    else if(HOLAT.mentor && idx === HOLAT.modulesRead && HOLAT.waitSeconds > 0){ kutishBoshla(HOLAT.waitSeconds); }
     save();
   }
 
@@ -788,7 +840,7 @@ body:not(.js) .nojs{display:block}
     const d = r ? await r.json().catch(()=>null) : null;
     if(!r || !r.ok || !d){
       mode = "test"; nextBtn.disabled = false;
-      hintEl.textContent = (d && d.error) || "Natijani yuborib bo'lmadi. Internetni tekshirib, qayta bosing.";
+      hintEl.textContent = (d && (d.message || d.error)) || "Natijani yuborib bo'lmadi. Internetni tekshirib, qayta bosing.";
       return;
     }
     lastResult = d;
@@ -830,13 +882,15 @@ body:not(.js) .nojs{display:block}
   }
 
   let mode = "mod";
-  nextBtn.addEventListener("click", ()=>{
+  nextBtn.addEventListener("click", async ()=>{
     if(mode === "mod"){
+      if(!(await modulOqildi())) return;
       if(idx < MODS.length-1){ idx++; renderModule(); }
       else {
+        if(HOLAT.passed){ location.href = "/work.html"; return; }
         nextBtn.disabled = true;
-        savollarTayyor.then(()=>{ mode = "test"; qi = 0; renderQuestion(); })
-          .catch(()=>{ nextBtn.disabled = false; hintEl.textContent = "Savollarni yuklab bo'lmadi. Qayta bosing."; });
+        savollarniOl().then(()=>{ mode = "test"; qi = 0; renderQuestion(); })
+          .catch((e)=>{ nextBtn.disabled = false; hintEl.textContent = e.message; });
       }
     } else if(mode === "test"){
       if(qi < QUESTIONS.length-1){ qi++; renderQuestion(); }
@@ -867,7 +921,12 @@ body:not(.js) .nojs{display:block}
     history.replaceState(null, "", location.pathname);
   }
   load();
-  renderModule();
+  nextBtn.disabled = true; // holat kelguncha oldinga o'tib bo'lmasin
+  holatOl().then((ok)=>{
+    if(!ok) return;
+    if(HOLAT.mentor && !HOLAT.passed) idx = Math.min(idx, HOLAT.modulesRead, MODS.length-1);
+    renderModule();
+  });
 })();
 </script>
 
