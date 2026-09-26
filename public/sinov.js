@@ -161,7 +161,7 @@ function darsKartasi(d) {
   const ustoz = d.mentorName ? `<div class="dars-ustoz">${matn(d.mentorName)}</div>` : '';
   k.innerHTML = `${teg}${ustoz}<div class="dars-vaqt">${vaqtMatni(d.startsAt)}</div>`;
 
-  const h = kirishHolati(d.startsAt, d.durationMin || 30);
+  const h = kirishHolati(d.startsAt, d.durationMin || 60);
   if (h.holat === 'ochiq') {
     const tugma = document.createElement('button');
     tugma.className = 'asosiy';

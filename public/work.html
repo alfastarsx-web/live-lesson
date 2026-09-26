@@ -279,7 +279,7 @@ function smenaChiz() {
 
 function keyingiChiz() {
   const now = Date.now();
-  const k = KELGUSI.find((x) => new Date(x.startsAt).getTime() + (x.durationMin || 30) * 60_000 > now);
+  const k = KELGUSI.find((x) => new Date(x.startsAt).getTime() + (x.durationMin || 60) * 60_000 > now);
   const el = $('#keyingiDars');
   if (!k) { el.textContent = 'Bugun uchun rejadagi dars yo‘q'; return; }
   const ms = new Date(k.startsAt).getTime() - now;
@@ -315,7 +315,7 @@ function sorovlarniChiz() {
       <div class="chipta-ust">
         <div class="matn">
           <b>${esc(s.leadName || 'Yangi o‘quvchi')}</b>
-          <div class="vaqt">${esc(vaqtYorliq(s.startsAt))} · ${s.durationMin || 30} daq</div>
+          <div class="vaqt">${esc(vaqtYorliq(s.startsAt))} · ${s.durationMin || 60} daq</div>
           ${s.note ? `<div class="izoh2">${esc(s.note)}</div>` : ''}
         </div>
         <div class="halqa"><svg viewBox="0 0 100 100"><circle class="fon" cx="50" cy="50" r="44"/><circle class="ol" cx="50" cy="50" r="44"/></svg><span data-qoldi></span></div>
@@ -355,7 +355,7 @@ function chaqiruvOch(s) {
   ch.dataset.exp = s.expiresAt;
   $('#chHarf').textContent = bosh(s.leadName);
   $('#chIsm').textContent = s.leadName || 'Yangi o‘quvchi';
-  $('#chVaqt').textContent = `${vaqtYorliq(s.startsAt)} · ${s.durationMin || 30} daqiqa`;
+  $('#chVaqt').textContent = `${vaqtYorliq(s.startsAt)} · ${s.durationMin || 60} daqiqa`;
   $('#chIzoh').hidden = !s.note;
   $('#chIzoh').textContent = s.note || '';
   $('#chQabul').disabled = false; $('#chRad').disabled = false;
@@ -444,7 +444,7 @@ function darsKarta(d, { tarix = false } = {}) {
         ? `<button class="asosiy" data-holat="trial_completed">Dars o‘tildi</button><button data-holat="trial_no_show">Kelmadi</button>`
         : '';
     if (tugmalar || d.leadPhone) past = `<div class="dk-past" data-lid="${esc(d.leadId)}">${tugmalar}${telHavola(d.leadPhone)}</div>`;
-    const tugadi = kun.getTime() + (d.durationMin || 30) * 60_000;
+    const tugadi = kun.getTime() + (d.durationMin || 60) * 60_000;
     const qoldi = tugadi + BONUS_MS - Date.now();
     if (d.leadStatus === 'trial_completed' && qoldi > 0) {
       const foiz = Math.round((qoldi / BONUS_MS) * 100);
@@ -456,7 +456,7 @@ function darsKarta(d, { tarix = false } = {}) {
   return `<div class="dk">
     <div class="dk-bosh">
       <div class="dk-soat">${soatQisqa(d.startsAt)}<small>${kun.getDate()}.${String(kun.getMonth() + 1).padStart(2, '0')}</small></div>
-      <div class="matn"><b>${ism}${teg}</b><span>${esc(vaqtYorliq(d.startsAt))} · ${d.durationMin || 30} daq${baho}</span>${holat ? `<div class="dk-holat">${holat}</div>` : ''}</div>
+      <div class="matn"><b>${ism}${teg}</b><span>${esc(vaqtYorliq(d.startsAt))} · ${d.durationMin || 60} daq${baho}</span>${holat ? `<div class="dk-holat">${holat}</div>` : ''}</div>
     </div>${past}</div>`;
 }
 

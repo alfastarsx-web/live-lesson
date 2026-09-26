@@ -97,7 +97,7 @@ body.jadval{background:#eef1f7}
     <h1 id="hajmSarlavha">…</h1>
     <div class="izoh3" id="hajmIzoh">Sinov darsi so‘rovlari faqat ochiq vaqtlaringizga keladi.</div>
     <div class="shkala" id="shkala"><i id="shkalaI" style="width:0"></i><b id="shkalaMin"></b></div>
-    <div class="shkala-yozuv"><span>0</span><span id="shkalaMinYozuv">kamida 20 slot</span><span id="shkalaMax">60</span></div>
+    <div class="shkala-yozuv"><span>0</span><span id="shkalaMinYozuv">kamida 10 soat</span><span id="shkalaMax">40</span></div>
   </section>
 
   <nav class="tablar" aria-label="Work bo‘limlari">
@@ -112,7 +112,7 @@ body.jadval{background:#eef1f7}
   <!-- ===== Kelgusi 14 kun ===== -->
   <section class="bolim">
     <h2>Kelgusi 14 kun</h2>
-    <p>Kunni tanlang va vaqtlarni bosing yoki barmoq bilan suring. O‘zgarish faqat shu kunga ta’sir qiladi.</p>
+    <p>Har katak — bir soatlik dars. Kunni tanlang va vaqtlarni bosing yoki barmoq bilan suring. O‘zgarish faqat shu kunga ta’sir qiladi.</p>
     <div class="lenta" id="lenta"></div>
     <div class="panel">
       <div class="panel-bosh">
@@ -164,9 +164,10 @@ const $ = (s) => document.querySelector(s);
 const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const KUN_QISQA = ['Ya', 'Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh'];
 const KUN_TOLIQ = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
-const OYLAR = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+const OY_NOMLARI = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
 const HAFTA_TARTIB = [1, 2, 3, 4, 5, 6, 0];
 const KUNDUZ = 6 * 60; // 06:00 dan boshlab ko'rsatiladi, tungi soatlar — tugma bilan
+const SLOT = 60;       // dars 1 soat, slot soat boshida
 
 let J = null;                 // serverdan kelgan jadval
 let TANLANGAN = null;         // tanlangan sana
@@ -196,7 +197,8 @@ function shablonniOl() {
   SHABLON = {}; SHABLON_ASL = {};
   for (let wd = 0; wd < 7; wd += 1) { SHABLON[wd] = new Set(); SHABLON_ASL[wd] = new Set(); }
   for (const r of J.weekly) {
-    for (let m = r.startMinute; m + 30 <= r.endMinute; m += 30) { SHABLON[r.weekday].add(m); SHABLON_ASL[r.weekday].add(m); }
+    // Soat boshiga tekislanadi — eski 09:30 kabi chegaralardan faqat to'liq soatlar
+    for (let m = Math.ceil(r.startMinute / SLOT) * SLOT; m + SLOT <= r.endMinute; m += SLOT) { SHABLON[r.weekday].add(m); SHABLON_ASL[r.weekday].add(m); }
   }
 }
 
@@ -232,18 +234,18 @@ function setkaQur(el, hodisa) {
 
 function vaqtlar(tungi) {
   const out = [];
-  for (let m = tungi ? 0 : KUNDUZ; m < 1440; m += 30) out.push(m);
+  for (let m = tungi ? 0 : KUNDUZ; m < 1440; m += SLOT) out.push(m);
   return out;
 }
 
 // ---------- kelgusi 14 kun ----------
 function lentaChiz() {
   $('#lenta').innerHTML = J.days.map((d) => {
-    const soat = d.open.length / 2;
+    const soat = d.open.length;
     const [, mo, da] = d.date.split('-');
     const bugunmi = d.date === J.today;
     return `<button class="kun" type="button" data-date="${d.date}" aria-pressed="${d.date === TANLANGAN}"
-      aria-label="${KUN_TOLIQ[d.weekday]}, ${Number(da)}-${OYLAR[Number(mo) - 1]}">
+      aria-label="${KUN_TOLIQ[d.weekday]}, ${Number(da)}-${OY_NOMLARI[Number(mo) - 1]}">
       ${d.override ? '<i class="ozg" aria-hidden="true"></i>' : ''}
       <small>${bugunmi ? 'Bugun' : KUN_QISQA[d.weekday]}</small><b>${Number(da)}</b>
       <span class="${soat ? '' : 'dam'}">${soat ? `${soat} soat` : 'dam'}</span></button>`;
@@ -275,7 +277,7 @@ function kunKatakHolati(d, m) {
 function kunChiz() {
   const d = kunJ(TANLANGAN);
   const [, mo, da] = d.date.split('-');
-  $('#kunNomi').textContent = `${KUN_TOLIQ[d.weekday]}, ${Number(da)}-${OYLAR[Number(mo) - 1]}`;
+  $('#kunNomi').textContent = `${KUN_TOLIQ[d.weekday]}, ${Number(da)}-${OY_NOMLARI[Number(mo) - 1]}`;
   const ozg = !tengmi(KUN_TAHRIR, new Set(d.open));
   $('#kunHolat').textContent = d.override ? 'Alohida o‘zgartirilgan kun' : 'Haftalik shablon bo‘yicha';
   $('#kunHolat').className = 'holat2' + (d.override ? ' ozg' : '');
@@ -338,7 +340,7 @@ $('#kunTungi').onclick = () => { TUNGI.kun = !TUNGI.kun; kunChiz(); };
 // ---------- haftalik shablon ----------
 function haftaChiz() {
   $('#hafta').innerHTML = HAFTA_TARTIB.map((wd) => `<button type="button" data-wd="${wd}" aria-pressed="${wd === HAFTA_KUNI}">
-    <b>${KUN_QISQA[wd]}</b><span>${SHABLON[wd].size ? `${SHABLON[wd].size / 2}s` : '—'}</span></button>`).join('');
+    <b>${KUN_QISQA[wd]}</b><span>${SHABLON[wd].size ? `${SHABLON[wd].size}s` : '—'}</span></button>`).join('');
   document.querySelectorAll('#hafta button').forEach((b) => { b.onclick = () => { HAFTA_KUNI = Number(b.dataset.wd); haftaChiz(); shablonChiz(); }; });
 }
 
@@ -381,8 +383,8 @@ function oraliqlar() {
     const m = [...SHABLON[wd]].sort((a, b) => a - b);
     for (let i = 0; i < m.length;) {
       let j = i;
-      while (j + 1 < m.length && m[j + 1] === m[j] + 30) j += 1;
-      items.push({ weekday: Number(wd), startMinute: m[i], endMinute: m[j] + 30 });
+      while (j + 1 < m.length && m[j + 1] === m[j] + SLOT) j += 1;
+      items.push({ weekday: Number(wd), startMinute: m[i], endMinute: m[j] + SLOT });
       i = j + 1;
     }
   }
@@ -393,15 +395,15 @@ function oraliqlar() {
 function hajmChiz() {
   const n = haftalikSlot();
   const min = J.minWeeklySlots;
-  const max = Math.max(60, n);
-  $('#hajmSarlavha').textContent = `Haftasiga ${n / 2} soat`;
+  const max = Math.max(40, n);
+  $('#hajmSarlavha').textContent = `Haftasiga ${n} soat`;
   $('#hajmIzoh').innerHTML = n >= min
-    ? `<b>${n}</b> ta 30 daqiqalik slot ochiq. Sinov darsi so‘rovlari faqat shu vaqtlarga keladi.`
-    : `<b>${n}</b> ta slot — tavsiya etilgan minimumdan <b>${min - n}</b> ta kam. Kam ochilgan jadvalga kam so‘rov keladi.`;
+    ? `<b>${n}</b> ta bir soatlik dars vaqti ochiq. Sinov darsi so‘rovlari faqat shu vaqtlarga keladi.`
+    : `<b>${n}</b> soat — tavsiya etilgan minimumdan <b>${min - n}</b> soat kam. Kam ochilgan jadvalga kam so‘rov keladi.`;
   $('#shkalaI').style.width = `${Math.min(100, (n / max) * 100)}%`;
   $('#shkalaMin').style.left = `${(min / max) * 100}%`;
   $('#shkala').classList.toggle('kam', n < min);
-  $('#shkalaMinYozuv').textContent = `kamida ${min} slot`;
+  $('#shkalaMinYozuv').textContent = `kamida ${min} soat`;
   $('#shkalaMax').textContent = max;
 }
 
@@ -413,10 +415,10 @@ function barChiz() {
   else if (kunOzg) {
     const d = kunJ(TANLANGAN);
     const [, mo, da] = d.date.split('-');
-    $('#saqlaMatn').innerHTML = `${Number(da)}-${OYLAR[Number(mo) - 1]}: ${KUN_TAHRIR.size / 2} soat ochiq`;
+    $('#saqlaMatn').innerHTML = `${Number(da)}-${OY_NOMLARI[Number(mo) - 1]}: ${KUN_TAHRIR.size} soat ochiq`;
   } else if (shOzg) {
     const n = haftalikSlot();
-    $('#saqlaMatn').innerHTML = `Shablon: haftasiga ${n / 2} soat${n < J.minWeeklySlots ? `<small>Minimum ${J.minWeeklySlots} slot — ${J.minWeeklySlots - n} ta kam</small>` : ''}`;
+    $('#saqlaMatn').innerHTML = `Shablon: haftasiga ${n} soat${n < J.minWeeklySlots ? `<small>Minimum ${J.minWeeklySlots} soat — ${J.minWeeklySlots - n} soat kam</small>` : ''}`;
   }
 }
 
@@ -429,6 +431,8 @@ $('#bekorQil').onclick = () => {
 $('#saqla').onclick = async () => {
   const btn = $('#saqla');
   btn.disabled = true;
+  const oldinAlohida = new Set(J.days.filter((d) => d.override).map((d) => d.date));
+  let shablonSaqlandi = false;
   try {
     if (shablonOzgarganmi()) {
       const r = await api('/api/booking/availability', {
@@ -436,6 +440,7 @@ $('#saqla').onclick = async () => {
       });
       if (!r) return;
       if (!r.ok) return toast(r.data.message || 'Shablonni saqlab bo‘lmadi', 'err');
+      shablonSaqlandi = true;
     }
     if (KUN_TAHRIR && !tengmi(KUN_TAHRIR, new Set(kunJ(TANLANGAN).open))) {
       const r = await api('/api/booking/schedule/day', {
@@ -446,7 +451,14 @@ $('#saqla').onclick = async () => {
       if (!r.ok) return toast(r.data.message || 'Kunni saqlab bo‘lmadi', 'err');
     }
     await yukla();
-    toast('Jadval saqlandi', 'ok');
+    // Darsi, so'rovi yoki 12 soat qulfi bor kunlar eski holatida qoldi — mentorga aytamiz
+    const qoldi = shablonSaqlandi ? J.days.filter((d) => d.override && !oldinAlohida.has(d.date)) : [];
+    if (qoldi.length) {
+      const nomlar = qoldi.slice(0, 3).map((d) => { const [, mo, da] = d.date.split('-'); return `${Number(da)}-${OY_NOMLARI[Number(mo) - 1]}`; });
+      toast(`Shablon saqlandi. ${nomlar.join(', ')}${qoldi.length > 3 ? ' va boshqalar' : ''} o‘zgarmadi — u yerda dars, so‘rov yoki 12 soatdan kam vaqt bor`, 'ok');
+    } else {
+      toast('Jadval saqlandi', 'ok');
+    }
   } finally {
     btn.disabled = false;
   }
