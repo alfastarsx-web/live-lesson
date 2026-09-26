@@ -15,7 +15,12 @@ body.work{background:var(--bg)}
 .smena::after{content:none}
 .smena-yuqori{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;z-index:1}
 .sana-yorliq{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
-.onlayn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--green);background:var(--green-soft);padding:5px 10px;border-radius:999px}
+.onlayn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:12.5px;font-weight:700;color:var(--green);background:var(--green-soft);padding:6px 11px;border-radius:999px;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.onlayn small{font-size:11px;font-weight:600;opacity:.75;font-variant-numeric:tabular-nums}
+.onlayn[aria-pressed="false"]{color:var(--mut2);background:var(--sub);box-shadow:inset 0 0 0 1px var(--line)}
+.onlayn[aria-pressed="false"] i{background:var(--mut);animation:none}
+.onlayn:disabled{opacity:.6}
+.onlayn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .onlayn i{width:7px;height:7px;border-radius:50%;background:var(--green);animation:puls 2.4s infinite}
 @keyframes puls{0%,100%{opacity:1}50%{opacity:.35}}
 .smena h1{position:relative;z-index:1;margin:12px 0 2px;font-size:24px;line-height:1.2;font-weight:800;letter-spacing:-.5px;text-wrap:balance}
@@ -107,7 +112,7 @@ body.work{background:var(--bg)}
   <section class="smena" aria-label="Bugungi smena">
     <div class="smena-yuqori">
       <span class="sana-yorliq" id="bugunSana">…</span>
-      <span class="onlayn"><i></i>Onlayn · so‘rovlar keladi</span>
+      <button class="onlayn" id="holatTugma" type="button" aria-pressed="true" aria-label="Onlayn holat — bosib o‘zgartiring"><i></i><span id="holatMatn">Onlayn</span><small id="holatVaqt" class="num"></small></button>
     </div>
     <h1 id="salom">Xayrli kun</h1>
     <div class="keyingi" id="keyingiDars">&nbsp;</div>
@@ -562,6 +567,42 @@ document.querySelectorAll('#sinovlar .chip').forEach((c) => {
   };
 });
 
+// ---------- Onlayn / Oflayn ----------
+// Oflaynda sinov so'rovlari va lidlar kelmaydi; onlaynda taymer bugungi onlayn vaqtni sanaydi.
+let HOLAT = { online: true, soniya: 0, olingan: Date.now() };
+const soatMatni = (s) => {
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), c = Math.floor(s % 60);
+  return `${h}:${String(m).padStart(2, '0')}:${String(c).padStart(2, '0')}`;
+};
+function holatChiz() {
+  const t = $('#holatTugma');
+  t.setAttribute('aria-pressed', String(HOLAT.online));
+  $('#holatMatn').textContent = HOLAT.online ? 'Onlayn' : 'Oflayn';
+  const s = HOLAT.soniya + (HOLAT.online ? (Date.now() - HOLAT.olingan) / 1000 : 0);
+  $('#holatVaqt').textContent = HOLAT.online ? soatMatni(s) : '';
+}
+async function holatYukla() {
+  const r = await api('/api/mentor-session/me');
+  if (!r || !r.ok) return;
+  HOLAT = { online: !r.data.away, soniya: r.data.todaySeconds || 0, olingan: Date.now() };
+  holatChiz();
+}
+$('#holatTugma').onclick = async () => {
+  const t = $('#holatTugma');
+  t.disabled = true;
+  const r = await api('/api/mentor-session/status', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ online: !HOLAT.online }),
+  });
+  t.disabled = false;
+  if (!r) return;
+  if (!r.ok) return toast(r.data.message || 'Holatni o‘zgartirib bo‘lmadi', 'err');
+  HOLAT = { online: !r.data.away, soniya: r.data.todaySeconds || 0, olingan: Date.now() };
+  holatChiz();
+  toast(HOLAT.online ? 'Onlayn — so‘rovlar keladi' : 'Oflayn — so‘rovlar kelmaydi', HOLAT.online ? 'ok' : '');
+};
+setInterval(() => { if (document.visibilityState === 'visible') holatChiz(); }, 1000);
+
 // ---------- tablar ----------
 function tabKorsat() {
   const tab = location.hash === '#sinovlar' ? 'sinovlar' : 'bugun';
@@ -589,7 +630,7 @@ window.addEventListener('hashchange', tabKorsat);
   if (!w) return;
   ISM = w.data.name || '';
 
-  await Promise.all([sorovlarniYukla(), darslarniYukla()]);
+  await Promise.all([sorovlarniYukla(), darslarniYukla(), holatYukla()]);
   tabriklarniKorsat((ISM || '').split(/\s+/)[0]);
 
   // So'rovlar tez-tez tekshiriladi; push kelib ilova ochilganda ham darhol yangilanadi
