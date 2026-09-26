@@ -842,6 +842,21 @@ let AKTIV_TOKEN = TOKEN;
       return;
     }
     // Ustoz — login sahifasiga
+    // Mentor ilovasi ichida login so'ralmaydi — ilovadan yangi havola so'raymiz
+    let ilova = Boolean(window.MyTeacher?.postMessage || window.flutter_inappwebview);
+    try { ilova = ilova || sessionStorage.getItem('ll_ilova') === '1'; } catch { /* yo'q */ }
+    if (ilova) {
+      const xabar = { turi: 'tokenEskirdi', sahifa: location.pathname };
+      try {
+        if (window.MyTeacher?.postMessage) window.MyTeacher.postMessage(JSON.stringify(xabar));
+        else window.flutter_inappwebview?.callHandler?.('mentorAction', xabar);
+      } catch { /* ko'prik yo'q */ }
+      el.remotePh.hidden = false;
+      el.remotePh.innerHTML = '<b>Dars havolasi eskirgan</b>'
+        + '<span>Ilovada darsni qayta oching.</span>';
+      setStatus('Havola eskirgan');
+      return;
+    }
     location.replace('/login.html?keyin=' + encodeURIComponent(location.pathname + location.search));
     return;
   }

@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Liga</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Onest:wght@400;500;600&display=swap">
+<style>
+:root{
+  --deep:#04124A; --brand:#0A47DB; --brand-soft:#E8EEFD; --signal:#2F7BFF;
+  --gold:#FF9A1F; --gold-soft:#FFF2E0; --red:#D64545; --red-soft:#FDECEC; --green:#1E8E5A; --green-soft:#E6F5EE;
+  --bg:#F4F6FC; --card:#FFFFFF; --line:#E3E8F6; --line-2:#CBD6EF; --text:#0A1747; --mute:#5C6A90;
+  --display:"Lexend","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Onest","Segoe UI",system-ui,-apple-system,sans-serif;
+  --shadow:0 1px 2px rgba(10,23,71,.05),0 10px 30px rgba(10,23,71,.07);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --deep:#050B20; --brand:#5C8DFF; --brand-soft:#151F42; --signal:#7AA7FF;
+  --gold:#FFB454; --gold-soft:#36260F; --red:#FF7A7A; --red-soft:#3A1C1C; --green:#4FD198; --green-soft:#12301F;
+  --bg:#070C1E; --card:#0D1530; --line:#1C2749; --line-2:#2B3765; --text:#E8EDFB; --mute:#9BA9CF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --deep:#050B20; --brand:#5C8DFF; --brand-soft:#151F42; --signal:#7AA7FF;
+  --gold:#FFB454; --gold-soft:#36260F; --red:#FF7A7A; --red-soft:#3A1C1C; --green:#4FD198; --green-soft:#12301F;
+  --bg:#070C1E; --card:#0D1530; --line:#1C2749; --line-2:#2B3765; --text:#E8EDFB; --mute:#9BA9CF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.02em;text-wrap:balance}
+p{margin:0}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:660px;margin:0 auto;padding-inline:16px}
+
+/* header */
+.top{background:linear-gradient(150deg,#0B34B8,#07227E 55%,#04124A);color:#fff;padding:26px 0 0;position:relative;overflow:hidden}
+.top::after{content:"";position:absolute;right:-70px;top:-50px;width:240px;height:208px;background:rgba(255,255,255,.06);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.top .lg{display:flex;align-items:center;gap:12px;position:relative}
+.top .cup{width:46px;height:40px;background:var(--gold);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:17px;color:#fff}
+.top h1{font-size:26px;font-weight:700}
+.top .sub{font-size:13px;color:#AFC0F0}
+.timer{margin-top:16px;background:rgba(255,255,255,.1);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;position:relative}
+.timer b{font-family:var(--display);font-size:17px}
+.timer span{font-size:12px;color:#AFC0F0}
+.tabs{display:flex;gap:2px;margin-top:18px;position:relative}
+.tabs button{flex:1;background:rgba(255,255,255,.08);border:0;color:#AFC0F0;font:600 14px var(--display);padding:13px 6px}
+.tabs button[aria-selected="true"]{background:var(--bg);color:var(--brand)}
+
+/* podium */
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:8px;align-items:end;margin:20px 0 14px}
+.pod{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:14px 10px;text-align:center}
+.pod .av{width:44px;height:38px;margin:0 auto 8px;background:var(--brand-soft);color:var(--brand);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:grid;place-items:center;font:700 15px var(--display)}
+.pod b{display:block;font-family:var(--display);font-size:14px;font-weight:600;line-height:1.2}
+.pod .pts{display:block;font-family:var(--display);font-size:17px;font-weight:700;color:var(--brand);margin-top:5px;font-variant-numeric:tabular-nums}
+.pod .pl{display:block;font-size:11px;color:var(--mute);margin-top:2px}
+.pod.p1{padding-block:20px;border-color:var(--gold)}
+.pod.p1 .av{background:var(--gold);color:#fff;width:52px;height:45px}
+.pod.p1 .pts{color:var(--gold)}
+
+/* list */
+.zone{display:flex;align-items:center;gap:8px;font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:16px 0 8px}
+.zone i{flex:1;height:1px;background:var(--line-2)}
+.zone.up{color:var(--green)}
+.zone.down{color:var(--red)}
+.rows{display:grid;gap:6px}
+.row{display:grid;grid-template-columns:34px 38px 1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);padding:11px 12px}
+.row .pos{font-family:var(--display);font-weight:700;font-size:15px;color:var(--mute);text-align:center;font-variant-numeric:tabular-nums}
+.row .av{width:38px;height:33px;background:var(--brand-soft);color:var(--brand);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:grid;place-items:center;font:700 13px var(--display)}
+.row .nm{display:block;font-family:var(--display);font-size:15px;font-weight:600;line-height:1.2}
+.row .meta{display:block;font-size:12px;color:var(--mute);margin-top:1px}
+.row .pts{display:block;font-family:var(--display);font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+.row.me{border-color:var(--brand);background:var(--brand-soft);box-shadow:0 0 0 1px var(--brand)}
+.row.me .pos,.row.me .pts{color:var(--brand)}
+.row.upz{border-left:3px solid var(--green)}
+.row.downz{border-left:3px solid var(--red)}
+.crown{display:inline-block;font:700 10px var(--display);letter-spacing:.08em;background:var(--gold);color:#fff;padding:2px 6px;margin-left:6px;vertical-align:2px}
+.delta{font-size:11px;font-family:var(--display);color:var(--mute)}
+.delta.plus{color:var(--green)}
+.delta.minus{color:var(--red)}
+
+/* cards */
+section{padding:22px 0 4px}
+.slabel{font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--brand);display:flex;align-items:center;gap:8px}
+.slabel i{width:12px;height:10px;background:var(--gold);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:block}
+h2{font-size:22px;font-weight:700;margin:10px 0 8px}
+.lede{color:var(--mute);font-size:15px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:16px 18px;margin-bottom:10px}
+.card h3{font-size:16px;font-weight:600;margin-bottom:6px}
+.card p{font-size:14px;color:var(--mute)}
+.prize{display:grid;gap:8px}
+.prize div{display:flex;justify-content:space-between;gap:12px;background:var(--gold-soft);padding:11px 14px;font-size:14px}
+.prize b{font-family:var(--display);color:#B35C00;white-space:nowrap}
+:root[data-theme="dark"] .prize b,:root:not([data-theme="light"]) .prize b{color:var(--gold)}
+.leagues{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.leagues div{padding:12px 10px;text-align:center;border:1px solid var(--line);background:var(--card)}
+.leagues b{display:block;font-family:var(--display);font-size:14px;font-weight:700}
+.leagues span{font-size:11px;color:var(--mute)}
+.leagues .b3{border-color:#B08D57}.leagues .b2{border-color:#9AA6B8}.leagues .b1{border-color:var(--gold)}
+.note{background:var(--brand-soft);border-left:3px solid var(--brand);padding:12px 14px;font-size:14px;margin-top:10px}
+.mini{font-size:12px;color:var(--mute);margin-top:8px}
+footer{padding:26px 0 50px;text-align:center;color:var(--mute);font-size:13px}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="lg">
+      <span class="cup">K</span>
+      <div><h1>Kumush liga</h1><p class="sub">15 mentor · 2-guruh</p></div>
+    </div>
+    <div class="timer"><b id="left">3 kun 14 soat</b><span>hafta yakunlanishiga</span></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-t="w">Hafta</button>
+      <button role="tab" aria-selected="false" data-t="m">Oy</button>
+      <button role="tab" aria-selected="false" data-t="y">Yil</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main"></main>
+
+<footer class="wrap">Namuna ma'lumotlar · haqiqiy jadval ilovada har kuni yangilanadi</footer>
+
+<script>
+(function(){
+  var WEEK = [
+    {n:"Dilnoza R.", p:2140, d:0, meta:"14 dars · 6 yangi o'quvchi", king:true},
+    {n:"Jasur T.", p:1980, d:1, meta:"12 dars · 5 yangi o'quvchi"},
+    {n:"Malika S.", p:1870, d:-1, meta:"13 dars · 4 yangi o'quvchi"},
+    {n:"Siz", p:1640, d:2, meta:"11 dars · 4 yangi o'quvchi", me:true},
+    {n:"Aziza K.", p:1585, d:-1, meta:"10 dars · 3 yangi o'quvchi"},
+    {n:"Bekzod A.", p:1490, d:0, meta:"9 dars · 3 yangi o'quvchi"},
+    {n:"Nilufar H.", p:1320, d:3, meta:"9 dars · 2 yangi o'quvchi"},
+    {n:"Sardor M.", p:1205, d:-2, meta:"8 dars · 2 yangi o'quvchi"},
+    {n:"Gulnora B.", p:1140, d:0, meta:"7 dars · 2 yangi o'quvchi"},
+    {n:"Otabek Y.", p:990, d:1, meta:"7 dars · 1 yangi o'quvchi"},
+    {n:"Shahzoda N.", p:870, d:-1, meta:"6 dars · 1 yangi o'quvchi"},
+    {n:"Javlon E.", p:760, d:0, meta:"5 dars · 1 yangi o'quvchi"},
+    {n:"Ozoda F.", p:610, d:-3, meta:"4 dars"},
+    {n:"Ruslan D.", p:480, d:-1, meta:"3 dars"},
+    {n:"Kamola I.", p:310, d:-2, meta:"2 dars"}
+  ];
+  var MONTH = [
+    {n:"Jasur T.", p:7820, meta:"Oltin liga · Expert"},
+    {n:"Dilnoza R.", p:7460, meta:"Kumush liga · Senior"},
+    {n:"Siz", p:6890, meta:"Kumush liga · Senior", me:true},
+    {n:"Malika S.", p:6510, meta:"Kumush liga · Senior"},
+    {n:"Aziza K.", p:6240, meta:"Bronza liga · Pro"},
+    {n:"Bekzod A.", p:5870, meta:"Kumush liga · Pro"},
+    {n:"Nilufar H.", p:5310, meta:"Bronza liga · Pro"},
+    {n:"Sardor M.", p:4980, meta:"Kumush liga · Senior"}
+  ];
+  var YEAR = [
+    {n:"Jasur T.", p:74300, meta:"Master · retention 82%"},
+    {n:"Dilnoza R.", p:69100, meta:"Expert · retention 79%"},
+    {n:"Malika S.", p:61250, meta:"Expert · retention 77%"},
+    {n:"Siz", p:52400, meta:"Senior · retention 74%", me:true},
+    {n:"Aziza K.", p:48800, meta:"Expert · retention 71%"}
+  ];
+  function fmt(v){ return v.toString().replace(/\B(?=(\d{3})+(?!\d))/g," "); }
+  function initials(name){ return name === "Siz" ? "S" : name.trim()[0]; }
+  function crown(item){ return item.king ? ' <span class="crown" title="Sinov darslari qiroli">QIROL</span>' : ''; }
+  function rowHTML(item, pos, zone){
+    var cls = "row" + (item.me ? " me" : "") + (zone ? " " + zone : "");
+    var d = item.d === undefined ? "" : (item.d > 0
+      ? '<span class="delta plus">▲ ' + item.d + '</span>'
+      : (item.d < 0 ? '<span class="delta minus">▼ ' + Math.abs(item.d) + '</span>' : '<span class="delta">—</span>'));
+    return '<div class="' + cls + '"><span class="pos">' + pos + '</span>' +
+      '<span class="av">' + initials(item.n) + '</span>' +
+      '<span><span class="nm">' + item.n + crown(item) + '</span><span class="meta">' + item.meta + '</span></span>' +
+      '<span style="text-align:right"><span class="pts">' + fmt(item.p) + '</span><br>' + d + '</span></div>';
+  }
+  function week(){
+    var top3 = WEEK.slice(0,3);
+    var html = '<div class="podium">' +
+      podHTML(top3[1], 2, "p2") + podHTML(top3[0], 1, "p1") + podHTML(top3[2], 3, "p3") + '</div>';
+    html += '<div class="zone up"><span>Ko\'tarilish zonasi</span><i></i><span>Oltin ligaga</span></div><div class="rows">';
+    WEEK.forEach(function(item, i){
+      var pos = i + 1;
+      var zone = pos <= 3 ? "upz" : (pos >= WEEK.length - 2 ? "downz" : "");
+      if(pos === 4) html += '</div><div class="zone"><span>Xavfsiz zona</span><i></i></div><div class="rows">';
+      if(pos === WEEK.length - 2) html += '</div><div class="zone down"><span>Tushish zonasi</span><i></i><span>Bronzaga</span></div><div class="rows">';
+      html += rowHTML(item, pos, zone);
+    });
+    html += '</div>';
+    html += '<section><p class="slabel"><i></i>Mukofot</p><h2>Shu hafta uchun</h2>' +
+      '<div class="prize">' +
+      '<div><span>1-o\'rin</span><b>+500 ball · oqimda ustunlik</b></div>' +
+      '<div><span>2–3-o\'rin</span><b>+250 ball</b></div>' +
+      '<div><span>1–3-o\'rin</span><b>Oltin ligaga ko\'tarilish</b></div>' +
+      '<div><span>13–15-o\'rin</span><b>Bronza ligaga tushish</b></div>' +
+      '</div>' +
+      '<div class="card" style="margin-top:12px"><h3>Sinov darslari qiroli</h3>' +
+      '<p>Haftada eng ko\'p muvaffaqiyatli birinchi dars o\'tkazgan mentor toj oladi: ismi yonida bir hafta turadi, +1 000 ball va kuniga bitta qo\'shimcha issiq o\'quvchi beriladi. Hisobda 72 soat ichida to\'lovga aylangan darslar olinadi.</p></div>' +
+      '<div class="note"><b>Oqimda ustunlik</b> — g\'olib keyingi hafta davomida navbatda birinchi turadi va kuniga 3 tagacha qo\'shimcha o\'quvchi oladi.</div>' +
+      '<p class="mini">Hafta dushanba 00:00 da boshlanib, yakshanba 23:59 da tugaydi. Ball teng bo\'lsa, retentioni yuqori mentor oldinda turadi.</p></section>';
+    html += leaguesHTML();
+    return html;
+  }
+  function podHTML(item, pos, cls){
+    return '<div class="pod ' + cls + '"><span class="av">' + initials(item.n) + '</span>' +
+      '<b>' + item.n + crown(item) + '</b><span class="pts">' + fmt(item.p) + '</span><span class="pl">' + pos + "-o'rin" + '</span></div>';
+  }
+  function leaguesHTML(){
+    return '<section><p class="slabel"><i></i>Ligalar</p><h2>Uch bosqich</h2>' +
+      '<p class="lede">Har hafta yuqoridagi uch mentor ko\'tariladi, quyidagi uchtasi tushadi. Yangi mentorlar Bronzadan boshlaydi.</p>' +
+      '<div class="leagues"><div class="b3"><b>Bronza</b><span>1-o\'rin +300</span></div>' +
+      '<div class="b2"><b>Kumush</b><span>1-o\'rin +500</span></div>' +
+      '<div class="b1"><b>Oltin</b><span>1-o\'rin +800 va pul</span></div></div>' +
+      '<div class="card" style="margin-top:12px"><h3>Adolat qoidalari</h3>' +
+      '<p>Muzlatishdagi mentor haftada qatnashmaydi va ligasi saqlanadi. Ketma-ket uch hafta nol ball yig\'gan mentor ligadan chiqariladi va faollashganda Bronzadan qaytadi.</p></div></section>';
+  }
+  function month(){
+    var html = '<section style="padding-top:18px"><p class="slabel"><i></i>Oy</p><h2>Oyning mentori</h2>' +
+      '<p class="lede">Oylik ball bo\'yicha, barcha ligalar bo\'ylab. G\'olib +1 000 ball, pul mukofoti va ilovada e\'lon oladi.</p><div class="rows">';
+    MONTH.forEach(function(item, i){ html += rowHTML(item, i + 1, i === 0 ? "upz" : ""); });
+    html += '</div><div class="card" style="margin-top:12px"><h3>Nominatsiyalar</h3><p>Oy yakunida uchta alohida nominatsiya ham beriladi: eng ko\'p birinchi dars, eng yuqori retention va eng uzun seriya. Har biri +500 ball.</p></div></section>';
+    return html;
+  }
+  function year(){
+    var html = '<section style="padding-top:18px"><p class="slabel"><i></i>Yil</p><h2>Yilning eng yaxshi mentori</h2>' +
+      '<p class="lede">Yillik ball, reyting va retention birgalikda hisoblanadi. Poygada Expert, Master va Legend ranklari qatnashadi.</p><div class="rows">';
+    YEAR.forEach(function(item, i){ html += rowHTML(item, i + 1, i === 0 ? "upz" : ""); });
+    html += '</div><div class="card" style="margin-top:12px"><h3>Nima uchun uchta ko\'rsatkich</h3><p>Faqat ball bo\'yicha hisoblansa, ko\'p ishlagan mentor g\'olib bo\'lardi. Reyting va retention qo\'shilganda esa o\'quvchini ushlab qolgan mentor oldinga chiqadi — kompaniyaga aynan shu kerak.</p></div></section>';
+    return html;
+  }
+  var views = {w: week, m: month, y: year};
+  var main = document.getElementById("main");
+  function show(t){
+    main.innerHTML = views[t]();
+    [].forEach.call(document.querySelectorAll(".tabs button"), function(b){
+      b.setAttribute("aria-selected", b.dataset.t === t ? "true" : "false");
+    });
+    window.scrollTo(0, 0);
+  }
+  [].forEach.call(document.querySelectorAll(".tabs button"), function(b){
+    b.addEventListener("click", function(){ show(b.dataset.t); });
+  });
+  show("w");
+
+  // countdown to Sunday 23:59
+  function tick(){
+    var now = new Date();
+    var end = new Date(now);
+    var days = (7 - now.getDay()) % 7;
+    end.setDate(now.getDate() + days);
+    end.setHours(23, 59, 0, 0);
+    var diff = Math.max(0, end - now);
+    var d = Math.floor(diff / 86400000), h = Math.floor(diff % 86400000 / 3600000), m = Math.floor(diff % 3600000 / 60000);
+    document.getElementById("left").textContent = d > 0 ? (d + " kun " + h + " soat") : (h + " soat " + m + " daqiqa");
+  }
+  tick(); setInterval(tick, 60000);
+})();
+</script>
+
+</body>
+</html>

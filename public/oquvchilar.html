@@ -14,9 +14,10 @@
   </div>
 
   <nav class="nav">
-    <a href="/jadval.html">Jadval</a>
+    <a href="/work.html">Bugun</a>
+    <a href="/work.html#sinovlar">Sinovlar</a>
     <a href="/oquvchilar.html" aria-current="page">O‘quvchilar</a>
-    <a href="/lidlar.html">Lidlar</a>
+    <a href="/jadval.html">Jadval</a>
   </nav>
 
   <div class="qidiruv">
@@ -92,8 +93,8 @@ function sinovKartaHtml(l) {
       <div class="karta-past">
         <span class="yorliq">Hali o‘quvchi emas</span>
         <span class="osma"></span>
-        <a href="/lidlar.html" style="text-decoration:none">
-          <button class="dumaloq" type="button" title="Lidlar bo‘limi">
+        <a href="/work.html#sinovlar" style="text-decoration:none">
+          <button class="dumaloq" type="button" title="Sinov darslari">
             <svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button></a>
       </div>
@@ -124,7 +125,7 @@ function chiz() {
          <span>Boshqa filter yoki qidiruvni sinab ko‘ring</span></div>`;
 
   document.querySelectorAll('.karta').forEach((k) => {
-    if (k.dataset.lid) { k.onclick = () => { location.href = '/lidlar.html'; }; return; }
+    if (k.dataset.lid) { k.onclick = () => { location.href = '/work.html#sinovlar'; }; return; }
     k.onclick = (e) => {
       const amal = e.target.closest('[data-amal]');
       if (amal) { e.stopPropagation(); return amalBajar(amal.dataset.amal, k.dataset.id); }

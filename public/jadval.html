@@ -5,249 +5,493 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Jadval</title>
 <link rel="stylesheet" href="/app.css">
-</head>
-<body>
-<div class="wrap">
-  <div class="sahifa-bosh">
-    <h1>Jadval</h1>
-    <div class="izoh" id="kim">…</div>
-  </div>
+<style>
+body.jadval{background:#eef1f7}
+.jadval .wrap{padding-bottom:110px}
 
-  <nav class="nav">
-    <a href="/jadval.html" aria-current="page">Jadval</a>
-    <a href="/oquvchilar.html">O‘quvchilar</a>
-    <a href="/lidlar.html">Lidlar</a>
+/* Bosh qism: haftalik hajm */
+.hajm{margin:16px 0 14px;border-radius:26px;padding:18px 20px;color:#fff;position:relative;overflow:hidden;
+  background:radial-gradient(110% 90% at 100% 0%, rgba(99,102,241,.55) 0%, rgba(99,102,241,0) 55%), #0b1b3f;
+  box-shadow:0 18px 40px -18px rgba(11,27,63,.55)}
+.hajm .yorliq{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#a5b4fc}
+.hajm h1{margin:8px 0 2px;font-size:27px;font-weight:800;letter-spacing:-.6px}
+.hajm .izoh3{font-size:14px;color:#cbd5e1}
+.hajm .izoh3 b{color:#fff;font-variant-numeric:tabular-nums}
+.shkala{position:relative;height:10px;border-radius:10px;background:rgba(255,255,255,.12);margin-top:14px}
+.shkala i{position:absolute;left:0;top:0;bottom:0;border-radius:10px;background:linear-gradient(90deg,#22c55e,#4ade80);transition:width .4s}
+.shkala.kam i{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.shkala b{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;opacity:.7}
+.shkala-yozuv{display:flex;justify-content:space-between;font-size:11.5px;color:#94a3b8;font-weight:600;margin-top:6px}
+
+.bolim{margin-top:22px}
+.bolim > h2{margin:0 2px 4px;font-size:15px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:#334155}
+.bolim > p{margin:0 2px 12px;font-size:13.5px;color:#64748b}
+
+/* Sanalar lentasi */
+.lenta{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none;scroll-snap-type:x proximity}
+.lenta::-webkit-scrollbar{display:none}
+.kun{flex:0 0 auto;scroll-snap-align:start;width:58px;border:0;border-radius:16px;background:#fff;padding:9px 0 8px;
+  font:inherit;cursor:pointer;box-shadow:0 1px 2px rgba(15,23,42,.05);position:relative;color:#0f172a}
+.kun small{display:block;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase}
+.kun b{display:block;font-size:20px;font-weight:800;line-height:1.2;font-variant-numeric:tabular-nums}
+.kun span{display:block;font-size:10.5px;font-weight:700;color:#16a34a;margin-top:2px}
+.kun span.dam{color:#e11d48}
+.kun[aria-pressed="true"]{background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;box-shadow:0 8px 18px -8px rgba(37,99,235,.8)}
+.kun[aria-pressed="true"] small,.kun[aria-pressed="true"] span{color:#c7d2fe}
+.kun .ozg{position:absolute;top:6px;right:7px;width:6px;height:6px;border-radius:50%;background:#f59e0b}
+
+/* Kun kartasi */
+.panel{background:#fff;border-radius:22px;padding:16px;box-shadow:0 1px 2px rgba(15,23,42,.05),0 10px 26px -18px rgba(15,23,42,.25)}
+.panel-bosh{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+.panel-bosh h3{margin:0;font-size:18px;font-weight:800;letter-spacing:-.3px}
+.panel-bosh .holat2{font-size:12.5px;font-weight:700;color:#64748b;margin-top:2px}
+.panel-bosh .holat2.ozg{color:#b45309}
+.amal2{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.amal2 button{border:1.5px solid #e2e8f0;background:#fff;border-radius:12px;padding:8px 12px;font:inherit;font-size:13px;font-weight:700;color:#334155;cursor:pointer}
+.amal2 button:disabled{opacity:.45;cursor:not-allowed}
+
+.belgilar{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;font-weight:700;color:#64748b;margin-bottom:10px}
+.belgilar i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+/* Katakchalar */
+.setka{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;touch-action:none;user-select:none;-webkit-user-select:none}
+.katak{position:relative;height:48px;border-radius:12px;border:1.5px dashed #d5dce8;background:#f8fafc;color:#94a3b8;
+  font:inherit;font-size:13.5px;font-weight:800;font-variant-numeric:tabular-nums;cursor:pointer;padding:0 4px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;transition:background .15s,border-color .15s}
+.katak small{font-size:10px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.katak.ochiq{border:1.5px solid #86efac;background:#ecfdf5;color:#15803d}
+.katak.dars{border:1.5px solid #c4b5fd;background:#f5f3ff;color:#6d28d9;cursor:default}
+.katak.sorov{border:1.5px solid #fcd34d;background:#fffbeb;color:#b45309;cursor:default}
+.katak.otgan{opacity:.35;cursor:default}
+.katak.qulf::after{content:"";position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:2px;background:#15803d;opacity:.55}
+.katak.ozgardi{box-shadow:0 0 0 2px #f59e0b inset}
+.katak:focus-visible{outline:3px solid #f59e0b;outline-offset:1px}
+.tungi{margin-top:10px;border:0;background:none;font:inherit;font-size:13px;font-weight:700;color:#4f46e5;cursor:pointer;padding:4px 0}
+
+/* Hafta kunlari */
+.hafta{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;background:#fff;border-radius:16px;padding:4px;margin-bottom:12px;
+  box-shadow:0 1px 2px rgba(15,23,42,.05)}
+.hafta button{border:0;background:none;border-radius:12px;padding:8px 0 6px;font:inherit;cursor:pointer;color:#475569}
+.hafta button b{display:block;font-size:13px;font-weight:800}
+.hafta button span{display:block;font-size:10.5px;font-weight:700;color:#94a3b8;font-variant-numeric:tabular-nums}
+.hafta button[aria-pressed="true"]{background:#eef2ff;color:#3730a3}
+.hafta button[aria-pressed="true"] span{color:#6366f1}
+
+/* Saqlash paneli */
+.saqla-bar{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));
+  background:rgba(255,255,255,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid #e2e8f0}
+.saqla-bar .ichi{max-width:528px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.saqla-bar .matn{flex:1;min-width:0;font-size:13.5px;font-weight:700;color:#334155}
+.saqla-bar .matn small{display:block;font-weight:600;color:#b45309;font-size:12px}
+.saqla-bar button{border:0;border-radius:13px;padding:12px 16px;font:inherit;font-size:14.5px;font-weight:800;cursor:pointer}
+.saqla-bar .bekor{background:#f1f5f9;color:#475569}
+.saqla-bar .ok{background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff}
+.saqla-bar button:disabled{opacity:.5}
+@media (prefers-reduced-motion:reduce){.shkala i,.katak{transition:none}}
+</style>
+</head>
+<body class="jadval">
+<div class="wrap">
+  <section class="hajm" aria-label="Haftalik hajm">
+    <div class="yorliq">Jadval</div>
+    <h1 id="hajmSarlavha">…</h1>
+    <div class="izoh3" id="hajmIzoh">Sinov darsi so‘rovlari faqat ochiq vaqtlaringizga keladi.</div>
+    <div class="shkala" id="shkala"><i id="shkalaI" style="width:0"></i><b id="shkalaMin"></b></div>
+    <div class="shkala-yozuv"><span>0</span><span id="shkalaMinYozuv">kamida 10 soat</span><span id="shkalaMax">40</span></div>
+  </section>
+
+  <nav class="tablar" aria-label="Work bo‘limlari">
+    <div class="tablar-ichi statik">
+      <a href="/work.html">Bugun</a>
+      <a href="/work.html#sinovlar">Sinovlar</a>
+      <a href="/oquvchilar.html">O‘quvchilar</a>
+      <a href="/jadval.html" aria-current="page">Jadval</a>
+    </div>
   </nav>
 
-  <div class="karta-oq">
-    <h2>Kelgusi darslar</h2>
-    <div id="darslar"><div class="izoh">Yuklanmoqda…</div></div>
-  </div>
-
-  <div class="karta-oq">
-    <h2>Haftalik bo‘sh vaqtlarim</h2>
-    <div class="izoh">O‘quvchilar faqat shu oraliqlardan 30 daqiqalik dars band qila oladi.</div>
-    <div id="kunlar"></div>
-    <div style="margin-top:16px;display:flex;gap:12px;align-items:center">
-      <button class="tugma" id="saqla">Saqlash</button>
-      <span class="xabar2" id="xabar"></span>
+  <!-- ===== Kelgusi 14 kun ===== -->
+  <section class="bolim">
+    <h2>Kelgusi 14 kun</h2>
+    <p>Har katak — bir soatlik dars. Kunni tanlang va vaqtlarni bosing yoki barmoq bilan suring. O‘zgarish faqat shu kunga ta’sir qiladi.</p>
+    <div class="lenta" id="lenta"></div>
+    <div class="panel">
+      <div class="panel-bosh">
+        <div><h3 id="kunNomi">…</h3><div class="holat2" id="kunHolat"></div></div>
+      </div>
+      <div class="amal2">
+        <button type="button" id="damOlaman">Bu kun dam olaman</button>
+        <button type="button" id="shablongaQayt" hidden>Shablonga qaytarish</button>
+      </div>
+      <div class="belgilar" aria-hidden="true">
+        <span><i style="background:#ecfdf5;border:1.5px solid #86efac"></i>Ochiq</span>
+        <span><i style="background:#f8fafc;border:1.5px dashed #cbd5e1"></i>Yopiq</span>
+        <span><i style="background:#f5f3ff;border:1.5px solid #c4b5fd"></i>Dars</span>
+        <span><i style="background:#fffbeb;border:1.5px solid #fcd34d"></i>So‘rov</span>
+      </div>
+      <div class="setka" id="kunSetka" role="group" aria-label="Kun vaqtlari"></div>
+      <button class="tungi" type="button" id="kunTungi">Tungi soatlarni ko‘rsatish</button>
     </div>
-  </div>
+  </section>
 
-  <div class="karta-oq" id="keyingi">
-    <h2>Keyingi qadam</h2>
-    <div class="izoh">Jadval saqlangach, o‘quvchi shu havoladan kirib o‘zi vaqt band qiladi.</div>
-    <div class="havola-quti">
-      <code id="oqHavola">…</code>
-      <button id="nusxa">Nusxa</button>
+  <!-- ===== Haftalik shablon ===== -->
+  <section class="bolim">
+    <h2>Haftalik shablon</h2>
+    <p>Har hafta takrorlanadi. Alohida o‘zgartirilgan kunlarga ta’sir qilmaydi.</p>
+    <div class="hafta" id="hafta"></div>
+    <div class="panel">
+      <div class="amal2">
+        <button type="button" id="ishKunlarga">Ish kunlariga nusxalash</button>
+        <button type="button" id="hammaKunga">Hamma kunga nusxalash</button>
+        <button type="button" id="kunniTozala">Kunni tozalash</button>
+      </div>
+      <div class="setka" id="shablonSetka" role="group" aria-label="Shablon vaqtlari"></div>
+      <button class="tungi" type="button" id="shablonTungi">Tungi soatlarni ko‘rsatish</button>
     </div>
-    <div class="izoh" style="margin:16px 0 8px">Yoki hozir dars xonasini ochib sinab ko‘ring:</div>
-    <button class="tugma ikkilamchi" id="xona">Dars xonasini ochish</button>
+  </section>
+</div>
+
+<div class="saqla-bar" id="saqlaBar" hidden>
+  <div class="ichi">
+    <div class="matn" id="saqlaMatn">…</div>
+    <button class="bekor" type="button" id="bekorQil">Bekor</button>
+    <button class="ok" type="button" id="saqla">Saqlash</button>
   </div>
 </div>
 
 <script src="/auth-webview.js"></script>
 <script>
-const KUNLAR = ['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'];
 const $ = (s) => document.querySelector(s);
-let SESSIYA_BOR = false;
+const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const KUN_QISQA = ['Ya', 'Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh'];
+const KUN_TOLIQ = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+const OY_NOMLARI = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+const HAFTA_TARTIB = [1, 2, 3, 4, 5, 6, 0];
+const KUNDUZ = 6 * 60; // 06:00 dan boshlab ko'rsatiladi, tungi soatlar — tugma bilan
+const SLOT = 60;       // dars 1 soat, slot soat boshida
 
-async function so(yol, opts) {
-  const r = await fetch(yol, opts);
-  if (r.status === 401 && !SESSIYA_BOR) {
-    location.href = '/login.html?keyin=' + encodeURIComponent(location.pathname);
-    return null;
+let J = null;                 // serverdan kelgan jadval
+let TANLANGAN = null;         // tanlangan sana
+let KUN_TAHRIR = null;        // Set — tanlangan kunning tahrirdagi ochiq slotlari
+let SHABLON = {};             // weekday -> Set (tahrirdagi)
+let SHABLON_ASL = {};         // weekday -> Set (saqlangan)
+let HAFTA_KUNI = 1;
+let TUNGI = { kun: false, shablon: false };
+
+const hhmm = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+const tengmi = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
+
+function toast(t, turi) {
+  document.querySelectorAll('.toast').forEach((x) => x.remove());
+  const d = document.createElement('div');
+  d.className = 'toast ' + (turi || '');
+  d.textContent = t;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 4500);
+}
+
+// Toshkent vaqtidagi sana + daqiqa -> ms (server ham shunday hisoblaydi, UTC+5)
+const vaqtMs = (date, m) => { const [y, mo, d] = date.split('-').map(Number); return Date.UTC(y, mo - 1, d) + (m - 300) * 60_000; };
+const kunJ = (date) => J.days.find((d) => d.date === date);
+
+function shablonniOl() {
+  SHABLON = {}; SHABLON_ASL = {};
+  for (let wd = 0; wd < 7; wd += 1) { SHABLON[wd] = new Set(); SHABLON_ASL[wd] = new Set(); }
+  for (const r of J.weekly) {
+    // Soat boshiga tekislanadi — eski 09:30 kabi chegaralardan faqat to'liq soatlar
+    for (let m = Math.ceil(r.startMinute / SLOT) * SLOT; m + SLOT <= r.endMinute; m += SLOT) { SHABLON[r.weekday].add(m); SHABLON_ASL[r.weekday].add(m); }
   }
-  return { ok: r.ok, data: await r.json().catch(() => ({})) };
 }
 
-function vaqtlar(sel, tanlangan) {
-  for (let m = 0; m <= 1440; m += 30) {
-    const o = document.createElement('option');
-    o.value = m;
-    o.textContent = `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
-    if (m === tanlangan) o.selected = true;
-    sel.appendChild(o);
-  }
-}
-
-function kunQatori(i) {
-  const row = document.createElement('div');
-  row.className = 'kun-qator';
-  row.innerHTML = `<input type="checkbox" data-k="${i}">
-    <span class="nom">${KUNLAR[i]}</span>
-    <select data-b="${i}"></select><span class="ora">—</span><select data-t="${i}"></select>`;
-  vaqtlar(row.querySelector(`[data-b="${i}"]`), 540);
-  vaqtlar(row.querySelector(`[data-t="${i}"]`), 1080);
-  const cb = row.querySelector('input');
-  const yangila = () => row.querySelectorAll('select').forEach((s) => { s.disabled = !cb.checked; });
-  cb.onchange = yangila; yangila();
-  return row;
-}
-for (let i = 1; i <= 6; i++) $('#kunlar').appendChild(kunQatori(i));
-$('#kunlar').appendChild(kunQatori(0));
-
-function xabar(t, turi) {
-  $('#xabar').textContent = t;
-  $('#xabar').className = 'xabar2 ' + (turi || '');
-  if (turi === 'ok') setTimeout(() => { $('#xabar').textContent = ''; }, 3500);
-}
-
-$('#saqla').onclick = async () => {
-  const items = [];
-  document.querySelectorAll('input[data-k]').forEach((cb) => {
-    if (!cb.checked) return;
-    const k = cb.dataset.k;
-    items.push({
-      weekday: Number(k),
-      startMinute: Number(document.querySelector(`select[data-b="${k}"]`).value),
-      endMinute: Number(document.querySelector(`select[data-t="${k}"]`).value),
-    });
+// ---------- katakchalar va surib belgilash ----------
+function setkaQur(el, hodisa) {
+  let rejim = null; // true — ochish, false — yopish
+  const katakOl = (x, y) => { const t = document.elementFromPoint(x, y); return t && t.closest ? t.closest('.katak') : null; };
+  el.addEventListener('pointerdown', (e) => {
+    const k = e.target.closest('.katak');
+    if (!k || k.disabled) return;
+    rejim = hodisa.boshla(Number(k.dataset.m));
+    if (rejim === null) return;
+    e.preventDefault();
+    hodisa.qoy(Number(k.dataset.m), rejim);
   });
-  const yomon = items.find((i) => i.endMinute <= i.startMinute);
-  if (yomon) return xabar(`${KUNLAR[yomon.weekday]}: tugash vaqti boshlanishdan keyin bo‘lsin`, 'err');
-
-  $('#saqla').disabled = true;
-  const r = await so('/api/booking/availability', {
-    method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({items}),
+  el.addEventListener('pointermove', (e) => {
+    if (rejim === null) return;
+    const k = katakOl(e.clientX, e.clientY);
+    if (k && el.contains(k) && !k.disabled) hodisa.qoy(Number(k.dataset.m), rejim);
   });
-  $('#saqla').disabled = false;
-  if (!r) return;
-  if (r.ok) {
-    xabar('Saqlandi — endi o‘quvchi vaqt band qila oladi', 'ok');
-    $('#keyingi').scrollIntoView({behavior:'smooth', block:'nearest'});
-  } else {
-    xabar(r.data.message || 'Saqlab bo‘lmadi', 'err');
-  }
-};
-
-const vaqtMatni = (iso) => sanaChiroyli(iso);
-
-function sinovKarta(d) {
-  const row = document.createElement('div');
-  row.className = 'sinov-kirish';
-  row.style.margin = '0 0 10px';
-  row.innerHTML = `<div class="sinov-kirish-bosh">
-    <span class="sinov-kirish-belgi" aria-hidden="true">▶</span>
-    <div class="sinov-kirish-matn">
-      <span class="sinov-kirish-yorliq">BELGILANGAN SINOV DARSI</span>
-      <strong></strong><small class="sinov-oquvchi"></small><small class="sinov-holat"></small>
-    </div>
-  </div><button type="button">Darsga kirish <span aria-hidden="true">↗</span></button>`;
-  row.querySelector('strong').textContent = vaqtMatni(d.startsAt);
-  row.querySelector('.sinov-oquvchi').textContent = d.studentName || 'O‘quvchi';
-  const btn = row.querySelector('button');
-  const status = row.querySelector('.sinov-holat');
-  const opensAt = Date.parse(d.startsAt) - 10 * 60_000;
-  const closesAt = Date.parse(d.startsAt) + (d.durationMin + 10) * 60_000;
-  const update = () => {
-    if (Date.now() >= closesAt) { row.remove(); return; }
-    btn.disabled = Date.now() < opensAt;
-    status.textContent = btn.disabled
-      ? 'Kirish darsdan 10 daqiqa oldin ochiladi' : 'Dars xonasi ochiq';
-  };
-  update();
-  const timer = setInterval(() => {
-    if (!row.isConnected) { clearInterval(timer); return; }
-    update();
-  }, 15_000);
-  btn.onclick = async () => {
-    btn.disabled = true;
-    // Lidlar also uses /entry: both buttons must open the same sinov room.
-    const e = await so(`/api/booking/${d.id}/entry`);
-    update();
-    if (!e) return;
-    if (e.ok && e.data.url) location.href = e.data.url;
-    else xabar(e.data.message || 'Hozircha kirib bo‘lmaydi', 'err');
-  };
-  return row;
+  const tugat = () => { rejim = null; };
+  window.addEventListener('pointerup', tugat);
+  window.addEventListener('pointercancel', tugat);
+  // Klaviatura: Enter/Space — bitta katak
+  el.addEventListener('keydown', (e) => {
+    const k = e.target.closest('.katak');
+    if (!k || (e.key !== 'Enter' && e.key !== ' ')) return;
+    e.preventDefault();
+    const r = hodisa.boshla(Number(k.dataset.m));
+    if (r !== null) hodisa.qoy(Number(k.dataset.m), r);
+  });
 }
 
-async function darslarniYukla() {
-  const r = await so('/api/booking/mentor/my');
-  if (!r) return;
-  const box = $('#darslar');
-  if (!r.ok || !Array.isArray(r.data) || !r.data.length) {
-    box.innerHTML = '<div class="izoh">Hozircha band qilingan dars yo‘q</div>';
+function vaqtlar(tungi) {
+  const out = [];
+  for (let m = tungi ? 0 : KUNDUZ; m < 1440; m += SLOT) out.push(m);
+  return out;
+}
+
+// ---------- kelgusi 14 kun ----------
+function lentaChiz() {
+  $('#lenta').innerHTML = J.days.map((d) => {
+    const soat = d.open.length;
+    const [, mo, da] = d.date.split('-');
+    const bugunmi = d.date === J.today;
+    return `<button class="kun" type="button" data-date="${d.date}" aria-pressed="${d.date === TANLANGAN}"
+      aria-label="${KUN_TOLIQ[d.weekday]}, ${Number(da)}-${OY_NOMLARI[Number(mo) - 1]}">
+      ${d.override ? '<i class="ozg" aria-hidden="true"></i>' : ''}
+      <small>${bugunmi ? 'Bugun' : KUN_QISQA[d.weekday]}</small><b>${Number(da)}</b>
+      <span class="${soat ? '' : 'dam'}">${soat ? `${soat} soat` : 'dam'}</span></button>`;
+  }).join('');
+  document.querySelectorAll('#lenta .kun').forEach((b) => { b.onclick = () => kunTanla(b.dataset.date); });
+}
+
+function kunTanla(date) {
+  if (KUN_TAHRIR && !tengmi(KUN_TAHRIR, new Set(kunJ(TANLANGAN).open))) {
+    toast('Avval o‘zgarishlarni saqlang yoki bekor qiling', 'err');
     return;
   }
-  box.innerHTML = '';
-  for (const d of r.data) {
-    if (d.isTrial) {
-      box.appendChild(sinovKarta(d));
-      continue;
+  TANLANGAN = date;
+  KUN_TAHRIR = new Set(kunJ(date).open);
+  lentaChiz();
+  kunChiz();
+}
+
+// Katak holati: o'tgan, dars, so'rov, 12 soatlik qulf
+function kunKatakHolati(d, m) {
+  const ms = vaqtMs(d.date, m);
+  const b = d.booked.find((x) => x.minute === m);
+  if (b) return { tur: 'dars', b };
+  if (d.requests.includes(m)) return { tur: 'sorov' };
+  if (ms <= Date.now()) return { tur: 'otgan' };
+  return { tur: 'oddiy', qulf: ms < Date.now() + J.lockHours * 3600_000 };
+}
+
+function kunChiz() {
+  const d = kunJ(TANLANGAN);
+  const [, mo, da] = d.date.split('-');
+  $('#kunNomi').textContent = `${KUN_TOLIQ[d.weekday]}, ${Number(da)}-${OY_NOMLARI[Number(mo) - 1]}`;
+  const ozg = !tengmi(KUN_TAHRIR, new Set(d.open));
+  $('#kunHolat').textContent = d.override ? 'Alohida o‘zgartirilgan kun' : 'Haftalik shablon bo‘yicha';
+  $('#kunHolat').className = 'holat2' + (d.override ? ' ozg' : '');
+  $('#shablongaQayt').hidden = !d.override;
+
+  const asl = new Set(d.open);
+  $('#kunSetka').innerHTML = vaqtlar(TUNGI.kun || d.open.some((m) => m < KUNDUZ)).map((m) => {
+    const h = kunKatakHolati(d, m);
+    if (h.tur === 'dars') {
+      return `<button class="katak dars" type="button" data-m="${m}" disabled title="${esc(h.b.name || '')}">${hhmm(m)}<small>${esc((h.b.name || (h.b.isTrial ? 'Sinov' : 'Dars')).split(' ')[0])}</small></button>`;
     }
-    const row = document.createElement('div');
-    row.className = 'dars-karta';
-    row.style.margin = '0 0 10px';
-    row.style.padding = '12px';
-    row.innerHTML = `<span class="matn"><b>${vaqtMatni(d.startsAt)}</b>
-      <span>${d.studentName || 'O‘quvchi'}</span></span>`;
-    const btn = document.createElement('button');
-    btn.className = 'kirish';
-    btn.textContent = 'Kirish';
-    btn.onclick = async () => {
-      btn.disabled = true;
-      const e = await so(`/api/booking/${d.id}/start`, { method: 'POST' });
-      btn.disabled = false;
-      if (!e) return;
-      if (e.ok && e.data.teacherUrl) location.href = e.data.teacherUrl;
-      else xabar(e.data.message || 'Hozircha kirib bo‘lmaydi', 'err');
-    };
-    row.appendChild(btn);
-    box.appendChild(row);
+    if (h.tur === 'sorov') return `<button class="katak sorov" type="button" data-m="${m}" disabled>${hhmm(m)}<small>so‘rov</small></button>`;
+    const ochiq = KUN_TAHRIR.has(m);
+    const cls = ['katak', ochiq ? 'ochiq' : '', h.tur === 'otgan' ? 'otgan' : '', ochiq && h.qulf ? 'qulf' : '', ochiq !== asl.has(m) ? 'ozgardi' : ''].join(' ');
+    return `<button class="${cls}" type="button" data-m="${m}" ${h.tur === 'otgan' ? 'disabled' : ''} aria-pressed="${ochiq}">${hhmm(m)}</button>`;
+  }).join('');
+  $('#kunTungi').textContent = TUNGI.kun ? 'Tungi soatlarni yashirish' : 'Tungi soatlarni ko‘rsatish';
+  $('#damOlaman').disabled = ![...KUN_TAHRIR].some((m) => kunKatakHolati(d, m).tur === 'oddiy' && !kunKatakHolati(d, m).qulf);
+  barChiz();
+}
+
+setkaQur($('#kunSetka'), {
+  boshla(m) {
+    const h = kunKatakHolati(kunJ(TANLANGAN), m);
+    if (h.tur !== 'oddiy') return null;
+    const ochiq = KUN_TAHRIR.has(m);
+    if (ochiq && h.qulf && new Set(kunJ(TANLANGAN).open).has(m)) {
+      toast(`${hhmm(m)} gacha ${J.lockHours} soatdan kam qoldi — bu vaqtni endi yopib bo‘lmaydi`, 'err');
+      return null;
+    }
+    return !ochiq;
+  },
+  qoy(m, ochish) {
+    const d = kunJ(TANLANGAN);
+    const h = kunKatakHolati(d, m);
+    if (h.tur !== 'oddiy') return;
+    if (!ochish && h.qulf && new Set(d.open).has(m)) return;
+    if (ochish) KUN_TAHRIR.add(m); else KUN_TAHRIR.delete(m);
+    kunChiz();
+  },
+});
+
+$('#damOlaman').onclick = () => {
+  const d = kunJ(TANLANGAN);
+  for (const m of [...KUN_TAHRIR]) {
+    const h = kunKatakHolati(d, m);
+    if (h.tur === 'oddiy' && !(h.qulf && new Set(d.open).has(m))) KUN_TAHRIR.delete(m);
+  }
+  kunChiz();
+};
+$('#shablongaQayt').onclick = async () => {
+  const r = await api(`/api/booking/schedule/day/${TANLANGAN}`, { method: 'DELETE' });
+  if (!r) return;
+  if (!r.ok) return toast(r.data.message || 'Qaytarib bo‘lmadi', 'err');
+  yangiJ(r.data);
+  toast('Kun haftalik shablonga qaytdi', 'ok');
+};
+$('#kunTungi').onclick = () => { TUNGI.kun = !TUNGI.kun; kunChiz(); };
+
+// ---------- haftalik shablon ----------
+function haftaChiz() {
+  $('#hafta').innerHTML = HAFTA_TARTIB.map((wd) => `<button type="button" data-wd="${wd}" aria-pressed="${wd === HAFTA_KUNI}">
+    <b>${KUN_QISQA[wd]}</b><span>${SHABLON[wd].size ? `${SHABLON[wd].size}s` : '—'}</span></button>`).join('');
+  document.querySelectorAll('#hafta button').forEach((b) => { b.onclick = () => { HAFTA_KUNI = Number(b.dataset.wd); haftaChiz(); shablonChiz(); }; });
+}
+
+function shablonChiz() {
+  const s = SHABLON[HAFTA_KUNI];
+  const asl = SHABLON_ASL[HAFTA_KUNI];
+  $('#shablonSetka').innerHTML = vaqtlar(TUNGI.shablon || [...s].some((m) => m < KUNDUZ)).map((m) => {
+    const ochiq = s.has(m);
+    return `<button class="katak ${ochiq ? 'ochiq' : ''} ${ochiq !== asl.has(m) ? 'ozgardi' : ''}" type="button" data-m="${m}" aria-pressed="${ochiq}">${hhmm(m)}</button>`;
+  }).join('');
+  $('#shablonTungi').textContent = TUNGI.shablon ? 'Tungi soatlarni yashirish' : 'Tungi soatlarni ko‘rsatish';
+  hajmChiz();
+  barChiz();
+}
+
+setkaQur($('#shablonSetka'), {
+  boshla(m) { return !SHABLON[HAFTA_KUNI].has(m); },
+  qoy(m, ochish) {
+    if (ochish) SHABLON[HAFTA_KUNI].add(m); else SHABLON[HAFTA_KUNI].delete(m);
+    haftaChiz(); shablonChiz();
+  },
+});
+
+function nusxala(kunlar) {
+  for (const wd of kunlar) if (wd !== HAFTA_KUNI) SHABLON[wd] = new Set(SHABLON[HAFTA_KUNI]);
+  haftaChiz(); shablonChiz();
+}
+$('#ishKunlarga').onclick = () => nusxala([1, 2, 3, 4, 5]);
+$('#hammaKunga').onclick = () => nusxala([0, 1, 2, 3, 4, 5, 6]);
+$('#kunniTozala').onclick = () => { SHABLON[HAFTA_KUNI] = new Set(); haftaChiz(); shablonChiz(); };
+$('#shablonTungi').onclick = () => { TUNGI.shablon = !TUNGI.shablon; shablonChiz(); };
+
+const shablonOzgarganmi = () => Object.keys(SHABLON).some((wd) => !tengmi(SHABLON[wd], SHABLON_ASL[wd]));
+const haftalikSlot = () => Object.values(SHABLON).reduce((n, s) => n + s.size, 0);
+
+// Set -> {weekday,startMinute,endMinute}[] — ketma-ket slotlar bitta oraliqqa qo'shiladi
+function oraliqlar() {
+  const items = [];
+  for (const wd of Object.keys(SHABLON)) {
+    const m = [...SHABLON[wd]].sort((a, b) => a - b);
+    for (let i = 0; i < m.length;) {
+      let j = i;
+      while (j + 1 < m.length && m[j + 1] === m[j] + SLOT) j += 1;
+      items.push({ weekday: Number(wd), startMinute: m[i], endMinute: m[j] + SLOT });
+      i = j + 1;
+    }
+  }
+  return items;
+}
+
+// ---------- hajm va saqlash paneli ----------
+function hajmChiz() {
+  const n = haftalikSlot();
+  const min = J.minWeeklySlots;
+  const max = Math.max(40, n);
+  $('#hajmSarlavha').textContent = `Haftasiga ${n} soat`;
+  $('#hajmIzoh').innerHTML = n >= min
+    ? `<b>${n}</b> ta bir soatlik dars vaqti ochiq. Sinov darsi so‘rovlari faqat shu vaqtlarga keladi.`
+    : `<b>${n}</b> soat — tavsiya etilgan minimumdan <b>${min - n}</b> soat kam. Kam ochilgan jadvalga kam so‘rov keladi.`;
+  $('#shkalaI').style.width = `${Math.min(100, (n / max) * 100)}%`;
+  $('#shkalaMin').style.left = `${(min / max) * 100}%`;
+  $('#shkala').classList.toggle('kam', n < min);
+  $('#shkalaMinYozuv').textContent = `kamida ${min} soat`;
+  $('#shkalaMax').textContent = max;
+}
+
+function barChiz() {
+  const kunOzg = KUN_TAHRIR && !tengmi(KUN_TAHRIR, new Set(kunJ(TANLANGAN).open));
+  const shOzg = shablonOzgarganmi();
+  $('#saqlaBar').hidden = !kunOzg && !shOzg;
+  if (kunOzg && shOzg) $('#saqlaMatn').innerHTML = 'Kun va haftalik shablon o‘zgardi';
+  else if (kunOzg) {
+    const d = kunJ(TANLANGAN);
+    const [, mo, da] = d.date.split('-');
+    $('#saqlaMatn').innerHTML = `${Number(da)}-${OY_NOMLARI[Number(mo) - 1]}: ${KUN_TAHRIR.size} soat ochiq`;
+  } else if (shOzg) {
+    const n = haftalikSlot();
+    $('#saqlaMatn').innerHTML = `Shablon: haftasiga ${n} soat${n < J.minWeeklySlots ? `<small>Minimum ${J.minWeeklySlots} soat — ${J.minWeeklySlots - n} soat kam</small>` : ''}`;
   }
 }
 
-$('#xona').onclick = () => { location.href = '/room.html'; };
-$('#nusxa').onclick = () => {
-  const t = $('#oqHavola').textContent;
-  navigator.clipboard.writeText(t).then(
-    () => { $('#nusxa').textContent = 'Nusxalandi'; setTimeout(() => { $('#nusxa').textContent = 'Nusxa'; }, 2000); },
-    () => xabar('Nusxalab bo‘lmadi', 'err'),
-  );
+$('#bekorQil').onclick = () => {
+  KUN_TAHRIR = new Set(kunJ(TANLANGAN).open);
+  shablonniOl();
+  haftaChiz(); shablonChiz(); kunChiz();
 };
+
+$('#saqla').onclick = async () => {
+  const btn = $('#saqla');
+  btn.disabled = true;
+  const oldinAlohida = new Set(J.days.filter((d) => d.override).map((d) => d.date));
+  let shablonSaqlandi = false;
+  try {
+    if (shablonOzgarganmi()) {
+      const r = await api('/api/booking/availability', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: oraliqlar() }),
+      });
+      if (!r) return;
+      if (!r.ok) return toast(r.data.message || 'Shablonni saqlab bo‘lmadi', 'err');
+      shablonSaqlandi = true;
+    }
+    if (KUN_TAHRIR && !tengmi(KUN_TAHRIR, new Set(kunJ(TANLANGAN).open))) {
+      const r = await api('/api/booking/schedule/day', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: TANLANGAN, slots: [...KUN_TAHRIR] }),
+      });
+      if (!r) return;
+      if (!r.ok) return toast(r.data.message || 'Kunni saqlab bo‘lmadi', 'err');
+    }
+    await yukla();
+    // Darsi, so'rovi yoki 12 soat qulfi bor kunlar eski holatida qoldi — mentorga aytamiz
+    const qoldi = shablonSaqlandi ? J.days.filter((d) => d.override && !oldinAlohida.has(d.date)) : [];
+    if (qoldi.length) {
+      const nomlar = qoldi.slice(0, 3).map((d) => { const [, mo, da] = d.date.split('-'); return `${Number(da)}-${OY_NOMLARI[Number(mo) - 1]}`; });
+      toast(`Shablon saqlandi. ${nomlar.join(', ')}${qoldi.length > 3 ? ' va boshqalar' : ''} o‘zgarmadi — u yerda dars, so‘rov yoki 12 soatdan kam vaqt bor`, 'ok');
+    } else {
+      toast('Jadval saqlandi', 'ok');
+    }
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+// ---------- yuklash ----------
+function yangiJ(data) {
+  J = data;
+  if (!TANLANGAN || !kunJ(TANLANGAN)) TANLANGAN = J.today;
+  KUN_TAHRIR = new Set(kunJ(TANLANGAN).open);
+  shablonniOl();
+  lentaChiz(); kunChiz(); haftaChiz(); shablonChiz();
+}
+
+async function yukla() {
+  const r = await api('/api/booking/schedule');
+  if (!r) return;
+  if (!r.ok) {
+    $('#hajmSarlavha').textContent = 'Jadvalni yuklab bo‘lmadi';
+    $('#hajmIzoh').textContent = r.data.message || 'Internetni tekshirib, sahifani yangilang';
+    return;
+  }
+  yangiJ(r.data);
+}
+
+// Saqlanmagan o'zgarish bilan chiqib ketmaslik
+window.addEventListener('beforeunload', (e) => { if (!$('#saqlaBar').hidden) { e.preventDefault(); e.returnValue = ''; } });
 
 (async () => {
   await WebViewAuth.tayyorla();
-  // Mentor shu sahifada ishlayotganini bildirib turamiz — aks holda tizim uni
-  // oflayn deb biladi va avtomatik lid bermaydi
   mentorNabzi();
-
-  // Avval whoami — u ikkala kirish usulini ham taniydi (cookie yoki WebView tokeni)
-  const w = await so('/api/whoami');
-  if (!w) return;
-  SESSIYA_BOR = w.ok;
-  $('#kim').textContent = w.data.name || '';
-
-  // Xona havolasi faqat login qilgan ustozda bo'ladi (WebView'da xona darsdan olinadi)
-  const ses = await so('/api/session');
-  if (ses && ses.ok && ses.data.room) {
-    $('#oqHavola').textContent = `${location.origin}/dars/${ses.data.room}`;
-  } else {
-    $('#keyingi').hidden = true;
-  }
-
-  const a = await so('/api/booking/availability');
-  if (a && a.ok) {
-    for (const item of a.data) {
-      const cb = document.querySelector(`input[data-k="${item.weekday}"]`);
-      if (!cb) continue;
-      cb.checked = true;
-      document.querySelector(`select[data-b="${item.weekday}"]`).value = item.startMinute;
-      document.querySelector(`select[data-t="${item.weekday}"]`).value = item.endMinute;
-      cb.dispatchEvent(new Event('change'));
-    }
-  } else if (a && !a.ok) {
-    $('#darslar').innerHTML = '<div class="izoh">Jadval faqat MyTeacher hisobi bilan ishlaydi</div>';
-    $('#saqla').disabled = true;
-    return;
-  }
-
-  await darslarniYukla();
-  setInterval(() => {
-    if (document.visibilityState === 'visible') void darslarniYukla();
-  }, 15_000);
+  HAFTA_KUNI = new Date().getDay();
+  await yukla();
 })();
 </script>
 </body>

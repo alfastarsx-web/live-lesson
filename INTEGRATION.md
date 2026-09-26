@@ -191,3 +191,26 @@ Haqiqiy qurilmada sinash **shart** — simulyator/emulyatorda kamera va audio ma
 2. Ovoz aks-sadosi (echo) bor-yo'qligi — karnay rejimida
 3. Ilovani fonga otib, qaytib kirish
 4. 20+ daqiqalik uzluksiz dars — issiqlik va batareya
+
+## Work bo'limi (mentor ilovasi)
+
+Ilovaning **Work** tabi WebView'da shu manzilni ochadi — login/parol so'ralmaydi:
+
+```
+https://lesson.myteacher.uz/work.html#ai=<ai.myteacher.uz access token>
+```
+
+- Token `#` dan keyin beriladi: serverga va nginx loglariga tushmaydi. Sahifa uni bir marta
+  cookie'ga aylantiradi va manzildan o'chiradi.
+- Yangi mentor akademiyadan o'tmagan bo'lsa, sahifa o'zi `/mentor/akademiya.html` ga o'tadi.
+- **Token eskirsa** sahifa login ko'rsatmaydi. U ilovaga xabar yuboradi (mavjud ko'prik orqali:
+  `MyTeacher.postMessage` yoki `flutter_inappwebview.callHandler('mentorAction', ...)`):
+
+  ```json
+  { "turi": "tokenEskirdi", "sahifa": "/work.html" }
+  ```
+
+  Ilova yangi access token olib, WebView'da `https://lesson.myteacher.uz<sahifa>#ai=<yangi token>`
+  ni ochishi kerak. Ochiq sahifada faqat `#ai=` ni almashtirish ham yetarli — sahifa uni ushlaydi.
+- Sinov darsi so'rovi push'i `data: { screen: 'work', type: 'trial_request', requestId, expiresAt }`
+  bilan keladi. Bosilganda Work tabini oching — so'rov ekrani o'zi chiqadi.
