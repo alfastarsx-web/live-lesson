@@ -257,6 +257,10 @@ app.all(/^\/api\/booking(\/.*)?$/, (req, res) => {
   aiProxy(req, res, `/lesson-booking${sub}`);
 });
 
+// Onlayn/Oflayn tugmasi (Work) — holat va bugungi onlayn vaqt
+app.get('/api/mentor-session/me', (req, res) => aiProxy(req, res, '/mentor-session/me'));
+app.post('/api/mentor-session/status', (req, res) => aiProxy(req, res, '/mentor-session/status'));
+
 // Mentor veb sahifada ishlayotganini bildiradi — aks holda tizim uni oflayn
 // deb biladi va lid bermaydi (mobil ilova soket orqali ulanadi, veb esa shu yo'l bilan)
 // Akademiyadan o'tmagan mentor onlayn hisoblanmaydi — ya'ni unga lid tushmaydi
