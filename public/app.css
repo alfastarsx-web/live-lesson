@@ -375,13 +375,14 @@ body{
 .tablar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;margin:0 -16px;padding:8px 16px;
   background:rgba(247,247,245,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 /* Tinch minimal: och trek ustida tanlangan tab — oq karta */
-.tablar-ichi{position:relative;display:grid;grid-template-columns:repeat(4,1fr);background:var(--sub);border-radius:14px;padding:3px;
+.tablar-ichi{position:relative;display:grid;grid-template-columns:repeat(5,1fr);background:var(--sub);border-radius:14px;padding:3px;
   box-shadow:0 0 0 1px var(--line)}
-.tablar a{position:relative;z-index:1;text-align:center;padding:10px 2px;border-radius:12px;text-decoration:none;
-  font-size:13px;font-weight:700;color:#6b6e76;white-space:nowrap;transition:color .25s}
-.tablar a[aria-current="page"]{color:var(--ink)}
-.tablar .kors{position:absolute;z-index:0;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/4);border-radius:12px;
+.tablar a{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;padding:7px 0 6px;border-radius:12px;text-decoration:none;
+  font-size:11px;font-weight:700;color:#6b6e76;white-space:nowrap;transition:color .25s}
+.tablar a svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tablar a[aria-current="page"]{color:var(--blue)}
+.tablar .kors{position:absolute;z-index:0;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/5);border-radius:12px;
   background:var(--card);box-shadow:0 0 0 1px var(--line),0 1px 2px rgba(35,38,45,.06);transition:transform .3s ease}
-.tablar a .nuqta{position:absolute;top:6px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 0 2px #fff}
+.tablar a .nuqta{position:absolute;top:5px;right:calc(50% - 16px);width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 0 2px #fff}
 
 .tablar-ichi.statik a[aria-current="page"]{background:var(--card);box-shadow:0 0 0 1px var(--line),0 1px 2px rgba(35,38,45,.06)}

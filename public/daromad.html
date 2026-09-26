@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Daromad</title>
+<link rel="stylesheet" href="/app.css">
+<style>
+body.daromad{background:var(--bg)}
+.daromad .wrap{padding-bottom:110px}
+.num{font-variant-numeric:tabular-nums}
+
+/* Hamyon — bank kartasiga o'xshash */
+.bank{position:relative;overflow:hidden;margin:16px 0 10px;border-radius:22px;padding:18px 20px;color:#fff;aspect-ratio:1.586;max-height:240px;
+  display:flex;flex-direction:column;justify-content:space-between;
+  background:radial-gradient(120% 90% at 100% 0%,#2f9b7d 0%,rgba(47,155,125,0) 55%),linear-gradient(150deg,#1f6f5c 0%,#123f35 100%);
+  box-shadow:0 16px 34px rgba(18,63,53,.28)}
+.bank::before{content:"";position:absolute;right:-50px;bottom:-70px;width:220px;height:220px;border-radius:50%;border:30px solid rgba(200,240,122,.10)}
+.bank::after{content:"";position:absolute;left:-60px;top:-80px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.05)}
+.bank > *{position:relative;z-index:1}
+.bank .yuqori{display:flex;align-items:center;justify-content:space-between}
+.bank .brend{font-size:13px;font-weight:800;letter-spacing:.02em;color:#e4f5ee}
+.bank .chip{width:34px;height:26px;border-radius:6px;background:linear-gradient(135deg,#f3dd9b,#c9a55a);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.bank .l{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#bfe5d8}
+.bank .sum{font-size:clamp(30px,9vw,38px);font-weight:800;letter-spacing:-1.3px;line-height:1.05;margin-top:2px}
+.bank .sum small{font-size:15px;font-weight:700;color:#bfe5d8;letter-spacing:0;margin-left:5px}
+.bank .past{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.bank .egasi{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#e4f5ee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bank .raqam{font-size:15px;font-weight:700;letter-spacing:.12em;color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bank .tur{font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#c8f07a}
+.karta-amal{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 4px 12px;font-size:13px}
+.havola{border:0;background:none;padding:4px 0;font-weight:700;font-size:13px;font-family:inherit;color:var(--blue);cursor:pointer}
+.havola:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+.statlar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.statlar div{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:10px 12px}
+.statlar span{display:block;font-size:11.5px;color:var(--mut2);font-weight:600}
+.statlar b{font-size:16px;font-variant-numeric:tabular-nums}
+.soliq-q{display:flex;align-items:center;gap:8px;background:var(--red-soft);color:#8a3f38;border-radius:12px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+.soliq-q b{margin-left:auto;font-variant-numeric:tabular-nums}
+.yech{width:100%;border:0;border-radius:14px;padding:13px;font-weight:800;font-size:14.5px;font-family:inherit;background:var(--blue);color:#fff;cursor:pointer}
+.yech:disabled{opacity:.5;cursor:not-allowed}
+.izohcha{display:block;text-align:center;font-size:11.5px;color:var(--mut2);margin:7px 0 4px}
+.ogoh{margin-bottom:10px;background:var(--amber-soft);color:var(--amber);border-radius:12px;padding:10px 12px;font-size:13px}
+.chiziq-g svg{display:block;width:100%;height:auto}
+.chiziq-g .ch-bosh{display:flex;align-items:baseline;justify-content:space-between}
+
+.karta{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+.karta-bosh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+.karta-bosh h2{margin:0;font-size:16px;letter-spacing:-.2px}
+.karta-bosh span{font-size:12px;color:var(--mut2);font-weight:600}
+.xira{color:var(--mut2);font-size:13px}
+
+.chek{background:var(--sub);border-radius:14px;padding:4px 12px}
+.chek .q{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed #dcdcd7;font-size:13px;color:var(--mut2)}
+.chek .q:last-child{border-bottom:0}
+.chek .q b{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.chek .q.soliq b{color:var(--red)} .chek .q.sof b{color:var(--green);font-size:15px}
+
+.plastik{width:52px;height:36px;border-radius:8px;background:linear-gradient(135deg,#1d5fb8,#0d3a7a);color:#fff;font-size:8.5px;font-weight:800;display:flex;align-items:flex-end;padding:5px;flex:0 0 auto;text-transform:uppercase}
+.plastik.humo{background:linear-gradient(135deg,#1f9a8a,#0e5f55)}
+.kartaq{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.kartaq:last-of-type{border-bottom:0}
+.kartaq .b{flex:1;min-width:0}
+.kartaq .b b{display:block;font-size:14.5px}
+.mayda-t{border:0;background:var(--sub);color:var(--ink);border-radius:10px;padding:7px 10px;font-weight:700;font-size:12px;font-family:inherit;cursor:pointer}
+.qosh{display:block;width:100%;border:1.5px dashed #cfd3cb;background:none;border-radius:14px;padding:11px;text-align:center;font-weight:800;font-size:13.5px;font-family:inherit;color:var(--blue);margin-top:10px;cursor:pointer}
+
+.bolak{display:flex;height:10px;border-radius:8px;overflow:hidden;margin:2px 0 10px;background:var(--sub)}
+.bolak i{display:block;height:100%}
+.ushlab{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.ushlab:last-child{border-bottom:0}
+.ushlab .b{flex:1;min-width:0}
+.ushlab .b b{display:block;font-size:14px}
+.ushlab .s{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.filtr{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.filtr button{border:0;font-weight:800;font-size:12px;font-family:inherit;padding:6px 11px;border-radius:999px;background:var(--sub);color:var(--mut2);cursor:pointer}
+.filtr button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.filtr select{margin-left:auto;border:0;background:var(--sub);border-radius:10px;padding:6px 8px;font-weight:700;font-size:12px;font-family:inherit;color:var(--ink)}
+.kun-y{font-size:11.5px;font-weight:800;color:var(--mut);letter-spacing:.06em;text-transform:uppercase;padding:12px 0 2px}
+.yozuv{border-bottom:1px solid var(--line)}
+.yozuv:last-child{border-bottom:0}
+.yozuv > button{all:unset;box-sizing:border-box;display:flex;gap:11px;align-items:center;width:100%;padding:10px 0;cursor:pointer}
+.yozuv > button:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:8px}
+.ik{width:32px;height:32px;border-radius:11px;display:grid;place-items:center;font-weight:800;font-size:14px;flex:0 0 auto}
+.ik.kirim{background:var(--green-soft);color:var(--green)} .ik.bonus{background:var(--amber-soft);color:var(--amber)}
+.ik.chiqim{background:var(--red-soft);color:var(--red)} .ik.kut{background:var(--sub);color:var(--mut2)}
+.yozuv .b{flex:1;min-width:0}
+.yozuv .b b{display:block;font-size:14px}
+.yozuv .b small{font-size:11.5px;color:var(--mut);font-variant-numeric:tabular-nums}
+.yozuv .b small em{font-style:normal;color:var(--red);font-weight:700}
+.yozuv .s{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.yozuv .s.plus{color:var(--green)}
+.yozuv .s.kut{color:var(--mut)}
+.holat{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:999px;margin-top:3px}
+.holat.kut{background:var(--amber-soft);color:var(--amber)} .holat.ok{background:var(--green-soft);color:var(--green)} .holat.yoq{background:var(--red-soft);color:var(--red)}
+.yozuv .ochiq{padding:0 0 12px}
+.yozuv .ochiq .izohq{font-size:12.5px;color:var(--mut2);margin:8px 2px 0}
+.yozuv .ochiq .mayda-t{margin-top:8px}
+
+.soliq-k{background:linear-gradient(120deg,#fbf3f1,#f8ebe8);box-shadow:0 0 0 1px #efdcd7}
+.soliq-oy{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+.soliq-oy:last-child{border-bottom:0}
+.soliq-oy .b{flex:1}
+.kutish-k{box-shadow:0 0 0 1px #ecdcc0;background:linear-gradient(120deg,#fffaf0,#fbf2e2)}
+.bosh{padding:14px 4px;text-align:center;color:var(--mut2);font-size:13.5px}
+
+/* pastdan chiqadigan oyna */
+.pastki{position:fixed;inset:0;z-index:60;background:rgba(35,38,45,.35);display:flex;align-items:flex-end;justify-content:center}
+.pastki[hidden]{display:none}
+.pastki .ichi{width:100%;max-width:560px;background:var(--card);border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));display:grid;gap:10px}
+.pastki h3{margin:0;font-size:18px}
+.pastki label{display:grid;gap:5px;font-size:12.5px;font-weight:700;color:var(--mut2)}
+.pastki input,.pastki select,.pastki textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font-weight:600;font-size:16px;font-family:inherit;color:var(--ink);background:var(--card)}
+.pastki input:focus,.pastki select:focus,.pastki textarea:focus{outline:2px solid var(--blue);outline-offset:0;border-color:transparent}
+.pastki .qator3{display:flex;gap:8px}
+.pastki .qator3 > *{flex:1}
+.pastki .tugma{border:0;border-radius:14px;padding:13px;font-weight:800;font-size:15px;font-family:inherit;cursor:pointer;background:var(--blue);color:#fff}
+.pastki .tugma.ikkinchi{background:var(--sub);color:var(--ink)}
+.pastki .tugma:disabled{opacity:.5}
+.pastki .xato{color:var(--red);font-size:13px;min-height:1em}
+</style>
+</head>
+<body class="daromad">
+<div class="wrap">
+  <section class="bank" aria-label="Balans kartasi">
+    <div class="yuqori"><span class="brend">MyTeacher · Mentor</span><span class="chip" aria-hidden="true"></span></div>
+    <div><div class="l">Balans</div><div class="sum num"><span id="balans">…</span><small>so‘m</small></div></div>
+    <div class="past">
+      <span class="egasi" id="egasi">&nbsp;</span>
+      <span style="text-align:right"><span class="tur" id="kartaTur"></span><br><span class="raqam" id="kartaRaqam">•••• ••••</span></span>
+    </div>
+  </section>
+  <div class="karta-amal">
+    <span class="xira" id="kartalarSoni"></span>
+    <button class="havola" type="button" id="kartaQosh">+ Karta qo‘shish</button>
+  </div>
+
+  <nav class="tablar" aria-label="Work bo‘limlari">
+    <div class="tablar-ichi statik">
+      <a href="/work.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg><span>Bugun</span></a>
+      <a href="/work.html#sinovlar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.5 5 5.5.8-4 3.9.9 5.5L12 16.1l-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg><span>Sinovlar</span></a>
+      <a href="/oquvchilar.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3.2"/><path d="M3.5 19c.8-3 3-4.5 5.5-4.5s4.7 1.5 5.5 4.5M16 6.5a3 3 0 010 5.6M17.5 14.8c1.6.6 2.6 2 3 4.2"/></svg><span>O‘quvchi</span></a>
+      <a href="/jadval.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>Jadval</span></a>
+      <a href="/daromad.html" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18M16 15h2"/></svg><span>Daromad</span></a>
+    </div>
+  </nav>
+
+  <div class="statlar">
+    <div><span>Ushlab turilgan</span><b id="ushlabJami">—</b></div>
+    <div><span id="oyNomi">Oy jami</span><b id="oyJami">—</b></div>
+  </div>
+  <div class="soliq-q"><span id="soliqYozuv">Soliq 1% ushlandi</span><b id="oySoliq">—</b></div>
+  <div class="ogoh" id="ogoh" hidden></div>
+
+  <section class="karta chiziq-g" aria-labelledby="kunlikSarlavha">
+    <div class="ch-bosh"><h2 id="kunlikSarlavha" style="margin:0;font-size:16px">Kunlik kirim</h2><span class="xira" id="kunlikJami"></span></div>
+    <div id="kunlik"></div>
+  </section>
+
+  <button class="yech" id="yechTugma" type="button" disabled>Kartaga yechib olish</button>
+  <span class="izohcha" id="yechIzoh">Yechib olish tez orada ishga tushadi · soliq kirim paytida ushlangan, yechishda qo‘shimcha ushlanmaydi</span>
+
+
+  <section class="karta kutish-k" id="kutishK" aria-labelledby="kutishSarlavha" style="margin-top:12px" hidden>
+    <div class="karta-bosh"><h2 id="kutishSarlavha">To‘lov kutilmoqda</h2><span>24 soatlik bonus</span></div>
+    <div id="kutish"></div>
+  </section>
+
+
+  <section class="karta" aria-labelledby="formulaSarlavha">
+    <div class="karta-bosh"><h2 id="formulaSarlavha">Har darsdan qancha tushadi</h2></div>
+    <div id="formula"></div>
+  </section>
+
+  <section class="karta" aria-labelledby="ushlabSarlavha">
+    <div class="karta-bosh"><h2 id="ushlabSarlavha">Ushlab turilgan</h2><span>dars o‘tilgach balansga tushadi</span></div>
+    <div id="ushlab"></div>
+  </section>
+
+  <section class="karta" aria-labelledby="tarixSarlavha">
+    <div class="karta-bosh"><h2 id="tarixSarlavha">Kirim-chiqim tarixi</h2></div>
+    <div class="filtr" role="group" aria-label="Filtr">
+      <button type="button" data-kind="all" aria-pressed="true">Hammasi</button>
+      <button type="button" data-kind="in" aria-pressed="false">Kirim</button>
+      <button type="button" data-kind="out" aria-pressed="false">Chiqim</button>
+      <select id="oyTanlov" aria-label="Oy"></select>
+    </div>
+    <div id="tarix"></div>
+  </section>
+
+  <section class="karta soliq-k" aria-labelledby="soliqSarlavha">
+    <div class="karta-bosh"><h2 id="soliqSarlavha">Soliq hisoboti</h2><span id="soliqFoiz">1% · o‘zini o‘zi band</span></div>
+    <div id="soliqlar"></div>
+  </section>
+</div>
+
+<div class="pastki" id="pastki" hidden>
+  <div class="ichi" role="dialog" aria-modal="true" aria-labelledby="pastkiSarlavha" id="pastkiIchi"></div>
+</div>
+
+<script src="/auth-webview.js"></script>
+<script src="/tabrik.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// So'm yaxlitlanmaydi: tiyin bo'lsa 2 xona ko'rsatiladi (40 837,50)
+const pul = (n) => {
+  const v = Math.abs(Number(n) || 0);
+  const s = v.toLocaleString('ru-RU', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 }).replace(/\s/g, ' ');
+  return (Number(n) < 0 ? '−' : '') + s;
+};
+const belgili = (n) => (n > 0 ? '+' : '') + pul(n);
+const OY_KICHIK = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+const OY_BOSH = OY_KICHIK.map((o) => o[0].toUpperCase() + o.slice(1));
+const kunNomi = (d) => { const [, m, dd] = d.split('-'); return `${Number(dd)}-${OY_KICHIK[Number(m) - 1]}`; };
+const soat = (iso) => new Date(iso).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
+const bugunKun = () => new Date(Date.now() + 5 * 3600e3).toISOString().slice(0, 10);
+
+let S = null; // summary
+let TARIX = [];
+let KIND = 'all';
+let YECHISH = new Map();
+
+function toast(matn, tur = '') {
+  const t = document.createElement('div');
+  t.className = `toast ${tur}`;
+  t.setAttribute('role', 'status');
+  t.textContent = matn;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+// ---------- pastki oyna ----------
+function oyna(html) {
+  $('#pastkiIchi').innerHTML = html;
+  $('#pastki').hidden = false;
+  const f = $('#pastkiIchi').querySelector('input,select,textarea,button');
+  if (f) f.focus();
+}
+function yop() { $('#pastki').hidden = true; $('#pastkiIchi').innerHTML = ''; }
+$('#pastki').addEventListener('click', (e) => { if (e.target.id === 'pastki') yop(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#pastki').hidden) yop(); });
+
+async function smsYubor(purpose, el) {
+  el.disabled = true;
+  const r = await api('/api/wallet/otp', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ purpose }) });
+  if (!r) return;
+  if (!r.ok) { el.disabled = false; return r.data.message || 'SMS yuborilmadi'; }
+  let q = 60;
+  el.textContent = `Kod ${r.data.sentTo} ga yuborildi`;
+  const t = setInterval(() => { q -= 1; if (q <= 0) { clearInterval(t); el.disabled = false; el.textContent = 'Kodni qayta yuborish'; } }, 1000);
+  return null;
+}
+const xatoMatn = (d) => (Array.isArray(d?.message) ? d.message[0] : d?.message) || 'Xatolik yuz berdi';
+
+// ---------- balans ----------
+function balansChiz() {
+  const s = S;
+  $('#balans').textContent = pul(s.balance);
+  $('#ushlabJami').textContent = pul(s.held.total);
+  const [y, m] = s.month.month.split('-');
+  $('#oyNomi').textContent = `${OY_BOSH[Number(m) - 1]} jami`;
+  $('#oyJami').textContent = pul(s.month.net);
+  $('#soliqYozuv').textContent = `${OY_BOSH[Number(m) - 1]}: soliq ${s.rules.taxPercent}% ushlandi`;
+  $('#oySoliq').textContent = `${pul(s.month.tax)} so‘m`;
+  $('#soliqFoiz').textContent = `${s.rules.taxPercent}% · o‘zini o‘zi band`;
+  const ogoh = [];
+  if (!s.enabled) ogoh.push(s.from ? `Hamyon ${kunNomi(s.from)}dan ishga tushadi. Undan keyin o‘tilgan har bir dars puli shu yerda ko‘rinadi.` : 'Hamyon tez orada ishga tushadi. Hozir ko‘rinayotgan ushlab turilgan summa — hisob namunasi.');
+  if (s.pendingReview) ogoh.push(`${s.pendingReview} ta yozuv tekshiruvda — natija tarixda ko‘rinadi.`);
+  if (s.withdrawing) ogoh.push(`${pul(s.withdrawing)} so‘m yechib olish jarayonida.`);
+  $('#ogoh').hidden = !ogoh.length;
+  $('#ogoh').innerHTML = ogoh.map(esc).join('<br>');
+  const t = $('#yechTugma');
+  t.disabled = !s.rules.withdrawEnabled;
+  $('#yechIzoh').textContent = s.rules.withdrawEnabled
+    ? `Eng kam summa — ${pul(s.rules.minWithdraw)} so‘m · soliq kirim paytida ushlangan, yechishda qo‘shimcha ushlanmaydi`
+    : 'Yechib olish tez orada ishga tushadi · soliq kirim paytida ushlangan, yechishda qo‘shimcha ushlanmaydi';
+}
+
+// ---------- kartalar ----------
+function kartalarChiz() {
+  const k = S.cards;
+  const asosiy = k.find((c) => c.isPrimary) || k[0];
+  $('#egasi').textContent = asosiy ? asosiy.holderName : (S.firstName || '').toUpperCase() || ' ';
+  $('#kartaRaqam').textContent = asosiy ? `•••• ${asosiy.last4}` : '•••• ••••';
+  $('#kartaTur').textContent = asosiy ? asosiy.brand : '';
+  $('#kartalarSoni').innerHTML = k.length > 1
+    ? `<button class="havola" type="button" id="kartalarOch" style="color:var(--mut2)">${k.length} ta karta ›</button>`
+    : k.length ? '<span>Pul shu kartaga yechib olinadi</span>' : '<span>Karta qo‘shilmagan</span>';
+  const och = $('#kartalarOch');
+  if (och) och.onclick = kartalarOyna;
+  $('#kartaQosh').hidden = k.length >= 3;
+}
+function kartalarOyna() {
+  oyna(`<h3 id="pastkiSarlavha">Kartalarim</h3><div id="kartalar"></div>
+    <button class="tugma ikkinchi" type="button" id="kYop">Yopish</button>`);
+  const chiz = () => {
+    $('#kartalar').innerHTML = S.cards.map((c) => `<div class="kartaq"><div class="plastik ${c.brand}">${c.brand}</div>
+      <div class="b"><b class="num">${esc(c.masked)}</b><span class="xira">${esc(c.holderName)}${c.isPrimary ? ' · asosiy' : ''}</span></div>
+      ${c.isPrimary ? '' : `<button class="mayda-t" type="button" data-asosiy="${c.id}">Asosiy</button>`}
+      <button class="mayda-t" type="button" data-ochir="${c.id}">O‘chirish</button></div>`).join('');
+  };
+  chiz();
+  $('#kYop').onclick = yop;
+  $('#kartalar').onclick = async (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.asosiy) {
+      const r = await api(`/api/wallet/cards/${b.dataset.asosiy}/primary`, { method: 'POST' });
+      if (r?.ok) { S.cards = r.data; kartalarChiz(); chiz(); }
+    }
+    if (b.dataset.ochir) {
+      if (b.dataset.tasdiq !== '1') { b.dataset.tasdiq = '1'; b.textContent = 'Rostdan?'; return; }
+      const r = await api(`/api/wallet/cards/${b.dataset.ochir}`, { method: 'DELETE' });
+      if (r?.ok) { S.cards = r.data; kartalarChiz(); if (S.cards.length) chiz(); else yop(); toast('Karta o‘chirildi'); } else if (r) toast(xatoMatn(r.data), 'err');
+    }
+  };
+}
+
+// ---------- kunlik kirim chizig'i ----------
+function kunlikChiz() {
+  const d = S.daily || [];
+  if (!d.length) { $('#kunlik').innerHTML = ''; return; }
+  const W = 320, H = 120, P = { l: 4, r: 4, t: 14, b: 22 };
+  const max = Math.max(1, ...d.map((x) => x.net));
+  const x = (i) => P.l + (i * (W - P.l - P.r)) / (d.length - 1);
+  const y = (v) => P.t + (1 - v / max) * (H - P.t - P.b);
+  const nuq = d.map((p, i) => [x(i), y(p.net)]);
+  const yol = nuq.map(([a, b], i) => `${i ? 'L' : 'M'}${a.toFixed(1)},${b.toFixed(1)}`).join(' ');
+  const maydon = `${yol} L${x(d.length - 1).toFixed(1)},${H - P.b} L${x(0).toFixed(1)},${H - P.b} Z`;
+  const jami = d.reduce((s, p) => s + p.net, 0);
+  const oxirgi = nuq[nuq.length - 1];
+  const eng = d.reduce((m, p, i) => (p.net > d[m].net ? i : m), 0);
+  const yorliq = (i) => { const [, mm, dd] = d[i].day.split('-'); return `${Number(dd)}.${mm}`; };
+  $('#kunlikJami').textContent = `14 kun · ${pul(jami)} so‘m`;
+  $('#kunlik').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Oxirgi 14 kunlik kirim, jami ${pul(jami)} so‘m">
+    <defs><linearGradient id="kg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a8a70" stop-opacity=".28"/><stop offset="1" stop-color="#2a8a70" stop-opacity="0"/></linearGradient></defs>
+    <g stroke="#ececea" stroke-width="1"><line x1="0" y1="${H - P.b}" x2="${W}" y2="${H - P.b}"/><line x1="0" y1="${y(max / 2)}" x2="${W}" y2="${y(max / 2)}" stroke-dasharray="3 4"/></g>
+    <path d="${maydon}" fill="url(#kg)"/>
+    <path d="${yol}" fill="none" stroke="#1f6f5c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${d[eng].net > 0 ? `<circle cx="${nuq[eng][0]}" cy="${nuq[eng][1]}" r="3.5" fill="#1f6f5c"/><text x="${Math.min(W - 40, Math.max(30, nuq[eng][0]))}" y="${Math.max(10, nuq[eng][1] - 7)}" text-anchor="middle" font-size="10" font-weight="700" fill="#1f6f5c">${pul(d[eng].net)}</text>` : ''}
+    <circle cx="${oxirgi[0]}" cy="${oxirgi[1]}" r="4.5" fill="#f0a73a" stroke="#fff" stroke-width="2"/>
+    <g font-size="10" fill="#9a9ca3" font-weight="600"><text x="${P.l}" y="${H - 6}">${yorliq(0)}</text><text x="${x(6)}" y="${H - 6}" text-anchor="middle">${yorliq(6)}</text><text x="${W - P.r}" y="${H - 6}" text-anchor="end">Bugun</text></g>
+  </svg>`;
+}
+$('#kartaQosh').onclick = () => {
+  oyna(`<h3 id="pastkiSarlavha">Karta qo‘shish</h3>
+    <p class="xira" style="margin:0">Karta raqami bizda saqlanmaydi — faqat oxirgi 4 raqami ko‘rinadi. Karta sizning nomingizda bo‘lishi kerak.</p>
+    <label>Karta raqami<input id="kPan" inputmode="numeric" autocomplete="cc-number" placeholder="8600 0000 0000 0000" maxlength="19"></label>
+    <label>Karta egasi<input id="kIsm" autocomplete="cc-name" placeholder="ISM FAMILIYA"></label>
+    <button class="tugma ikkinchi" id="kSms" type="button">SMS kod olish</button>
+    <label>SMS kod<input id="kKod" inputmode="numeric" autocomplete="one-time-code" maxlength="5" placeholder="5 xonali kod"></label>
+    <div class="xato" id="kXato" role="alert"></div>
+    <div class="qator3"><button class="tugma ikkinchi" type="button" id="kBekor">Bekor</button><button class="tugma" type="button" id="kSaqla">Qo‘shish</button></div>`);
+  $('#kPan').addEventListener('input', (e) => { const d = e.target.value.replace(/\D/g, '').slice(0, 16); e.target.value = d.replace(/(\d{4})(?=\d)/g, '$1 '); });
+  $('#kBekor').onclick = yop;
+  $('#kSms').onclick = async () => { $('#kXato').textContent = (await smsYubor('card', $('#kSms'))) || ''; $('#kKod').focus(); };
+  $('#kSaqla').onclick = async () => {
+    const pan = $('#kPan').value.replace(/\D/g, '');
+    if (pan.length !== 16) { $('#kXato').textContent = 'Karta raqami 16 ta raqam bo‘lishi kerak'; return; }
+    $('#kSaqla').disabled = true;
+    const r = await api('/api/wallet/cards', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ pan, holderName: $('#kIsm').value.trim(), code: $('#kKod').value.trim() }) });
+    $('#kSaqla').disabled = false;
+    if (!r) return;
+    if (!r.ok) { $('#kXato').textContent = xatoMatn(r.data); return; }
+    S.cards = r.data; kartalarChiz(); yop(); toast('Karta qo‘shildi', 'ok');
+  };
+};
+
+// ---------- yechib olish ----------
+$('#yechTugma').onclick = () => {
+  if (!S.cards.length) { toast('Avval karta qo‘shing'); $('#kartaQosh').click(); return; }
+  oyna(`<h3 id="pastkiSarlavha">Kartaga yechib olish</h3>
+    <p class="xira" style="margin:0">Balansda <b class="num">${pul(S.balance)} so‘m</b>. Soliq allaqachon ushlangan — kartangizga aynan shu summa tushadi.</p>
+    <label>Summa (so‘m)<input id="yS" inputmode="decimal" placeholder="${pul(S.rules.minWithdraw)} dan"></label>
+    <label>Karta<select id="yK">${S.cards.map((c) => `<option value="${c.id}">${esc(c.masked)}</option>`).join('')}</select></label>
+    <button class="tugma ikkinchi" id="ySms" type="button">SMS kod olish</button>
+    <label>SMS kod<input id="yKod" inputmode="numeric" autocomplete="one-time-code" maxlength="5" placeholder="5 xonali kod"></label>
+    <div class="xato" id="yXato" role="alert"></div>
+    <div class="qator3"><button class="tugma ikkinchi" type="button" id="yBekor">Bekor</button><button class="tugma" type="button" id="yOk">So‘rov yuborish</button></div>`);
+  $('#yBekor').onclick = yop;
+  $('#ySms').onclick = async () => { $('#yXato').textContent = (await smsYubor('withdraw', $('#ySms'))) || ''; $('#yKod').focus(); };
+  $('#yOk').onclick = async () => {
+    const amount = Number($('#yS').value.replace(/\s/g, '').replace(',', '.'));
+    if (!amount) { $('#yXato').textContent = 'Summani kiriting'; return; }
+    $('#yOk').disabled = true;
+    const r = await api('/api/wallet/withdrawals', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ amount, cardId: $('#yK').value, code: $('#yKod').value.trim() }) });
+    $('#yOk').disabled = false;
+    if (!r) return;
+    if (!r.ok) { $('#yXato').textContent = xatoMatn(r.data); return; }
+    yop(); toast('So‘rov yuborildi — holati tarixda ko‘rinadi', 'ok'); yukla();
+  };
+};
+
+// ---------- formula va ushlab turilgan ----------
+function formulaChiz() {
+  const s = S;
+  const namuna = s.held.students[0];
+  const share = s.rules.sharePercent;
+  const tax = s.rules.taxPercent;
+  if (!namuna) {
+    $('#formula').innerHTML = `<div class="chek">
+      <div class="q"><span>O‘quvchi to‘lovi</span><b>oylik summa</b></div>
+      <div class="q"><span>Ulushingiz</span><b>${share}%</b></div>
+      <div class="q"><span>÷ paketdagi darslar</span><b>bir dars</b></div>
+      <div class="q soliq"><span>Soliq ${tax}% · o‘zini o‘zi band</span><b>− ${tax}%</b></div>
+      <div class="q sof"><span>Balansingizga tushadi</span><b>har o‘tilgan dars uchun</b></div></div>
+      <p class="xira" style="margin:10px 2px 0">To‘lov qilgan o‘quvchingiz bo‘lganda aniq hisob shu yerda chiqadi.</p>`;
+    return;
+  }
+  const p = namuna.perLesson;
+  $('#formula').innerHTML = `<div class="chek">
+    <div class="q"><span>O‘quvchi to‘lovi (${esc(namuna.name)})</span><b>${pul(namuna.paymentAmount)}</b></div>
+    <div class="q"><span>Ulushingiz</span><b>${share}% → ${pul(namuna.paymentAmount * share / 100)}</b></div>
+    <div class="q"><span>Paketdagi darslar</span><b>÷ ${namuna.lessonsInPackage}</b></div>
+    <div class="q"><span>Bir dars (soliqdan oldin)</span><b>${pul(p.gross)}</b></div>
+    <div class="q soliq"><span>Soliq ${tax}% · o‘zini o‘zi band</span><b>− ${pul(p.tax)}</b></div>
+    <div class="q sof"><span>Balansingizga tushadi</span><b>${pul(p.net)} so‘m</b></div></div>
+    <p class="xira" style="margin:10px 2px 0">Dars kamida 45 daqiqa davom etsa hisoblanadi. Ulush foizi Career → Yo‘l’dagi rankingizga bog‘liq; rank tizimi ishga tushguncha hammaga ${share}%.</p>`;
+}
+const RANGLAR = ['#1f6f5c', '#2a8a70', '#5fa58c', '#9cc9bb', '#c6ddd6', '#dcdcd7'];
+function ushlabChiz() {
+  const h = S.held;
+  if (!h.students.length) { $('#ushlab').innerHTML = '<div class="bosh">Hozircha ushlab turilgan pul yo‘q.</div>'; return; }
+  const bolak = h.total > 0 ? `<div class="bolak" aria-hidden="true">${h.students.map((x, i) => `<i style="width:${(x.amount / h.total) * 100}%;background:${RANGLAR[Math.min(i, 5)]}"></i>`).join('')}</div>` : '';
+  $('#ushlab').innerHTML = bolak + h.students.map((x) => `<div class="ushlab">
+    <div class="b"><b>${esc(x.name)}</b><span class="xira">${x.lessonsLeft} dars qoldi · ${x.lessonsDone}/${x.lessonsInPackage} o‘tildi · ${pul(x.perLesson.net)} dan</span></div>
+    <span class="s">${pul(x.amount)}</span></div>`).join('');
+}
+
+// ---------- tarix ----------
+const TUR = {
+  lesson: ['kirim', '✓'], bonus: ['bonus', '★'], trial_bonus: ['bonus', '★'], referral: ['bonus', '★'], mission: ['bonus', '★'],
+  reversal: ['chiqim', '↺'], withdrawal: ['chiqim', '↑'], withdrawal_return: ['kirim', '↓'],
+};
+const W_HOLAT = { requested: ['kut', 'Ko‘rib chiqilmoqda'], approved: ['kut', 'Tasdiqlandi, o‘tkazilmoqda'], paid: ['ok', 'O‘tkazildi'], rejected: ['yoq', 'Rad etildi'] };
+function yozuvHtml(e) {
+  const [cls, ik] = TUR[e.type] || ['kirim', '•'];
+  const kut = e.status === 'pending_review';
+  const rad = e.status === 'rejected';
+  let holat = '';
+  if (kut) holat = '<span class="holat kut">Tekshiruvda</span>';
+  if (rad) holat = '<span class="holat yoq">Rad etildi</span>';
+  if (e.type === 'withdrawal' && YECHISH.get(e.withdrawalId)) {
+    const [c, t] = W_HOLAT[YECHISH.get(e.withdrawalId).status] || ['kut', ''];
+    holat = `<span class="holat ${c}">${t}</span>`;
+  }
+  let pastki = '';
+  if (e.tax > 0) pastki = `${pul(e.gross)} <em>− ${pul(e.tax)} soliq</em>`;
+  else if (e.type === 'withdrawal') pastki = 'soliqsiz';
+  if (e.type === 'lesson' && e.lessonNo) pastki += ` · ${e.lessonNo}/${e.lessonsInPackage}`;
+  if (e.type === 'lesson') pastki = `${soat(e.occurredAt)} · ${pastki}`;
+  const summa = kut || rad ? `<span class="s kut">${e.gross > 0 ? pul(e.net) : '—'}</span>` : `<span class="s ${e.net > 0 ? 'plus' : ''}">${belgili(e.net)}</span>`;
+  return `<div class="yozuv"><button type="button" aria-expanded="false" data-id="${e.id}">
+    <span class="ik ${kut ? 'kut' : cls}" aria-hidden="true">${ik}</span>
+    <span class="b"><b>${esc(e.title)}</b><small>${pastki}</small>${holat ? `<br>${holat}` : ''}</span>${summa}</button>
+    <div class="ochiq" hidden></div></div>`;
+}
+function chekHtml(e) {
+  const q = [];
+  if (e.type === 'lesson') {
+    q.push(['Dars', `${kunNomi(e.day)}, ${soat(e.occurredAt)}${e.lessonMinutes != null ? ` · ${e.lessonMinutes} daq` : ''}`]);
+    if (e.paymentAmount) q.push(['To‘lov × ulush ÷ darslar', `${pul(e.paymentAmount)} × ${e.sharePercent}% ÷ ${e.lessonsInPackage}`]);
+  }
+  if (e.gross !== 0 || e.type === 'lesson') q.push([e.net < 0 ? 'Summa' : 'Soliqdan oldin', pul(e.gross)]);
+  if (e.tax !== 0) q.push([`Soliq ${e.taxPercent}%`, `− ${pul(Math.abs(e.tax))}`, 'soliq']);
+  q.push([e.status === 'posted' ? 'Balansga' : 'Balansga (tasdiqlansa)', belgili(e.net), 'sof']);
+  q.push(['Yozuv raqami', `#${e.code}`]);
+  const w = YECHISH.get(e.withdrawalId);
+  if (w?.reason) q.push(['Sabab', w.reason]);
+  return `<div class="chek">${q.map(([a, b, c]) => `<div class="q ${c || ''}"><span>${esc(a)}</span><b>${esc(b)}</b></div>`).join('')}</div>
+    ${e.note ? `<p class="izohq">${esc(e.note)}</p>` : ''}
+    ${e.type === 'lesson' && e.status !== 'posted' ? `<button class="mayda-t" type="button" data-etiroz="${e.id}" data-booking="${e.bookingId || ''}">Pul tushmadi — bildirish</button>` : ''}`;
+}
+function tarixChiz() {
+  const r = TARIX.filter((e) => KIND === 'all' || (KIND === 'in' ? e.net > 0 || e.status === 'pending_review' : e.net < 0));
+  if (!r.length) { $('#tarix').innerHTML = '<div class="bosh">Bu oyda yozuv yo‘q.</div>'; return; }
+  const bugun = bugunKun();
+  let html = '';
+  let oldingi = '';
+  for (const e of r) {
+    if (e.day !== oldingi) { html += `<div class="kun-y">${e.day === bugun ? 'Bugun' : kunNomi(e.day)}</div>`; oldingi = e.day; }
+    html += yozuvHtml(e);
+  }
+  $('#tarix').innerHTML = html;
+}
+$('#tarix').addEventListener('click', (ev) => {
+  const et = ev.target.closest('[data-etiroz]');
+  if (et) { etiroz(et.dataset.etiroz, et.dataset.booking); return; }
+  const b = ev.target.closest('button[data-id]');
+  if (!b) return;
+  const ochiq = b.nextElementSibling;
+  const e = TARIX.find((x) => x.id === b.dataset.id);
+  const yangi = ochiq.hidden;
+  ochiq.hidden = !yangi;
+  b.setAttribute('aria-expanded', String(yangi));
+  if (yangi) ochiq.innerHTML = chekHtml(e);
+});
+document.querySelectorAll('.filtr button').forEach((b) => {
+  b.onclick = () => {
+    KIND = b.dataset.kind;
+    document.querySelectorAll('.filtr button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    tarixChiz();
+  };
+});
+function oylarniTayyorla() {
+  const [y, m] = bugunKun().split('-').map(Number);
+  const opts = [];
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(Date.UTC(y, m - 1 - i, 1));
+    const v = d.toISOString().slice(0, 7);
+    opts.push(`<option value="${v}">${OY_BOSH[d.getUTCMonth()]} ${d.getUTCFullYear()}</option>`);
+  }
+  $('#oyTanlov').innerHTML = opts.join('');
+  $('#oyTanlov').onchange = tarixYukla;
+}
+async function tarixYukla() {
+  const r = await api(`/api/wallet/entries?month=${$('#oyTanlov').value}`);
+  if (!r) return;
+  TARIX = r.ok ? r.data : [];
+  tarixChiz();
+}
+function etiroz(entryId, bookingId) {
+  oyna(`<h3 id="pastkiSarlavha">Pul tushmadi</h3>
+    <p class="xira" style="margin:0">Nima bo‘lganini qisqa yozing — admin tekshirib, javobni bildirishnoma orqali yuboradi.</p>
+    <label>Izoh<textarea id="eMatn" rows="3" placeholder="Masalan: dars 55 daqiqa bo‘ldi, aloqa uzilgan edi"></textarea></label>
+    <div class="xato" id="eXato" role="alert"></div>
+    <div class="qator3"><button class="tugma ikkinchi" type="button" id="eBekor">Bekor</button><button class="tugma" type="button" id="eOk">Yuborish</button></div>`);
+  $('#eBekor').onclick = yop;
+  $('#eOk').onclick = async () => {
+    const text = $('#eMatn').value.trim();
+    if (text.length < 5) { $('#eXato').textContent = 'Kamida 5 ta belgi yozing'; return; }
+    const r = await api('/api/wallet/disputes', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text, entryId, ...(bookingId ? { bookingId } : {}) }) });
+    if (!r) return;
+    if (!r.ok) { $('#eXato').textContent = xatoMatn(r.data); return; }
+    yop(); toast('Yuborildi — admin javob beradi', 'ok');
+  };
+}
+
+// ---------- sinovdan o'quvchi: to'lov kutilmoqda ----------
+function kutishChiz() {
+  const k = S.awaitingPayment || [];
+  $('#kutishK').hidden = !k.length;
+  $('#kutish').innerHTML = k.map((c) => {
+    const qoldi = new Date(c.deadline).getTime() - Date.now();
+    const vaqt = qoldi > 0 ? `${Math.floor(qoldi / 3600e3)} soat ${Math.floor((qoldi % 3600e3) / 60e3)} daqiqa qoldi` : 'belgi 24 soat ichida qo‘yilgan';
+    return `<div class="ushlab"><div class="b"><b>${esc(c.studentName)}</b><span class="xira">To‘lov tasdiqlanishi bilan bitta dars puli bonus darhol balansga tushadi · ${vaqt}</span></div></div>`;
+  }).join('');
+}
+
+// ---------- soliq ----------
+async function soliqYukla() {
+  const r = await api('/api/wallet/tax');
+  if (!r || !r.ok) return;
+  if (!r.data.length) { $('#soliqlar').innerHTML = '<div class="bosh">Hali soliq ushlanmagan.</div>'; return; }
+  const joriy = bugunKun().slice(0, 7);
+  $('#soliqlar').innerHTML = r.data.map((o) => {
+    const [y, m] = o.month.split('-');
+    const holat = o.remitted
+      ? `<span class="holat ok">O‘tkazildi · ${esc(o.remitted.documentNo)}</span>`
+      : `<span class="holat kut">${o.month === joriy ? 'Oy davom etmoqda' : 'O‘tkazilishi kutilmoqda'}</span>`;
+    return `<div class="soliq-oy"><div class="b"><b>${OY_BOSH[Number(m) - 1]} ${y}</b><br>
+      <span class="xira num">${pul(o.gross)} dan · balansga ${pul(o.net)}</span><br>${holat}</div>
+      <b class="num" style="color:var(--red)">− ${pul(o.tax)}</b></div>`;
+  }).join('');
+}
+
+async function yukla() {
+  const [r, w] = await Promise.all([api('/api/wallet/summary'), api('/api/wallet/withdrawals')]);
+  if (!r) return;
+  if (!r.ok) {
+    $('#balans').textContent = '—';
+    $('#ogoh').hidden = false;
+    $('#ogoh').textContent = r.status === 404 || !r.data?.message ? 'Hamyon hali ulanmagan — tez orada ishga tushadi.' : xatoMatn(r.data);
+    return;
+  }
+  S = r.data;
+  YECHISH = new Map((w?.ok ? w.data : []).map((x) => [x.id, x]));
+  balansChiz(); kartalarChiz(); kunlikChiz(); formulaChiz(); ushlabChiz(); kutishChiz();
+  await Promise.all([tarixYukla(), soliqYukla()]);
+}
+
+(async () => {
+  await WebViewAuth.tayyorla();
+  oylarniTayyorla();
+  await yukla();
+  await tabriklarniKorsat(S?.firstName || '');
+  yukla();
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') yukla(); });
+})();
+</script>
+</body>
+</html>
