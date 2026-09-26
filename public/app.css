@@ -260,6 +260,21 @@ body{
 .sinov-quti{background:var(--blue-soft);border-radius:13px;padding:12px;margin-top:12px}
 .sinov-quti b{display:block;font-size:14px;font-weight:700;color:var(--blue-dark);margin-bottom:8px}
 
+.sinov-kirish{margin-top:14px;padding:15px;border:1px solid #bfdbfe;border-radius:16px;
+  background:linear-gradient(135deg,#eff6ff 0%,#f0fdfa 100%)}
+.sinov-kirish-bosh{display:flex;align-items:center;gap:12px}
+.sinov-kirish-belgi{width:42px;height:42px;border-radius:13px;flex:0 0 auto;display:grid;place-items:center;
+  background:var(--blue);color:#fff;font-size:15px;box-shadow:0 5px 12px rgba(37,99,235,.18)}
+.sinov-kirish-matn{min-width:0;display:flex;flex-direction:column;gap:2px}
+.sinov-kirish-yorliq{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--blue-dark)}
+.sinov-kirish-matn strong{font-size:15px;color:var(--ink)}
+.sinov-kirish-matn small{font-size:12px;color:var(--mut2)}
+.sinov-kirish button{width:100%;margin-top:14px;padding:11px 14px;border:0;border-radius:11px;
+  background:var(--blue);color:#fff;font:inherit;font-size:14px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px}
+.sinov-kirish button:disabled{background:#dbeafe;color:#64748b;cursor:default}
+.sinov-kirish[hidden]{display:none}
+
 /* ---------- Lid kartasida ilova akkaunti ---------- */
 .akkaunt{
   margin:10px 0 0; padding:11px 13px; border-radius:12px;

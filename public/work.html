@@ -435,7 +435,7 @@ function darsKarta(d, { tarix = false } = {}) {
   if (!tarix) {
     const ochiq = Date.now() >= kun.getTime() - 10 * 60_000;
     past = `<div class="dk-past">
-      <button class="asosiy" data-kirish="${esc(d.id)}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>${ochiq ? 'Darsni boshlash' : 'Kirish 10 daq oldin'}</button>
+      <button class="asosiy" data-kirish="${esc(d.id)}" data-sinov="${d.isTrial ? 1 : ''}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>${ochiq ? 'Darsni boshlash' : 'Kirish 10 daq oldin'}</button>
       ${telHavola(d.leadPhone)}</div>`;
   } else if (d.isTrial && d.leadId) {
     const tugmalar = d.leadStatus === 'trial_completed'
@@ -476,10 +476,15 @@ function tugmalarniUla(box) {
   box.querySelectorAll('[data-kirish]').forEach((b) => {
     b.onclick = async () => {
       b.disabled = true;
-      const e = await api(`/api/booking/${b.dataset.kirish}/entry`);
+      // Sinov darsi — /entry (lidga ochiq havola bilan bir xil xona); oddiy dars — /start
+      // (o'quvchiga "dars boshlandi" push'i ketadi va faol xona ochiladi)
+      const e = b.dataset.sinov
+        ? await api(`/api/booking/${b.dataset.kirish}/entry`)
+        : await api(`/api/booking/${b.dataset.kirish}/start`, { method: 'POST' });
       b.disabled = false;
       if (!e) return;
-      if (e.ok && e.data.url) location.href = e.data.url;
+      const url = e.data.url || e.data.teacherUrl;
+      if (e.ok && url) location.href = url;
       else toast(e.data.message || 'Hozircha kirib bo‘lmaydi', 'err');
     };
   });
