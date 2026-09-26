@@ -501,7 +501,7 @@ function tugmalarniUla(box) {
       if (!r.ok) return toast(r.data.message || 'O‘zgartirib bo‘lmadi', 'err');
       TARIX.filter((x) => x.leadId === id).forEach((x) => { x.leadStatus = b.dataset.holat; });
       bugunChiz(); sinovChiz(); smenaChiz();
-      toast('Saqlandi', 'ok');
+      toast(b.dataset.holat === 'converted' ? 'O‘quvchilar bo‘limiga o‘tdi' : 'Saqlandi', 'ok');
     };
   });
 }
@@ -548,15 +548,17 @@ function sinovChiz() {
     ? `Oxirgi 30 kun · kelganlardan <b>${Math.round((tolov / keldi) * 100)}%</b> to‘lov qildi`
     : 'Oxirgi 30 kun · hali sinov darsi o‘tkazilmagan';
 
+  // To'lov qilganlar O'quvchilar bo'limiga o'tadi — bu yerda faqat voronkada hisoblanadi
+  const otganKorinadi = otgan.filter((d) => d.leadStatus !== 'converted');
   const [c1, c2] = document.querySelectorAll('#sinovlar .chip');
   c1.textContent = `Belgilangan (${kelgusi.length})`;
-  c2.textContent = `O‘tilgan (${otgan.length})`;
-  const royxat = FILTR === 'kelgusi' ? kelgusi : otgan;
+  c2.textContent = `O‘tilgan (${otganKorinadi.length})`;
+  const royxat = FILTR === 'kelgusi' ? kelgusi : otganKorinadi;
   $('#sinovRoyxat').innerHTML = royxat.length
     ? (FILTR === 'kelgusi'
       ? `<div class="chiziq-vaqt">${royxat.map((d) => qadam(d)).join('')}</div>`
       : royxat.map((d) => darsKarta(d, { tarix: true })).join(''))
-    : `<div class="bosh-kichik">${FILTR === 'kelgusi' ? 'Belgilangan sinov darsi yo‘q. So‘rov kelganda shu yerda paydo bo‘ladi.' : 'Oxirgi 30 kunda o‘tilgan sinov darsi yo‘q'}</div>`;
+    : `<div class="bosh-kichik">${FILTR === 'kelgusi' ? 'Belgilangan sinov darsi yo‘q. So‘rov kelganda shu yerda paydo bo‘ladi.' : 'Natijasi kutilayotgan sinov darsi yo‘q. To‘lov qilganlar — O‘quvchilar bo‘limida.'}</div>`;
   tugmalarniUla($('#sinovRoyxat'));
 }
 

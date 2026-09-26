@@ -39,6 +39,9 @@ body.oquvchilar{background:#eef1f7}
 .malumot{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .malumot div{background:#f8fafc;border-radius:12px;padding:8px 10px}
 .malumot small{display:block;font-size:11px;font-weight:700;color:#94a3b8;white-space:nowrap}
+.kutish{margin-top:14px;background:#fffbeb;border-radius:12px;padding:10px 12px}
+.kutish b{display:block;font-size:13.5px;font-weight:800;color:#b45309}
+.kutish span{font-size:12.5px;color:#92400e}
 .malumot b{font-size:13.5px;font-weight:800;color:#0f172a;font-variant-numeric:tabular-nums}
 </style>
 </head>
@@ -94,7 +97,34 @@ function keyingiMatn(iso) {
   return `${sanaUzun(iso)} ${soat}`;
 }
 
+// Mentor "To'lov qildi" belgilagan, operator hali obunani kiritmagan
+function kutilayotganHtml(x) {
+  return `
+    <div class="oq kutilmoqda" data-id="${esc(x.student.id)}" tabindex="0" role="link" aria-label="${esc(ism(x.student))}">
+      <div class="oq-ust">
+        <div class="avatar">${esc(bosh(ism(x.student)))}</div>
+        <div class="ism">
+          <b>${esc(ism(x.student))}</b>
+          <span>${x.student.phoneNumber ? esc(x.student.phoneNumber) : 'O‘quvchi'}</span>
+        </div>
+      </div>
+      <div class="kutish">
+        <b>To‘lov tasdiqlanmoqda</b>
+        <span>Operator to‘lovni kiritgach, tarif va obuna muddati shu yerda chiqadi.</span>
+      </div>
+      <div class="oq-past">
+        <div class="malumot">
+          <div><small>Keyingi dars</small><b>${esc(keyingiMatn(x.nextLessonAt))}</b></div>
+          <div><small>O‘tilgan darslar</small><b>${x.lessonsDone}</b></div>
+        </div>
+        <button class="dumaloq" type="button" data-amal="chat" aria-label="Chat">${IKON.chat}</button>
+        <button class="dumaloq qongiroq" type="button" data-amal="qongiroq" aria-label="Qo‘ng‘iroq">${IKON.qongiroq}</button>
+      </div>
+    </div>`;
+}
+
 function kartaHtml(x) {
+  if (!x.plan) return kutilayotganHtml(x);
   const p = x.plan;
   const jami = Math.max(1, new Date(p.endDate) - new Date(p.startDate));
   const qoldiFoiz = Math.max(0, Math.min(100, ((new Date(p.endDate) - Date.now()) / jami) * 100));
@@ -170,7 +200,7 @@ $('#qidiruv').oninput = chiz;
     return;
   }
   HAMMASI = Array.isArray(r.data) ? r.data : [];
-  const tugayapti = HAMMASI.filter((x) => x.plan.daysLeft <= TUGAYAPTI_KUN).length;
+  const tugayapti = HAMMASI.filter((x) => x.plan && x.plan.daysLeft <= TUGAYAPTI_KUN).length;
   $('#sarlavha').textContent = `${HAMMASI.length} ta o‘quvchi`;
   $('#izoh').innerHTML = tugayapti
     ? `Doimiy darslar uchun to‘lov qilganlar · <b>${tugayapti} tasining obunasi ${TUGAYAPTI_KUN} kun ichida tugaydi</b>`
