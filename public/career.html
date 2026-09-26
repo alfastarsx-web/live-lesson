@@ -60,6 +60,31 @@ main{padding:20px 0 48px;display:grid;gap:16px}
 .manbalar dd{margin:0;font-family:var(--display);font-weight:600;font-variant-numeric:tabular-nums}
 
 /* Ball · Rank · Prioritet */
+.ball-ust{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.ball-ust div{background:var(--brand-soft);padding:12px 10px}
+.ball-ust b{display:block;font-family:var(--display);font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--brand)}
+.ball-ust span{font-size:12.5px;font-weight:600;color:var(--mute)}
+.ball-ust em{font-style:normal;color:var(--gold);font-weight:700}
+.norma{margin-top:14px}
+.norma-q{display:flex;justify-content:space-between;font-size:14px;font-weight:600}
+.norma-q b{font-family:var(--display);font-variant-numeric:tabular-nums}
+.norma-ch{height:8px;background:var(--line);margin-top:6px;overflow:hidden}
+.norma-ch i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--signal));transition:width .4s}
+.norma-ch.toldi i{background:linear-gradient(90deg,var(--green),#4ade80)}
+.kun-t{border-top:1px solid var(--line);padding:12px 0 4px}
+.kun-t:first-child{border-top:0}
+.kun-bosh{display:flex;justify-content:space-between;gap:10px;font-family:var(--display);font-size:14.5px;font-weight:600}
+.kun-bosh .hol{font-family:var(--body);font-size:12.5px;font-weight:600;color:var(--mute)}
+.kun-bosh .hol.ok{color:var(--green)} .kun-bosh .hol.yoq{color:var(--red)}
+.yozuv{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:8px 0;font-size:14px;align-items:baseline}
+.yozuv .p{font-family:var(--display);font-weight:700;font-variant-numeric:tabular-nums;color:var(--green)}
+.yozuv .p.m{color:var(--red)}
+.yozuv .ets{grid-column:1/-1;font-size:12.5px;color:var(--mute)}
+.yozuv button{grid-column:1/-1;justify-self:start;border:1px solid var(--line-2);background:transparent;color:var(--text);font:inherit;font-size:12.5px;font-weight:600;padding:4px 10px;cursor:pointer}
+.ets-f{grid-column:1/-1;display:grid;gap:6px}
+.ets-f textarea{font:inherit;font-size:14px;padding:8px;border:1px solid var(--line-2);background:var(--card);color:var(--text);min-height:64px;resize:vertical}
+.ets-f div{display:flex;gap:8px}
+.ets-f button{grid-column:auto}
 .uchlik{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
 .uchlik div{background:var(--bg);border:1px dashed var(--line-2);padding:12px 10px}
 .uchlik b{display:block;font-family:var(--display);font-size:20px;font-weight:700;color:var(--mute)}
@@ -96,23 +121,41 @@ a.bolim .o{font-family:var(--display);color:var(--brand);font-size:20px}
 </header>
 
 <main class="wrap">
+  <p class="slabel">Ball</p>
+  <section class="card" aria-labelledby="ballS">
+    <h2 id="ballS">Ball va kunlik norma</h2>
+    <p class="izoh" id="ballIzoh">Yuklanmoqda…</p>
+    <div id="ballTana" hidden>
+      <div class="ball-ust">
+        <div><b id="jamiBall">0</b><span>jami ball</span></div>
+        <div><b id="seriya">0</b><span>kun seriya <em id="koef"></em></span></div>
+        <div><b id="bugunBall">0</b><span>bugun</span></div>
+      </div>
+      <div class="norma">
+        <div class="norma-q"><span>Bugungi norma</span><b id="normaMatn">0 / 100</b></div>
+        <div class="norma-ch" role="progressbar" aria-label="Bugungi norma" id="normaBar" aria-valuemin="0" aria-valuemax="100"><i id="normaI"></i></div>
+        <p class="izoh">Onlayn soat 10 · sinov so‘rovini qabul qilish 5 · sinov darsi 30 · doimiy dars 10 · natija 5</p>
+      </div>
+    </div>
+    <div class="uchlik">
+      <div><b>—</b><span>Rank</span><small>Pro 60% dan Legend 85% gacha ulush · keyingi bosqich</small></div>
+      <div><b>—</b><span>Prioritet</span><small>ertaga qancha so‘rov olasiz · keyingi bosqich</small></div>
+      <div><b>—</b><span>Liga</span><small>haftalik reyting · keyingi bosqich</small></div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="tarixS" id="tarixCard" hidden>
+    <h2 id="tarixS">Ball tarixi</h2>
+    <p class="izoh">Har bir ball qayerdan kelgani. Jarimaga rozi bo‘lmasangiz — e’tiroz bildiring, administrator 24 soat ichida javob beradi.</p>
+    <div id="tarix"></div>
+  </section>
+
   <p class="slabel">Daromad</p>
   <section class="card" aria-labelledby="pulS">
     <h2 id="pulS">Ishlagan pulingiz</h2>
     <div class="pul"><b id="jami">…</b><span>so‘m</span></div>
     <dl class="manbalar" id="manbalar"></dl>
     <p class="izoh" id="pulIzoh">Pulni ishlagan kuningizning ertasiyoq yechib olasiz.</p>
-  </section>
-
-  <p class="slabel">O‘sish</p>
-  <section class="card" aria-labelledby="osishS">
-    <h2 id="osishS">Ball, rank va prioritet <span class="tez">Tez orada</span></h2>
-    <p class="izoh">Ball tizimi ishga tushgach, raqamlaringiz shu yerda har kuni yangilanadi. Qoidalar hozirdan Mentor yo‘li bo‘limida.</p>
-    <div class="uchlik">
-      <div><b>—</b><span>Ball</span><small>qancha ishladingiz; kuniga 100 — norma</small></div>
-      <div><b>—</b><span>Rank</span><small>Pro 60% dan Legend 85% gacha ulush</small></div>
-      <div><b>—</b><span>Prioritet</span><small>ertaga qancha so‘rov olasiz</small></div>
-    </div>
   </section>
 
   <p class="slabel">Akademiya</p>
@@ -140,6 +183,75 @@ const MANBA = {
   retention: 'O‘quvchini ushlab qolish',
   manual: 'Bonus va tuzatishlar',
 };
+
+const KUN_Q = (d) => { const [, m, dd] = d.split('-'); return `${Number(dd)}-${OYLAR_T[Number(m) - 1]}`; };
+const belgi = (n) => (n > 0 ? '+' : n < 0 ? '−' : '') + summa(Math.abs(n));
+
+async function ball() {
+  const r = await api('/api/ai/mentor-gamification/home');
+  if (!r || !r.ok) { $('#ballIzoh').textContent = 'Ball ma’lumotini yuklab bo‘lmadi.'; return; }
+  const h = r.data;
+  if (!h.enabled) {
+    $('#ballIzoh').textContent = h.startsAt
+      ? `Ball tizimi ${KUN_Q(h.startsAt)}dan ishga tushadi. Qoidalar — Mentor yo‘li bo‘limida.`
+      : 'Ball tizimi tez orada ishga tushadi. Qoidalar — Mentor yo‘li bo‘limida.';
+    return;
+  }
+  $('#ballIzoh').textContent = 'Kun yakunida norma bajarilsa +50 va seriya davom etadi.';
+  $('#ballTana').hidden = false;
+  $('#jamiBall').textContent = summa(h.totalPoints);
+  $('#seriya').textContent = h.streakDays;
+  $('#koef').textContent = h.coefficient > 1 ? `×${h.coefficient}` : '';
+  $('#bugunBall').textContent = belgi(h.today.points) || '0';
+  const foiz = Math.min(100, Math.round((h.today.activity / h.today.normTarget) * 100));
+  $('#normaMatn').textContent = `${h.today.activity} / ${h.today.normTarget}`;
+  $('#normaI').style.width = foiz + '%';
+  $('#normaBar').setAttribute('aria-valuenow', String(foiz));
+  $('#normaBar').classList.toggle('toldi', foiz >= 100);
+  await tarix();
+}
+
+async function tarix() {
+  const r = await api('/api/ai/mentor-gamification/history?days=7');
+  if (!r || !r.ok || !Array.isArray(r.data) || !r.data.length) return;
+  $('#tarixCard').hidden = false;
+  $('#tarix').innerHTML = r.data.map((k) => {
+    const hol = !k.closed ? '<span class="hol">kun davom etmoqda</span>'
+      : k.normMet === true ? `<span class="hol ok">norma ✓ · ${belgi(k.total)}</span>`
+        : k.normMet === false ? `<span class="hol yoq">norma bajarilmadi · ${belgi(k.total)}</span>`
+          : `<span class="hol">dam olish · ${belgi(k.total)}</span>`;
+    const yozuvlar = k.entries.map((e) => {
+      const d = e.dispute;
+      const ets = d ? `<span class="ets">E’tiroz: ${d.state === 'open' ? 'ko‘rib chiqilmoqda' : d.state === 'accepted' ? 'qabul qilindi' : 'rad etildi'}${d.answer ? ' — ' + esc(d.answer) : ''}</span>`
+        : e.points < 0 ? `<button type="button" data-ets="${esc(e.id)}">E’tiroz bildirish</button>` : '';
+      return `<div class="yozuv" data-id="${esc(e.id)}"><span>${esc(e.reason)}</span><span class="p${e.points < 0 ? ' m' : ''}">${e.points ? belgi(e.points) : '·'}</span>${ets}</div>`;
+    }).join('');
+    return `<div class="kun-t"><div class="kun-bosh"><span>${KUN_Q(k.day)}</span>${hol}</div>${yozuvlar}</div>`;
+  }).join('');
+
+  document.querySelectorAll('[data-ets]').forEach((b) => {
+    b.onclick = () => {
+      const qator = b.closest('.yozuv');
+      b.remove();
+      const f = document.createElement('div');
+      f.className = 'ets-f';
+      f.innerHTML = '<textarea maxlength="500" aria-label="E’tiroz matni" placeholder="Nima bo‘lganini yozing: masalan, internet uzilgan edi"></textarea>'
+        + '<div><button type="button" data-yubor>Yuborish</button><span class="izoh" data-xabar></span></div>';
+      qator.appendChild(f);
+      f.querySelector('textarea').focus();
+      f.querySelector('[data-yubor]').onclick = async (ev) => {
+        const matn = f.querySelector('textarea').value.trim();
+        if (matn.length < 5) { f.querySelector('[data-xabar]').textContent = 'Kamida 5 ta belgi yozing'; return; }
+        ev.target.disabled = true;
+        const res = await api(`/api/ai/mentor-gamification/entries/${qator.dataset.id}/dispute`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: matn }),
+        });
+        if (res && res.ok) f.outerHTML = '<span class="ets">E’tiroz: ko‘rib chiqilmoqda</span>';
+        else { ev.target.disabled = false; f.querySelector('[data-xabar]').textContent = (res && res.data.message) || 'Yuborib bo‘lmadi'; }
+      };
+    };
+  });
+}
 
 async function daromad() {
   const r = await api('/api/ai/mentor/salary');
@@ -178,7 +290,7 @@ async function akademiya() {
   await WebViewAuth.tayyorla({ akademiya: false });
   const w = await api('/api/whoami');
   if (w && w.ok && w.data.name && w.data.name !== 'Ustoz') $('#salom').textContent = `Career · ${w.data.name.split(/\s+/)[0]}`;
-  await Promise.all([daromad(), akademiya()]);
+  await Promise.all([ball(), daromad(), akademiya()]);
 })();
 </script>
 </body>
