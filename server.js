@@ -153,6 +153,15 @@ function setSession(req, res, { room, name }) {
   res.json({ ok: true, room, name, role: 'mentor', redirect: '/room.html' });
 }
 
+// Mobil ilova har tabni o'z domenida login.html orqali ochadi (Home | Work | Career).
+// Kirgandan keyin shu tabning sahifasi ochilsin; Home va Career akademiyani talab qilmaydi.
+async function mentorBoshSahifa(req, token) {
+  const host = String(req.hostname || '');
+  if (host.startsWith('mentor-home.')) return '/home.html';
+  if (host.startsWith('mentor-career.')) return '/career.html';
+  return (await akademiyaKerak(token)) ? '/mentor/akademiya.html' : '/work.html';
+}
+
 app.post('/api/login', async (req, res) => {
   const { login, password } = req.body || {};
   if (!AUTH_ON) return res.status(500).json({ error: 'server sozlanmagan (LESSON_TOKEN_SECRET yo‘q)' });
@@ -176,9 +185,7 @@ app.post('/api/login', async (req, res) => {
         name: r.name,
         role: r.isMentor ? 'mentor' : 'student',
         mustChangePassword: Boolean(r.mustChangePassword),
-        redirect: r.isMentor
-          ? (await akademiyaKerak(r.token) ? '/mentor/akademiya.html' : '/work.html')
-          : '/band.html',
+        redirect: r.isMentor ? await mentorBoshSahifa(req, r.token) : '/band.html',
       });
     }
     if (r.status === 403 || r.status === 502) return res.status(r.status).json({ error: r.message });
