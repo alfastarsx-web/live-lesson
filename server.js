@@ -314,6 +314,7 @@ const RUXSAT = [
   /^student-activity\/students\/[0-9a-f-]{36}\/logs$/,
   /^calls$/,
   /^leads\/my$/,
+  /^mentor\/salary$/,
 ];
 
 // Lid holati va izohi (PATCH) — ruxsat etilgan yozish amallari
@@ -512,7 +513,8 @@ app.post('/api/akademiya/natija', (req, res) => {
 
 // Brauzerdan kirilganda ish sahifalari server tomonda yopiladi.
 // WebView birinchi ochilishda cookie hali yo'q — u holatni auth-webview.js tekshiradi.
-const AKADEMIYA_YOPIQ = /^\/(work|jadval|oquvchilar|oquvchi|lidlar|mentor\/yol|mentor\/liga)(\.html)?$/;
+// Career (yo'l, liga, akademiya) yopilmaydi — yangi mentor ham o'qib o'rganadi
+const AKADEMIYA_YOPIQ = /^\/(work|jadval|oquvchilar|oquvchi|lidlar)(\.html)?$/;
 app.get(AKADEMIYA_YOPIQ, async (req, res, next) => {
   if (await akademiyaKerak(cookies(req)[AI_COOKIE])) return res.redirect('/mentor/akademiya.html');
   next();

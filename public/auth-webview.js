@@ -44,7 +44,8 @@ window.kirishKerak = () => {
 };
 
 window.WebViewAuth = {
-  async tayyorla() {
+  // { akademiya: false } — Career kabi yangi mentorga ham ochiq sahifalar akademiyaga yo'naltirmaydi
+  async tayyorla(opts = {}) {
     const hash = new URLSearchParams(location.hash.slice(1));
     const token = hash.get('ai') || new URLSearchParams(location.search).get('ai');
 
@@ -63,6 +64,7 @@ window.WebViewAuth = {
 
     // Yangi mentor avval akademiyadan o'tadi. Brauzerda buni server qiladi,
     // WebView esa birinchi ochilishda cookie'siz keladi — shuning uchun shu yerda ham.
+    if (opts.akademiya === false) return;
     try {
       const h = await fetch('/api/akademiya/holat').then((r) => r.json());
       if (h && h.required && location.pathname !== '/mentor/akademiya.html') {

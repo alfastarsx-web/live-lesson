@@ -214,3 +214,14 @@ https://lesson.myteacher.uz/work.html#ai=<ai.myteacher.uz access token>
   ni ochishi kerak. Ochiq sahifada faqat `#ai=` ni almashtirish ham yetarli — sahifa uni ushlaydi.
 - Sinov darsi so'rovi push'i `data: { screen: 'work', type: 'trial_request', requestId, expiresAt }`
   bilan keladi. Bosilganda Work tabini oching — so'rov ekrani o'zi chiqadi.
+
+## Career bo'limi (mentor ilovasi)
+
+Ilovaning **Career** tabi WebView'da shu manzilni ochadi — Work bilan bir xil kirish (`#ai=`, `tokenEskirdi`):
+
+```
+https://lesson.myteacher.uz/career.html#ai=<ai.myteacher.uz access token>
+```
+
+- Ichida tablar: Umumiy (daromad, akademiya holati) · Mentor yo'li · Liga · Akademiya.
+- Career akademiyadan o'tmagan yangi mentorga ham ochiq (Work esa yopiq).
