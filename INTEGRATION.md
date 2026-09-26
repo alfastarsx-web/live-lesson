@@ -220,8 +220,11 @@ https://lesson.myteacher.uz/work.html#ai=<ai.myteacher.uz access token>
 Ilovaning **Career** tabi WebView'da shu manzilni ochadi — Work bilan bir xil kirish (`#ai=`, `tokenEskirdi`):
 
 ```
-https://lesson.myteacher.uz/career.html#ai=<ai.myteacher.uz access token>
+https://mentor-career.myteacher.uz/#ai=<ai.myteacher.uz access token>
 ```
+
+Bosh sahifa `/` avtomatik `/career.html` ga o'tadi (`#ai=` saqlanadi). Domen lesson.myteacher.uz bilan
+bir xil serverga ulangan, shuning uchun `https://lesson.myteacher.uz/career.html#ai=…` ham ishlayveradi.
 
 - Ichida tablar: Umumiy (daromad, akademiya holati) · Mentor yo'li · Liga · Akademiya.
 - Career akademiyadan o'tmagan yangi mentorga ham ochiq (Work esa yopiq).
