@@ -386,3 +386,7 @@ body{
 .tablar a .nuqta{position:absolute;top:5px;right:calc(50% - 16px);width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 0 2px #fff}
 
 .tablar-ichi.statik a[aria-current="page"]{background:var(--card);box-shadow:0 0 0 1px var(--line),0 1px 2px rgba(35,38,45,.06)}
+
+/* Telefon: biror element sig'masa ham sahifa yon tomonga siljimasin (WebView) */
+html,body{overflow-x:clip}
+img{max-width:100%}

@@ -61,3 +61,54 @@ html body .steps i,html body .dots i{border-radius:4px}
 html body .steps i{width:14px;height:6px}
 html body .steps i.now,html body .dots i.now{background:var(--brand);opacity:.45}
 html body .topbar{border-bottom-color:var(--line)}
+
+/* ===== Telefon birinchi: ilova WebView'ida ochiladi =====
+   Work sahifalari bilan bir xil o'lcham — matn 15px, sarlavhalar 22–26px, chetlar 16px.
+   Sahifalarning o'z qoidalaridan kuchliroq bo'lishi uchun `html body` bilan. */
+html body{font-size:15px;line-height:1.55}
+html body .wrap{padding-inline:16px}
+
+/* akademiya */
+html body main{padding-left:16px;padding-right:16px}
+html body .topbar .row{padding:10px 16px}
+html body .screen{padding-top:16px}
+html body .hero{padding-bottom:20px}
+html body .hero .art{padding:20px 16px 0}
+html body .hero .art svg{max-width:300px}
+html body .hero .txt{padding:18px 16px 0}
+html body .hero h1{font-size:24px;line-height:1.2;margin:10px 0 8px}
+html body .hero p,html body .mod-head p,html body .lede{font-size:15px}
+html body .mod-head h2{font-size:22px;line-height:1.2}
+html body .block{padding:16px}
+html body .block h3,html body .card h3,html body .rank h3,html body .rew .r h3{font-size:16.5px}
+html body .facts b{font-size:19px}
+html body .points .big b{font-size:30px}
+html body .lad .r span{font-size:17px}
+html body .prog .price{font-size:22px}
+html body .q h2{font-size:18px;margin:8px 0 14px}
+html body .opt{font-size:15px}
+html body .res .score{font-size:48px}
+html body .res h2{font-size:21px}
+html body .unlock{padding:18px 16px}
+html body .unlock h3{font-size:18px}
+html body .script{font-size:15px;padding:16px}
+html body .dock{padding-left:16px;padding-right:16px}
+
+/* career / yo'l / liga */
+html body .hero .now b{font-size:18px}
+html body h2{font-size:21px}
+html body .card{padding:16px}
+html body .card h2{font-size:16.5px}
+html body .pul b{font-size:28px}
+html body .ball-ust b{font-size:21px}
+html body .rank .pct{font-size:24px}
+html body label.fld output{font-size:21px}
+html body .calc,html body .result,html body .quiz{padding:16px}
+html body .result .sum{font-size:32px}
+html body .big100 b{font-size:30px}
+html body .top h1{font-size:22px}
+/* Uzun yozuvlar qatorga sig'masa keyingi qatorga o'tsin — ekran yonga siljimasin */
+html body .missions b{white-space:normal;text-align:right}
+html body .missions span{min-width:0}
+html,html body{overflow-x:clip}
+html body img,html body svg{max-width:100%}
