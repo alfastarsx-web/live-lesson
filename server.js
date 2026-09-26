@@ -309,6 +309,7 @@ app.post('/api/kirish', async (req, res) => {
 const RUXSAT = [
   /^assignments\/my-students$/,
   /^assignments\/my-students\/active$/,
+  /^assignments\/my-students\/paid$/,
   /^assignments\/my-students\/online-count$/,
   /^student-activity\/students\/[0-9a-f-]{36}\/logs$/,
   /^calls$/,
