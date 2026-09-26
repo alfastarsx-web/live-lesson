@@ -6,12 +6,50 @@
  * Hash (#) qismi serverga UMUMAN yuborilmaydi — ya'ni token nginx loglariga
  * tushmaydi. Sahifa uni o'qib, bir marta serverga uzatadi va cookie'ga aylantiradi.
  */
+// Sahifa mentor ilovasi ichida ochilganmi. Ilova ichida login/parol HECH QACHON so'ralmaydi:
+// kirish ilovaning tokeni bilan bo'ladi, token eskirsa — ilovadan yangisi so'raladi.
+const ILOVA_KALIT = 'll_ilova';
+window.ilovadami = () => {
+  if (window.MyTeacher?.postMessage || window.flutter_inappwebview) return true;
+  try { return sessionStorage.getItem(ILOVA_KALIT) === '1'; } catch { return false; }
+};
+
+// Ilovaga xabar — mavjud ko'prik (MyTeacher kanali yoki flutter_inappwebview) orqali
+window.nativeXabar = (xabar) => {
+  try {
+    if (window.MyTeacher?.postMessage) window.MyTeacher.postMessage(JSON.stringify(xabar));
+    else if (window.flutter_inappwebview?.callHandler) window.flutter_inappwebview.callHandler('mentorAction', xabar);
+  } catch { /* ko'prik yo'q */ }
+};
+
+/**
+ * Sessiya yo'q yoki eskirgan. Brauzerda — login sahifasi. Ilova ichida — login emas:
+ * ilovaga "tokenEskirdi" yuboriladi, u WebView'ni yangi #ai=<token> bilan qayta ochadi.
+ */
+window.kirishKerak = () => {
+  if (!window.ilovadami()) {
+    location.href = '/login.html?keyin=' + encodeURIComponent(location.pathname + location.search + location.hash);
+    return;
+  }
+  window.nativeXabar({ turi: 'tokenEskirdi', sahifa: location.pathname });
+  if (document.getElementById('ilovaSessiya')) return;
+  const d = document.createElement('div');
+  d.id = 'ilovaSessiya';
+  d.setAttribute('role', 'alert');
+  d.style.cssText = 'position:fixed;inset:0;z-index:100;background:rgba(15,23,42,.55);display:grid;place-items:center;padding:24px;font-family:inherit';
+  d.innerHTML = '<div style="background:#fff;color:#0f172a;border-radius:20px;padding:22px;max-width:340px;text-align:center">'
+    + '<b style="display:block;font-size:17px;margin-bottom:6px">Sessiya yangilanmoqda…</b>'
+    + '<span style="font-size:14px;color:#64748b">Sahifa o‘zi yangilanmasa, ilovada bo‘limni yopib, qayta oching.</span></div>';
+  document.body.appendChild(d);
+};
+
 window.WebViewAuth = {
   async tayyorla() {
     const hash = new URLSearchParams(location.hash.slice(1));
     const token = hash.get('ai') || new URLSearchParams(location.search).get('ai');
 
     if (token) {
+      try { sessionStorage.setItem(ILOVA_KALIT, '1'); } catch { /* saqlab bo'lmasa ham ishlayveradi */ }
       try {
         await fetch('/api/adopt', {
           method: 'POST',
@@ -27,7 +65,7 @@ window.WebViewAuth = {
     // WebView esa birinchi ochilishda cookie'siz keladi — shuning uchun shu yerda ham.
     try {
       const h = await fetch('/api/akademiya/holat').then((r) => r.json());
-      if (h && h.kerak) {
+      if (h && h.required && location.pathname !== '/mentor/akademiya.html') {
         location.replace('/mentor/akademiya.html');
         await new Promise(() => {}); // sahifa qolgan kodini ishga tushirmasin
       }
@@ -38,7 +76,7 @@ window.WebViewAuth = {
 window.api = async function api(yol, opts) {
   const r = await fetch(yol, opts);
   if (r.status === 401) {
-    location.href = '/login.html?keyin=' + encodeURIComponent(location.pathname + location.search);
+    window.kirishKerak();
     return null;
   }
   return { ok: r.ok, data: await r.json().catch(() => ({})) };
@@ -133,3 +171,18 @@ window.sanaChiroyli = (iso) => {
   return `${d.getDate()} ${OYLAR[d.getMonth()]}, `
     + `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 };
+
+// Ilova ochiq sahifaga yangi token bilan faqat #ai=... ni almashtirsa, brauzer sahifani
+// qayta yuklamaydi. Shu holatni ushlab, tokenni qabul qilamiz va sahifani yangilaymiz.
+window.addEventListener('hashchange', async () => {
+  const token = new URLSearchParams(location.hash.slice(1)).get('ai');
+  if (!token) return;
+  try { sessionStorage.setItem(ILOVA_KALIT, '1'); } catch { /* yo'q */ }
+  try {
+    await fetch('/api/adopt', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }),
+    });
+  } catch { /* qayta yuklangach tekshiriladi */ }
+  history.replaceState(null, '', location.pathname);
+  location.reload();
+});

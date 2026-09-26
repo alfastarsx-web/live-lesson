@@ -705,6 +705,7 @@ body:not(.js) .nojs{display:block}
 </div>
 </div>
 
+<script src="/auth-webview.js"></script>
 <script>
 (function(){
   const MODS = ["s0","s1","s2","s3","s4","s5","s6","s7","s8"];
@@ -718,7 +719,7 @@ body:not(.js) .nojs{display:block}
 
   async function holatOl(){
     const r = await fetch("/api/akademiya/boshla", {method:"POST"}).catch(()=>null);
-    if(r && r.status === 401){ location.href = "/login.html?keyin=" + encodeURIComponent(location.pathname); return false; }
+    if(r && r.status === 401){ kirishKerak(); return false; }
     if(r && r.ok){ HOLAT = await r.json(); }
     return true;
   }
@@ -836,7 +837,7 @@ body:not(.js) .nojs{display:block}
     try{
       r = await fetch("/api/akademiya/natija", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({answers})});
     }catch(e){ r = null; }
-    if(r && r.status === 401){ location.href = "/login.html?keyin=" + encodeURIComponent(location.pathname); return; }
+    if(r && r.status === 401){ kirishKerak(); return; }
     const d = r ? await r.json().catch(()=>null) : null;
     if(!r || !r.ok || !d){
       mode = "test"; nextBtn.disabled = false;
@@ -915,14 +916,10 @@ body:not(.js) .nojs{display:block}
 
   document.body.classList.add('js');
   // Ilova WebView'ni #ai=<token> bilan ochadi — tokenni cookie'ga aylantiramiz
-  const aiTok = new URLSearchParams(location.hash.slice(1)).get("ai");
-  if(aiTok){
-    fetch("/api/adopt",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:aiTok})}).catch(()=>{});
-    history.replaceState(null, "", location.pathname);
-  }
   load();
   nextBtn.disabled = true; // holat kelguncha oldinga o'tib bo'lmasin
-  holatOl().then((ok)=>{
+  // Ilova #ai=<token> bilan ochadi — avval cookie'ga aylantiramiz, keyin holatni so'raymiz
+  WebViewAuth.tayyorla().then(holatOl).then((ok)=>{
     if(!ok) return;
     if(HOLAT.mentor && !HOLAT.passed) idx = Math.min(idx, HOLAT.modulesRead, MODS.length-1);
     renderModule();

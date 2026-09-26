@@ -56,7 +56,7 @@ let SESSIYA_BOR = false;
 async function so(yol, opts) {
   const r = await fetch(yol, opts);
   if (r.status === 401 && !SESSIYA_BOR) {
-    location.href = '/login.html?keyin=' + encodeURIComponent(location.pathname);
+    kirishKerak();
     return null;
   }
   return { ok: r.ok, data: await r.json().catch(() => ({})) };
