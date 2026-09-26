@@ -352,3 +352,17 @@ body{
 .chip[data-f][aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
 .dk-past button:disabled{background:#e2e8f0;border-color:#e2e8f0;color:var(--mut);cursor:not-allowed}
 .dk-holat{margin-top:5px}.dk-holat .teg{margin-left:0}
+
+/* ---------- Work bo'limi tablari (Work, Jadval) ---------- */
+.tablar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;margin:0 -16px;padding:8px 16px;
+  background:rgba(238,241,247,.86);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px)}
+.tablar-ichi{position:relative;display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-radius:16px;padding:4px;
+  box-shadow:0 1px 2px rgba(15,23,42,.05),0 6px 18px rgba(15,23,42,.05)}
+.tablar a{position:relative;z-index:1;text-align:center;padding:10px 2px;border-radius:12px;text-decoration:none;
+  font-size:13px;font-weight:700;color:#64748b;white-space:nowrap;transition:color .25s}
+.tablar a[aria-current="page"]{color:#fff}
+.tablar .kors{position:absolute;z-index:0;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/4);border-radius:12px;
+  background:linear-gradient(135deg,#2563eb,#4f46e5);box-shadow:0 6px 14px -6px rgba(37,99,235,.7);transition:transform .35s cubic-bezier(.3,1.3,.5,1)}
+.tablar a .nuqta{position:absolute;top:6px;right:10px;width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px #fff}
+
+.tablar-ichi.statik a[aria-current="page"]{background:linear-gradient(135deg,#2563eb,#4f46e5);box-shadow:0 6px 14px -6px rgba(37,99,235,.7)}
