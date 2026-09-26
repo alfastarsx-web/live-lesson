@@ -238,6 +238,13 @@ async function aiProxy(req, res, targetPath) {
   }
 }
 
+// Mentor hamyoni (Work → Daromad, Home grafigi). Admin yo'llari bu yerdan o'tmaydi.
+app.all(/^\/api\/wallet(\/.*)?$/, (req, res) => {
+  const sub = req.path.replace(/^\/api\/wallet/, '');
+  if (/^\/admin(\/|$)/.test(sub)) return res.status(404).json({ error: 'topilmadi' });
+  aiProxy(req, res, `/mentor-wallet${sub}`);
+});
+
 app.all(/^\/api\/booking(\/.*)?$/, (req, res) => {
   const sub = req.path.replace(/^\/api\/booking/, '');
   aiProxy(req, res, `/lesson-booking${sub}`);

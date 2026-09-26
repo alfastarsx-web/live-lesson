@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f4f5f1; --card:#fff; --sub:#f0f1ec; --ink:#1f2a27; --mut:#8f9793; --mut2:#5f6864; --line:#e6e8e2;
+  --em:#1f6f5c; --em-2:#2a8a70; --em-deep:#123f35; --em-soft:#e2f2ec;
+  --lime:#c8f07a; --amber:#f0a73a; --amber-soft:#fdf1dc; --coral:#e8715f; --coral-soft:#fce9e5;
+  --sky:#5b8def; --sky-soft:#e7eefd;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 'Manrope',system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:560px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+.num{font-variant-numeric:tabular-nums}
+a{color:inherit}
+
+.salom{display:flex;align-items:center;gap:12px}
+.salom .ph{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#f7c873,#e8715f);display:grid;place-items:center;color:#fff;font-weight:800;flex:0 0 auto}
+.salom small{font-size:12.5px;color:var(--mut2);font-weight:600}
+.salom h1{margin:0;font-size:21px;letter-spacing:-.4px;line-height:1.2;text-wrap:balance}
+
+.card{background:var(--card);border-radius:20px;box-shadow:0 1px 0 var(--line),0 6px 18px rgba(31,42,39,.05);padding:16px}
+.ch{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.ch h2{margin:0;font-size:15.5px;letter-spacing:-.2px}
+.ch .d{font-size:12px;color:var(--mut2);font-weight:600}
+.big{font-size:24px;font-weight:800;letter-spacing:-.6px}
+.up{font-size:12.5px;font-weight:800;padding:3px 8px;border-radius:999px;margin-left:6px;vertical-align:4px}
+.up.o{color:var(--em-2);background:var(--em-soft)} .up.t{color:var(--coral);background:var(--coral-soft)}
+a.grafik{display:block;text-decoration:none}
+a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-radius:20px}
+.grafik svg{width:100%;height:auto;display:block;margin-top:10px}
+.xira{color:var(--mut2);font-size:13px}
+
+.lbl{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:4px 2px -6px}
+.ruyxat{padding:4px 14px}
+.qator{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.qator:last-child{border-bottom:0}
+.qator .b{flex:1;min-width:0}
+.qator .t1{font-weight:800;font-size:14.5px}
+.qator .t2{font-size:12.5px;color:var(--mut2)}
+.vaqt{width:52px;text-align:center;flex:0 0 auto}
+.vaqt b{display:block;font-size:15px}
+.vaqt span{font-size:10.5px;font-weight:700;color:var(--mut)}
+.qator.hozir .vaqt b{color:#b7761c}
+.teg{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:999px;margin-left:6px;vertical-align:1px}
+.teg.s{background:var(--amber-soft);color:#9a6315} .teg.d{background:var(--em-soft);color:var(--em)}
+.btn{border:0;border-radius:13px;background:var(--em);color:#fff;font-family:inherit;font-weight:800;font-size:13.5px;padding:10px 14px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:disabled{background:var(--sub);color:var(--mut);cursor:default}
+.btn.soft{background:var(--sub);color:var(--ink);padding:8px 11px;font-size:12.5px}
+.btn:focus-visible{outline:2px solid var(--em);outline-offset:2px}
+.ico{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:15px;flex:0 0 auto}
+.ico.c{background:var(--coral-soft);color:var(--coral)} .ico.a{background:var(--amber-soft);color:#b7761c}
+.ico.s{background:var(--sky-soft);color:var(--sky)} .ico.g{background:var(--em-soft);color:var(--em)}
+.bosh{padding:14px 2px;color:var(--mut2);font-size:13.5px;text-align:center}
+.tinch{display:flex;align-items:center;gap:10px;padding:12px 0;color:var(--em);font-weight:700}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{border-radius:18px;padding:13px 14px;text-decoration:none}
+.stat small{font-size:11.5px;font-weight:700;opacity:.8}
+.stat b{display:block;font-size:22px;letter-spacing:-.6px;margin-top:2px}
+.stat .t2{font-size:12px;opacity:.75}
+.stat.n{background:var(--em-soft);color:var(--em)}
+.stat.s{background:var(--amber-soft);color:#9a6315}
+.ring{height:6px;border-radius:6px;background:rgba(31,111,92,.15);margin-top:8px;overflow:hidden}
+.ring i{display:block;height:100%;width:0;background:var(--em);border-radius:6px;transition:width .5s}
+.akad{display:flex;gap:12px;align-items:center;background:linear-gradient(120deg,#fff6e6,#fdeede);box-shadow:0 0 0 1px #f6e2c4;border-radius:18px;padding:14px;text-decoration:none}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:90;max-width:528px;margin:0 auto;background:var(--ink);color:#fff;border-radius:14px;padding:14px 16px;font-size:14px;font-weight:600}
+@media (prefers-reduced-motion:reduce){.ring i{transition:none}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="salom">
+    <div class="ph" id="ph" aria-hidden="true">·</div>
+    <div><small id="sana"></small><h1 id="salomMatn">Xush kelibsiz!</h1></div>
+  </header>
+
+  <a class="akad" id="akad" href="/mentor/akademiya.html" hidden>
+    <span class="ico a" aria-hidden="true">A</span>
+    <span><b>Akademiyani tugating</b><br><span class="xira" id="akadMatn">Testdan o‘tgach sinov darsi so‘rovlari kela boshlaydi</span></span>
+  </a>
+
+  <a class="card grafik" id="grafik" href="/daromad.html" aria-label="Haftalik kirim — Daromad bo‘limini ochish">
+    <div class="ch"><h2>Shu hafta</h2><span class="d" id="haftaOralik"></span></div>
+    <div style="margin-top:4px"><span class="big num" id="haftaJami">—</span> <span class="xira">so‘m</span><span class="up" id="haftaFoiz" hidden></span></div>
+    <div id="sham"></div>
+  </a>
+
+  <div class="lbl">Bugungi darslar</div>
+  <section class="card ruyxat" id="darslar" aria-label="Bugungi darslar"><div class="bosh">Yuklanmoqda…</div></section>
+
+  <div class="lbl">Sizni kutyapti</div>
+  <section class="card ruyxat" id="kutyapti" aria-label="Sizni kutyapti"><div class="bosh">Yuklanmoqda…</div></section>
+
+  <div class="stats" id="stats" hidden>
+    <a class="stat n" href="/career.html"><small>Bugungi norma</small><b class="num" id="norma">—</b><div class="ring"><i id="normaI"></i></div></a>
+    <a class="stat s" href="/career.html"><small>Seriya</small><b class="num" id="seriya">—</b><div class="t2" id="koef"></div></a>
+  </div>
+</main>
+
+<script src="/auth-webview.js"></script>
+<script src="/tabrik.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pul = (n) => {
+  const v = Math.abs(Number(n) || 0);
+  return (Number(n) < 0 ? '−' : '') + v.toLocaleString('ru-RU', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 }).replace(/\s/g, ' ');
+};
+const qisqa = (n) => (n >= 1e6 ? `${(n / 1e6).toFixed(1).replace('.0', '')}m` : n >= 1000 ? `${Math.round(n / 1000)}k` : n > 0 ? String(Math.round(n)) : '—');
+const OY_NOM = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+const HAFTA_NOM = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+const tash = (d = new Date()) => new Date(d.getTime() + 5 * 3600e3);
+const kunKalit = (d) => tash(d).toISOString().slice(0, 10);
+const soat = (iso) => tash(new Date(iso)).toISOString().slice(11, 16);
+const qTexti = (ms) => (ms < 3600e3 ? `${Math.max(1, Math.round(ms / 60e3))} daq` : `${Math.round(ms / 3600e3)} soat`);
+function toast(m) { const t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 3000); }
+
+let ISM = '';
+function salomChiz() {
+  const t = tash();
+  const h = t.getUTCHours();
+  const s = h >= 5 && h < 11 ? 'Xayrli tong' : h >= 11 && h < 17 ? 'Xayrli kun' : h >= 17 && h < 22 ? 'Xayrli kech' : 'Xayrli tun';
+  $('#salomMatn').textContent = ISM ? `${s}, ${ISM} ustoz!` : `${s}, ustoz!`;
+  $('#sana').textContent = `${HAFTA_NOM[t.getUTCDay()]}, ${t.getUTCDate()}-${OY_NOM[t.getUTCMonth()]}`;
+  $('#ph').textContent = ISM ? ISM[0].toUpperCase() : 'U';
+}
+
+// ---------- haftalik sham grafigi ----------
+function shamChiz(w) {
+  const [, m1, d1] = w.from.split('-');
+  const [, m2, d2] = w.to.split('-');
+  $('#haftaOralik').textContent = m1 === m2 ? `${Number(d1)} – ${Number(d2)} ${OY_NOM[Number(m2) - 1]}` : `${Number(d1)} ${OY_NOM[Number(m1) - 1]} – ${Number(d2)} ${OY_NOM[Number(m2) - 1]}`;
+  $('#haftaJami').textContent = pul(w.total);
+  const f = $('#haftaFoiz');
+  f.hidden = w.changePercent == null;
+  if (w.changePercent != null) {
+    f.className = `up ${w.changePercent >= 0 ? 'o' : 't'}`;
+    f.textContent = `${w.changePercent >= 0 ? '▲' : '▼'} ${Math.abs(w.changePercent)}%`;
+  }
+  const W = 320, top = 18, base = 110;
+  const max = Math.max(1, ...w.days.map((d) => Math.max(d.earned, d.planned)));
+  const y = (v) => base - (v / max) * (base - top);
+  const step = W / 7;
+  const shamlar = w.days.map((d, i) => {
+    const cx = step * i + step / 2;
+    const reja = Math.max(d.earned, d.planned);
+    const bekor = d.cancelled > 0 && d.earned === 0;
+    const rang = d.today ? '#f0a73a' : bekor ? '#e8715f' : d.earned > 0 ? (d.earned >= reja ? '#1f6f5c' : '#2a8a70') : '#d9dcd5';
+    const tana = d.earned > 0 ? Math.max(4, base - y(d.earned)) : 4;
+    const pilik = reja > 0 ? `<line x1="${cx}" y1="${y(reja).toFixed(1)}" x2="${cx}" y2="${base}" stroke="${d.today ? '#f3c88a' : '#9cc9bb'}" stroke-width="2" stroke-linecap="round" ${d.today || d.earned === 0 ? 'stroke-dasharray="2 4"' : ''}/>` : '';
+    return `${pilik}<rect x="${cx - 13}" y="${(base - tana).toFixed(1)}" width="26" height="${tana.toFixed(1)}" rx="7" fill="${rang}"/>
+      <text x="${cx}" y="128" text-anchor="middle" font-size="10.5" font-weight="700" fill="${d.today ? '#b7761c' : '#5f6864'}">${d.label}</text>
+      <text x="${cx}" y="142" text-anchor="middle" font-size="9" fill="#8f9793">${qisqa(d.earned)}</text>`;
+  }).join('');
+  $('#sham').innerHTML = `<svg viewBox="0 0 ${W} 150" role="img" aria-label="Haftaning kunlik kirimi, jami ${pul(w.total)} so‘m">
+    <g stroke="#e6e8e2" stroke-width="1"><line x1="0" y1="${top}" x2="${W}" y2="${top}"/><line x1="0" y1="${(top + base) / 2}" x2="${W}" y2="${(top + base) / 2}"/><line x1="0" y1="${base}" x2="${W}" y2="${base}"/></g>
+    <g font-family="Manrope,sans-serif">${shamlar}</g></svg>`;
+}
+
+// ---------- bugungi darslar ----------
+let DARSLAR = [];
+function darslarChiz() {
+  const bugun = kunKalit(new Date());
+  const r = DARSLAR.filter((d) => kunKalit(new Date(d.startsAt)) === bugun && new Date(d.startsAt).getTime() + (d.durationMin || 60) * 60e3 > Date.now())
+    .sort((a, b) => new Date(a.startsAt) - new Date(b.startsAt));
+  if (!r.length) { $('#darslar').innerHTML = '<div class="bosh">Bugun boshqa dars yo‘q. Sinov so‘rovi kelsa, bildirishnoma keladi.</div>'; return; }
+  $('#darslar').innerHTML = r.map((d, i) => {
+    const qoldi = new Date(d.startsAt).getTime() - Date.now();
+    const ochiq = qoldi <= 10 * 60e3;
+    const ism = esc(d.studentName || 'O‘quvchi');
+    return `<div class="qator ${i === 0 ? 'hozir' : ''}">
+      <div class="vaqt"><b class="num">${soat(d.startsAt)}</b><span>${qoldi > 0 ? qTexti(qoldi) : 'hozir'}</span></div>
+      <div class="b"><div class="t1">${ism}<span class="teg ${d.isTrial ? 's' : 'd'}">${d.isTrial ? 'sinov' : 'dars'}</span></div><div class="t2">${d.durationMin || 60} daqiqa</div></div>
+      <button class="btn" type="button" data-kirish="${esc(d.id)}" data-sinov="${d.isTrial ? 1 : ''}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>Kirish</button></div>`;
+  }).join('');
+}
+$('#darslar').addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-kirish]');
+  if (!b) return;
+  b.disabled = true;
+  const r = b.dataset.sinov ? await api(`/api/booking/${b.dataset.kirish}/entry`) : await api(`/api/booking/${b.dataset.kirish}/start`, { method: 'POST' });
+  b.disabled = false;
+  if (!r) return;
+  const url = r.data.url || r.data.teacherUrl;
+  if (r.ok && url) location.href = url;
+  else toast(r.data.message || 'Hozircha kirib bo‘lmaydi');
+});
+
+// ---------- sizni kutyapti ----------
+function kutyaptiChiz({ tarix, jadval, oquvchilar, hamyon }) {
+  const ish = [];
+  const kun = 24 * 3600e3;
+  for (const d of tarix) {
+    if (!d.isTrial || !d.leadId) continue;
+    const tugadi = new Date(d.startsAt).getTime() + (d.durationMin || 60) * 60e3;
+    if (d.leadStatus === 'trial_scheduled' && tugadi < Date.now()) {
+      ish.push([0, 'c', '!', 'Sinov darsi o‘tdimi?', `${esc(d.studentName || 'Lid')} · ${soat(d.startsAt)}`, '/work.html#sinovlar', 'Belgilash']);
+    } else if (d.leadStatus === 'trial_completed' && Date.now() - tugadi < 3 * kun) {
+      const qoldi = tugadi + kun - Date.now();
+      ish.push([1, 'a', '★', 'Sinov natijasini belgilang', `${esc(d.studentName || 'Lid')}${qoldi > 0 ? ` · bonusga ${qTexti(qoldi)} qoldi` : ''}`, '/work.html#sinovlar', 'Belgilash']);
+    }
+  }
+  for (const c of hamyon?.awaitingPayment || []) {
+    ish.push([2, 'g', '✓', `${esc(c.studentName)} to‘lovi kutilmoqda`, 'Tasdiqlanishi bilan bitta dars puli bonus', '/daromad.html', 'Ko‘rish']);
+  }
+  if (jadval && jadval.weeklySlots < jadval.minWeeklySlots) {
+    ish.push([3, 'a', '⏱', `Haftada ${jadval.weeklySlots} soat ochiq`, `Kamida ${jadval.minWeeklySlots} soat kerak`, '/jadval.html', 'Jadval']);
+  }
+  for (const o of oquvchilar) {
+    if (o.plan && o.plan.daysLeft <= 5) {
+      ish.push([4, 's', '↻', `${esc(o.student?.firstName || 'O‘quvchi')} obunasi tugayapti`, `${o.plan.daysLeft} kun qoldi · eslatib qo‘ying`, '/oquvchilar.html', 'Ko‘rish']);
+    }
+  }
+  ish.sort((a, b) => a[0] - b[0]);
+  $('#kutyapti').innerHTML = ish.length
+    ? ish.slice(0, 6).map(([, c, ik, t1, t2, href, tugma]) => `<div class="qator"><span class="ico ${c}" aria-hidden="true">${ik}</span>
+        <div class="b"><div class="t1">${t1}</div><div class="t2">${t2}</div></div><a class="btn soft" href="${href}">${tugma}</a></div>`).join('')
+    : '<div class="tinch"><span class="ico g" aria-hidden="true">✓</span>Hammasi joyida — kutayotgan ish yo‘q</div>';
+}
+
+(async () => {
+  salomChiz();
+  await WebViewAuth.tayyorla({ akademiya: false });
+  const ol = (u) => api(u).then((r) => (r && r.ok ? r.data : null)).catch(() => null);
+  const [hamyon, my, tarix, jadval, oquvchilar, ball, akad] = await Promise.all([
+    ol('/api/wallet/summary'),
+    ol('/api/booking/mentor/my'),
+    ol('/api/booking/mentor/history'),
+    ol('/api/booking/schedule'),
+    ol('/api/ai/assignments/my-students/paid'),
+    ol('/api/ai/mentor-gamification/home'),
+    fetch('/api/akademiya/holat').then((x) => (x.ok ? x.json() : null)).catch(() => null),
+  ]);
+  if (hamyon?.firstName) { ISM = hamyon.firstName.trim().split(/\s+/)[0]; salomChiz(); }
+  if (hamyon?.week) shamChiz(hamyon.week); else $('#grafik').hidden = true;
+  DARSLAR = Array.isArray(my) ? my : [];
+  darslarChiz();
+  kutyaptiChiz({ tarix: Array.isArray(tarix) ? tarix : [], jadval, oquvchilar: Array.isArray(oquvchilar) ? oquvchilar : [], hamyon });
+  if (akad && akad.mentor && !akad.passed) {
+    $('#akad').hidden = false;
+    $('#akadMatn').textContent = `${akad.modulesRead}/${akad.modules} modul o‘qildi · testdan o‘tgach sinov so‘rovlari keladi`;
+  }
+  if (ball && ball.enabled) {
+    $('#stats').hidden = false;
+    const foiz = Math.min(100, Math.round((ball.today.activity / ball.today.normTarget) * 100));
+    $('#norma').textContent = `${ball.today.activity} / ${ball.today.normTarget}`;
+    $('#normaI').style.width = `${foiz}%`;
+    $('#seriya').textContent = `🔥 ${ball.streakDays} kun`;
+    $('#koef').textContent = ball.coefficient > 1 ? `×${ball.coefficient} koeffitsient` : 'Normani bajaring — seriya boshlanadi';
+  }
+  tabriklarniKorsat(ISM);
+  setInterval(() => { salomChiz(); darslarChiz(); }, 60e3);
+  // Ilovaga qaytganda (2 daqiqadan ko'p o'tgan bo'lsa) ma'lumot yangilansin
+  const yuklandi = Date.now();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && Date.now() - yuklandi > 120e3) location.reload();
+  });
+})();
+</script>
+</body>
+</html>

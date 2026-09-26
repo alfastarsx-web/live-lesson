@@ -210,7 +210,7 @@ footer{padding:34px 0 60px;color:var(--mute);font-size:14px;text-align:center}
   <h2>Sizning daromadingiz</h2>
   <p class="lede">Surib ko'ring: o'quvchi soni va tarif o'zgarganda oylik daromad qanday o'zgaradi.</p>
   <div class="calc">
-    <div class="seg" role="group" aria-label="Dastur">
+    <div class="seg" role="group" aria-label="Dastur" hidden>
       <button type="button" id="pSpeak" aria-pressed="true">Speaking</button>
       <button type="button" id="pIelts" aria-pressed="false">IELTS / CEFR</button>
     </div>
@@ -227,7 +227,7 @@ footer{padding:34px 0 60px;color:var(--mute);font-size:14px;text-align:center}
       <p class="sum" id="sum">3 300 000<span>so'm</span></p>
       <p class="rankpill" id="pill">SENIOR · 66%</p>
       <div class="rows">
-        <div><span id="tarLbl">Tarif: 500 000 so'm</span><b id="tarVal">×10</b></div>
+        <div><span id="tarLbl">Tarif: 450 000 so'm</span><b id="tarVal">×10</b></div>
         <div><span>Bitta o'quvchidan</span><b id="perOne">330 000</b></div>
         <div><span>Ustiga qo'shiladi</span><b>bonuslar</b></div>
       </div>
@@ -423,7 +423,9 @@ footer{padding:34px 0 60px;color:var(--mute);font-size:14px;text-align:center}
 
 <script>
 (function(){
-  var PRICES = {speak:[350000,500000,650000,800000,950000,1100000], ielts:[550000,700000,850000,1000000,1150000,1300000]};
+  // Kurs narxi haftadagi darslar soniga qarab (1–6 marta; 7 martalik yo'q)
+  var NARX = [350000,450000,550000,650000,750000,850000];
+  var PRICES = {speak:NARX, ielts:NARX};
   var RANKS = [{n:"PRO",max:5,p:.60},{n:"SENIOR",max:10,p:.66},{n:"EXPERT",max:16,p:.72},{n:"MASTER",max:24,p:.78},{n:"LEGEND",max:Infinity,p:.85}];
   var prog = "speak";
   var st = document.getElementById("students"), ls = document.getElementById("lessons");
