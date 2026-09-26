@@ -5,32 +5,63 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>O'quvchilar</title>
 <link rel="stylesheet" href="/app.css">
-</head>
-<body>
-<div class="wrap">
-  <div class="sahifa-bosh">
-    <h1>O‘quvchilar</h1>
-    <div class="izoh" id="izoh">Yuklanmoqda…</div>
-  </div>
+<style>
+body.oquvchilar{background:#eef1f7}
+.oquvchilar .wrap{padding-bottom:40px}
+.oq-bosh{margin:16px 0 14px;border-radius:26px;padding:18px 20px;color:#fff;
+  background:radial-gradient(110% 90% at 100% 0%, rgba(99,102,241,.55) 0%, rgba(99,102,241,0) 55%), #0b1b3f;
+  box-shadow:0 18px 40px -18px rgba(11,27,63,.55)}
+.oq-bosh .yorliq{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#a5b4fc}
+.oq-bosh h1{margin:8px 0 2px;font-size:27px;font-weight:800;letter-spacing:-.6px}
+.oq-bosh p{margin:0;font-size:14px;color:#cbd5e1}
+.oq-bosh p b{color:#fbbf24}
 
-  <nav class="nav">
-    <a href="/work.html">Bugun</a>
-    <a href="/work.html#sinovlar">Sinovlar</a>
-    <a href="/oquvchilar.html" aria-current="page">O‘quvchilar</a>
-    <a href="/jadval.html">Jadval</a>
+.oq{background:#fff;border-radius:20px;padding:16px;margin-bottom:12px;cursor:pointer;
+  box-shadow:0 1px 2px rgba(15,23,42,.05),0 8px 22px -16px rgba(15,23,42,.25)}
+.oq:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
+.oq-ust{display:flex;align-items:center;gap:12px}
+.oq-ust .avatar{flex:0 0 auto}
+.oq-ust .ism{flex:1;min-width:0}
+.oq-ust .ism b{display:block;font-size:16px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oq-ust .ism span{font-size:13px;color:#64748b;font-weight:600}
+.tarif{display:inline-block;font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:#eef2ff;color:#4338ca;margin-bottom:8px}
+
+.obuna{margin-top:14px}
+.obuna-qator{display:flex;justify-content:space-between;gap:10px;font-size:13px;font-weight:700;color:#334155}
+.obuna-qator > span:last-child{color:#16a34a;font-variant-numeric:tabular-nums;white-space:nowrap}
+.oq.tugayapti .obuna-qator > span:last-child{color:#d97706}
+.oq.tugadi .obuna-qator > span:last-child{color:#e11d48}
+.chiziq-ob{height:6px;border-radius:6px;background:#e2e8f0;margin-top:7px;overflow:hidden}
+.chiziq-ob i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#22c55e,#4ade80)}
+.oq.tugayapti .chiziq-ob i{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+
+.oq-past{display:flex;align-items:center;gap:10px;margin-top:14px}
+.malumot{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.malumot div{background:#f8fafc;border-radius:12px;padding:8px 10px}
+.malumot small{display:block;font-size:11px;font-weight:700;color:#94a3b8;white-space:nowrap}
+.malumot b{font-size:13.5px;font-weight:800;color:#0f172a;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body class="oquvchilar">
+<div class="wrap">
+  <section class="oq-bosh" aria-label="O‘quvchilar">
+    <div class="yorliq">O‘quvchilar</div>
+    <h1 id="sarlavha">…</h1>
+    <p id="izoh">Doimiy darslar uchun to‘lov qilgan o‘quvchilaringiz</p>
+  </section>
+
+  <nav class="tablar" aria-label="Work bo‘limlari">
+    <div class="tablar-ichi statik">
+      <a href="/work.html">Bugun</a>
+      <a href="/work.html#sinovlar">Sinovlar</a>
+      <a href="/oquvchilar.html" aria-current="page">O‘quvchilar</a>
+      <a href="/jadval.html">Jadval</a>
+    </div>
   </nav>
 
   <div class="qidiruv">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5" stroke-linecap="round"/></svg>
-    <input id="qidiruv" placeholder="O‘quvchi qidirish…" autocomplete="off">
-  </div>
-
-  <div class="chiplar" id="chiplar">
-    <button class="chip" data-t="all" aria-pressed="true">Barchasi (0)</button>
-    <button class="chip" data-t="active" aria-pressed="false">Faol (0)</button>
-    <button class="chip" data-t="completed" aria-pressed="false">Yakunlangan (0)</button>
-    <button class="chip" data-t="cancelled" aria-pressed="false">Bekor qilingan (0)</button>
-    <button class="chip" data-t="trial" aria-pressed="false">Sinov darsi (0)</button>
+    <input id="qidiruv" placeholder="O‘quvchi qidirish…" autocomplete="off" aria-label="O‘quvchi qidirish">
   </div>
 
   <div id="royxat">
@@ -41,96 +72,78 @@
 <script src="/auth-webview.js"></script>
 <script>
 const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const OYLAR_T = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+const TUGAYAPTI_KUN = 5; // obuna shuncha kun qolganda ogohlantiriladi
 let HAMMASI = [];
-let SINOVLAR = [];     // sinov darsi belgilangan lidlar
-let FILTR = 'all';
 
 const IKON = {
   chat: '<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3 1.2-4.2A8 8 0 1 1 21 12Z" stroke-linejoin="round"/></svg>',
   qongiroq: '<svg viewBox="0 0 24 24"><path d="M6.6 3h3l1.5 4-2 1.4a12 12 0 0 0 5.5 5.5l1.4-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.6 5.2 2 2 0 0 1 6.6 3Z" stroke-linejoin="round"/></svg>',
 };
 
-function kartaHtml(x) {
-  const h = HOLAT[x.status] || { matn: x.status, sinf: '' };
-  const foiz = x.progress == null ? null : Math.round(x.progress);
-  return `
-    <div class="karta ${h.sinf}" data-id="${x.student.id}">
-      <div class="karta-bosh">
-        <div class="avatar">${bosh(x.student.fullName || x.student.firstName)}</div>
-        <div class="karta-ism">
-          <b>${x.student.fullName || x.student.firstName || 'Noma‘lum'}</b>
-          <div class="sana">${sanaQisqa(x.startDate)}${x.endDate ? ' → ' + sanaQisqa(x.endDate) : ''}</div>
-        </div>
-        <span class="holat"><i></i>${h.matn}</span>
-      </div>
-
-      ${foiz == null ? '' : `
-      <div class="progress">
-        <span class="yol"><i style="width:${Math.min(100, foiz)}%"></i></span>
-        <b>${foiz}%</b>
-      </div>`}
-
-      <div class="karta-past">
-        <span class="yorliq">${h.matn}</span>
-        <span class="osma"></span>
-        <button class="dumaloq" data-amal="chat">${IKON.chat}</button>
-        <button class="dumaloq qongiroq" data-amal="qongiroq">${IKON.qongiroq}</button>
-      </div>
-    </div>`;
+const ism = (s) => s.fullName || [s.firstName, s.lastName].filter(Boolean).join(' ') || 'Noma‘lum';
+const sanaUzun = (iso) => { const d = new Date(iso); return `${d.getDate()}-${OYLAR_T[d.getMonth()]}`; };
+const kunBoshi = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x.getTime(); };
+function keyingiMatn(iso) {
+  if (!iso) return '—';
+  const farq = Math.round((kunBoshi(iso) - kunBoshi(Date.now())) / 86400000);
+  const soat = soatQisqa(iso);
+  if (farq === 0) return `Bugun ${soat}`;
+  if (farq === 1) return `Ertaga ${soat}`;
+  return `${sanaUzun(iso)} ${soat}`;
 }
 
-function sinovKartaHtml(l) {
+function kartaHtml(x) {
+  const p = x.plan;
+  const jami = Math.max(1, new Date(p.endDate) - new Date(p.startDate));
+  const qoldiFoiz = Math.max(0, Math.min(100, ((new Date(p.endDate) - Date.now()) / jami) * 100));
+  const holat = p.daysLeft <= 0 ? 'tugadi' : p.daysLeft <= TUGAYAPTI_KUN ? 'tugayapti' : '';
+  const qoldi = p.daysLeft <= 0 ? 'bugun tugaydi' : `${p.daysLeft} kun qoldi`;
   return `
-    <div class="karta s-active" data-lid="${l.id}">
-      <div class="karta-bosh">
-        <div class="avatar">${bosh(l.name)}</div>
-        <div class="karta-ism">
-          <b>${l.name || 'Noma‘lum'}</b>
-          <div class="sana">${l.phoneNumber || ''}</div>
+    <div class="oq ${holat}" data-id="${esc(x.student.id)}" tabindex="0" role="link" aria-label="${esc(ism(x.student))}">
+      <div class="oq-ust">
+        <div class="avatar">${esc(bosh(ism(x.student)))}</div>
+        <div class="ism">
+          <b>${esc(ism(x.student))}</b>
+          <span>${x.student.phoneNumber ? esc(x.student.phoneNumber) : 'O‘quvchi'}</span>
         </div>
-        <span class="holat"><i></i>Sinov darsi</span>
       </div>
-      <div class="karta-past">
-        <span class="yorliq">Hali o‘quvchi emas</span>
-        <span class="osma"></span>
-        <a href="/work.html#sinovlar" style="text-decoration:none">
-          <button class="dumaloq" type="button" title="Sinov darslari">
-            <svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button></a>
+      <div class="obuna">
+        <span class="tarif">${esc(p.name)}</span>
+        <div class="obuna-qator"><span>Obuna ${esc(sanaUzun(p.endDate))} gacha</span><span>${qoldi}</span></div>
+        <div class="chiziq-ob"><i style="width:${qoldiFoiz}%"></i></div>
+      </div>
+      <div class="oq-past">
+        <div class="malumot">
+          <div><small>Keyingi dars</small><b>${esc(keyingiMatn(x.nextLessonAt))}</b></div>
+          <div><small>O‘tilgan darslar</small><b>${x.lessonsDone}</b></div>
+        </div>
+        <button class="dumaloq" type="button" data-amal="chat" aria-label="Chat">${IKON.chat}</button>
+        <button class="dumaloq qongiroq" type="button" data-amal="qongiroq" aria-label="Qo‘ng‘iroq">${IKON.qongiroq}</button>
       </div>
     </div>`;
 }
 
 function chiz() {
   const q = $('#qidiruv').value.trim().toLowerCase();
-
-  // Sinov darsi — hali o'quvchi bo'lmagan lidlar
-  if (FILTR === 'trial') {
-    let lidlar = SINOVLAR;
-    if (q) lidlar = lidlar.filter((x) => (x.name || '').toLowerCase().includes(q));
-    $('#royxat').innerHTML = lidlar.length
-      ? lidlar.map(sinovKartaHtml).join('')
-      : `<div class="bosh-holat"><b>Sinov darsi yo‘q</b>
-           <span>Lidlar bo‘limidan sinov darsi belgilang</span></div>`;
-    return;
-  }
-
-  let ro = HAMMASI;
-  if (FILTR !== 'all') ro = ro.filter((x) => x.status === FILTR);
-  if (q) ro = ro.filter((x) => (x.student.fullName || '').toLowerCase().includes(q));
+  const ro = q ? HAMMASI.filter((x) => ism(x.student).toLowerCase().includes(q)) : HAMMASI;
 
   $('#royxat').innerHTML = ro.length
     ? ro.map(kartaHtml).join('')
-    : `<div class="bosh-holat"><b>O‘quvchilar topilmadi</b>
-         <span>Boshqa filter yoki qidiruvni sinab ko‘ring</span></div>`;
+    : HAMMASI.length
+      ? '<div class="bosh-holat"><b>Topilmadi</b><span>Boshqa ism bilan qidirib ko‘ring</span></div>'
+      : '<div class="bosh-holat"><b>Hali to‘lov qilgan o‘quvchi yo‘q</b>'
+        + '<span>Sinov darsidan keyin doimiy darslar uchun to‘lov qilgan o‘quvchilar shu yerda chiqadi</span></div>';
 
-  document.querySelectorAll('.karta').forEach((k) => {
-    if (k.dataset.lid) { k.onclick = () => { location.href = '/work.html#sinovlar'; }; return; }
+  document.querySelectorAll('.oq').forEach((k) => {
+    const och = () => { location.href = `/oquvchi.html?id=${encodeURIComponent(k.dataset.id)}`; };
     k.onclick = (e) => {
       const amal = e.target.closest('[data-amal]');
       if (amal) { e.stopPropagation(); return amalBajar(amal.dataset.amal, k.dataset.id); }
-      location.href = `/oquvchi.html?id=${encodeURIComponent(k.dataset.id)}`;
+      och();
     };
+    k.onkeydown = (e) => { if (e.key === 'Enter' && e.target === k) och(); };
   });
 }
 
@@ -142,56 +155,27 @@ function amalBajar(amal, id) {
   else location.href = `/oquvchi.html?id=${encodeURIComponent(id)}`;
 }
 
-function sanoqlarniYangila() {
-  const son = (t) => {
-    if (t === 'all') return HAMMASI.length;
-    if (t === 'trial') return SINOVLAR.length;
-    return HAMMASI.filter((x) => x.status === t).length;
-  };
-  document.querySelectorAll('.chip').forEach((c) => {
-    const t = c.dataset.t;
-    const nom = {
-      all: 'Barchasi', active: 'Faol', completed: 'Yakunlangan',
-      cancelled: 'Bekor qilingan', trial: 'Sinov darsi',
-    }[t];
-    c.textContent = `${nom} (${son(t)})`;
-  });
-}
-
-document.querySelectorAll('.chip').forEach((c) => {
-  c.onclick = () => {
-    FILTR = c.dataset.t;
-    document.querySelectorAll('.chip').forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
-    chiz();
-  };
-});
 $('#qidiruv').oninput = chiz;
 
 (async () => {
   await WebViewAuth.tayyorla();
-  // Mentor shu sahifada ishlayotganini bildirib turamiz — aks holda tizim uni
-  // oflayn deb biladi va avtomatik lid bermaydi
+  // Mentor shu sahifada ishlayotganini bildirib turamiz — aks holda tizim uni oflayn deb biladi
   mentorNabzi();
-  const r = await api('/api/ai/assignments/my-students');
+  const r = await api('/api/ai/assignments/my-students/paid');
   if (!r) return;
   if (!r.ok) {
-    $('#izoh').textContent = '';
+    $('#sarlavha').textContent = 'Yuklab bo‘lmadi';
     $('#royxat').innerHTML = '<div class="bosh-holat"><b>Ro‘yxatni yuklab bo‘lmadi</b>'
-      + `<span>${r.data.message || 'Qaytadan urinib ko‘ring'}</span></div>`;
+      + `<span>${esc(r.data.message || 'Qaytadan urinib ko‘ring')}</span></div>`;
     return;
   }
   HAMMASI = Array.isArray(r.data) ? r.data : [];
-  $('#izoh').textContent = `${HAMMASI.length} ta o‘quvchi biriktirilgan`;
-  sanoqlarniYangila();
+  const tugayapti = HAMMASI.filter((x) => x.plan.daysLeft <= TUGAYAPTI_KUN).length;
+  $('#sarlavha').textContent = `${HAMMASI.length} ta o‘quvchi`;
+  $('#izoh').innerHTML = tugayapti
+    ? `Doimiy darslar uchun to‘lov qilganlar · <b>${tugayapti} tasining obunasi ${TUGAYAPTI_KUN} kun ichida tugaydi</b>`
+    : 'Doimiy darslar uchun to‘lov qilgan o‘quvchilaringiz';
   chiz();
-
-  // Sinov darsi belgilangan lidlar — alohida so'rov, ro'yxatni kutdirmasin
-  const lid = await fetch('/api/ai/leads/my').then((x) => x.ok ? x.json() : null).catch(() => null);
-  if (Array.isArray(lid)) {
-    SINOVLAR = lid.filter((x) => x.status === 'trial_scheduled');
-    sanoqlarniYangila();
-    if (FILTR === 'trial') chiz();
-  }
 })();
 </script>
 </body>
