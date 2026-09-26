@@ -65,11 +65,11 @@ const ID = new URLSearchParams(location.search).get('id');
 let TALABA = null;
 
 const TUR = {
-  course:  {nom: 'Dars sessiya', rang: '#2563eb', fon: '#eff4ff', ikon: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5V5.5Z"/>'},
-  speaking:{nom: 'Suhbat',       rang: '#7c3aed', fon: '#ede9fe', ikon: '<path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3ZM5 11a7 7 0 0 0 14 0M12 18v3"/>'},
-  battle:  {nom: 'So‘z jangi',   rang: '#7c3aed', fon: '#ede9fe', ikon: '<path d="M6 8h12v8H6zM9 12h.01M15 12h.01"/>'},
+  course:  {nom: 'Dars sessiya', rang: '#3d6b64', fon: '#e8f0ee', ikon: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5V5.5Z"/>'},
+  speaking:{nom: 'Suhbat',       rang: '#76689a', fon: '#f1eff5', ikon: '<path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3ZM5 11a7 7 0 0 0 14 0M12 18v3"/>'},
+  battle:  {nom: 'So‘z jangi',   rang: '#76689a', fon: '#f1eff5', ikon: '<path d="M6 8h12v8H6zM9 12h.01M15 12h.01"/>'},
 };
-const turBilan = (t) => TUR[t] || {nom: t || 'Faoliyat', rang: '#64748b', fon: '#f1f5f9', ikon: '<circle cx="12" cy="12" r="7"/>'};
+const turBilan = (t) => TUR[t] || {nom: t || 'Faoliyat', rang: '#6b6e76', fon: '#f2f2ef', ikon: '<circle cx="12" cy="12" r="7"/>'};
 
 function nativeGa(amal) {
   const xabar = { turi: amal, studentId: ID };
@@ -236,7 +236,7 @@ async function darsniYukla() {
 
 function qongiroqHtml(c) {
   const tugagan = !!c.endedAt;
-  const rang = tugagan ? '#16a34a' : '#2563eb';
+  const rang = tugagan ? '#3d7d5f' : '#3d6b64';
   const matn = tugagan ? 'Qo‘ng‘iroq tugadi' : 'Qo‘ng‘iroq davom etmoqda';
   const d = new Date(c.createdAt);
   return `<div class="qator">
