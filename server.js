@@ -178,7 +178,7 @@ app.post('/api/login', async (req, res) => {
         role: r.isMentor ? 'mentor' : 'student',
         mustChangePassword: Boolean(r.mustChangePassword),
         redirect: r.isMentor
-          ? (await akademiyaKerak(r.token) ? '/mentor/akademiya.html' : '/jadval.html')
+          ? (await akademiyaKerak(r.token) ? '/mentor/akademiya.html' : '/work.html')
           : '/band.html',
       });
     }
@@ -252,6 +252,19 @@ app.post('/api/mentor-session/heartbeat', async (req, res) => {
     return res.status(403).json({ error: 'akademiya', redirect: '/mentor/akademiya.html' });
   }
   aiProxy(req, res, '/mentor-session/heartbeat');
+});
+
+// Operator yuborgan sinov darsi so'rovlari: ko'rish, qabul qilish, rad etish.
+// Akademiyadan o'tmagan mentor so'rov ololmaydi.
+app.get('/api/trial/incoming', async (req, res) => {
+  if (await akademiyaKerak(cookies(req)[AI_COOKIE])) return res.json([]);
+  aiProxy(req, res, '/trial-requests/incoming');
+});
+app.post(/^\/api\/trial\/([0-9a-f-]{36})\/(accept|decline)$/, async (req, res) => {
+  if (await akademiyaKerak(cookies(req)[AI_COOKIE])) {
+    return res.status(403).json({ error: 'akademiya', redirect: '/mentor/akademiya.html' });
+  }
+  aiProxy(req, res, `/trial-requests/${req.params[0]}/${req.params[1]}`);
 });
 
 app.get('/api/my-mentor', (req, res) => aiProxy(req, res, '/assignments/my-mentor'));
@@ -470,7 +483,7 @@ app.post('/api/akademiya/natija', (req, res) => {
 
 // Brauzerdan kirilganda ish sahifalari server tomonda yopiladi.
 // WebView birinchi ochilishda cookie hali yo'q — u holatni auth-webview.js tekshiradi.
-const AKADEMIYA_YOPIQ = /^\/(jadval|oquvchilar|oquvchi|lidlar|mentor\/yol|mentor\/liga)(\.html)?$/;
+const AKADEMIYA_YOPIQ = /^\/(work|jadval|oquvchilar|oquvchi|lidlar|mentor\/yol|mentor\/liga)(\.html)?$/;
 app.get(AKADEMIYA_YOPIQ, async (req, res, next) => {
   if (await akademiyaKerak(cookies(req)[AI_COOKIE])) return res.redirect('/mentor/akademiya.html');
   next();

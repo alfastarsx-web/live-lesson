@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Work</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="sahifa-bosh">
+    <h1>Work</h1>
+    <div class="izoh" id="kim">…</div>
+  </div>
+
+  <nav class="nav">
+    <a href="/work.html" data-tab="bugun">Bugun</a>
+    <a href="/work.html#sinovlar" data-tab="sinovlar">Sinovlar</a>
+    <a href="/oquvchilar.html">O‘quvchilar</a>
+    <a href="/jadval.html">Jadval</a>
+  </nav>
+
+  <!-- ===== Bugun ===== -->
+  <section id="bugun">
+    <div id="sorovBolim" hidden>
+      <div class="bolim-sarlavha"><h2>Sinov darsi so‘rovlari</h2><span class="son" id="sorovSon"></span></div>
+      <div id="sorovlar"></div>
+    </div>
+
+    <div class="bolim-sarlavha"><h2>Bugungi darslar</h2><span class="son" id="bugunSon"></span></div>
+    <div id="bugungi"><div class="skelet"></div></div>
+
+    <div id="diqqatBolim" hidden>
+      <div class="bolim-sarlavha"><h2>Natijasini belgilang</h2><span class="son" id="diqqatSon"></span></div>
+      <div id="diqqat"></div>
+    </div>
+  </section>
+
+  <!-- ===== Sinovlar ===== -->
+  <section id="sinovlar" hidden>
+    <div class="chiplar" style="padding-top:14px">
+      <button class="chip" data-f="kelgusi" aria-pressed="true">Belgilangan (0)</button>
+      <button class="chip" data-f="otgan" aria-pressed="false">O‘tilgan (0)</button>
+    </div>
+    <div id="sinovRoyxat"><div class="skelet"></div></div>
+  </section>
+</div>
+
+<!-- Yangi so'rov kelganda butun ekran -->
+<div class="chaqiruv" id="chaqiruv" hidden role="dialog" aria-modal="true" aria-labelledby="chIsm">
+  <div class="yuqori">Yangi sinov darsi</div>
+  <h2 id="chIsm">…</h2>
+  <div class="vaqt" id="chVaqt">…</div>
+  <div class="izoh2" id="chIzoh" hidden></div>
+  <div class="markaz">
+    <div class="halqa" id="chHalqa">
+      <svg viewBox="0 0 100 100"><circle class="fon" cx="50" cy="50" r="44"/><circle class="ol" cx="50" cy="50" r="44"/></svg>
+      <span><div><div id="chQoldi">15:00</div><small>qabul qilish uchun</small></div></span>
+    </div>
+  </div>
+  <button class="qabul" id="chQabul">Qabul qilish</button>
+  <button class="rad" id="chRad">Rad etish</button>
+  <div class="ogoh">Rad etish yoki javob bermaslik reytingingizga ta’sir qiladi</div>
+</div>
+
+<script src="/auth-webview.js"></script>
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const OYNA_MS = 15 * 60_000;   // so'rovni qabul qilish muddati
+const BONUS_MS = 24 * 3600_000; // sinovdan keyin 24 soat ichida to'lasa — bonus
+
+let SORROVLAR = [];      // kelgan so'rovlar
+const KORILGAN = new Set(); // butun ekranda ko'rsatilganlar
+let KELGUSI = [];        // mentor/my
+let TARIX = [];          // mentor/history
+let FILTR = 'kelgusi';
+
+// ---------- yordamchi ----------
+function toast(t, turi) {
+  document.querySelectorAll('.toast').forEach((x) => x.remove());
+  const d = document.createElement('div');
+  d.className = 'toast ' + (turi || '');
+  d.textContent = t;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 4000);
+}
+
+const kunBoshi = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x.getTime(); };
+function vaqtYorliq(iso) {
+  const d = new Date(iso);
+  const farq = Math.round((kunBoshi(d) - kunBoshi(Date.now())) / 86400000);
+  const soat = soatQisqa(iso);
+  if (farq === 0) return `Bugun, ${soat}`;
+  if (farq === 1) return `Ertaga, ${soat}`;
+  if (farq === -1) return `Kecha, ${soat}`;
+  return sanaChiroyli(iso);
+}
+const qoldiMatn = (ms) => {
+  const s = Math.max(0, Math.ceil(ms / 1000));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+};
+const telHavola = (t) => t ? `<a href="tel:${esc(t.replace(/[^\d+]/g, ''))}">Qo‘ng‘iroq</a>` : '';
+
+function halqaChiz(el, expiresAt) {
+  const ms = new Date(expiresAt).getTime() - Date.now();
+  const r = 44, uz = 2 * Math.PI * r;
+  const ol = el.querySelector('.ol');
+  ol.style.strokeDasharray = uz;
+  ol.style.strokeDashoffset = uz * (1 - Math.max(0, Math.min(1, ms / OYNA_MS)));
+  el.classList.toggle('shoshil', ms < 3 * 60_000);
+  return ms;
+}
+
+// Ovoz va tebranish — brauzer ruxsat bermasa jim o'tadi
+let AUDIO = null;
+function signal() {
+  try { navigator.vibrate?.([300, 150, 300, 150, 300]); } catch {}
+  try {
+    AUDIO = AUDIO || new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.35, 0.7].forEach((t) => {
+      const o = AUDIO.createOscillator(), g = AUDIO.createGain();
+      o.frequency.value = 880; o.connect(g); g.connect(AUDIO.destination);
+      g.gain.setValueAtTime(0.25, AUDIO.currentTime + t);
+      g.gain.exponentialRampToValueAtTime(0.001, AUDIO.currentTime + t + 0.3);
+      o.start(AUDIO.currentTime + t); o.stop(AUDIO.currentTime + t + 0.3);
+    });
+  } catch {}
+}
+document.addEventListener('pointerdown', () => { try { AUDIO?.resume(); } catch {} }, { once: true });
+
+// ---------- so'rovlar ----------
+async function sorovlarniYukla() {
+  const r = await fetch('/api/trial/incoming').catch(() => null);
+  if (!r || !r.ok) return;
+  const d = await r.json().catch(() => []);
+  SORROVLAR = Array.isArray(d) ? d : [];
+  sorovlarniChiz();
+
+  // Yangi so'rov — butun ekranga chiqaramiz
+  const yangi = SORROVLAR.find((s) => !KORILGAN.has(s.requestId));
+  if (yangi && $('#chaqiruv').hidden) chaqiruvOch(yangi);
+  if ($('#chaqiruv').dataset.id && !SORROVLAR.some((s) => s.requestId === $('#chaqiruv').dataset.id)) {
+    chaqiruvYop(); // boshqa mentor olib bo'ldi yoki muddati tugadi
+  }
+}
+
+function sorovlarniChiz() {
+  $('#sorovBolim').hidden = !SORROVLAR.length;
+  $('#sorovSon').textContent = SORROVLAR.length ? `${SORROVLAR.length} ta` : '';
+  $('#sorovlar').innerHTML = SORROVLAR.map((s) => `
+    <div class="sorov" data-id="${esc(s.requestId)}" data-exp="${esc(s.expiresAt)}">
+      <div class="halqa"><svg viewBox="0 0 100 100"><circle class="fon" cx="50" cy="50" r="44"/><circle class="ol" cx="50" cy="50" r="44"/></svg><span data-qoldi></span></div>
+      <div class="matn">
+        <b>${esc(s.leadName || 'Yangi lid')}</b>
+        <div class="vaqt">${esc(vaqtYorliq(s.startsAt))} · ${s.durationMin || 30} daq</div>
+        ${s.note ? `<div class="izoh2">${esc(s.note)}</div>` : ''}
+      </div>
+      <div class="tugmalar">
+        <button class="rad" data-rad>Rad etish</button>
+        <button class="qabul" data-qabul>Qabul qilish</button>
+      </div>
+    </div>`).join('');
+  document.querySelectorAll('.sorov').forEach((k) => {
+    k.querySelector('[data-qabul]').onclick = (e) => qabulQil(k.dataset.id, e.currentTarget);
+    k.querySelector('[data-rad]').onclick = (e) => radEt(k.dataset.id, e.currentTarget);
+  });
+  taymerlar();
+}
+
+function taymerlar() {
+  document.querySelectorAll('.sorov').forEach((k) => {
+    const ms = halqaChiz(k.querySelector('.halqa'), k.dataset.exp);
+    k.querySelector('[data-qoldi]').textContent = qoldiMatn(ms);
+    if (ms <= 0) k.remove();
+  });
+  const ch = $('#chaqiruv');
+  if (!ch.hidden) {
+    const ms = halqaChiz($('#chHalqa'), ch.dataset.exp);
+    $('#chQoldi').textContent = qoldiMatn(ms);
+    if (ms <= 0) { chaqiruvYop(); toast('So‘rov muddati tugadi', 'err'); }
+  }
+}
+setInterval(taymerlar, 1000);
+
+function chaqiruvOch(s) {
+  KORILGAN.add(s.requestId);
+  const ch = $('#chaqiruv');
+  ch.dataset.id = s.requestId;
+  ch.dataset.exp = s.expiresAt;
+  $('#chIsm').textContent = s.leadName || 'Yangi lid';
+  $('#chVaqt').textContent = `${vaqtYorliq(s.startsAt)} · ${s.durationMin || 30} daqiqa`;
+  $('#chIzoh').hidden = !s.note;
+  $('#chIzoh').textContent = s.note || '';
+  $('#chQabul').disabled = false; $('#chRad').disabled = false;
+  ch.hidden = false;
+  taymerlar();
+  signal();
+}
+function chaqiruvYop() {
+  const ch = $('#chaqiruv');
+  ch.hidden = true;
+  delete ch.dataset.id;
+  // Navbatda yana ko'rilmagan so'rov bo'lsa — keyingisini ko'rsatamiz
+  const keyingi = SORROVLAR.find((s) => !KORILGAN.has(s.requestId) && new Date(s.expiresAt) > Date.now());
+  if (keyingi) chaqiruvOch(keyingi);
+}
+$('#chQabul').onclick = (e) => qabulQil($('#chaqiruv').dataset.id, e.currentTarget);
+$('#chRad').onclick = (e) => radEt($('#chaqiruv').dataset.id, e.currentTarget);
+
+async function qabulQil(id, btn) {
+  if (!id) return;
+  btn.disabled = true;
+  const r = await api(`/api/trial/${id}/accept`, { method: 'POST' });
+  btn.disabled = false;
+  if (!r) return;
+  SORROVLAR = SORROVLAR.filter((s) => s.requestId !== id);
+  if ($('#chaqiruv').dataset.id === id) chaqiruvYop();
+  sorovlarniChiz();
+  if (r.data.redirect) return (location.href = r.data.redirect);
+  if (!r.ok) return toast(r.data.message || r.data.error || 'Qabul qilib bo‘lmadi', 'err');
+  const b = r.data.booking || {};
+  toast(`Sinov darsi sizniki: ${b.leadName || ''}, ${vaqtYorliq(b.startsAt)}`, 'ok');
+  await darslarniYukla();
+}
+
+async function radEt(id, btn) {
+  if (!id) return;
+  if (!confirm('Rad etsangiz reytingingizga ta’sir qiladi. Rad etasizmi?')) return;
+  btn.disabled = true;
+  const r = await api(`/api/trial/${id}/decline`, { method: 'POST' });
+  btn.disabled = false;
+  if (!r) return;
+  SORROVLAR = SORROVLAR.filter((s) => s.requestId !== id);
+  if ($('#chaqiruv').dataset.id === id) chaqiruvYop();
+  sorovlarniChiz();
+  if (!r.ok) toast(r.data.message || 'Rad etib bo‘lmadi', 'err');
+}
+
+// ---------- darslar ----------
+const LID_HOLAT = {
+  trial_scheduled: ['Natija belgilanmagan', 't-kut'],
+  trial_completed: ['O‘tildi · javob kutilmoqda', 't-kut'],
+  trial_no_show: ['Kelmadi', 't-yoq'],
+  converted: ['To‘lov qildi', 't-ok'],
+  lost: ['Rad etdi', 't-mut'],
+  negotiating: ['O‘ylab ko‘ryapti', 't-kut'],
+};
+
+async function darslarniYukla() {
+  const [k, t] = await Promise.all([api('/api/booking/mentor/my'), api('/api/booking/mentor/history')]);
+  KELGUSI = k && k.ok && Array.isArray(k.data) ? k.data : [];
+  TARIX = t && t.ok && Array.isArray(t.data) ? t.data : [];
+  bugunChiz();
+  sinovChiz();
+}
+
+function darsKarta(d, { tarix = false } = {}) {
+  const ism = esc(d.studentName || (d.isTrial ? 'Lid' : 'O‘quvchi'));
+  const teg = d.isTrial ? '<span class="teg sinov">Sinov</span>' : '';
+  const holat = tarix && d.isTrial && LID_HOLAT[d.leadStatus]
+    ? `<span class="teg ${LID_HOLAT[d.leadStatus][1]}">${LID_HOLAT[d.leadStatus][0]}</span>` : '';
+  const baho = tarix && d.rating ? ` · ${'★'.repeat(d.rating)}` : '';
+  const kun = new Date(d.startsAt);
+  let past = '';
+
+  if (!tarix) {
+    const ochiq = Date.now() >= kun.getTime() - 10 * 60_000;
+    past = `<div class="dk-past">
+      <button class="asosiy" data-kirish="${esc(d.id)}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>${ochiq ? 'Darsni boshlash' : 'Kirish 10 daq oldin'}</button>
+      ${telHavola(d.leadPhone)}</div>`;
+  } else if (d.isTrial && d.leadId) {
+    const tugmalar = d.leadStatus === 'trial_completed'
+      ? `<button class="yashil" data-holat="converted">To‘lov qildi</button><button data-holat="lost">Rad etdi</button>`
+      : d.leadStatus === 'trial_scheduled'
+        ? `<button class="asosiy" data-holat="trial_completed">Dars o‘tildi</button><button data-holat="trial_no_show">Kelmadi</button>`
+        : '';
+    if (tugmalar || d.leadPhone) past = `<div class="dk-past" data-lid="${esc(d.leadId)}">${tugmalar}${telHavola(d.leadPhone)}</div>`;
+    const tugadi = kun.getTime() + (d.durationMin || 30) * 60_000;
+    const qoldi = tugadi + BONUS_MS - Date.now();
+    if (d.leadStatus === 'trial_completed' && qoldi > 0) {
+      past += `<div class="bonus">24 soat ichida to‘lasa bonus: ${Math.ceil(qoldi / 3600000)} soat qoldi</div>`;
+    }
+  }
+
+  return `<div class="dk">
+    <div class="dk-bosh">
+      <div class="dk-soat">${soatQisqa(d.startsAt)}<small>${kun.getDate()}.${String(kun.getMonth() + 1).padStart(2, '0')}</small></div>
+      <div class="matn"><b>${ism}${teg}</b><span>${esc(vaqtYorliq(d.startsAt))} · ${d.durationMin || 30} daq${baho}</span>${holat ? `<div class="dk-holat">${holat}</div>` : ''}</div>
+    </div>${past}</div>`;
+}
+
+function tugmalarniUla(box) {
+  box.querySelectorAll('[data-kirish]').forEach((b) => {
+    b.onclick = async () => {
+      b.disabled = true;
+      const e = await api(`/api/booking/${b.dataset.kirish}/entry`);
+      b.disabled = false;
+      if (!e) return;
+      if (e.ok && e.data.url) location.href = e.data.url;
+      else toast(e.data.message || 'Hozircha kirib bo‘lmaydi', 'err');
+    };
+  });
+  box.querySelectorAll('[data-lid] [data-holat]').forEach((b) => {
+    b.onclick = async () => {
+      const id = b.closest('[data-lid]').dataset.lid;
+      b.disabled = true;
+      const r = await api(`/api/ai/leads/${id}/status`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: b.dataset.holat }),
+      });
+      b.disabled = false;
+      if (!r) return;
+      if (!r.ok) return toast(r.data.message || 'O‘zgartirib bo‘lmadi', 'err');
+      TARIX.filter((x) => x.leadId === id).forEach((x) => { x.leadStatus = b.dataset.holat; });
+      bugunChiz(); sinovChiz();
+      toast('Saqlandi', 'ok');
+    };
+  });
+}
+
+function bugunChiz() {
+  const bugun = KELGUSI.filter((d) => kunBoshi(d.startsAt) === kunBoshi(Date.now()));
+  $('#bugunSon').textContent = bugun.length ? `${bugun.length} ta` : '';
+  $('#bugungi').innerHTML = bugun.length
+    ? bugun.map((d) => darsKarta(d)).join('')
+    : '<div class="bosh-kichik">Bugun dars yo‘q</div>';
+  tugmalarniUla($('#bugungi'));
+
+  // Natijasi belgilanmagan yoki javob kutilayotgan sinovlar
+  const diqqat = TARIX.filter((d) => d.isTrial && ['trial_scheduled', 'trial_completed'].includes(d.leadStatus));
+  $('#diqqatBolim').hidden = !diqqat.length;
+  $('#diqqatSon').textContent = diqqat.length ? `${diqqat.length} ta` : '';
+  $('#diqqat').innerHTML = diqqat.map((d) => darsKarta(d, { tarix: true })).join('');
+  tugmalarniUla($('#diqqat'));
+}
+
+function sinovChiz() {
+  const kelgusi = KELGUSI.filter((d) => d.isTrial);
+  const otgan = TARIX.filter((d) => d.isTrial);
+  const [c1, c2] = document.querySelectorAll('#sinovlar .chip');
+  c1.textContent = `Belgilangan (${kelgusi.length})`;
+  c2.textContent = `O‘tilgan (${otgan.length})`;
+  const royxat = FILTR === 'kelgusi' ? kelgusi : otgan;
+  $('#sinovRoyxat').innerHTML = royxat.length
+    ? royxat.map((d) => darsKarta(d, { tarix: FILTR === 'otgan' })).join('')
+    : `<div class="bosh-kichik">${FILTR === 'kelgusi' ? 'Belgilangan sinov darsi yo‘q. So‘rov kelganda shu yerda paydo bo‘ladi.' : 'Oxirgi 30 kunda o‘tilgan sinov darsi yo‘q'}</div>`;
+  tugmalarniUla($('#sinovRoyxat'));
+}
+
+document.querySelectorAll('#sinovlar .chip').forEach((c) => {
+  c.onclick = () => {
+    FILTR = c.dataset.f;
+    document.querySelectorAll('#sinovlar .chip').forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
+    sinovChiz();
+  };
+});
+
+// ---------- tablar ----------
+function tabKorsat() {
+  const tab = location.hash === '#sinovlar' ? 'sinovlar' : 'bugun';
+  $('#bugun').hidden = tab !== 'bugun';
+  $('#sinovlar').hidden = tab !== 'sinovlar';
+  document.querySelectorAll('.nav a[data-tab]').forEach((a) => {
+    if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  });
+}
+document.querySelectorAll('.nav a[data-tab]').forEach((a) => {
+  a.onclick = (e) => { e.preventDefault(); history.replaceState(null, '', a.dataset.tab === 'bugun' ? '/work.html' : '/work.html#sinovlar'); tabKorsat(); };
+});
+window.addEventListener('hashchange', tabKorsat);
+
+(async () => {
+  const hash = location.hash;
+  await WebViewAuth.tayyorla();
+  if (hash === '#sinovlar' && !location.hash) history.replaceState(null, '', '/work.html#sinovlar');
+  tabKorsat();
+  document.querySelector('#sinovlar .chip').click();
+  mentorNabzi();
+
+  const w = await api('/api/whoami');
+  if (!w) return;
+  $('#kim').textContent = w.data.name || '';
+
+  await Promise.all([sorovlarniYukla(), darslarniYukla()]);
+
+  // So'rovlar tez-tez tekshiriladi; push kelib ilova ochilganda ham darhol yangilanadi
+  setInterval(() => { if (document.visibilityState === 'visible') sorovlarniYukla(); }, 8000);
+  setInterval(() => { if (document.visibilityState === 'visible') darslarniYukla(); }, 60000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') { sorovlarniYukla(); darslarniYukla(); }
+  });
+})();
+</script>
+</body>
+</html>

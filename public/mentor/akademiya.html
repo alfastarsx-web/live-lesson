@@ -842,7 +842,7 @@ body:not(.js) .nojs{display:block}
       if(qi < QUESTIONS.length-1){ qi++; renderQuestion(); }
       else { mode = "res"; renderResult(); }
     } else {
-      if(lastResult && lastResult.pass){ location.href = "/jadval.html"; }
+      if(lastResult && lastResult.pass){ location.href = "/work.html"; }
       else { answers = new Array(QUESTIONS.length).fill(null); mode="test"; qi=0; save(); renderQuestion(); }
     }
   });
