@@ -37,9 +37,9 @@ window.kirishKerak = () => {
   d.id = 'ilovaSessiya';
   d.setAttribute('role', 'alert');
   d.style.cssText = 'position:fixed;inset:0;z-index:100;background:rgba(15,23,42,.55);display:grid;place-items:center;padding:24px;font-family:inherit';
-  d.innerHTML = '<div style="background:#fff;color:#0f172a;border-radius:20px;padding:22px;max-width:340px;text-align:center">'
+  d.innerHTML = '<div style="background:#fff;color:#23262d;border-radius:18px;padding:22px;max-width:340px;text-align:center">'
     + '<b style="display:block;font-size:17px;margin-bottom:6px">Sessiya yangilanmoqda…</b>'
-    + '<span style="font-size:14px;color:#64748b">Sahifa o‘zi yangilanmasa, ilovada bo‘limni yopib, qayta oching.</span></div>';
+    + '<span style="font-size:14px;color:#6b6e76">Sahifa o‘zi yangilanmasa, ilovada bo‘limni yopib, qayta oching.</span></div>';
   document.body.appendChild(d);
 };
 

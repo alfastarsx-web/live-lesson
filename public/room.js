@@ -80,7 +80,7 @@ function interfeysniSozla() {
     el.toolbar.hidden = false;
     el.emptyHint.innerHTML = 'PDF yoki rasm ochish uchun 📄 tugmasini bosing'
       + (ROOM ? `<br><br><span style="opacity:.75">O‘quvchi havolasi:</span><br>`
-        + `<code id="oqHavola" style="cursor:pointer;color:#60a5fa" title="Nusxalash">`
+        + `<code id="oqHavola" style="cursor:pointer;color:#8fbfa6" title="Nusxalash">`
         + `${location.origin}/dars/${ROOM}</code>` : '');
     const h = document.getElementById('oqHavola');
     if (h) h.onclick = () => {
@@ -160,7 +160,7 @@ async function onSignal(m) {
       setStatus(m.message || 'Xatolik');
       el.remotePh.hidden = false;
       el.remotePh.innerHTML = `<b>Xonaga kirib bo‘lmadi</b><span>${m.message || 'Xatolik'}<br>`
-        + '<a href="/jadval.html" style="color:#60a5fa">Jadvalga qaytish</a></span>';
+        + '<a href="/jadval.html" style="color:#8fbfa6">Jadvalga qaytish</a></span>';
       toast(m.message || 'Xatolik', 8000);
       break;
 
