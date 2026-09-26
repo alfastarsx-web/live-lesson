@@ -6,7 +6,7 @@
 <title>Liga</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Onest:wght@400;500;600&display=swap">
+
 <style>
 :root{
   --deep:#04124A; --brand:#0A47DB; --brand-soft:#E8EEFD; --signal:#2F7BFF;
@@ -38,22 +38,22 @@ button{font-family:inherit;cursor:pointer}
 
 /* header */
 .top{background:linear-gradient(150deg,#0B34B8,#07227E 55%,#04124A);color:#fff;padding:26px 0 0;position:relative;overflow:hidden}
-.top::after{content:"";position:absolute;right:-70px;top:-50px;width:240px;height:208px;background:rgba(255,255,255,.06);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.top::after{content:"";position:absolute;right:-70px;top:-50px;width:240px;height:208px;background:rgba(255,255,255,.06);border-radius:12px}
 .top .lg{display:flex;align-items:center;gap:12px;position:relative}
-.top .cup{width:46px;height:40px;background:var(--gold);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:17px;color:#fff}
+.top .cup{width:46px;height:40px;background:var(--gold);border-radius:12px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:17px;color:#fff}
 .top h1{font-size:26px;font-weight:700}
-.top .sub{font-size:13px;color:#AFC0F0}
+.top .sub{font-size:13px;color:var(--mute)}
 .timer{margin-top:16px;background:rgba(255,255,255,.1);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;position:relative}
 .timer b{font-family:var(--display);font-size:17px}
-.timer span{font-size:12px;color:#AFC0F0}
+.timer span{font-size:12px;color:var(--mute)}
 .tabs{display:flex;gap:2px;margin-top:18px;position:relative}
-.tabs button{flex:1;background:rgba(255,255,255,.08);border:0;color:#AFC0F0;font:600 14px var(--display);padding:13px 6px}
+.tabs button{flex:1;background:rgba(255,255,255,.08);border:0;color:var(--mute);font:600 14px var(--display);padding:13px 6px}
 .tabs button[aria-selected="true"]{background:var(--bg);color:var(--brand)}
 
 /* podium */
 .podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:8px;align-items:end;margin:20px 0 14px}
 .pod{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:14px 10px;text-align:center}
-.pod .av{width:44px;height:38px;margin:0 auto 8px;background:var(--brand-soft);color:var(--brand);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:grid;place-items:center;font:700 15px var(--display)}
+.pod .av{width:44px;height:38px;margin:0 auto 8px;background:var(--brand-soft);color:var(--brand);border-radius:12px;display:grid;place-items:center;font:700 15px var(--display)}
 .pod b{display:block;font-family:var(--display);font-size:14px;font-weight:600;line-height:1.2}
 .pod .pts{display:block;font-family:var(--display);font-size:17px;font-weight:700;color:var(--brand);margin-top:5px;font-variant-numeric:tabular-nums}
 .pod .pl{display:block;font-size:11px;color:var(--mute);margin-top:2px}
@@ -69,7 +69,7 @@ button{font-family:inherit;cursor:pointer}
 .rows{display:grid;gap:6px}
 .row{display:grid;grid-template-columns:34px 38px 1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);padding:11px 12px}
 .row .pos{font-family:var(--display);font-weight:700;font-size:15px;color:var(--mute);text-align:center;font-variant-numeric:tabular-nums}
-.row .av{width:38px;height:33px;background:var(--brand-soft);color:var(--brand);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:grid;place-items:center;font:700 13px var(--display)}
+.row .av{width:38px;height:33px;background:var(--brand-soft);color:var(--brand);border-radius:12px;display:grid;place-items:center;font:700 13px var(--display)}
 .row .nm{display:block;font-family:var(--display);font-size:15px;font-weight:600;line-height:1.2}
 .row .meta{display:block;font-size:12px;color:var(--mute);margin-top:1px}
 .row .pts{display:block;font-family:var(--display);font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
@@ -85,7 +85,7 @@ button{font-family:inherit;cursor:pointer}
 /* cards */
 section{padding:22px 0 4px}
 .slabel{font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--brand);display:flex;align-items:center;gap:8px}
-.slabel i{width:12px;height:10px;background:var(--gold);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:block}
+.slabel i{width:12px;height:10px;background:var(--gold);border-radius:12px;display:block}
 h2{font-size:22px;font-weight:700;margin:10px 0 8px}
 .lede{color:var(--mute);font-size:15px;margin-bottom:14px}
 .card{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:16px 18px;margin-bottom:10px}
@@ -106,6 +106,7 @@ footer{padding:26px 0 50px;text-align:center;color:var(--mute);font-size:13px}
 .namuna{margin:16px 0 0;padding:12px 14px;background:var(--gold-soft, #FFF2E0);border-left:3px solid var(--gold, #FF9A1F);font-size:14px;color:var(--text)}
 .namuna b{font-family:var(--display)}
 </style>
+<link rel="stylesheet" href="/tinch.css">
 
 </head>
 <body>

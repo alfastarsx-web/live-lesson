@@ -7,7 +7,7 @@
 <title>Career</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Onest:wght@400;500;600&display=swap">
+
 <style>
 :root{
   --ink:#0A1747; --brand:#0A47DB; --brand-soft:#E8EEFD; --signal:#2F7BFF;
@@ -34,15 +34,15 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);fon
 h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.02em;text-wrap:balance}
 p{margin:0}
 .wrap{max-width:720px;margin:0 auto;padding-inline:18px}
-.hex{clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.hex{border-radius:12px}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 
 /* Bosh qism */
 .hero{background:linear-gradient(150deg,#0B34B8 0%,#07227E 50%,#04124A 100%);color:#fff;padding:30px 0 28px;position:relative;overflow:hidden}
-.hero::after{content:"";position:absolute;right:-60px;top:-40px;width:230px;height:200px;background:rgba(255,255,255,.06);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
-.hero .eyebrow{font-family:var(--display);font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#AFC0F0}
+.hero::after{content:"";position:absolute;right:-60px;top:-40px;width:230px;height:200px;background:rgba(255,255,255,.06);border-radius:12px}
+.hero .eyebrow{font-family:var(--display);font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
 .hero h1{font-size:34px;font-weight:800;margin:10px 0 6px;position:relative}
-.hero p{color:#D5DEFA;font-size:15px;position:relative;max-width:34em}
+.hero p{color:var(--mute);font-size:15px;position:relative;max-width:34em}
 
 main{padding:20px 0 48px;display:grid;gap:16px}
 .slabel{font-family:var(--display);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin:6px 0 -6px}
@@ -110,6 +110,7 @@ a.bolim span{font-size:13.5px;color:var(--mute)}
 a.bolim .o{font-family:var(--display);color:var(--brand);font-size:20px}
 .namuna-teg{font-family:var(--display);font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-left:6px}
 </style>
+<link rel="stylesheet" href="/tinch.css">
 </head>
 <body>
 <header class="hero">

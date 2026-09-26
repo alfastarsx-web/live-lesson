@@ -1,25 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 /* Bugun topilgan xato takrorlanmasin: class'dagi display brauzerning
    [hidden] qoidasini bosib ketadi. Shuning uchun boshida qat'iy aytamiz. */
 [hidden] { display: none !important; }
 
 :root{
-  --fon:#0b1220; --karta:#ffffff; --siyoh:#0f1b2d; --xira:#64748b;
-  --moviy:#2563eb; --moviy-quyuq:#1d4ed8; --qirra:#e2e8f0; --qizil:#dc2626;
-  --yashil:#059669;
+  --fon:#f7f7f5; --karta:#ffffff; --siyoh:#23262d; --xira:#6b6e76;
+  --moviy:#3d6b64; --moviy-quyuq:#2f5751; --qirra:#ececea; --qizil:#b85a52;
+  --yashil:#3d7d5f;
 }
 *{box-sizing:border-box}
 body{
   margin:0; min-height:100vh; padding:24px 16px;
-  background:linear-gradient(180deg,#0b1220 0%,#152238 100%);
-  font:16px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--fon);
+  font:16px/1.5 'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   color:var(--siyoh);
   display:flex; align-items:center; justify-content:center;
 }
 .qobiq{width:100%; max-width:420px}
 
 .karta{
-  background:var(--karta); border-radius:22px; padding:28px 22px;
-  box-shadow:0 18px 48px rgba(3,10,26,.35);
+  background:var(--karta); border-radius:18px; padding:28px 22px;
+  box-shadow:0 0 0 1px var(--qirra);
 }
 .nishon{font-size:40px; text-align:center; line-height:1; margin-bottom:10px}
 h1{margin:0 0 6px; font-size:21px; text-align:center; letter-spacing:-.3px}
@@ -40,7 +41,7 @@ h1{margin:0 0 6px; font-size:21px; text-align:center; letter-spacing:-.3px}
   transition:background .12s;
 }
 .asosiy:hover{background:var(--moviy-quyuq)}
-.asosiy:disabled{background:#93a7c7; cursor:default}
+.asosiy:disabled{background:#b9c9c6; cursor:default}
 
 .ikkilamchi{
   width:100%; margin-top:16px; padding:11px; font-size:14px; font-weight:600;
@@ -50,7 +51,7 @@ h1{margin:0 0 6px; font-size:21px; text-align:center; letter-spacing:-.3px}
 
 .xato{
   margin:0 0 12px; padding:10px 12px; font-size:13.5px;
-  color:#7f1d1d; background:#fef2f2; border-radius:10px;
+  color:#8a3f38; background:#f7ecea; border-radius:10px;
 }
 .xato[hidden]{display:none !important}
 .mayda{margin:16px 0 0; font-size:12.5px; color:var(--xira); text-align:center}
@@ -64,7 +65,7 @@ h1{margin:0 0 6px; font-size:21px; text-align:center; letter-spacing:-.3px}
 }
 .dars-teg{
   display:inline-block; font-size:11px; font-weight:800; letter-spacing:.5px;
-  text-transform:uppercase; color:var(--yashil); background:#ecfdf5;
+  text-transform:uppercase; color:var(--yashil); background:#eaf3ee;
   padding:3px 9px; border-radius:20px; margin-bottom:9px;
 }
 .dars-ustoz{font-size:16px; font-weight:700; margin-bottom:3px}
@@ -72,12 +73,12 @@ h1{margin:0 0 6px; font-size:21px; text-align:center; letter-spacing:-.3px}
 .dars .asosiy{padding:12px; font-size:15px}
 .dars-kutish{
   margin:0; padding:11px; font-size:13.5px; color:var(--xira);
-  background:#f8fafc; border-radius:11px; text-align:center;
+  background:#f2f2ef; border-radius:11px; text-align:center;
 }
 
 .bosh{padding:8px 0; text-align:center; color:var(--xira)}
 .bosh b{display:block; font-size:16px; color:var(--siyoh); margin-bottom:6px}
 
 .yuklanmoqda{
-  padding:40px 0; text-align:center; color:#94a3b8; font-size:14px;
+  padding:40px 0; text-align:center; color:#9a9ca3; font-size:14px;
 }

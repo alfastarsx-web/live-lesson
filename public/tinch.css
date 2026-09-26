@@ -1,0 +1,63 @@
+/* "Tinch minimal" — Career sahifalari uchun umumiy qatlam.
+   Sahifaning o'z <style>'idan keyin ulanadi va tokenlarni (qorong'i rejimdagilarini ham)
+   Work bilan bir xil yumshoq palitraga almashtiradi. */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root:root:root:root{
+  color-scheme:light;
+  --ink:#23262d; --deep:#2f5751; --brand:#3d6b64; --brand-soft:#e8f0ee; --signal:#5d8a82;
+  --gold:#9d7640; --gold-soft:#f6f0e6; --orange:#9d7640; --orange-soft:#f6f0e6;
+  --green:#3d7d5f; --green-soft:#eaf3ee; --red:#b85a52; --red-soft:#f7ecea;
+  --bg:#f7f7f5; --card:#fff; --line:#ececea; --line-2:#dcdcd7; --text:#23262d; --mute:#6b6e76;
+  --display:'Manrope',system-ui,-apple-system,sans-serif;
+  --body:'Manrope',system-ui,-apple-system,sans-serif;
+  --shadow:0 0 0 1px #ececea;
+}
+html body{font-family:var(--body);background:var(--bg);color:var(--text)}
+html body h1,html body h2,html body h3{letter-spacing:-.02em}
+
+/* olti burchak shakllar — oddiy yumaloq burchak */
+html body .hex,html body .rank .badge,html body .top .cup,html body .hero .eyebrow::before{clip-path:none;border-radius:12px}
+html body .hero .eyebrow::before{border-radius:50%;width:8px;height:8px}
+
+/* to'q ko'k qahramon bloklar -> oq, chegarali karta */
+html body .hero,html body .top{background:var(--card);color:var(--ink);box-shadow:0 1px 0 var(--line)}
+html body .hero::after,html body .top::after{content:none}
+html body .hero .eyebrow,html body .top .sub{color:var(--mute)}
+html body .hero p{color:var(--mute)}
+html body .hero .now{background:var(--line);border-radius:14px;overflow:hidden}
+html body .hero .now div{background:var(--bg)}
+html body .hero .now span{color:var(--mute)}
+html body .timer{background:var(--bg);border-radius:12px}
+html body .tabs button{background:transparent;color:var(--mute)}
+html body .tabs button[aria-selected="true"],html body .tabs button[aria-pressed="true"]{background:var(--bg);color:var(--ink)}
+
+/* akademiya */
+html body .hero .art{background:var(--brand-soft)}
+html body .hero{border-color:var(--line);box-shadow:none;border-radius:18px}
+html body .unlock{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line);border-radius:16px}
+html body .unlock p{color:var(--mute)}
+:root:root:root:root body .script{background:var(--sub,#f2f2ef);color:var(--ink);border-radius:14px}
+
+/* yo'l: natija / viktorina bloklari */
+html body .result,html body .quiz{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line);border-radius:16px}
+html body .quiz h2,html body .result .rows b{color:var(--ink)}
+html body .result .rows{border-top-color:var(--line)}
+html body .result .rows div{color:var(--mute);border-bottom-color:var(--line)}
+html body .qq button{background:var(--bg);border-color:var(--line);color:var(--ink);border-radius:12px}
+html body .qq button[aria-pressed="true"]{background:var(--brand-soft);color:var(--ink);border-color:var(--brand)}
+html body .qq button.ok,html body .qq button.no{color:#fff}
+html body .qres{background:var(--bg);border-radius:12px}
+html body .lede b[style]{color:var(--ink)!important}
+
+/* umumiy: yumshoq burchak va soyasiz kartalar */
+html body .btn,html body .qbtn,html body .big100,html body .rankpill,html body .seg button,html body .akad .belgi,html body a.bolim i{border-radius:12px}
+html body .norma-ch i{background:var(--brand)}
+html body .norma-ch.toldi i{background:var(--green)}
+:focus-visible{outline:2px solid var(--brand)!important}
+
+/* akademiya qadamlari — yumaloq, bir rangli */
+html body .steps i,html body .dots i{border-radius:4px}
+html body .steps i{width:14px;height:6px}
+html body .steps i.now,html body .dots i.now{background:var(--brand);opacity:.45}
+html body .topbar{border-bottom-color:var(--line)}

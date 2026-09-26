@@ -6,86 +6,84 @@
 <title>Jadval</title>
 <link rel="stylesheet" href="/app.css">
 <style>
-body.jadval{background:#eef1f7}
+body.jadval{background:var(--bg)}
 .jadval .wrap{padding-bottom:110px}
 
 /* Bosh qism: haftalik hajm */
-.hajm{margin:16px 0 14px;border-radius:26px;padding:18px 20px;color:#fff;position:relative;overflow:hidden;
-  background:radial-gradient(110% 90% at 100% 0%, rgba(99,102,241,.55) 0%, rgba(99,102,241,0) 55%), #0b1b3f;
-  box-shadow:0 18px 40px -18px rgba(11,27,63,.55)}
-.hajm .yorliq{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#a5b4fc}
+.hajm{margin:16px 0 14px;border-radius:18px;padding:18px;color:var(--ink);position:relative;background:var(--card);box-shadow:var(--shadow)}
+.hajm .yorliq{padding:0;font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
 .hajm h1{margin:8px 0 2px;font-size:27px;font-weight:800;letter-spacing:-.6px}
-.hajm .izoh3{font-size:14px;color:#cbd5e1}
-.hajm .izoh3 b{color:#fff;font-variant-numeric:tabular-nums}
-.shkala{position:relative;height:10px;border-radius:10px;background:rgba(255,255,255,.12);margin-top:14px}
-.shkala i{position:absolute;left:0;top:0;bottom:0;border-radius:10px;background:linear-gradient(90deg,#22c55e,#4ade80);transition:width .4s}
-.shkala.kam i{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
-.shkala b{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;opacity:.7}
-.shkala-yozuv{display:flex;justify-content:space-between;font-size:11.5px;color:#94a3b8;font-weight:600;margin-top:6px}
+.hajm .izoh3{font-size:14px;color:var(--mut2)}
+.hajm .izoh3 b{color:var(--ink);font-variant-numeric:tabular-nums}
+.shkala{position:relative;height:8px;border-radius:8px;background:var(--sub);margin-top:14px}
+.shkala i{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:var(--green);transition:width .4s}
+.shkala.kam i{background:#c9a36b}
+.shkala b{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--mut);opacity:.6}
+.shkala-yozuv{display:flex;justify-content:space-between;font-size:11.5px;color:#9a9ca3;font-weight:600;margin-top:6px}
 
 .bolim{margin-top:22px}
-.bolim > h2{margin:0 2px 4px;font-size:15px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:#334155}
-.bolim > p{margin:0 2px 12px;font-size:13.5px;color:#64748b}
+.bolim > h2{margin:0 2px 4px;font-size:15px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:#3a3d45}
+.bolim > p{margin:0 2px 12px;font-size:13.5px;color:#6b6e76}
 
 /* Sanalar lentasi */
 .lenta{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none;scroll-snap-type:x proximity}
 .lenta::-webkit-scrollbar{display:none}
 .kun{flex:0 0 auto;scroll-snap-align:start;width:58px;border:0;border-radius:16px;background:#fff;padding:9px 0 8px;
-  font:inherit;cursor:pointer;box-shadow:0 1px 2px rgba(15,23,42,.05);position:relative;color:#0f172a}
-.kun small{display:block;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase}
+  font:inherit;cursor:pointer;box-shadow:0 1px 2px rgba(35,38,45,.05);position:relative;color:#23262d}
+.kun small{display:block;font-size:11px;font-weight:700;color:#9a9ca3;text-transform:uppercase}
 .kun b{display:block;font-size:20px;font-weight:800;line-height:1.2;font-variant-numeric:tabular-nums}
-.kun span{display:block;font-size:10.5px;font-weight:700;color:#16a34a;margin-top:2px}
-.kun span.dam{color:#e11d48}
-.kun[aria-pressed="true"]{background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;box-shadow:0 8px 18px -8px rgba(37,99,235,.8)}
-.kun[aria-pressed="true"] small,.kun[aria-pressed="true"] span{color:#c7d2fe}
-.kun .ozg{position:absolute;top:6px;right:7px;width:6px;height:6px;border-radius:50%;background:#f59e0b}
+.kun span{display:block;font-size:10.5px;font-weight:700;color:#3d7d5f;margin-top:2px}
+.kun span.dam{color:#b85a52}
+.kun[aria-pressed="true"]{background:var(--blue);color:#fff;box-shadow:none}
+.kun[aria-pressed="true"] small,.kun[aria-pressed="true"] span{color:#dce8e5}
+.kun .ozg{position:absolute;top:6px;right:7px;width:6px;height:6px;border-radius:50%;background:#b0874a}
 
 /* Kun kartasi */
-.panel{background:#fff;border-radius:22px;padding:16px;box-shadow:0 1px 2px rgba(15,23,42,.05),0 10px 26px -18px rgba(15,23,42,.25)}
+.panel{background:#fff;border-radius:18px;padding:16px;box-shadow:0 1px 2px rgba(35,38,45,.05),0 10px 26px -18px rgba(35,38,45,.25)}
 .panel-bosh{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
 .panel-bosh h3{margin:0;font-size:18px;font-weight:800;letter-spacing:-.3px}
-.panel-bosh .holat2{font-size:12.5px;font-weight:700;color:#64748b;margin-top:2px}
-.panel-bosh .holat2.ozg{color:#b45309}
+.panel-bosh .holat2{font-size:12.5px;font-weight:700;color:#6b6e76;margin-top:2px}
+.panel-bosh .holat2.ozg{color:#8a6a36}
 .amal2{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
-.amal2 button{border:1.5px solid #e2e8f0;background:#fff;border-radius:12px;padding:8px 12px;font:inherit;font-size:13px;font-weight:700;color:#334155;cursor:pointer}
+.amal2 button{border:1.5px solid #e6e6e2;background:#fff;border-radius:12px;padding:8px 12px;font:inherit;font-size:13px;font-weight:700;color:#3a3d45;cursor:pointer}
 .amal2 button:disabled{opacity:.45;cursor:not-allowed}
 
-.belgilar{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;font-weight:700;color:#64748b;margin-bottom:10px}
+.belgilar{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;font-weight:700;color:#6b6e76;margin-bottom:10px}
 .belgilar i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 
 /* Katakchalar */
 .setka{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;touch-action:none;user-select:none;-webkit-user-select:none}
-.katak{position:relative;height:48px;border-radius:12px;border:1.5px dashed #d5dce8;background:#f8fafc;color:#94a3b8;
+.katak{position:relative;height:48px;border-radius:12px;border:1.5px dashed #dcdcd7;background:#f4f4f1;color:#9a9ca3;
   font:inherit;font-size:13.5px;font-weight:800;font-variant-numeric:tabular-nums;cursor:pointer;padding:0 4px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;transition:background .15s,border-color .15s}
 .katak small{font-size:10px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.katak.ochiq{border:1.5px solid #86efac;background:#ecfdf5;color:#15803d}
-.katak.dars{border:1.5px solid #c4b5fd;background:#f5f3ff;color:#6d28d9;cursor:default}
-.katak.sorov{border:1.5px solid #fcd34d;background:#fffbeb;color:#b45309;cursor:default}
+.katak.ochiq{border:1.5px solid #bcd8c7;background:#eaf3ee;color:#35694f}
+.katak.dars{border:1.5px solid #d9d3e6;background:#f1eff5;color:#665a88;cursor:default}
+.katak.sorov{border:1.5px solid #e2cfa9;background:#f6f0e6;color:#8a6a36;cursor:default}
 .katak.otgan{opacity:.35;cursor:default}
-.katak.qulf::after{content:"";position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:2px;background:#15803d;opacity:.55}
-.katak.ozgardi{box-shadow:0 0 0 2px #f59e0b inset}
-.katak:focus-visible{outline:3px solid #f59e0b;outline-offset:1px}
-.tungi{margin-top:10px;border:0;background:none;font:inherit;font-size:13px;font-weight:700;color:#4f46e5;cursor:pointer;padding:4px 0}
+.katak.qulf::after{content:"";position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:2px;background:#35694f;opacity:.55}
+.katak.ozgardi{box-shadow:0 0 0 2px #b0874a inset}
+.katak:focus-visible{outline:3px solid #b0874a;outline-offset:1px}
+.tungi{margin-top:10px;border:0;background:none;font:inherit;font-size:13px;font-weight:700;color:#3d6b64;cursor:pointer;padding:4px 0}
 
 /* Hafta kunlari */
 .hafta{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;background:#fff;border-radius:16px;padding:4px;margin-bottom:12px;
-  box-shadow:0 1px 2px rgba(15,23,42,.05)}
-.hafta button{border:0;background:none;border-radius:12px;padding:8px 0 6px;font:inherit;cursor:pointer;color:#475569}
+  box-shadow:0 1px 2px rgba(35,38,45,.05)}
+.hafta button{border:0;background:none;border-radius:12px;padding:8px 0 6px;font:inherit;cursor:pointer;color:#5f636b}
 .hafta button b{display:block;font-size:13px;font-weight:800}
-.hafta button span{display:block;font-size:10.5px;font-weight:700;color:#94a3b8;font-variant-numeric:tabular-nums}
-.hafta button[aria-pressed="true"]{background:#eef2ff;color:#3730a3}
-.hafta button[aria-pressed="true"] span{color:#6366f1}
+.hafta button span{display:block;font-size:10.5px;font-weight:700;color:#9a9ca3;font-variant-numeric:tabular-nums}
+.hafta button[aria-pressed="true"]{background:#e8f0ee;color:#2f5751}
+.hafta button[aria-pressed="true"] span{color:#3d6b64}
 
 /* Saqlash paneli */
 .saqla-bar{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));
-  background:rgba(255,255,255,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid #e2e8f0}
+  background:rgba(255,255,255,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid #e6e6e2}
 .saqla-bar .ichi{max-width:528px;margin:0 auto;display:flex;align-items:center;gap:10px}
-.saqla-bar .matn{flex:1;min-width:0;font-size:13.5px;font-weight:700;color:#334155}
-.saqla-bar .matn small{display:block;font-weight:600;color:#b45309;font-size:12px}
+.saqla-bar .matn{flex:1;min-width:0;font-size:13.5px;font-weight:700;color:#3a3d45}
+.saqla-bar .matn small{display:block;font-weight:600;color:#8a6a36;font-size:12px}
 .saqla-bar button{border:0;border-radius:13px;padding:12px 16px;font:inherit;font-size:14.5px;font-weight:800;cursor:pointer}
-.saqla-bar .bekor{background:#f1f5f9;color:#475569}
-.saqla-bar .ok{background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff}
+.saqla-bar .bekor{background:#f2f2ef;color:#5f636b}
+.saqla-bar .ok{background:var(--blue);color:#fff}
 .saqla-bar button:disabled{opacity:.5}
 @media (prefers-reduced-motion:reduce){.shkala i,.katak{transition:none}}
 </style>
@@ -123,10 +121,10 @@ body.jadval{background:#eef1f7}
         <button type="button" id="shablongaQayt" hidden>Shablonga qaytarish</button>
       </div>
       <div class="belgilar" aria-hidden="true">
-        <span><i style="background:#ecfdf5;border:1.5px solid #86efac"></i>Ochiq</span>
-        <span><i style="background:#f8fafc;border:1.5px dashed #cbd5e1"></i>Yopiq</span>
-        <span><i style="background:#f5f3ff;border:1.5px solid #c4b5fd"></i>Dars</span>
-        <span><i style="background:#fffbeb;border:1.5px solid #fcd34d"></i>So‘rov</span>
+        <span><i style="background:#eaf3ee;border:1.5px solid #bcd8c7"></i>Ochiq</span>
+        <span><i style="background:#f4f4f1;border:1.5px dashed #dcdcd7"></i>Yopiq</span>
+        <span><i style="background:#f1eff5;border:1.5px solid #d9d3e6"></i>Dars</span>
+        <span><i style="background:#f6f0e6;border:1.5px solid #e2cfa9"></i>So‘rov</span>
       </div>
       <div class="setka" id="kunSetka" role="group" aria-label="Kun vaqtlari"></div>
       <button class="tungi" type="button" id="kunTungi">Tungi soatlarni ko‘rsatish</button>

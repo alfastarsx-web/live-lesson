@@ -7,7 +7,7 @@
 <title>MyTeacher Mentor Akademiyasi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Onest:wght@400;500;600&display=swap">
+
 <style>
 :root{
   --ink:#0A1747; --brand:#0A47DB; --brand-soft:#E8EEFD; --signal:#2F7BFF;
@@ -45,7 +45,7 @@ h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.02em;text-wrap:bal
 p{margin:0}
 button{font-family:var(--display);cursor:pointer}
 :focus-visible{outline:3px solid var(--orange);outline-offset:2px}
-.hex{clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.hex{border-radius:12px}
 
 /* ---------- shell ---------- */
 .app{min-height:100vh;display:flex;flex-direction:column}
@@ -76,7 +76,7 @@ body:not(.js) .nojs{display:block}
 .hero .art svg{display:block;width:100%;height:auto;max-width:420px;margin:0 auto}
 .hero .txt{padding:28px 28px 0}
 .eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--brand)}
-.eyebrow::before{content:"";width:14px;height:12px;background:var(--orange);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.eyebrow::before{content:"";width:14px;height:12px;background:var(--orange);border-radius:12px}
 .hero h1{font-size:clamp(28px,7vw,40px);font-weight:700;line-height:1.1;margin:14px 0 12px}
 .hero p{color:var(--mute);font-size:17px}
 .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);margin:26px 0 0}
@@ -100,7 +100,7 @@ body:not(.js) .nojs{display:block}
 .block p, .block li{font-size:16px}
 .list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
 .list li{display:block;position:relative;padding-left:28px}
-.list li::before{content:"";position:absolute;left:0;top:9px;width:16px;height:14px;background:var(--brand);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.list li::before{content:"";position:absolute;left:0;top:9px;width:16px;height:14px;background:var(--brand);border-radius:12px}
 .kv{display:grid;gap:0;margin:0}
 .kv div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
 .kv div:last-child{border-bottom:0}
@@ -212,7 +212,7 @@ body:not(.js) .nojs{display:block}
 .review .item .no{color:var(--red)}
 .unlock{margin-top:22px;background:linear-gradient(140deg,#0B34B8,#07227E 55%,#04124A);color:#fff;padding:26px 22px;text-align:left}
 .unlock h3{font-size:22px;font-weight:700;margin-bottom:10px}
-.unlock p{color:#C9D6F8;font-size:15px}
+.unlock p{color:var(--mute);font-size:15px}
 .unlock ol{margin:16px 0 0;padding-left:20px;display:grid;gap:8px;font-size:15px}
 
 /* ---------- bottom nav ---------- */
@@ -237,6 +237,7 @@ body:not(.js) .nojs{display:block}
   .btn{padding:14px 16px;font-size:15px}
 }
 </style>
+<link rel="stylesheet" href="/tinch.css">
 
 </head>
 <body>
@@ -266,22 +267,17 @@ body:not(.js) .nojs{display:block}
   <div class="hero">
     <div class="art">
       <svg viewBox="0 0 420 220" role="img" aria-label="Yangi o'quvchidan doimiy o'quvchigacha bo'lgan yo'l">
-        <g fill="none" stroke="#2F7BFF" stroke-width="2" opacity=".35">
-          <path d="M20 180 C 110 180, 110 60, 200 60 S 290 180, 400 120"/>
+        <path d="M51 176 C 120 176, 120 65, 190 65 S 300 121, 378 121" fill="none" stroke="#9fbab5" stroke-width="2" stroke-dasharray="4 6"/>
+        <circle cx="51" cy="176" r="22" fill="#fff" stroke="#c9d9d6" stroke-width="1.5"/>
+        <circle cx="190" cy="65" r="32" fill="#3d6b64"/>
+        <circle cx="378" cy="121" r="24" fill="#fff" stroke="#3d7d5f" stroke-width="2"/>
+        <path d="M368 121l7 7 13-14" fill="none" stroke="#3d7d5f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <g font-family="Manrope, sans-serif" font-size="13" font-weight="600" fill="#6b6e76">
+          <text x="14" y="214">Yangi o'quvchi</text>
+          <text x="190" y="120" text-anchor="middle">Birinchi dars</text>
+          <text x="410" y="170" text-anchor="end">Doimiy o'quvchi</text>
         </g>
-        <g>
-          <polygon points="36,150 66,150 81,176 66,202 36,202 21,176" fill="#2F7BFF" opacity=".9"/>
-          <polygon points="170,30 210,30 230,65 210,100 170,100 150,65" fill="#fff"/>
-          <polygon points="360,90 396,90 414,121 396,152 360,152 342,121" fill="#FF9A1F"/>
-        </g>
-        <g font-family="Lexend, sans-serif" font-size="13" fill="#C9D6F8">
-          <text x="14" y="215">Yangi o'quvchi</text>
-          <text x="152" y="120">Birinchi dars</text>
-          <text x="410" y="172" text-anchor="end">Doimiy o'quvchi</text>
-        </g>
-        <g fill="#fff" font-family="Lexend, sans-serif" font-size="12" font-weight="600">
-          <text x="176" y="70">45'</text>
-        </g>
+        <text x="190" y="70" text-anchor="middle" fill="#fff" font-family="Manrope, sans-serif" font-size="15" font-weight="700">60'</text>
       </svg>
     </div>
     <div class="txt">

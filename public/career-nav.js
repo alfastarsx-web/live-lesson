@@ -16,13 +16,14 @@
 
   const css = document.createElement('style');
   css.textContent = `
-.career-nav{position:sticky;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line);
-  padding:8px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left))}
-.career-nav .ichi{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
-.career-nav a{text-align:center;padding:9px 2px;font-family:var(--display);font-size:13.5px;font-weight:600;
-  color:var(--mute);text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap}
-.career-nav a[aria-current="page"]{color:var(--brand);border-bottom-color:var(--brand)}
-.career-nav a:focus-visible{outline:3px solid var(--gold, #FF9A1F);outline-offset:2px}`;
+.career-nav{position:sticky;top:0;z-index:30;background:var(--bg);
+  padding:10px max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left))}
+.career-nav .ichi{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;
+  background:#f2f2ef;border-radius:14px;padding:4px;box-shadow:inset 0 0 0 1px var(--line)}
+.career-nav a{text-align:center;padding:8px 2px;font-family:var(--display);font-size:13.5px;font-weight:700;
+  color:var(--mute);text-decoration:none;border-radius:10px;white-space:nowrap}
+.career-nav a[aria-current="page"]{background:var(--card);color:var(--text);box-shadow:0 0 0 1px var(--line)}
+.career-nav a:focus-visible{outline:2px solid var(--brand);outline-offset:2px}`;
   document.head.appendChild(css);
 
   const nav = document.createElement('nav');
