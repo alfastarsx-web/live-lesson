@@ -121,7 +121,7 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
     </button>
     <button class="pl reyting" type="button" data-varaq="reyting" aria-label="Reyting">
       <span class="ik"><svg viewBox="0 0 42 42" aria-hidden="true"><circle cx="21" cy="21" r="18" fill="none" stroke="rgba(138,100,18,.15)" stroke-width="4"/><circle id="reytingHalqa" cx="21" cy="21" r="18" fill="none" stroke="#e0a526" stroke-width="4" stroke-linecap="round" stroke-dasharray="113" stroke-dashoffset="113"/></svg>⭐</span>
-      <span><b id="reyting">—</b><span>reyting</span></span>
+      <span><b id="reyting">—</b><span id="yulduz">reyting</span></span>
     </button>
     <button class="pl rank" type="button" data-varaq="rank" aria-label="Rank">
       <span class="rank-harf" id="rankHarf">P</span>
@@ -294,6 +294,9 @@ function holatChiz(ball, p) {
   }
   if (p) {
     $('#reyting').textContent = p.rating;
+    // O'quvchilar bahosi (1–5) — reyting (0–100) ichidagi 25 ball shundan
+    const q0 = p.parts || {};
+    $('#yulduz').textContent = q0.starsCount ? `⭐ ${Number(q0.starsAvg).toFixed(1)} · ${q0.starsCount} baho` : 'reyting';
     halqa('#reytingHalqa', p.rating / 100);
     $('#rankHarf').textContent = p.rank.name[0];
     $('#rankNom').textContent = p.rank.name;
@@ -320,8 +323,11 @@ function varaq(tur) {
       + (b.entries || []).slice(0, 8).map((e) => `<div class="qism"><span>${esc(e.reason)}</span><b class="num">${e.points > 0 ? '+' : ''}${e.points}</b></div>`).join('')
       + `<p class="xira" style="margin:10px 0 0">${HOLAT_B.enabled ? `Seriya: ${HOLAT_B.streakDays} kun · ×${HOLAT_B.coefficient}` : 'Ball tizimi tez orada ishga tushadi.'}</p>`;
   } else if (tur === 'reyting' && q.rating) {
-    sarlavha = `⭐ Reyting ${p.rating}`;
-    t = bar('⭐ Yulduzlar', q.rating.stars, 25) + bar('✅ Norma kunlari', q.rating.norm, 30)
+    sarlavha = `⭐ Reyting ${p.rating} / 100`;
+    t = `<p class="xira" style="margin:6px 0 0">${q.starsCount
+      ? `O‘quvchilar bahosi: <b>⭐ ${Number(q.starsAvg).toFixed(1)}</b> (oxirgi ${q.starsCount} ta, eng past va eng yuqorisi hisobga olinmaydi)`
+      : 'O‘quvchilar bahosi hali yo‘q — 5 ta bahodan keyin hisobga kiradi'}</p>`
+      + bar('⭐ Yulduzlar', q.rating.stars, 25) + bar('✅ Norma kunlari', q.rating.norm, 30)
       + bar('🟢 Ochiq soatda onlayn', q.rating.online, 25) + bar('📝 Sinov natijasi o‘z vaqtida', q.rating.outcomes, 20);
   } else if (tur === 'rank' && p.rank) {
     const n = p.rank.next;

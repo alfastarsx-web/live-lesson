@@ -267,7 +267,7 @@ async function progress() {
   $('#pRank').textContent = p.rank.name;
   $('#pRankIzoh').textContent = p.rank.next ? `${p.rank.share}% · keyingisi ${p.rank.next.name} ${p.rank.next.share}%` : `${p.rank.share}% · eng yuqori`;
   $('#pReyting').textContent = p.rating;
-  $('#pReytingIzoh').textContent = p.rank.next ? `${p.rank.next.name} uchun ${p.rank.next.need.rating}` : '0–100';
+  $('#pReytingIzoh').textContent = p.parts?.starsCount ? `⭐ ${Number(p.parts.starsAvg).toFixed(1)} · ${p.parts.starsCount} baho` : (p.rank.next ? `${p.rank.next.name} uchun ${p.rank.next.need.rating}` : '0–100');
   $('#pPrior').textContent = p.priority.value;
   $('#pPriorIzoh').textContent = p.priority.level.name;
   document.querySelectorAll('.uchlik div').forEach((d) => d.classList.add('bor'));
