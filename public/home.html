@@ -74,6 +74,36 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
 .ring i{display:block;height:100%;width:0;background:var(--em);border-radius:6px;transition:width .5s}
 .akad{display:flex;gap:12px;align-items:center;background:linear-gradient(120deg,#fff6e6,#fdeede);box-shadow:0 0 0 1px #f6e2c4;border-radius:18px;padding:14px;text-decoration:none}
 .toast{position:fixed;left:16px;right:16px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:90;max-width:528px;margin:0 auto;background:var(--ink);color:#fff;border-radius:14px;padding:14px 16px;font-size:14px;font-weight:600}
+/* Holat: bugun, reyting, rank, prioritet — kam matn, ko'p belgi */
+.holat{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pl{position:relative;border:0;text-align:left;font-family:inherit;color:inherit;cursor:pointer;border-radius:18px;padding:12px 13px 11px;display:flex;align-items:center;gap:11px;min-height:74px}
+.pl:focus-visible{outline:2px solid var(--em);outline-offset:2px}
+.pl .ik{width:42px;height:42px;flex:0 0 auto;position:relative;display:grid;place-items:center;font-size:19px}
+.pl .ik svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.pl b{display:block;font-size:21px;letter-spacing:-.6px;line-height:1.1;font-variant-numeric:tabular-nums}
+.pl span{font-size:11.5px;font-weight:700;opacity:.72}
+.pl.bugun{background:var(--em-soft);color:var(--em)}
+.pl.reyting{background:#fff5d9;color:#8a6412}
+.pl.rank{background:#ece9fb;color:#4b3fa0}
+.pl.prior{background:var(--sky-soft);color:#2f5fc4}
+.pl.prior.low{background:var(--amber-soft);color:#9a6315}
+.pl.prior.stop{background:var(--coral-soft);color:var(--coral)}
+.pl .ogoh{position:absolute;top:8px;right:10px;font-size:13px}
+.rank-harf{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,#7b6be0,#4b3fa0);color:#fff;font-weight:800;font-size:18px;display:grid;place-items:center;box-shadow:0 4px 12px rgba(75,63,160,.3)}
+.nishonlar{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;margin:0 -2px}
+.nishonlar::-webkit-scrollbar{display:none}
+.nsh{flex:0 0 auto;width:46px;height:46px;border-radius:50%;border:0;display:grid;place-items:center;font-size:22px;cursor:pointer;
+  background:radial-gradient(circle at 35% 30%,#fff7d6,#f7c873 75%);box-shadow:0 3px 10px rgba(240,167,58,.3)}
+.nsh.yoq{background:var(--sub);filter:grayscale(1);opacity:.45;box-shadow:none}
+.nsh:focus-visible{outline:2px solid var(--em);outline-offset:2px}
+.qism{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;font-size:13px;margin-top:10px}
+.qism i{grid-column:1 / -1;height:6px;border-radius:6px;background:var(--sub);overflow:hidden;display:block}
+.qism i s{display:block;height:100%;background:var(--em);border-radius:6px;text-decoration:none}
+.varaq{position:fixed;inset:0;z-index:70;background:rgba(31,42,39,.35);display:flex;align-items:flex-end;justify-content:center}
+.varaq[hidden]{display:none}
+.varaq .ichi{width:100%;max-width:560px;background:var(--card);border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom))}
+.varaq h3{margin:0;font-size:18px}
+.varaq .yop{margin-top:14px;width:100%;border:0;border-radius:14px;padding:12px;font-family:inherit;font-weight:800;background:var(--sub);color:var(--ink);cursor:pointer}
 @media (prefers-reduced-motion:reduce){.ring i{transition:none}}
 </style>
 </head>
@@ -83,6 +113,27 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
     <div class="ph" id="ph" aria-hidden="true">·</div>
     <div><small id="sana"></small><h1 id="salomMatn">Xush kelibsiz!</h1></div>
   </header>
+
+  <div class="holat" id="holat" hidden>
+    <button class="pl bugun" type="button" data-varaq="bugun" aria-label="Bugungi ball va norma">
+      <span class="ik"><svg viewBox="0 0 42 42" aria-hidden="true"><circle cx="21" cy="21" r="18" fill="none" stroke="rgba(31,111,92,.15)" stroke-width="4"/><circle id="normaHalqa" cx="21" cy="21" r="18" fill="none" stroke="#1f6f5c" stroke-width="4" stroke-linecap="round" stroke-dasharray="113" stroke-dashoffset="113"/></svg>⚡</span>
+      <span><b id="bugunBall">0</b><span id="bugunIzoh">bugun</span></span>
+    </button>
+    <button class="pl reyting" type="button" data-varaq="reyting" aria-label="Reyting">
+      <span class="ik"><svg viewBox="0 0 42 42" aria-hidden="true"><circle cx="21" cy="21" r="18" fill="none" stroke="rgba(138,100,18,.15)" stroke-width="4"/><circle id="reytingHalqa" cx="21" cy="21" r="18" fill="none" stroke="#e0a526" stroke-width="4" stroke-linecap="round" stroke-dasharray="113" stroke-dashoffset="113"/></svg>⭐</span>
+      <span><b id="reyting">—</b><span id="yulduz">reyting</span></span>
+    </button>
+    <button class="pl rank" type="button" data-varaq="rank" aria-label="Rank">
+      <span class="rank-harf" id="rankHarf">P</span>
+      <span><b id="rankNom">Pro</b><span id="rankUlush">60%</span></span>
+    </button>
+    <button class="pl prior" id="priorPl" type="button" data-varaq="prior" aria-label="Prioritet">
+      <span class="ik">🚀</span>
+      <span><b id="prior">—</b><span id="priorNom">prioritet</span></span>
+      <span class="ogoh" id="priorOgoh" hidden aria-hidden="true">⚠️</span>
+    </button>
+  </div>
+  <div class="nishonlar" id="nishonlar" aria-label="Nishonlar"></div>
 
   <a class="akad" id="akad" href="/mentor/akademiya.html" hidden>
     <span class="ico a" aria-hidden="true">A</span>
@@ -101,14 +152,12 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
   <div class="lbl">Sizni kutyapti</div>
   <section class="card ruyxat" id="kutyapti" aria-label="Sizni kutyapti"><div class="bosh">Yuklanmoqda…</div></section>
 
-  <div class="stats" id="stats" hidden>
-    <a class="stat n" href="/career.html"><small>Bugungi norma</small><b class="num" id="norma">—</b><div class="ring"><i id="normaI"></i></div></a>
-    <a class="stat s" href="/career.html"><small>Seriya</small><b class="num" id="seriya">—</b><div class="t2" id="koef"></div></a>
-  </div>
 </main>
+<div class="varaq" id="varaq" hidden><div class="ichi" role="dialog" aria-modal="true" aria-labelledby="varaqS"><h3 id="varaqS"></h3><div id="varaqT"></div><button class="yop" type="button" id="varaqYop">Yopish</button></div></div>
 
 <script src="/auth-webview.js"></script>
 <script src="/tabrik.js"></script>
+<script src="/ding.js"></script>
 <script>
 const $ = (s) => document.querySelector(s);
 const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -228,17 +277,102 @@ function kutyaptiChiz({ tarix, jadval, oquvchilar, hamyon }) {
     : '<div class="tinch"><span class="ico g" aria-hidden="true">✓</span>Hammasi joyida — kutayotgan ish yo‘q</div>';
 }
 
+// ---------- holat: bugun, reyting, rank, prioritet, nishonlar ----------
+let HOLAT_B = null;
+let HOLAT_P = null;
+const halqa = (id, foiz) => { $(id).style.strokeDashoffset = String(113 - 113 * Math.max(0, Math.min(1, foiz))); };
+function holatChiz(ball, p) {
+  HOLAT_B = ball; HOLAT_P = p;
+  if (!ball && !p) return;
+  $('#holat').hidden = false;
+  if (ball) {
+    const bugun = ball.today || { points: 0, activity: 0, normTarget: 100 };
+    $('#bugunBall').textContent = `${bugun.points > 0 ? '+' : ''}${bugun.points}`;
+    $('#bugunIzoh').textContent = ball.streakDays ? `🔥 ${ball.streakDays} kun` : `${bugun.activity}/${bugun.normTarget}`;
+    halqa('#normaHalqa', bugun.activity / (bugun.normTarget || 100));
+    if (ball.enabled) ballKuzat(bugun.points, $('#bugunBall'), bugun.day);
+  }
+  if (p) {
+    $('#reyting').textContent = p.rating;
+    // O'quvchilar bahosi (1–5) — reyting (0–100) ichidagi 25 ball shundan
+    const q0 = p.parts || {};
+    $('#yulduz').textContent = q0.starsCount ? `⭐ ${Number(q0.starsAvg).toFixed(1)} · ${q0.starsCount} baho` : 'reyting';
+    halqa('#reytingHalqa', p.rating / 100);
+    $('#rankHarf').textContent = p.rank.name[0];
+    $('#rankNom').textContent = p.rank.name;
+    $('#rankUlush').textContent = `${p.rank.share}%`;
+    $('#prior').textContent = p.priority.value;
+    $('#priorNom').textContent = p.priority.level.name.toLowerCase();
+    $('#priorPl').className = `pl prior ${p.priority.level.code}`;
+    $('#priorOgoh').hidden = !(p.parts?.limits || []).length;
+    prioritetKuzat(p.priority.value);
+    $('#nishonlar').innerHTML = p.badges.map((b) =>
+      `<button class="nsh ${b.earned ? '' : 'yoq'}" type="button" data-nishon="${b.code}" aria-label="${esc(b.name)}${b.earned ? '' : ' — hali olinmagan'}">${b.emoji}</button>`).join('');
+  }
+}
+const bar = (nom, qiymat, max) => `<div class="qism"><span>${nom}</span><b class="num">${qiymat}/${max}</b><i><s style="width:${(qiymat / max) * 100}%"></s></i></div>`;
+function varaq(tur) {
+  const p = HOLAT_P || {};
+  const q = p.parts || {};
+  let sarlavha = '';
+  let t = '';
+  if (tur === 'bugun' && HOLAT_B) {
+    const b = HOLAT_B.today;
+    sarlavha = `⚡ Bugun ${b.points > 0 ? '+' : ''}${b.points} ball`;
+    t = bar('Norma', Math.min(b.activity, b.normTarget), b.normTarget)
+      + (b.entries || []).slice(0, 8).map((e) => `<div class="qism"><span>${esc(e.reason)}</span><b class="num">${e.points > 0 ? '+' : ''}${e.points}</b></div>`).join('')
+      + `<p class="xira" style="margin:10px 0 0">${HOLAT_B.enabled ? `Seriya: ${HOLAT_B.streakDays} kun · ×${HOLAT_B.coefficient}` : 'Ball tizimi tez orada ishga tushadi.'}</p>`;
+  } else if (tur === 'reyting' && q.rating) {
+    sarlavha = `⭐ Reyting ${p.rating} / 100`;
+    t = `<p class="xira" style="margin:6px 0 0">${q.starsCount
+      ? `O‘quvchilar bahosi: <b>⭐ ${Number(q.starsAvg).toFixed(1)}</b> (oxirgi ${q.starsCount} ta, eng past va eng yuqorisi hisobga olinmaydi)`
+      : 'O‘quvchilar bahosi hali yo‘q — 5 ta bahodan keyin hisobga kiradi'}</p>`
+      + bar('⭐ Yulduzlar', q.rating.stars, 25) + bar('✅ Norma kunlari', q.rating.norm, 30)
+      + bar('🟢 Ochiq soatda onlayn', q.rating.online, 25) + bar('📝 Sinov natijasi o‘z vaqtida', q.rating.outcomes, 20);
+  } else if (tur === 'rank' && p.rank) {
+    const n = p.rank.next;
+    sarlavha = `${p.rank.name} · ${p.rank.share}%`;
+    t = n ? `<p class="xira" style="margin:6px 0 0">${n.name} · ${n.share}% uchun:</p>`
+      + bar('👥 O‘quvchilar', Math.min(n.have.students, n.need.students), n.need.students)
+      + bar('⭐ Reyting', Math.min(n.have.rating, n.need.rating), n.need.rating)
+      + bar('⚡ Ball', Math.min(n.have.points, n.need.points), n.need.points)
+      : '<p class="xira">Eng yuqori rank — Legend 👑</p>';
+  } else if (tur === 'prior' && q.priority) {
+    sarlavha = `🚀 Prioritet ${p.priority.value} · ${p.priority.level.name}`;
+    t = bar('✅ Norma kunlari', q.priority.norm, 40) + bar('⚡ So‘rovga javob', q.priority.offers, 25)
+      + bar('🟢 Darsga chiqish', q.priority.online, 20) + bar('📝 Status va izoh', q.priority.notes, 15)
+      + ((q.limits || []).includes('small_calendar') ? `<p style="margin:10px 0 0;color:#9a6315">⚠️ Jadval haftasiga ${q.weeklyHours} soat — 10 soatdan kam. Prioritet 69 dan oshmaydi.</p>` : '')
+      + ((q.limits || []).includes('low_stars') ? '<p style="margin:6px 0 0;color:#9a6315">⚠️ Oxirgi darslar bahosi past — prioritet −15.</p>' : '');
+  } else return;
+  $('#varaqS').textContent = sarlavha;
+  $('#varaqT').innerHTML = t;
+  $('#varaq').hidden = false;
+  $('#varaqYop').focus();
+}
+$('#holat').addEventListener('click', (e) => { const b = e.target.closest('[data-varaq]'); if (b) varaq(b.dataset.varaq); });
+$('#nishonlar').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-nishon]');
+  const n = b && HOLAT_P?.badges.find((x) => x.code === b.dataset.nishon);
+  if (!n) return;
+  $('#varaqS').textContent = `${n.emoji} ${n.name}`;
+  $('#varaqT').innerHTML = `<p class="xira" style="margin:6px 0 0">${n.earned ? `${esc(n.done || '')} · ${new Date(n.awardedAt).toLocaleDateString('uz-UZ')}` : esc(n.how)}</p>`;
+  $('#varaq').hidden = false;
+});
+$('#varaqYop').onclick = () => { $('#varaq').hidden = true; };
+$('#varaq').addEventListener('click', (e) => { if (e.target.id === 'varaq') $('#varaq').hidden = true; });
+
 (async () => {
   salomChiz();
   await WebViewAuth.tayyorla({ akademiya: false });
   const ol = (u) => api(u).then((r) => (r && r.ok ? r.data : null)).catch(() => null);
-  const [hamyon, my, tarix, jadval, oquvchilar, ball, akad] = await Promise.all([
+  const [hamyon, my, tarix, jadval, oquvchilar, ball, progress, akad] = await Promise.all([
     ol('/api/wallet/summary'),
     ol('/api/booking/mentor/my'),
     ol('/api/booking/mentor/history'),
     ol('/api/booking/schedule'),
     ol('/api/ai/assignments/my-students/paid'),
     ol('/api/ai/mentor-gamification/home'),
+    ol('/api/ai/mentor-gamification/progress'),
     fetch('/api/akademiya/holat').then((x) => (x.ok ? x.json() : null)).catch(() => null),
   ]);
   if (hamyon?.firstName) { ISM = hamyon.firstName.trim().split(/\s+/)[0]; salomChiz(); }
@@ -250,16 +384,17 @@ function kutyaptiChiz({ tarix, jadval, oquvchilar, hamyon }) {
     $('#akad').hidden = false;
     $('#akadMatn').textContent = `${akad.modulesRead}/${akad.modules} modul o‘qildi · testdan o‘tgach sinov so‘rovlari keladi`;
   }
-  if (ball && ball.enabled) {
-    $('#stats').hidden = false;
-    const foiz = Math.min(100, Math.round((ball.today.activity / ball.today.normTarget) * 100));
-    $('#norma').textContent = `${ball.today.activity} / ${ball.today.normTarget}`;
-    $('#normaI').style.width = `${foiz}%`;
-    $('#seriya').textContent = `🔥 ${ball.streakDays} kun`;
-    $('#koef').textContent = ball.coefficient > 1 ? `×${ball.coefficient} koeffitsient` : 'Normani bajaring — seriya boshlanadi';
-  }
-  tabriklarniKorsat(ISM);
+  holatChiz(ball, progress);
+  await tabriklarniKorsat(ISM);
+  if (progress) nishonTabrik(progress.badges);
   setInterval(() => { salomChiz(); darslarChiz(); }, 60e3);
+  // Ball qo'shilsa yoki prioritet ko'tarilsa — ding (sahifa ochiq turganda ham)
+  setInterval(async () => {
+    if (document.visibilityState !== 'visible') return;
+    const [b, p] = await Promise.all([ol('/api/ai/mentor-gamification/home'), ol('/api/ai/mentor-gamification/progress')]);
+    holatChiz(b, p);
+    if (p) nishonTabrik(p.badges);
+  }, 60e3);
   // Ilovaga qaytganda (2 daqiqadan ko'p o'tgan bo'lsa) ma'lumot yangilansin
   const yuklandi = Date.now();
   document.addEventListener('visibilitychange', () => {

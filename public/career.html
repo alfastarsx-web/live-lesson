@@ -90,6 +90,15 @@ main{padding:20px 0 48px;display:grid;gap:16px}
 .uchlik b{display:block;font-family:var(--display);font-size:20px;font-weight:700;color:var(--mute)}
 .uchlik span{display:block;font-size:12.5px;font-weight:600;color:var(--text)}
 .uchlik small{display:block;font-size:11.5px;color:var(--mute);margin-top:2px;line-height:1.35}
+.uchlik div.bor{border-style:solid;background:var(--card)}
+.uchlik div.bor b{color:var(--brand)}
+.nishon-tor{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.nishon-tor div{text-align:center}
+.nishon-tor i{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 4px;border-radius:50%;font-size:25px;font-style:normal;
+  background:radial-gradient(circle at 35% 30%,#fff7d6,#f7c873 75%);box-shadow:0 3px 10px rgba(240,167,58,.3)}
+.nishon-tor .yoq i{background:var(--bg);filter:grayscale(1);opacity:.45;box-shadow:none}
+.nishon-tor span{display:block;font-size:11px;font-weight:700;line-height:1.25}
+.nishon-tor .yoq span{color:var(--mute);font-weight:600}
 .tez{display:inline-block;font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
   color:var(--gold);background:var(--gold-soft);padding:3px 8px;margin-left:8px;vertical-align:3px}
 
@@ -139,9 +148,9 @@ a.bolim .o{font-family:var(--display);color:var(--brand);font-size:20px}
       </div>
     </div>
     <div class="uchlik">
-      <div><b>—</b><span>Rank</span><small>Pro 60% dan Legend 85% gacha ulush · keyingi bosqich</small></div>
-      <div><b>—</b><span>Prioritet</span><small>ertaga qancha so‘rov olasiz · keyingi bosqich</small></div>
-      <div><b>—</b><span>Liga</span><small>haftalik reyting · keyingi bosqich</small></div>
+      <div><b id="pRank">—</b><span>Rank</span><small id="pRankIzoh">ulush</small></div>
+      <div><b id="pReyting">—</b><span>Reyting</span><small id="pReytingIzoh">0–100</small></div>
+      <div><b id="pPrior">—</b><span>Prioritet</span><small id="pPriorIzoh">ertangi oqim</small></div>
     </div>
   </section>
 
@@ -151,13 +160,15 @@ a.bolim .o{font-family:var(--display);color:var(--brand);font-size:20px}
     <div id="tarix"></div>
   </section>
 
-  <p class="slabel">Daromad</p>
-  <section class="card" aria-labelledby="pulS">
-    <h2 id="pulS">Ishlagan pulingiz</h2>
-    <div class="pul"><b id="jami">…</b><span>so‘m</span></div>
-    <dl class="manbalar" id="manbalar"></dl>
-    <p class="izoh" id="pulIzoh">Pulni ishlagan kuningizning ertasiyoq yechib olasiz.</p>
+  <p class="slabel">Nishonlar</p>
+  <section class="card" aria-labelledby="nishS">
+    <h2 id="nishS">Nishonlaringiz</h2>
+    <p class="izoh">Bir marta olinadi, umrbod qoladi. Kulranglari — keyingi maqsad.</p>
+    <div class="nishon-tor" id="nishonTor"></div>
   </section>
+
+  <p class="slabel">Daromad</p>
+  <a class="bolim" href="/daromad.html"><i class="hex">₮</i><span><b>Hamyon va daromad</b><span>Balans, har darsdan tushgan pul, soliq va yechib olish — Work → Daromad</span></span><span class="o" aria-hidden="true">›</span></a>
 
   <p class="slabel">Akademiya</p>
   <section class="card" aria-labelledby="akadS">
@@ -173,17 +184,12 @@ a.bolim .o{font-family:var(--display);color:var(--brand);font-size:20px}
 
 <script src="/auth-webview.js"></script>
 <script src="/career-nav.js"></script>
+<script src="/ding.js"></script>
 <script>
 const $ = (s) => document.querySelector(s);
 const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const summa = (n) => Math.round(n).toLocaleString('ru-RU').replace(/ /g, ' ');
 const OYLAR_T = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
-const MANBA = {
-  call: 'Qo‘ng‘iroqlar',
-  adaptation: 'Moslashuv (yangi o‘quvchi)',
-  retention: 'O‘quvchini ushlab qolish',
-  manual: 'Bonus va tuzatishlar',
-};
 
 const KUN_Q = (d) => { const [, m, dd] = d.split('-'); return `${Number(dd)}-${OYLAR_T[Number(m) - 1]}`; };
 const belgi = (n) => (n > 0 ? '+' : n < 0 ? '−' : '') + summa(Math.abs(n));
@@ -254,17 +260,20 @@ async function tarix() {
   });
 }
 
-async function daromad() {
-  const r = await api('/api/ai/mentor/salary');
-  if (!r || !r.ok) {
-    $('#jami').textContent = '—';
-    $('#pulIzoh').textContent = 'Daromadni yuklab bo‘lmadi. Keyinroq qayta oching.';
-    return;
-  }
-  $('#jami').textContent = summa(r.data.total || 0);
-  const qatorlar = Object.entries(r.data.bySource || {}).filter(([, v]) => v);
-  $('#manbalar').innerHTML = qatorlar.map(([k, v]) =>
-    `<div><dt>${esc(MANBA[k] || k)}</dt><dd>${summa(v)} so‘m</dd></div>`).join('');
+async function progress() {
+  const r = await api('/api/ai/mentor-gamification/progress');
+  if (!r || !r.ok) return;
+  const p = r.data;
+  $('#pRank').textContent = p.rank.name;
+  $('#pRankIzoh').textContent = p.rank.next ? `${p.rank.share}% · keyingisi ${p.rank.next.name} ${p.rank.next.share}%` : `${p.rank.share}% · eng yuqori`;
+  $('#pReyting').textContent = p.rating;
+  $('#pReytingIzoh').textContent = p.parts?.starsCount ? `⭐ ${Number(p.parts.starsAvg).toFixed(1)} · ${p.parts.starsCount} baho` : (p.rank.next ? `${p.rank.next.name} uchun ${p.rank.next.need.rating}` : '0–100');
+  $('#pPrior').textContent = p.priority.value;
+  $('#pPriorIzoh').textContent = p.priority.level.name;
+  document.querySelectorAll('.uchlik div').forEach((d) => d.classList.add('bor'));
+  $('#nishonTor').innerHTML = p.badges.map((b) =>
+    `<div class="${b.earned ? '' : 'yoq'}" title="${esc(b.how)}"><i aria-hidden="true">${b.emoji}</i><span>${esc(b.name)}</span></div>`).join('');
+  if (window.nishonTabrik) nishonTabrik(p.badges);
 }
 
 async function akademiya() {
@@ -291,7 +300,7 @@ async function akademiya() {
   await WebViewAuth.tayyorla({ akademiya: false });
   const w = await api('/api/whoami');
   if (w && w.ok && w.data.name && w.data.name !== 'Ustoz') $('#salom').textContent = `Career · ${w.data.name.split(/\s+/)[0]}`;
-  await Promise.all([ball(), daromad(), akademiya()]);
+  await Promise.all([ball(), progress(), akademiya()]);
 })();
 </script>
 </body>
