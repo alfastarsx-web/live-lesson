@@ -782,6 +782,10 @@ body:not(.js) .nojs{display:block}
     nextBtn.disabled = false;
     nextBtn.className = idx === MODS.length-1 ? "btn warn-btn" : "btn";
     hintEl.textContent = idx === 0 ? "8 ta modul · taxminan 12 daqiqa" : (LABELS[idx] + " · " + idx + " / " + (MODS.length-1));
+    if(!HOLAT.mentor && !HOLAT.passed){
+      // Admin hisobi — akademiyadan ozod: ko'rish rejimi, natija yozilmaydi
+      hintEl.textContent = "👀 Ko'rish rejimi · " + hintEl.textContent;
+    }
     if(HOLAT.passed){
       hintEl.textContent = "Siz akademiyadan o'tgansiz · " + hintEl.textContent;
       if(idx === MODS.length-1){ nextBtn.textContent = "Ishni boshlash"; nextBtn.className = "btn"; }
@@ -864,6 +868,12 @@ body:not(.js) .nojs{display:block}
     nextBtn.style.flex = "1";
     nextBtn.disabled = false;
     hintEl.textContent = pass ? "Natijangiz saqlandi" : "Har bir urinishda savollar bir xil qoladi";
+    if(d.preview){
+      // Ko'rish rejimi: natija saqlanmaydi, Work'ga o'tkazilmaydi
+      lastResult = {...d, pass:false};
+      nextBtn.textContent = "Testni qayta topshirish"; nextBtn.className = "btn";
+      hintEl.textContent = "👀 Ko'rish rejimi — natija saqlanmadi";
+    }
     barEl.style.width = "100%";
   }
 
@@ -876,7 +886,16 @@ body:not(.js) .nojs{display:block}
         if(HOLAT.passed){ location.href = "/work.html"; return; }
         nextBtn.disabled = true;
         savollarniOl().then(()=>{ mode = "test"; qi = 0; renderQuestion(); })
-          .catch((e)=>{ nextBtn.disabled = false; hintEl.textContent = e.message; });
+          .catch(async (e)=>{
+            // Server hisobi boshqacha bo'lsa — o'qilmagan bo'limga qaytaramiz
+            await holatOl();
+            if(HOLAT.mentor && !HOLAT.passed && HOLAT.modulesRead < MODS.length){
+              idx = HOLAT.modulesRead; renderModule();
+              hintEl.textContent = "Avval " + (idx + 1) + "-bo'limni o'qing — keyin test ochiladi";
+              return;
+            }
+            nextBtn.disabled = false; hintEl.textContent = e.message;
+          });
       }
     } else if(mode === "test"){
       if(qi < QUESTIONS.length-1){ qi++; renderQuestion(); }
