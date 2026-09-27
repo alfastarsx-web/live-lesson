@@ -207,11 +207,6 @@ details p{margin:0;padding:0 18px 18px;color:var(--mut);font-size:15.5px}
 .yakun h2{font-size:clamp(26px,6vw,42px);line-height:1.1;margin:10px 0 12px}
 .yakun p{color:#c8d3e3;max-width:32em;margin:0 auto 26px}
 
-/* forma (brauzerda) */
-.forma{max-width:420px;margin:0 auto;display:grid;gap:10px;text-align:left}
-.forma label{font-size:13px;font-weight:700;color:#c8d3e3}
-.forma input{width:100%;border:0;border-radius:14px;padding:16px;font:600 17px 'Manrope',sans-serif;background:#fff;color:var(--ink)}
-.forma .xato{color:#ffb4a6;font-size:14px;min-height:1.2em;margin:0}
 
 /* pastki tugma */
 .pastki{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:10px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(246,244,239,.96) 30%);
@@ -278,10 +273,14 @@ canvas#konfetti{position:fixed;inset:0;pointer-events:none;z-index:70}
 .yol ol{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:y}
 .yol li{display:flex;gap:10px;align-items:center;font-size:15px;font-weight:600}
 .yol li i{flex:none;width:32px;height:32px;border-radius:10px;background:#fff;display:grid;place-items:center;font-style:normal;font-size:17px}
-.yol-tugma{margin:12px 0 4px;display:flex;justify-content:center}
-.yol-tugma span{position:relative;background:var(--teal);color:#fff;font-weight:800;font-size:16px;padding:13px 24px;border-radius:16px;box-shadow:0 10px 24px rgba(13,148,136,.35)}
-.yol-tugma span::after{content:"";position:absolute;inset:-6px;border-radius:20px;border:2px solid var(--teal);animation:halqa 1.6s ease-out infinite}
-@keyframes halqa{0%{opacity:.9;transform:scale(.96)}100%{opacity:0;transform:scale(1.12)}}
+.vaqtlar{gap:0!important}
+.vaqtlar li{position:relative;align-items:flex-start!important;padding-bottom:14px}
+.vaqtlar li:not(.oxir)::before{content:"";position:absolute;left:15px;top:32px;bottom:0;width:2px;background:#bfe6e1}
+.vaqtlar li.oxir{padding-bottom:0}
+.vaqtlar li div{display:grid;gap:1px;padding-top:2px}
+.vaqtlar li small{font-weight:800;font-size:12.5px;color:var(--teal);letter-spacing:.02em}
+.vaqtlar li span{font-weight:600;font-size:14.5px;line-height:1.4}
+.vaqtlar li.oxir i{background:var(--teal);color:#fff}
 .e{display:inline-block;margin:0 .55em 0 .15em}
 .yol-eslat{margin:12px 0 0!important;font-size:14px;color:var(--ink)!important;background:#fff;border-radius:12px;padding:10px 12px}
 
@@ -325,6 +324,23 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
 .royxat{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .royxat li{display:flex;gap:10px;align-items:center;font-weight:600;font-size:15px}
 .royxat li i{flex:none;width:30px;height:30px;border-radius:9px;background:var(--sun-soft);display:grid;place-items:center;font-style:normal}
+.b-izoh{color:var(--mut);font-size:14.5px;margin:0 0 12px}
+.yulduzlar{display:flex;justify-content:center;gap:6px;margin:4px 0 14px}
+.yulduzlar button{border:0;background:none;font-size:42px;line-height:1;color:#d8dde4;cursor:pointer;padding:2px;transition:transform .15s,color .15s}
+.yulduzlar button.on{color:var(--sun)}
+.yulduzlar button:active{transform:scale(1.2)}
+.yulduzlar.kichik{font-size:26px;color:var(--sun);gap:2px;margin:0}
+.yulduzlar.kichik span{color:#d8dde4}
+.fikrlar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.fikr{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 13px;font:700 14px 'Manrope',sans-serif;color:var(--ink);cursor:pointer}
+.fikr[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+#bahoIzoh{width:100%;border:1.5px solid var(--line);border-radius:14px;padding:12px;font:600 15px 'Manrope',sans-serif;color:var(--ink);resize:vertical;margin-bottom:12px}
+.tariflar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tarif{border:1.5px solid var(--line);border-radius:16px;padding:12px 6px;text-align:center;display:grid;gap:1px}
+.tarif b{font-family:'Unbounded';font-size:20px}
+.tarif strong{font-size:15px;margin-top:4px;font-variant-numeric:tabular-nums}
+.tarif small{font-size:11.5px;color:var(--mut);font-weight:600}
+.tarif.top{background:var(--sun-soft);border-color:#f3d67a}
 .b-xato:empty{display:none}
 .b-xato{color:var(--coral);text-align:center;font-weight:700;font-size:14px;min-height:1.2em;margin:8px 0 0}
 </style>
@@ -339,7 +355,6 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
         <h1>Ingliz tilida <em>gapirishni</em> bugun boshlang</h1>
         <p class="lead">Jonli ustoz bilan birinchi darsingiz bepul. Darajangizni aniqlaymiz, xatolaringizni ko‘rsatamiz va sizga mos shaxsiy reja tuzamiz.</p>
         <button class="cta" type="button" data-cta>Vaqtni tanlab yozilish <small>→</small></button>
-        <button class="qongiroq" type="button" data-qongiroq>yoki menga qo‘ng‘iroq qiling</button>
         <ul class="kafolat">
           <li>Karta shart emas</li>
           <li>Hech qanday majburiyat yo‘q</li>
@@ -389,7 +404,7 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
       <div class="qadamlar">
         <div class="qd pay"><span class="vaqt">20 soniya</span><h3>Vaqtni tanlang</h3><p>O‘zingizga qulay kun va soatni belgilang. 🟢 belgisi — shu soatda bo‘sh ustoz bor.</p></div>
         <div class="qd pay"><span class="vaqt">Tasdiq</span><h3>Ustoz biriktiriladi</h3><p>Shu vaqtda bo‘sh ustozlardan biri darsingizni oladi — sizga bildirishnoma keladi.</p></div>
-        <div class="qd pay"><span class="vaqt">60 daqiqa</span><h3>Jonli dars</h3><p>Ilova Home sahifasida “Darsga kirish” tugmasi chiqadi. Bosasiz — ustoz sizni kutib turibdi.</p></div>
+        <div class="qd pay"><span class="vaqt">60 daqiqa</span><h3>Jonli dars</h3><p>Dars vaqtida ilovadagi Kurslar bo‘limida “Darsga kirish” tugmasi yonadi. Bosasiz — ustoz bilan darsdasiz.</p></div>
       </div>
     </div>
   </section>
@@ -483,7 +498,7 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
       <details class="pay"><summary>Sinov darsi haqiqatan bepulmi?</summary><p>Ha. 60 daqiqalik birinchi dars to‘liq bepul, karta ma’lumoti so‘ralmaydi. Davom etish-etmaslikni darsdan keyin o‘zingiz hal qilasiz.</p></details>
       <details class="pay"><summary>Darajam juda past, nol bo‘lsa-chi?</summary><p>Muammo emas. Ustoz darsni darajangizga moslab olib boradi — kerak bo‘lsa, o‘zbek tilida tushuntiradi. Sinov darsining maqsadi aynan boshlang‘ich nuqtani topish.</p></details>
       <details class="pay"><summary>Nima kerak bo‘ladi?</summary><p>Telefon, internet va 60 daqiqa tinch joy. Dars shu ilovaning ichida bo‘ladi — boshqa dastur o‘rnatish shart emas.</p></details>
-      <details class="pay"><summary>Ustozni kim tanlaydi?</summary><p>Menejer darajangiz va maqsadingizga qarab, siz tanlagan vaqtda bo‘sh bo‘lgan tekshirilgan ustozni belgilaydi. Keyinchalik ustozni almashtirishingiz mumkin.</p></details>
+      <details class="pay"><summary>Ustozni kim tanlaydi?</summary><p>Siz tanlagan soatda bo‘sh bo‘lgan tekshirilgan ustozlarga so‘rov boradi — birinchi qabul qilgan ustoz darsingizni oladi va sizga xabar keladi.</p></details>
       <details class="pay"><summary>Sinovdan keyin majbur bo‘lamanmi?</summary><p>Yo‘q. Dars yoqsa — haftada necha marta o‘qishni tanlab davom etasiz. Yoqmasa — hech narsa to‘lamaysiz.</p></details>
     </div>
   </section>
@@ -493,16 +508,8 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
       <div class="yakun pay">
         <span class="teg"><b></b>Bugun yozilganlar uchun</span>
         <h2>Birinchi gapingizni ingliz tilida aytishga tayyormisiz?</h2>
-        <p>Yoziling — menejerimiz qo‘ng‘iroq qilib, sizga qulay vaqtni kelishadi.</p>
-        <button class="cta" type="button" data-cta id="yakunCta">Vaqtni tanlab yozilish <small>→</small></button><br><button class="qongiroq" type="button" data-qongiroq>yoki menga qo‘ng‘iroq qiling</button>
-        <form class="forma" id="forma" hidden novalidate>
-          <label for="fIsm">Ismingiz</label>
-          <input id="fIsm" name="ism" autocomplete="given-name" placeholder="Ism">
-          <label for="fTel">Telefon</label>
-          <input id="fTel" name="tel" inputmode="tel" autocomplete="tel" placeholder="+998 90 123 45 67">
-          <p class="xato" id="fXato" role="alert"></p>
-          <button class="cta" type="submit" id="fYubor">Bepul darsga yozilish</button>
-        </form>
+        <p>Qulay vaqtni tanlang — shu soatda bo‘sh ustoz darsingizni oladi.</p>
+        <button class="cta" type="button" data-cta id="yakunCta">Vaqtni tanlab yozilish <small>→</small></button>
       </div>
     </div>
   </section>
@@ -515,13 +522,8 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
   <div class="ichi" role="dialog" aria-modal="true" aria-labelledby="oynaS">
     <div class="belgi-k" aria-hidden="true">✓</div>
     <h3 id="oynaS">Siz ro‘yxatdasiz!</h3>
-    <p id="oynaMatn">Menejerimiz tez orada qo‘ng‘iroq qilib, sinov darsi vaqtini kelishadi.</p>
+    <p id="oynaMatn"></p>
     <div id="oynaYol" hidden></div>
-    <div class="qadam" id="oynaQadam">
-      <div id="oq1"><i>🔔</i><span>Ustoz biriktirilgach bildirishnoma keladi</span></div>
-      <div id="oq2"><i>🗓️</i><span>Dars kuni Home sahifasida “Darsga kirish” tugmasi chiqadi</span></div>
-      <div><i>🎧</i><span>Darsga quloqchin bilan, tinch joydan kiring</span></div>
-    </div>
     <button class="cta oq" type="button" id="oynaYop" style="width:100%">Tushunarli</button>
   </div>
 </div>
@@ -623,10 +625,7 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
     })();
   }
 
-  function muvaffaqiyat(oldin){
-    if (oldin) $('#oynaMatn').textContent = 'So‘rovingiz allaqachon qabul qilingan — menejerimiz tez orada qo‘ng‘iroq qiladi.';
-    if (oldin === 'qongiroq') { $('#oynaYol').hidden = true; $('#oynaQadam').hidden = false; }
-    if (oldin === 'qongiroq') { $('#oynaS').textContent = 'Qo‘ng‘iroqni kuting!'; $('#oynaMatn').textContent = 'Menejerimiz tez orada qo‘ng‘iroq qilib, sinov darsi vaqtini kelishadi.'; qator('#oq1', '📞', 'Telefoningiz yoniq tursin'); }
+  function muvaffaqiyat(){
     $('#oyna').hidden = false; pk(); konfetti();
     try { navigator.vibrate && navigator.vibrate([30, 40, 60]); } catch (e) {}
   }
@@ -634,26 +633,6 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
 
   // ---- yozilish ----
   let band = false;
-  async function yozil(btn){
-    if (band) return;
-    if (ilova()) {
-      // Ilova ichida — ism va telefon akkauntdan (native so'rov yuboradi)
-      band = true; const eski = btn.innerHTML; btn.innerHTML = 'Yuborilmoqda…';
-      try {
-        const r = await window.flutter_inappwebview.callHandler('trialRequest');
-        if (r && r.ok) muvaffaqiyat(r.already ? true : 'qongiroq');
-        else alertMatn(btn, (r && r.message) || 'Yuborib bo‘lmadi, qayta urinib ko‘ring');
-      } catch (e) { alertMatn(btn, 'Yuborib bo‘lmadi, qayta urinib ko‘ring'); }
-      finally { btn.innerHTML = eski; band = false; }
-      return;
-    }
-    // Brauzerda — qisqa forma
-    $('#yakunCta').hidden = true; $('#forma').hidden = false;
-    $('#forma').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(() => $('#fIsm').focus(), 400);
-  }
-  function alertMatn(btn, m){ const t = document.createElement('p'); t.textContent = m; t.style.cssText = 'color:#F0654F;font-weight:700;margin:10px 0 0'; btn.after(t); setTimeout(() => t.remove(), 4000); }
-  document.querySelectorAll('[data-qongiroq]').forEach((b) => b.addEventListener('click', () => yozil(b)));
   document.querySelectorAll('[data-cta]').forEach((b) => b.addEventListener('click', vaqtOch));
 
   const qator = (sel, e, t) => { const el = $(sel); el.querySelector('i').textContent = e; el.querySelector('span').textContent = t; };
@@ -749,52 +728,66 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
       $('#oynaS').textContent = `${matn} — siz yozildingiz!`;
       $('#oynaMatn').innerHTML = 'Tabriklaymiz!<span class="e">🎉</span>Ustoz biriktirilishi bilan sizga xabar beramiz.';
       $('#oynaYol').innerHTML = qollanma(tanSoat.startsAt);
-      $('#oynaYol').hidden = false; $('#oynaQadam').hidden = true;
+      $('#oynaYol').hidden = false;
       yozildi = true;
-      muvaffaqiyat(false);
+      muvaffaqiyat();
     } catch (e) {
       $('#vXato').textContent = 'Yuborib bo‘lmadi, qayta urinib ko‘ring';
     } finally { band = false; b.disabled = !tanSoat; if (b.innerHTML === 'Yuborilmoqda…') b.innerHTML = `${vaqtMatni()} — albatta qatnashaman`; }
   });
 
-  $('#forma').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const ism = $('#fIsm').value.trim();
-    const tel = $('#fTel').value.replace(/[^\d+]/g, '');
-    if (ism.length < 2) return ($('#fXato').textContent = 'Ismingizni yozing');
-    if (tel.replace(/\D/g, '').length < 9) return ($('#fXato').textContent = 'Telefon raqamni to‘liq yozing');
-    $('#fXato').textContent = ''; $('#fYubor').disabled = true; $('#fYubor').textContent = 'Yuborilmoqda…';
-    try {
-      const r = await fetch(API + '/api/bepul-dars', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: ism, phone: tel }) });
-      if (!r.ok) throw new Error();
-      $('#forma').hidden = true; muvaffaqiyat('qongiroq');
-    } catch (err) {
-      $('#fXato').textContent = 'Yuborib bo‘lmadi. Internetni tekshirib, qayta urinib ko‘ring.';
-    } finally { $('#fYubor').disabled = false; $('#fYubor').textContent = 'Bepul darsga yozilish'; }
-  });
 
   // ---- darsga kirish yo'riqnomasi ----
   let yozildi = false;
   const TZ = 5 * 3600e3;
   const ikki = (n) => String(n).padStart(2, '0');
   function vaqtYoz(iso){
+    // iso yoki ms qabul qiladi
     const t = new Date(new Date(iso).getTime() + TZ); const date = t.toISOString().slice(0, 10);
     const f = kunFarqi(date); const [, m, d] = date.split('-');
     const kn = f === 0 ? 'Bugun' : f === 1 ? 'Ertaga' : `${Number(d)}-${OY[Number(m) - 1]}`;
     return { kun: kn, soat: `${ikki(t.getUTCHours())}:${ikki(t.getUTCMinutes())}` };
   }
+  // Eslatma vaqti — backend (TrialStudentReminderScheduler) bilan bir xil qoida:
+  // darsdan 3 soat oldin; tunga (8:00 dan oldin) tushsa — oldingi kun 20:00
+  function eslatmaVaqti(start){
+    const due = start - 3 * 36e5;
+    if (new Date(due + TZ).getUTCHours() >= 8) return due;
+    const kun = Date.parse(new Date(due + TZ).toISOString().slice(0, 10) + 'T00:00:00Z') - TZ;
+    return kun - 4 * 36e5;
+  }
+  // Ustoz biriktirilgan ekran uchun: hali oldinda turgan eslatmalar
+  function eslatmaMatni(start){
+    const esl = eslatmaVaqti(start), oxirgi = start - 15 * 6e4, hozir = Date.now();
+    const q = vaqtYoz(oxirgi).soat;
+    if (esl > hozir) { const e = vaqtYoz(esl); return `Eslatma keladi: ${e.kun.toLowerCase()} ${e.soat} da va ${q} da (15 daqiqa oldin).`; }
+    if (oxirgi > hozir) return `Soat ${q} da (15 daqiqa oldin) yana eslatamiz.`;
+    const ochilish = start - 10 * 6e4;
+    if (ochilish > hozir) return `Dars yaqin — “Darsga kirish” tugmasi soat ${vaqtYoz(ochilish).soat} da yonadi.`;
+    return 'Dars boshlanmoqda — tugmani bosing.';
+  }
+  // "Endi nima bo'ladi" — o'quvchining darsiga qarab haqiqiy vaqtlar bilan
   function qollanma(iso){
-    const v = vaqtYoz(iso);
-    const ilovada = ilova() || kalitli();
+    const start = new Date(iso).getTime();
+    const dars = vaqtYoz(start);
+    const esl = eslatmaVaqti(start);
+    const qadamlar = [
+      ['✅', 'Hozir', 'So‘rovingiz qabul qilindi. Ustoz biriktirilishi bilan bildirishnoma keladi.'],
+    ];
+    // Dars yaqin bo'lsa asosiy eslatma ketmaydi (backend ham yubormaydi)
+    if (esl - Date.now() > 30 * 6e4) {
+      const e = vaqtYoz(esl);
+      qadamlar.push(['🔔', `${e.kun}, ${e.soat}`, `Eslatma: “Sinov darsingiz soat ${dars.soat} da”.`]);
+    }
+    qadamlar.push(['⏰', vaqtYoz(start - 15 * 6e4).soat, 'Yana eslatma: 15 daqiqa qoldi, quloqchinni taqing.']);
+    qadamlar.push(['▶️', `${dars.kun}, ${dars.soat}`, ilova() || kalitli()
+      ? 'Shu <b>Kurslar</b> bo‘limida <b>“Darsga kirish”</b> tugmasi yonadi — bosasiz, xolos.'
+      : 'MyTeacher ilovasida <b>Kurslar</b> bo‘limini oching — <b>“Darsga kirish”</b> tugmasi yonib turadi.']);
     return `<div class="yol">
-      <b class="yol-s">Darsga qanday kirasiz?</b>
-      <ol>
-        <li><i>🗓️</i><span><b>${v.kun}, soat ${v.soat}</b> da</span></li>
-        <li><i>📱</i><span>${ilovada ? 'MyTeacher ilovasida <b>Kurslar</b> bo‘limini oching' : 'MyTeacher ilovasini oching → <b>Kurslar</b> bo‘limi'}</span></li>
-        <li><i>👆</i><span>Shu tugmani bosing — xolos:</span></li>
+      <b class="yol-s">Endi nima bo‘ladi?</b>
+      <ol class="vaqtlar">${qadamlar.map(([e, v, m], k) => `
+        <li class="${k === qadamlar.length - 1 ? 'oxir' : ''}"><i>${e}</i><div><small>${v}</small><span>${m}</span></div></li>`).join('')}
       </ol>
-      <div class="yol-tugma" aria-hidden="true"><span>▶ Darsga kirish</span></div>
-      <p class="yol-eslat"><span class="e">🔔</span>Dars oldidan <b>ikki marta eslatamiz</b> — bir necha soat oldin va boshlanishiga 15 daqiqa qolganda.</p>
     </div>`;
   }
 
@@ -824,7 +817,7 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
         <div class="b-kart markaz">
           <div class="radar" aria-hidden="true"><span></span><span></span><span></span><b>🎓</b><i>A</i><i>D</i><i>M</i></div>
           <span class="b-vaqt"><span class="e">🗓️</span>${v.kun}, ${v.soat}</span>
-          <p>Ustoz biriktirilishi bilan bildirishnoma keladi. Odatda bu 15 daqiqa ichida bo‘ladi.</p>
+          <p>Ustoz biriktirilishi bilan bildirishnoma keladi va shu sahifa o‘zi yangilanadi.</p>
         </div>
         ${qollanma(h.startsAt)}
       </div>`;
@@ -849,7 +842,7 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
             <li><i>🤫</i>Tinch joy — 60 daqiqa faqat siz va ustoz</li>
             <li><i>🎤</i>Mikrofon so‘ralsa — “Ruxsat berish”</li>
           </ul>
-          <p class="yol-eslat" style="margin-top:12px!important"><span class="e">🔔</span>Dars oldidan ikki marta eslatamiz — bir necha soat oldin va 15 daqiqa qolganda.</p>
+          <p class="yol-eslat" style="margin-top:12px!important"><span class="e">🔔</span>${eslatmaMatni(new Date(h.startsAt).getTime())}</p>
         </div>
       </div>`;
       const b = $('#kirishBtn');
@@ -864,20 +857,80 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
       };
       yangila(); sanoqT = setInterval(yangila, 1000);
     } else if (h.bosqich === 'sinov_otdi') {
-      el.innerHTML = bosh(h.ism, 'Sinov darsi o‘tdi', 'Birinchi qadam tashlandi! 🎉', 'Ustozingiz natijangizni tayyorlamoqda.') + `
+      const u = h.ustoz || {};
+      const ustozIsm = esc((u.ism || 'Ustoz').split(' ')[0]);
+      el.innerHTML = bosh(h.ism, 'Sinov darsi o‘tdi', 'Birinchi qadam tashlandi! 🎉', `${ustozIsm} bilan birinchi darsingiz yakunlandi.`) + `
       <div class="b-ichi">
-        ${h.ustoz ? `<div class="b-kart">${ustozKart(h.ustoz)}</div>` : ''}
-        <div class="b-kart markaz"><h3>Keyingi qadam</h3><p>Menejerimiz siz bilan bog‘lanib, darajangiz va shaxsiy rejangizni aytib beradi. Shu ustoz bilan davom etishingiz mumkin — haftasiga 1 martadan <b>350 000 so‘m</b>dan.</p></div>
+        <div class="b-kart" id="bahoKart">${h.baho ? bahoRahmat(h.baho) : bahoForma(ustozIsm)}</div>
+        <div class="b-kart">
+          ${ustozKart(u)}
+          <h3 style="margin-top:16px">${ustozIsm} bilan davom etish</h3>
+          <p class="b-izoh">Haftasiga necha marta o‘qishni tanlang. Oyiga 4 hafta hisobida.</p>
+          <div class="tariflar">${TARIFLAR.map(([n, narx]) => `
+            <div class="tarif${n === 3 ? ' top' : ''}"><b>${n}×</b><small>haftada</small><strong>${narx.toLocaleString('ru-RU')}</strong><small>so‘m / oy · ${n * 4} dars</small></div>`).join('')}
+          </div>
+        </div>
       </div>`;
+      if (!h.baho) bahoUlash();
     } else if (h.bosqich === 'kelmadi') {
       el.innerHTML = bosh(h.ism, 'Sinov darsi', 'Darsga ulgurmadingizmi?', 'Hech gap emas — boshqa qulay vaqtni tanlang.') + `
       <div class="b-ichi"><div class="b-kart markaz"><p style="margin:0 0 14px">Bepul sinov darsi hali ham siz uchun ochiq.</p><button class="cta" type="button" id="qaytaTanla" style="width:100%">Yangi vaqt tanlash</button></div></div>`;
       $('#qaytaTanla').onclick = vaqtOch;
     } else if (h.bosqich === 'oqiyapti') {
-      el.innerHTML = bosh(h.ism, 'Kurslarim', 'Darslaringiz davom etmoqda 💪', 'Keyingi darsingiz va ustozingiz bilan chat — Home sahifasida.') + `
+      el.innerHTML = bosh(h.ism, 'Kurslarim', 'Darslaringiz davom etmoqda 💪', 'Ustozingiz bilan o‘qishni davom ettiryapsiz.') + `
       <div class="b-ichi"><div class="b-kart markaz"><p style="margin:0">Dars jadvali va natijalaringiz tez orada shu yerda ham chiqadi.</p></div></div>`;
     }
     pk();
+  }
+  // Haftalik narxlar (oyiga) — mentor hamyoni HAFTALIK_NARXLAR bilan bir xil
+  const TARIFLAR = [[1, 350000], [2, 450000], [3, 550000], [4, 650000], [5, 750000], [6, 850000]];
+  const YAXSHI = ['Tushunarli tushuntirdi', 'Ko‘p gapirtirdi', 'Samimiy va do‘stona', 'Xatolarimni ko‘rsatdi'];
+  const YOMON = ['Ovoz yoki aloqa yomon', 'Juda tez gapirdi', 'Qiziq bo‘lmadi', 'Kech qoldi'];
+  let baho = 0; const tanlangan = new Set();
+  function bahoForma(ustozIsm){
+    return `<h3>Dars qanday o‘tdi?</h3>
+      <p class="b-izoh">Bahoyingiz ${ustozIsm}ga ham, bizga ham darslarni yaxshilashga yordam beradi.</p>
+      <div class="yulduzlar" role="radiogroup" aria-label="Baho">${[1, 2, 3, 4, 5].map((n) => `<button type="button" role="radio" aria-checked="false" aria-label="${n} yulduz" data-baho="${n}">★</button>`).join('')}</div>
+      <div id="bahoQolgan" hidden>
+        <div class="fikrlar" id="fikrlar"></div>
+        <textarea id="bahoIzoh" rows="2" maxlength="500" placeholder="Yana nima deysiz? (ixtiyoriy)"></textarea>
+        <button class="cta" type="button" id="bahoYubor" style="width:100%">Yuborish</button>
+        <p class="b-xato" id="bahoXato"></p>
+      </div>`;
+  }
+  function bahoRahmat(n){
+    return `<div class="markaz"><div class="yulduzlar kichik" aria-label="${n} yulduz">${'★'.repeat(n)}<span>${'★'.repeat(5 - n)}</span></div><h3 style="margin:6px 0 4px">Rahmat!</h3><p class="b-izoh" style="margin:0">Bahoyingiz qabul qilindi.</p></div>`;
+  }
+  function bahoUlash(){
+    const k = $('#bahoKart');
+    k.querySelector('.yulduzlar').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-baho]'); if (!b) return;
+      baho = Number(b.dataset.baho); tanlangan.clear();
+      k.querySelectorAll('[data-baho]').forEach((x) => { const on = Number(x.dataset.baho) <= baho; x.classList.toggle('on', on); x.setAttribute('aria-checked', String(Number(x.dataset.baho) === baho)); });
+      $('#fikrlar').innerHTML = (baho >= 4 ? YAXSHI : YOMON).map((f) => `<button type="button" class="fikr" aria-pressed="false">${f}</button>`).join('');
+      $('#bahoQolgan').hidden = false;
+    });
+    $('#fikrlar').addEventListener('click', (e) => {
+      const b = e.target.closest('.fikr'); if (!b) return;
+      const on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(on));
+      on ? tanlangan.add(b.textContent) : tanlangan.delete(b.textContent);
+    });
+    $('#bahoYubor').addEventListener('click', async () => {
+      if (!baho) return;
+      const btn = $('#bahoYubor'); btn.disabled = true; btn.textContent = 'Yuborilmoqda…'; $('#bahoXato').textContent = '';
+      const izoh = [...tanlangan, $('#bahoIzoh').value.trim()].filter(Boolean).join('. ');
+      try {
+        const r = await fetch(KAPI + '/course-page/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ t: KALIT, rating: baho, comment: izoh }) });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d.message || 'Yuborib bo‘lmadi');
+        $('#bahoKart').innerHTML = bahoRahmat(baho);
+        if (holat) holat.baho = baho;
+        if (baho >= 4) konfetti();
+      } catch (e) {
+        $('#bahoXato').textContent = e.message || 'Yuborib bo‘lmadi, qayta urinib ko‘ring';
+        btn.disabled = false; btn.textContent = 'Yuborish';
+      }
+    });
   }
   async function kirish(){
     const b = $('#kirishBtn'); if (!b || !b.classList.contains('ochiq')) return;
@@ -899,12 +952,11 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
       if (!r.ok) return; // kalit eskirgan bo'lsa landing ko'rinaveradi
       const h = await r.json();
       // Faqat bosqich yoki vaqt o'zgarsa qayta chizamiz (sanoq uzilib qolmasin)
-      const kalitH = (x) => x ? `${x.bosqich}|${x.startsAt || ''}|${x.kirishOchiq ? 1 : 0}` : '';
+      const kalitH = (x) => x ? `${x.bosqich}|${x.startsAt || ''}|${x.kirishOchiq ? 1 : 0}|${x.baho ? 1 : 0}` : '';
       if (kalitH(h) !== kalitH(holat)) chiz(h);
     } catch (e) { /* tarmoq xatosi — keyingi safar */ }
   }
   if (kalitli()) {
-    document.querySelectorAll('[data-qongiroq]').forEach((b) => { b.hidden = true; });
     holatYukla();
     soroqT = setInterval(() => { if (!document.hidden) holatYukla(); }, 30000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) holatYukla(); });
