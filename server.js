@@ -260,6 +260,16 @@ app.all(/^\/api\/booking(\/.*)?$/, (req, res) => {
 // ---------- Bepul sinov darsi landingi (bepul-dars.html) ----------
 // Ochiq sahifa: ilova ichida (Kurslar) va reklamada. Ilovada yozilish native orqali,
 // brauzerda esa shu forma — lid ai.myteacher.uz ga tushadi va operator qo'ng'iroq qiladi.
+// Ilova Kurslar sahifasi (app-course.myteacher.uz) landing so'rovlari uchun CORS
+const BEPUL_ORIGINS = new Set(['https://app-course.myteacher.uz']);
+app.use('/api/bepul-dars', (req, res, next) => {
+  const o = req.headers.origin;
+  if (o && BEPUL_ORIGINS.has(o)) {
+    res.set({ 'Access-Control-Allow-Origin': o, 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'GET,POST', Vary: 'Origin' });
+  }
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
 const BEPUL_LIMIT = new Map(); // ip -> [vaqtlar]
 app.get('/api/bepul-dars/stats', async (req, res) => {
   const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');

@@ -488,7 +488,9 @@ canvas#konfetti{position:fixed;inset:0;pointer-events:none;z-index:70}
 (function(){
   document.documentElement.classList.add('js');
   const $ = (s) => document.querySelector(s);
-  const ilova = () => !!(window.flutter_inappwebview && window.flutter_inappwebview.callHandler);
+  // Ilova rejimi faqat o'z TrialLandingView'imizda (lesson.myteacher.uz): u yerda trialBook/trialRequest handlerlari bor.
+  // app-course.myteacher.uz ham WebView'da ochiladi, lekin handlerlarsiz — u yerda oddiy forma.
+  const ilova = () => !!(window.flutter_inappwebview && window.flutter_inappwebview.callHandler) && !/app-course\./.test(location.hostname);
 
   // ---- ibora lentasi ----
   const IBORALAR = ["How was your day?","I'd like to…","Could you repeat that?","Let me think…","I have been to…","What do you mean?","Nice to meet you!","I'm looking forward to it"];
@@ -505,7 +507,9 @@ canvas#konfetti{position:fixed;inset:0;pointer-events:none;z-index:70}
   document.querySelectorAll('.pay').forEach((el) => koz.observe(el));
 
   // ---- haqiqiy raqamlar (kichik bo'lsa ko'rsatilmaydi) ----
-  fetch('/api/bepul-dars/stats').then((r) => r.ok ? r.json() : null).then((d) => {
+  // app-course.myteacher.uz (ilova Kurslar bo'limi) — so'rovlar lesson.myteacher.uz orqali
+  const API = /^(lesson\.myteacher\.uz|localhost|127\.0\.0\.1)$/.test(location.hostname) ? '' : 'https://lesson.myteacher.uz';
+  fetch(API + '/api/bepul-dars/stats').then((r) => r.ok ? r.json() : null).then((d) => {
     if (!d || !d.lessons || d.lessons < 30) return;
     $('#raqamlar').hidden = false;
     document.querySelectorAll('[data-son]').forEach((el) => {
@@ -615,7 +619,7 @@ canvas#konfetti{position:fixed;inset:0;pointer-events:none;z-index:70}
   async function slotlar(){
     if (slotYuklandi) return;
     try {
-      const r = await fetch('/api/bepul-dars/slots');
+      const r = await fetch(API + '/api/bepul-dars/slots');
       const d = r.ok ? await r.json() : null;
       KUNLAR = d && d.days && d.days.length ? d.days : zaxiraKunlar();
     } catch (e) { KUNLAR = zaxiraKunlar(); }
@@ -667,7 +671,7 @@ canvas#konfetti{position:fixed;inset:0;pointer-events:none;z-index:70}
         const r = await window.flutter_inappwebview.callHandler('trialBook', tanSoat.startsAt);
         ok = !!(r && r.ok); xabar = (r && r.message) || '';
       } else {
-        const r = await fetch('/api/bepul-dars', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const r = await fetch(API + '/api/bepul-dars', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         const d = await r.json().catch(() => ({}));
         ok = r.ok; xabar = d.error || '';
       }
@@ -690,7 +694,7 @@ canvas#konfetti{position:fixed;inset:0;pointer-events:none;z-index:70}
     if (tel.replace(/\D/g, '').length < 9) return ($('#fXato').textContent = 'Telefon raqamni to‘liq yozing');
     $('#fXato').textContent = ''; $('#fYubor').disabled = true; $('#fYubor').textContent = 'Yuborilmoqda…';
     try {
-      const r = await fetch('/api/bepul-dars', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: ism, phone: tel }) });
+      const r = await fetch(API + '/api/bepul-dars', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: ism, phone: tel }) });
       if (!r.ok) throw new Error();
       $('#forma').hidden = true; muvaffaqiyat('qongiroq');
     } catch (err) {
