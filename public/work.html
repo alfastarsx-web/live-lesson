@@ -187,6 +187,7 @@ body.work{background:var(--bg)}
 
 <script src="/auth-webview.js"></script>
 <script src="/tabrik.js"></script>
+<script src="/ding.js"></script>
 <script>
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -632,6 +633,14 @@ window.addEventListener('hashchange', tabKorsat);
 
   await Promise.all([sorovlarniYukla(), darslarniYukla(), holatYukla()]);
   tabriklarniKorsat((ISM || '').split(/\s+/)[0]);
+
+  // Ball qo'shilganda yengil ding (Onlayn tugmasi yonidan "+N" ko'tariladi)
+  const ballTekshir = async () => {
+    const r = await api('/api/ai/mentor-gamification/home');
+    if (r && r.ok && r.data.enabled) ballKuzat(r.data.today.points, $('#holatTugma'), r.data.today.day);
+  };
+  ballTekshir();
+  setInterval(() => { if (document.visibilityState === 'visible') ballTekshir(); }, 60e3);
 
   // So'rovlar tez-tez tekshiriladi; push kelib ilova ochilganda ham darhol yangilanadi
   setInterval(() => { if (document.visibilityState === 'visible') sorovlarniYukla(); }, 8000);
