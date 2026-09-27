@@ -257,6 +257,68 @@ app.all(/^\/api\/booking(\/.*)?$/, (req, res) => {
   aiProxy(req, res, `/lesson-booking${sub}`);
 });
 
+// ---------- Bepul sinov darsi landingi (bepul-dars.html) ----------
+// Ochiq sahifa: ilova ichida (Kurslar) va reklamada. Ilovada yozilish native orqali,
+// brauzerda esa shu forma — lid ai.myteacher.uz ga tushadi va operator qo'ng'iroq qiladi.
+const BEPUL_LIMIT = new Map(); // ip -> [vaqtlar]
+app.get('/api/bepul-dars/stats', async (req, res) => {
+  const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
+  try {
+    const r = await fetch(`${base}/lesson-booking/public/stats`, { signal: AbortSignal.timeout(8000) });
+    res.status(r.ok ? 200 : 502).json(r.ok ? await r.json() : {});
+  } catch {
+    res.status(502).json({});
+  }
+});
+app.get('/api/bepul-dars/slots', async (req, res) => {
+  const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
+  try {
+    const r = await fetch(`${base}/trial-requests/public/slots`, { signal: AbortSignal.timeout(15000) });
+    res.status(r.ok ? 200 : 502).json(r.ok ? await r.json() : {});
+  } catch {
+    res.status(502).json({});
+  }
+});
+app.post('/api/bepul-dars', async (req, res) => {
+  const ip = String(req.headers['x-real-ip'] || req.ip || '');
+  const hozir = Date.now();
+  const oldingi = (BEPUL_LIMIT.get(ip) || []).filter((t) => hozir - t < 3600_000);
+  if (oldingi.length >= 5) return res.status(429).json({ error: 'Juda ko‘p urinish, birozdan keyin qayta yuboring' });
+  const name = String(req.body?.name || '').trim().slice(0, 80);
+  const raqam = String(req.body?.phone || '').replace(/[^\d]/g, '');
+  if (name.length < 2 || raqam.length < 9 || raqam.length > 12) return res.status(400).json({ error: 'Ism va telefonni tekshiring' });
+  const phoneNumber = raqam.length === 9 ? `+998${raqam}` : `+${raqam}`;
+  BEPUL_LIMIT.set(ip, [...oldingi, hozir]);
+  const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
+  // Vaqt tanlangan bo'lsa — to'g'ridan-to'g'ri sinov so'rovi (bo'sh mentorlarga ketadi)
+  const startsAt = String(req.body?.startsAt || '');
+  if (startsAt) {
+    try {
+      const r = await fetch(`${base}/trial-requests/public`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-lesson-secret': process.env.LESSON_TOKEN_SECRET || '' },
+        body: JSON.stringify({ name, phone: phoneNumber, startsAt }),
+        signal: AbortSignal.timeout(15000),
+      });
+      const d = await r.json().catch(() => ({}));
+      return res.status(r.ok ? 201 : r.status === 400 ? 400 : 502).json(r.ok ? { ok: true } : { error: d.message || 'Yuborib bo‘lmadi' });
+    } catch {
+      return res.status(502).json({ error: 'Yuborib bo‘lmadi' });
+    }
+  }
+  try {
+    const r = await fetch(`${base}/leads`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phoneNumber, formId: 'web-bepul-dars', note: 'Landing: bepul 1-1 sinov darsi' }),
+      signal: AbortSignal.timeout(10000),
+    });
+    res.status(r.ok ? 201 : 502).json({ ok: r.ok });
+  } catch {
+    res.status(502).json({ ok: false });
+  }
+});
+
 // Onlayn/Oflayn tugmasi (Work) — holat va bugungi onlayn vaqt
 app.get('/api/mentor-session/me', (req, res) => aiProxy(req, res, '/mentor-session/me'));
 app.post('/api/mentor-session/status', (req, res) => aiProxy(req, res, '/mentor-session/status'));

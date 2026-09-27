@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Bepul 1-1 sinov darsi — MyTeacher</title>
+<meta name="description" content="Ingliz tilida gapirishni ustoz bilan yakkama-yakka boshlang. 60 daqiqalik bepul sinov darsi: darajangizni aniqlaymiz va shaxsiy reja tuzamiz.">
+<meta property="og:title" content="Bepul 1-1 sinov darsi — MyTeacher">
+<meta property="og:description" content="60 daqiqa · yakkama-yakka · darajangiz va shaxsiy reja. Karta shart emas.">
+<meta name="theme-color" content="#0A1628">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --navy:#0A1628; --navy-2:#13233d; --teal:#0D9488; --teal-2:#14b8a6; --teal-soft:#e6f6f4;
+  --sun:#F5B700; --sun-soft:#fff5d6; --coral:#F0654F; --coral-soft:#fde9e5;
+  --bg:#F6F4EF; --card:#fff; --ink:#0A1628; --mut:#5b6474; --mut2:#8a92a0; --line:#e7e3da;
+  --r:22px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;overflow-x:clip}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 'Manrope',system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
+img{max-width:100%}
+h1,h2,h3{font-family:'Unbounded','Manrope',system-ui,sans-serif;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.w{max-width:1080px;margin:0 auto;padding-inline:20px}
+.num{font-variant-numeric:tabular-nums}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+
+/* ---------- tugmalar ---------- */
+.cta{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;cursor:pointer;text-decoration:none;
+  font:800 17px/1 'Manrope',sans-serif;color:var(--navy);background:var(--sun);padding:18px 26px;border-radius:18px;
+  box-shadow:0 10px 0 -2px #c99600,0 18px 40px rgba(245,183,0,.35);transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
+.cta:active{transform:translateY(4px);box-shadow:0 6px 0 -2px #c99600,0 10px 20px rgba(245,183,0,.3)}
+.cta::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);transform:translateX(-120%);animation:yaltira 3.2s ease-in-out infinite 1.5s}
+@keyframes yaltira{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.cta small{font-weight:700;font-size:13px;opacity:.75}
+.cta.oq{background:#fff;box-shadow:0 10px 0 -2px #d9d5cb,0 18px 40px rgba(10,22,40,.15)}
+
+/* ---------- hero ---------- */
+.hero{position:relative;background:radial-gradient(90% 60% at 80% 10%,#16435a 0%,rgba(22,67,90,0) 60%),radial-gradient(70% 60% at 0% 100%,#0f3b3a 0%,rgba(15,59,58,0) 60%),var(--navy);
+  color:#fff;padding:calc(22px + env(safe-area-inset-top)) 0 0;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1px);background-size:22px 22px;mask-image:linear-gradient(#000,transparent 85%)}
+.hero .w{position:relative}
+.brend{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px}
+.brend i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--teal-2),var(--teal));display:grid;place-items:center;font-style:normal;font-family:'Unbounded';font-size:13px}
+.brend span{opacity:.85}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;align-items:center;padding:34px 0 0}
+@media (max-width:860px){.hero-grid{grid-template-columns:1fr;gap:10px;padding-top:22px}}
+.teg{display:inline-flex;align-items:center;gap:8px;background:rgba(245,183,0,.14);color:var(--sun);border:1px solid rgba(245,183,0,.35);
+  padding:7px 12px;border-radius:999px;font-weight:800;font-size:13px}
+.teg b{width:8px;height:8px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 0 rgba(245,183,0,.6);animation:tomir 1.8s infinite}
+@keyframes tomir{0%{box-shadow:0 0 0 0 rgba(245,183,0,.6)}80%,100%{box-shadow:0 0 0 10px rgba(245,183,0,0)}}
+.hero h1{font-size:clamp(30px,7.2vw,54px);line-height:1.08;margin:16px 0 14px}
+.hero h1 em{font-style:normal;color:var(--sun);position:relative;white-space:nowrap}
+.hero h1 em::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:8px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12'%3E%3Cpath d='M2 9C50 2 140 2 198 8' stroke='%23F5B700' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.hero p.lead{font-size:clamp(16px,4vw,19px);color:#c8d3e3;margin:0 0 24px;max-width:34em}
+.kafolat{display:flex;flex-wrap:wrap;gap:8px 16px;margin:18px 0 0;padding:0;list-style:none;font-size:14px;color:#c8d3e3;font-weight:600}
+.kafolat li{display:flex;align-items:center;gap:7px}
+.kafolat li::before{content:"";width:18px;height:18px;border-radius:50%;background:var(--teal) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat}
+
+/* telefon maketi — jonli dars */
+.sahna{position:relative;height:500px;display:flex;justify-content:center;align-items:flex-end}
+@media (max-width:860px){.sahna{height:430px;margin-top:10px}}
+.telefon{position:relative;z-index:1;width:250px;height:470px;border-radius:38px;background:#0b1222;box-shadow:0 0 0 8px #1c2a44,0 0 0 9px #33466a,0 40px 80px rgba(0,0,0,.5);
+  padding:12px;transform:translateY(40px) rotate(-3deg);animation:suz 6s ease-in-out infinite}
+@media (max-width:860px){.telefon{width:220px;height:420px;transform:translateY(30px) rotate(-3deg)}}
+@keyframes suz{0%,100%{translate:0 0}50%{translate:0 -10px}}
+.ekran{height:100%;border-radius:28px;overflow:hidden;background:#111827;display:flex;flex-direction:column}
+.video{position:relative;flex:1;background:radial-gradient(80% 70% at 50% 35%,#2c5c73,#10263a);display:grid;place-items:center}
+.yuz{width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 50% 38%,#f3c9a4 0 27%,transparent 28%),radial-gradient(circle at 50% 118%,#0D9488 0 52%,transparent 53%),linear-gradient(#3a2a22,#3a2a22);
+  box-shadow:0 0 0 4px rgba(20,184,166,.5);position:relative}
+.yuz::before{content:"";position:absolute;inset:-12px;border-radius:50%;border:2px solid rgba(20,184,166,.6);animation:gapir 1.4s ease-out infinite}
+@keyframes gapir{0%{transform:scale(.9);opacity:1}100%{transform:scale(1.25);opacity:0}}
+.video .nom{position:absolute;left:10px;bottom:10px;font-size:11px;font-weight:700;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:8px}
+.video .rec{position:absolute;right:10px;top:10px;font-size:10px;font-weight:800;background:rgba(240,101,79,.9);padding:3px 7px;border-radius:7px;display:flex;align-items:center;gap:5px}
+.video .rec::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;animation:tomir 1.4s infinite}
+.mini{position:absolute;right:10px;bottom:10px;width:64px;height:84px;border-radius:12px;background:radial-gradient(circle at 50% 40%,#e9b98f 0 24%,transparent 25%),radial-gradient(circle at 50% 120%,#F5B700 0 50%,transparent 51%),#233b55;border:2px solid rgba(255,255,255,.25)}
+.doska{height:44%;background:#fbfaf7;padding:12px;color:#1f2937;font-size:11.5px;position:relative}
+.doska b{display:block;font-family:'Unbounded';font-size:12px;margin-bottom:6px;color:var(--teal)}
+.doska .qator{height:8px;border-radius:4px;background:#e8e4db;margin:6px 0}
+.doska .qator.q2{width:70%}.doska .qator.q3{width:84%}
+.doska .belgi{position:absolute;right:14px;bottom:16px;width:70px;height:26px;border:3px solid var(--coral);border-radius:50%;transform:rotate(-8deg);
+  stroke-dasharray:1;clip-path:inset(0 100% 0 0);animation:chiz 4s ease-in-out infinite 1s}
+@keyframes chiz{0%{clip-path:inset(0 100% 0 0)}30%,80%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 0 0);opacity:0}}
+.pufak{position:absolute;z-index:3;background:#fff;color:var(--ink);border-radius:16px;padding:10px 13px;font-size:13.5px;font-weight:700;box-shadow:0 14px 34px rgba(0,0,0,.25);white-space:nowrap}
+.pufak small{display:block;font-size:11px;color:var(--mut2);font-weight:700}
+.p1{left:2%;top:34px;animation:suz 5s ease-in-out infinite .4s}
+.p2{right:0;top:120px;animation:suz 5.6s ease-in-out infinite 1.1s}
+.p3{left:0;bottom:120px;background:var(--sun);animation:suz 6.2s ease-in-out infinite .2s}
+@media (max-width:860px){.p1{left:0;top:20px}.p2{right:0;top:96px}.p3{bottom:100px}}
+.daraja{display:flex;align-items:center;gap:6px}
+.daraja span{width:26px;height:6px;border-radius:4px;background:#dfe6ee}
+.daraja span.b{background:var(--teal)}
+
+/* ibora lentasi */
+.lenta{background:var(--teal);color:#fff;overflow:hidden;white-space:nowrap;padding:14px 0;font-family:'Unbounded';font-size:15px;position:relative;z-index:2}
+.lenta div{display:inline-block;animation:lenta 32s linear infinite}
+.lenta span{margin:0 22px;opacity:.95}
+.lenta span::after{content:"✦";margin-left:44px;color:var(--sun)}
+@keyframes lenta{to{transform:translateX(-50%)}}
+
+/* ---------- bo'limlar ---------- */
+section{padding:64px 0}
+.bosh{max-width:640px;margin:0 0 30px}
+.bosh small{display:inline-block;font-weight:800;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+.bosh h2{font-size:clamp(24px,5.4vw,38px);line-height:1.12}
+.bosh p{color:var(--mut);margin:12px 0 0;font-size:17px}
+
+.raqamlar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:-34px;position:relative;z-index:3}
+@media (max-width:760px){.raqamlar{grid-template-columns:repeat(2,1fr)}}
+.raqam{background:var(--card);border-radius:20px;padding:18px;box-shadow:0 1px 0 var(--line),0 14px 30px rgba(10,22,40,.07)}
+.raqam b{display:block;font-family:'Unbounded';font-size:clamp(22px,5vw,30px);letter-spacing:-.03em}
+.raqam span{font-size:13.5px;color:var(--mut);font-weight:600}
+.raqam .yulduz{color:var(--sun)}
+
+.ogriq{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:860px){.ogriq{grid-template-columns:1fr}}
+.og{background:var(--card);border-radius:var(--r);padding:22px;border:1px solid var(--line)}
+.og .ik{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:24px;margin-bottom:14px}
+.og h3{font-size:18px;margin-bottom:6px}
+.og p{margin:0;color:var(--mut);font-size:15px}
+.og .yech{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);color:var(--teal);font-weight:700;font-size:14.5px}
+
+/* qadamlar */
+.qadamlar{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;counter-reset:q}
+@media (max-width:860px){.qadamlar{grid-template-columns:1fr}}
+.qd{position:relative;background:var(--navy);color:#fff;border-radius:var(--r);padding:24px 22px 22px;overflow:hidden}
+.qd::before{counter-increment:q;content:counter(q);position:absolute;right:14px;top:-8px;font-family:'Unbounded';font-size:96px;font-weight:800;color:rgba(255,255,255,.06)}
+.qd .vaqt{display:inline-block;background:rgba(20,184,166,.18);color:#7ee7da;font-weight:800;font-size:12.5px;padding:5px 10px;border-radius:999px;margin-bottom:14px}
+.qd h3{font-size:19px;margin-bottom:8px}
+.qd p{margin:0;color:#c8d3e3;font-size:15px}
+
+/* natija */
+.natija{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:center}
+@media (max-width:860px){.natija{grid-template-columns:1fr}}
+.natija ul{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.natija li{display:flex;gap:14px;align-items:flex-start;background:var(--card);border-radius:18px;padding:16px;border:1px solid var(--line)}
+.natija li i{flex:0 0 auto;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-style:normal;font-size:20px;background:var(--teal-soft)}
+.natija li b{display:block;font-size:16px}
+.natija li span{color:var(--mut);font-size:14.5px}
+.hisobot{background:var(--card);border-radius:26px;padding:22px;box-shadow:0 30px 60px rgba(10,22,40,.12);border:1px solid var(--line);position:relative}
+.hisobot small{font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut2)}
+.hisobot h3{font-size:20px;margin:6px 0 16px}
+.shkala{display:grid;gap:12px}
+.sh{display:grid;grid-template-columns:92px 1fr 38px;gap:10px;align-items:center;font-size:14px;font-weight:700}
+.sh .bar{height:10px;border-radius:6px;background:#efece5;overflow:hidden}
+.sh .bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--teal),var(--teal-2));width:0;transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+.sh em{font-style:normal;color:var(--mut);text-align:right}
+.reja{margin-top:18px;background:var(--sun-soft);border-radius:16px;padding:14px;font-size:14.5px}
+.reja b{display:block;margin-bottom:4px}
+.namuna{position:absolute;top:16px;right:16px;font-size:11px;font-weight:800;color:var(--mut2);background:#f4f1ea;padding:3px 8px;border-radius:999px}
+
+/* ustozlar */
+.ustozlar{background:var(--navy);color:#fff;border-radius:32px;padding:34px 26px;display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:center;overflow:hidden;position:relative}
+@media (max-width:860px){.ustozlar{grid-template-columns:1fr;padding:28px 20px}}
+.ustozlar .bosh h2{color:#fff}.ustozlar .bosh p{color:#c8d3e3}.ustozlar .bosh small{color:var(--sun)}
+.talab{display:grid;gap:10px}
+.tl{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:14px}
+.tl i{font-style:normal;font-size:22px}
+.tl b{display:block;font-size:15px}
+.tl span{font-size:13.5px;color:#aebbd0}
+.avatarlar{display:flex;margin-top:18px}
+.avatarlar span{width:44px;height:44px;border-radius:50%;border:3px solid var(--navy);margin-left:-10px;display:grid;place-items:center;font-weight:800;font-family:'Unbounded';font-size:14px}
+.avatarlar span:first-child{margin-left:0}
+
+/* taqqoslash */
+.jad{overflow-x:auto;background:var(--card);border-radius:var(--r);border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th,td{padding:15px 16px;text-align:center;border-bottom:1px solid #f0ece3;font-size:15px}
+th{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mut)}
+th:first-child,td:first-child{text-align:left;font-weight:700}
+th.biz{background:var(--teal);color:#fff;border-radius:14px 14px 0 0}
+td.biz{background:var(--teal-soft);font-weight:800;color:var(--teal)}
+tr:last-child td{border-bottom:0}
+.ha{color:var(--teal);font-weight:900}.yoq{color:#c3bdb0;font-weight:900}
+
+/* narx */
+.narx{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:center;background:var(--card);border-radius:32px;padding:28px;border:1px solid var(--line)}
+@media (max-width:860px){.narx{grid-template-columns:1fr}}
+.narx .katta{font-family:'Unbounded';font-size:clamp(40px,10vw,64px);line-height:1;letter-spacing:-.04em;color:var(--teal)}
+.narx .katta small{display:block;margin-top:8px;font-family:'Manrope';font-size:17px;font-weight:800;color:var(--ink);letter-spacing:0}
+.chastota{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ch{border-radius:14px;padding:12px 8px;text-align:center;background:#f7f5f0;border:1px solid var(--line)}
+.ch b{display:block;font-family:'Unbounded';font-size:15px}
+.ch span{font-size:12.5px;color:var(--mut);font-weight:700}
+.ch.top{background:var(--sun-soft);border-color:#f3d67a}
+
+/* savollar */
+details{background:var(--card);border-radius:18px;border:1px solid var(--line);margin-bottom:10px;overflow:hidden}
+summary{list-style:none;cursor:pointer;padding:18px 54px 18px 18px;font-weight:800;font-size:16px;position:relative}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";position:absolute;right:18px;top:50%;translate:0 -50%;width:28px;height:28px;border-radius:50%;background:var(--teal-soft);color:var(--teal);display:grid;place-items:center;font-size:20px;transition:transform .25s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{margin:0;padding:0 18px 18px;color:var(--mut);font-size:15.5px}
+
+/* yakun */
+.yakun{background:radial-gradient(80% 90% at 50% 0%,#16435a,var(--navy));color:#fff;border-radius:34px;padding:44px 24px;text-align:center;position:relative;overflow:hidden}
+.yakun h2{font-size:clamp(26px,6vw,42px);line-height:1.1;margin:10px 0 12px}
+.yakun p{color:#c8d3e3;max-width:32em;margin:0 auto 26px}
+
+/* forma (brauzerda) */
+.forma{max-width:420px;margin:0 auto;display:grid;gap:10px;text-align:left}
+.forma label{font-size:13px;font-weight:700;color:#c8d3e3}
+.forma input{width:100%;border:0;border-radius:14px;padding:16px;font:600 17px 'Manrope',sans-serif;background:#fff;color:var(--ink)}
+.forma .xato{color:#ffb4a6;font-size:14px;min-height:1.2em;margin:0}
+
+/* pastki tugma */
+.pastki{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:10px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(246,244,239,.96) 30%);
+  transform:translateY(120%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.pastki.ko{transform:none}
+.pastki .cta{width:100%;max-width:520px;margin:0 auto;display:flex}
+footer{padding:30px 0 110px;text-align:center;color:var(--mut2);font-size:13px}
+
+/* paydo bo'lish — JS yo'q bo'lsa hammasi ko'rinib turadi */
+.js .pay{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+.js .pay.ko{opacity:1;transform:none}
+
+/* ikkinchi darajali havola */
+.qongiroq{display:inline-block;margin-top:12px;border:0;background:none;color:inherit;opacity:.8;font:700 14px 'Manrope',sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px 2px}
+.hero .qongiroq{display:block;color:#c8d3e3}
+/* vaqt tanlash */
+.vaqt-ichi{text-align:left;max-height:92vh;overflow:auto}
+.vaqt-ichi h3{font-size:22px;margin-bottom:4px}
+.vaqt-izoh{color:var(--mut);font-size:14px;margin:0 0 14px}
+.yashil-n{display:inline-block;width:8px;height:8px;border-radius:50%;background:#16a34a;vertical-align:1px}
+.kunlar{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -22px 12px;padding:2px 22px}
+.kunlar::-webkit-scrollbar{display:none}
+.kun{flex:0 0 auto;border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:9px 12px;text-align:center;font:700 13px 'Manrope',sans-serif;color:var(--ink);cursor:pointer;min-width:66px}
+.kun b{display:block;font-size:15px}
+.kun span{font-size:11.5px;color:var(--mut)}
+.kun[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.kun[aria-selected="true"] span{color:#aebbd0}
+.soatlar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.soat{position:relative;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:12px 0;font:800 15px 'Manrope',sans-serif;color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums}
+.soat.bor::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#16a34a}
+.soat[aria-selected="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+.soat[aria-selected="true"]::after{background:#fff}
+.vaqt-yuk{color:var(--mut);font-size:14px;margin-bottom:12px}
+.vaqt-forma{display:grid;gap:8px;margin-bottom:6px}
+.vaqt-forma input{border:1.5px solid var(--line);border-radius:12px;padding:14px;font:600 16px 'Manrope',sans-serif;color:var(--ink)}
+.vaqt-ichi .xato{color:var(--coral);font-size:14px;min-height:1.2em;margin:4px 0 8px}
+.vaqt-ichi .qongiroq{display:block;margin:10px auto 0;color:var(--mut)}
+.cta:disabled{opacity:.55;box-shadow:none;cursor:default}
+.cta:disabled::after{display:none}
+
+/* muvaffaqiyat oynasi */
+.oyna{position:fixed;inset:0;z-index:60;background:rgba(10,22,40,.6);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center}
+.oyna[hidden]{display:none}
+.oyna .ichi{width:100%;max-width:520px;background:#fff;border-radius:28px 28px 0 0;padding:28px 22px calc(24px + env(safe-area-inset-bottom));text-align:center;animation:chiq .45s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes chiq{from{transform:translateY(100%)}to{transform:none}}
+.oyna .belgi-k{width:84px;height:84px;margin:0 auto 12px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-size:40px;box-shadow:0 12px 30px rgba(13,148,136,.4)}
+.oyna h3{font-size:22px;margin-bottom:8px}
+.oyna p{color:var(--mut);margin:0 0 18px}
+.oyna .qadam{display:grid;gap:8px;text-align:left;margin-bottom:18px}
+.oyna .qadam i{font-style:normal;flex:none;font-size:17px;line-height:1}
+.oyna .qadam div{display:flex;gap:10px;align-items:center;background:#f7f5f0;border-radius:12px;padding:10px 12px;font-size:14.5px;font-weight:600}
+canvas#konfetti{position:fixed;inset:0;pointer-events:none;z-index:70}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .js .pay{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="w">
+    <div class="brend"><i>M</i><span>MyTeacher</span></div>
+    <div class="hero-grid">
+      <div>
+        <span class="teg"><b></b>Bepul · yakkama-yakka · 60 daqiqa</span>
+        <h1>Ingliz tilida <em>gapirishni</em> bugun boshlang</h1>
+        <p class="lead">Jonli ustoz bilan birinchi darsingiz bepul. Darajangizni aniqlaymiz, xatolaringizni ko‘rsatamiz va sizga mos shaxsiy reja tuzamiz.</p>
+        <button class="cta" type="button" data-cta>Vaqtni tanlab yozilish <small>→</small></button>
+        <button class="qongiroq" type="button" data-qongiroq>yoki menga qo‘ng‘iroq qiling</button>
+        <ul class="kafolat">
+          <li>Karta shart emas</li>
+          <li>Hech qanday majburiyat yo‘q</li>
+          <li>Ilova ichida video dars</li>
+        </ul>
+      </div>
+      <div class="sahna" aria-hidden="true">
+        <div class="pufak p1"><small>Ustoz</small>“Tell me about your weekend 😊”</div>
+        <div class="pufak p2"><small>Darajangiz</small><span class="daraja"><span class="b"></span><span class="b"></span><span class="b"></span><span></span><span></span></span>A2 → B1</div>
+        <div class="pufak p3"><small style="color:#6b4e00">Sinovdan keyin</small>Shaxsiy reja tayyor ✓</div>
+        <div class="telefon">
+          <div class="ekran">
+            <div class="video"><span class="rec">LIVE</span><div class="yuz"></div><span class="nom">Ustoz</span><div class="mini"></div></div>
+            <div class="doska"><b>Speaking · Present Perfect</b>I <u>have been</u> to Samarkand twice.<div class="qator"></div><div class="qator q2"></div><div class="qator q3"></div><div class="belgi"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="lenta" aria-hidden="true"><div id="lentaIchi"></div></div>
+</header>
+
+<main>
+  <div class="w">
+    <div class="raqamlar" id="raqamlar" hidden>
+      <div class="raqam pay"><b class="num" data-son="avgRating" data-kasr="1">—</b><span><span class="yulduz">★★★★★</span> o‘rtacha baho</span></div>
+      <div class="raqam pay"><b class="num" data-son="lessons">—</b><span>o‘tilgan jonli dars</span></div>
+      <div class="raqam pay"><b class="num" data-son="mentors">—</b><span>faol ustoz</span></div>
+      <div class="raqam pay"><b class="num">60 daq</b><span>har bir dars, yakkama-yakka</span></div>
+    </div>
+  </div>
+
+  <section>
+    <div class="w">
+      <div class="bosh pay"><small>Tanish holatmi?</small><h2>Tushunasiz, lekin gapirishga kelganda — jimlik</h2><p>Grammatika, ilovalar, videolar… Hammasi bor, faqat bitta narsa yetishmaydi: siz bilan gaplashadigan tirik odam.</p></div>
+      <div class="ogriq">
+        <div class="og pay"><div class="ik" style="background:var(--coral-soft)">😶</div><h3>Xato qilishdan qo‘rqasiz</h3><p>Guruhda gapirish noqulay — hamma eshitib turibdi.</p><div class="yech">→ Yakkama-yakka: faqat siz va ustoz</div></div>
+        <div class="og pay"><div class="ik" style="background:var(--sun-soft)">⏳</div><h3>Vaqt yo‘q</h3><p>Markazga borish, yo‘l, qat’iy jadval — kun sig‘maydi.</p><div class="yech">→ Uydan, telefoningizda, o‘zingiz tanlagan soatda</div></div>
+        <div class="og pay"><div class="ik" style="background:var(--teal-soft)">🔁</div><h3>O‘rganganlar unutiladi</h3><p>Mashq bo‘lmasa, yangi so‘zlar bir haftada yo‘qoladi.</p><div class="yech">→ Darslar orasida ilovada AI bilan mashq</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:10px">
+    <div class="w">
+      <div class="bosh pay"><small>Qanday o‘tadi</small><h2>Uch qadam — va siz birinchi darsdasiz</h2></div>
+      <div class="qadamlar">
+        <div class="qd pay"><span class="vaqt">20 soniya</span><h3>Vaqtni tanlang</h3><p>O‘zingizga qulay kun va soatni belgilang. 🟢 belgisi — shu soatda bo‘sh ustoz bor.</p></div>
+        <div class="qd pay"><span class="vaqt">Tasdiq</span><h3>Ustoz biriktiriladi</h3><p>Shu vaqtda bo‘sh ustozlardan biri darsingizni oladi — sizga bildirishnoma keladi.</p></div>
+        <div class="qd pay"><span class="vaqt">60 daqiqa</span><h3>Jonli dars</h3><p>Ilova Home sahifasida “Darsga kirish” tugmasi chiqadi. Bosasiz — ustoz sizni kutib turibdi.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:10px">
+    <div class="w natija">
+      <div>
+        <div class="bosh pay"><small>Darsdan keyin qo‘lingizda</small><h2>Aniq holat va aniq yo‘l</h2></div>
+        <ul>
+          <li class="pay"><i>🎯</i><div><b>Haqiqiy darajangiz</b><span>Gapirish, tinglash va lug‘at bo‘yicha — test emas, suhbat orqali.</span></div></li>
+          <li class="pay"><i>🩺</i><div><b>Xatolaringiz xaritasi</b><span>Qaysi xatolar takrorlanadi va ularni qanday yopish kerak.</span></div></li>
+          <li class="pay"><i>🗺️</i><div><b>Shaxsiy reja</b><span>Maqsadingizga — suhbat, ish yoki IELTS/CEFR — mos darslar tartibi.</span></div></li>
+        </ul>
+      </div>
+      <div class="hisobot pay" aria-label="Sinov darsidan keyingi hisobot namunasi">
+        <span class="namuna">namuna</span>
+        <small>Sinov darsi hisoboti</small>
+        <h3>Sizning darajangiz: A2+</h3>
+        <div class="shkala">
+          <div class="sh"><span>Gapirish</span><span class="bar"><i data-w="48"></i></span><em>A2</em></div>
+          <div class="sh"><span>Tinglash</span><span class="bar"><i data-w="62"></i></span><em>B1</em></div>
+          <div class="sh"><span>Lug‘at</span><span class="bar"><i data-w="55"></i></span><em>A2+</em></div>
+          <div class="sh"><span>Grammatika</span><span class="bar"><i data-w="58"></i></span><em>B1</em></div>
+        </div>
+        <div class="reja"><b>Reja: 3 oyda B1 gapirish</b>Haftada 2 dars · talaffuz va zamonlar · har kuni 10 daqiqa AI suhbat</div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:10px">
+    <div class="w">
+      <div class="ustozlar pay">
+        <div>
+          <div class="bosh"><small>Ustozlar</small><h2>Tasodifiy odam emas — tanlangan ustoz</h2><p>Har bir ustoz til darajasi bo‘yicha tekshiriladi va MyTeacher akademiyasidan o‘tadi. O‘quvchilar bahosi ularning reytingini belgilaydi.</p></div>
+          <div class="avatarlar" aria-hidden="true">
+            <span style="background:#14b8a6">D</span><span style="background:#F5B700;color:#0A1628">S</span><span style="background:#F0654F">M</span><span style="background:#6366f1">J</span><span style="background:#fff;color:#0A1628">+</span>
+          </div>
+        </div>
+        <div class="talab">
+          <div class="tl"><i>🗣️</i><div><b>Speaking ustozlari</b><span>Kamida B2 · IELTS 6.0–6.5 dan yuqori</span></div></div>
+          <div class="tl"><i>🎓</i><div><b>IELTS / CEFR ustozlari</b><span>C1 · IELTS 7.5+, sertifikat tasdiqlangan</span></div></div>
+          <div class="tl"><i>🏛️</i><div><b>MyTeacher akademiyasi</b><span>Dars metodikasi va test — o‘tmagan ustoz dars bermaydi</span></div></div>
+          <div class="tl"><i>⭐</i><div><b>Har darsdan keyin baho</b><span>Siz qo‘ygan yulduzlar ustozning o‘rnini belgilaydi</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:10px">
+    <div class="w">
+      <div class="bosh pay"><small>Taqqoslang</small><h2>Nega aynan MyTeacher</h2></div>
+      <div class="jad pay">
+        <table>
+          <thead><tr><th></th><th>Guruh kursi</th><th>Repetitor</th><th class="biz">MyTeacher</th></tr></thead>
+          <tbody>
+            <tr><td>Yakkama-yakka</td><td class="yoq">✕</td><td class="ha">✓</td><td class="biz">✓</td></tr>
+            <tr><td>Uydan, telefonda</td><td class="yoq">✕</td><td>ba’zan</td><td class="biz">✓</td></tr>
+            <tr><td>Vaqtni o‘zingiz tanlaysiz</td><td class="yoq">✕</td><td>ba’zan</td><td class="biz">✓</td></tr>
+            <tr><td>Darslar orasida AI mashq</td><td class="yoq">✕</td><td class="yoq">✕</td><td class="biz">✓</td></tr>
+            <tr><td>Ustozni baholash va almashtirish</td><td class="yoq">✕</td><td class="yoq">✕</td><td class="biz">✓</td></tr>
+            <tr><td>Birinchi dars</td><td>pullik</td><td>pullik</td><td class="biz">bepul</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:10px">
+    <div class="w">
+      <div class="narx pay">
+        <div>
+          <div class="bosh" style="margin:0"><small>Sinovdan keyin</small><h2>Narx — haftada necha marta o‘qishingizga qarab</h2><p>Hech qanday yashirin to‘lov yo‘q. Sinov darsidan keyin davom etish — faqat sizning qaroringiz.</p></div>
+        </div>
+        <div>
+          <div class="katta num">350 000<small>so‘mdan / oyiga</small></div>
+          <p style="color:var(--mut);margin:8px 0 14px">Haftada 1 marta. Bitta dars — 87 500 so‘m.</p>
+          <div class="chastota">
+            <div class="ch"><b>1×</b><span>350 000</span></div>
+            <div class="ch top"><b>2×</b><span>450 000</span></div>
+            <div class="ch"><b>3×</b><span>550 000</span></div>
+          </div>
+          <p style="color:var(--mut2);font-size:13px;margin:10px 0 0">Haftada 6 martagacha — 850 000 so‘m/oy.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:10px">
+    <div class="w" style="max-width:760px">
+      <div class="bosh pay"><small>Savollar</small><h2>Ko‘p so‘raladi</h2></div>
+      <details class="pay"><summary>Sinov darsi haqiqatan bepulmi?</summary><p>Ha. 60 daqiqalik birinchi dars to‘liq bepul, karta ma’lumoti so‘ralmaydi. Davom etish-etmaslikni darsdan keyin o‘zingiz hal qilasiz.</p></details>
+      <details class="pay"><summary>Darajam juda past, nol bo‘lsa-chi?</summary><p>Muammo emas. Ustoz darsni darajangizga moslab olib boradi — kerak bo‘lsa, o‘zbek tilida tushuntiradi. Sinov darsining maqsadi aynan boshlang‘ich nuqtani topish.</p></details>
+      <details class="pay"><summary>Nima kerak bo‘ladi?</summary><p>Telefon, internet va 60 daqiqa tinch joy. Dars shu ilovaning ichida bo‘ladi — boshqa dastur o‘rnatish shart emas.</p></details>
+      <details class="pay"><summary>Ustozni kim tanlaydi?</summary><p>Menejer darajangiz va maqsadingizga qarab, siz tanlagan vaqtda bo‘sh bo‘lgan tekshirilgan ustozni belgilaydi. Keyinchalik ustozni almashtirishingiz mumkin.</p></details>
+      <details class="pay"><summary>Sinovdan keyin majbur bo‘lamanmi?</summary><p>Yo‘q. Dars yoqsa — haftada necha marta o‘qishni tanlab davom etasiz. Yoqmasa — hech narsa to‘lamaysiz.</p></details>
+    </div>
+  </section>
+
+  <section style="padding-top:10px" id="yakun">
+    <div class="w">
+      <div class="yakun pay">
+        <span class="teg"><b></b>Bugun yozilganlar uchun</span>
+        <h2>Birinchi gapingizni ingliz tilida aytishga tayyormisiz?</h2>
+        <p>Yoziling — menejerimiz qo‘ng‘iroq qilib, sizga qulay vaqtni kelishadi.</p>
+        <button class="cta" type="button" data-cta id="yakunCta">Vaqtni tanlab yozilish <small>→</small></button><br><button class="qongiroq" type="button" data-qongiroq>yoki menga qo‘ng‘iroq qiling</button>
+        <form class="forma" id="forma" hidden novalidate>
+          <label for="fIsm">Ismingiz</label>
+          <input id="fIsm" name="ism" autocomplete="given-name" placeholder="Ism">
+          <label for="fTel">Telefon</label>
+          <input id="fTel" name="tel" inputmode="tel" autocomplete="tel" placeholder="+998 90 123 45 67">
+          <p class="xato" id="fXato" role="alert"></p>
+          <button class="cta" type="submit" id="fYubor">Bepul darsga yozilish</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>© MyTeacher · Birinchi dars bepul · 60 daqiqa · yakkama-yakka</footer>
+
+<div class="pastki" id="pastki"><button class="cta" type="button" data-cta>Vaqtni tanlab yozilish <small>bepul</small></button></div>
+
+<div class="oyna" id="oyna" hidden>
+  <div class="ichi" role="dialog" aria-modal="true" aria-labelledby="oynaS">
+    <div class="belgi-k" aria-hidden="true">✓</div>
+    <h3 id="oynaS">Siz ro‘yxatdasiz!</h3>
+    <p id="oynaMatn">Menejerimiz tez orada qo‘ng‘iroq qilib, sinov darsi vaqtini kelishadi.</p>
+    <div class="qadam">
+      <div id="oq1"><i>🔔</i><span>Ustoz biriktirilgach bildirishnoma keladi</span></div>
+      <div id="oq2"><i>🗓️</i><span>Dars kuni Home sahifasida “Darsga kirish” tugmasi chiqadi</span></div>
+      <div><i>🎧</i><span>Darsga quloqchin bilan, tinch joydan kiring</span></div>
+    </div>
+    <button class="cta oq" type="button" id="oynaYop" style="width:100%">Tushunarli</button>
+  </div>
+</div>
+<div class="oyna" id="vaqtOyna" hidden>
+  <div class="ichi vaqt-ichi" role="dialog" aria-modal="true" aria-labelledby="vaqtS">
+    <h3 id="vaqtS">Qachon qulay?</h3>
+    <p class="vaqt-izoh">Bepul sinov darsi · 60 daqiqa · <span class="yashil-n"></span> — bo‘sh ustoz bor</p>
+    <div class="kunlar" id="kunlar" role="tablist" aria-label="Kun"></div>
+    <div class="soatlar" id="soatlar" role="listbox" aria-label="Soat"></div>
+    <div class="vaqt-yuk" id="vaqtYuk">Bo‘sh vaqtlar yuklanmoqda…</div>
+    <div class="vaqt-forma" id="vaqtForma" hidden>
+      <input id="vIsm" autocomplete="given-name" placeholder="Ismingiz">
+      <input id="vTel" inputmode="tel" autocomplete="tel" placeholder="+998 90 123 45 67">
+    </div>
+    <p class="xato" id="vXato" role="alert"></p>
+    <button class="cta" type="button" id="vTasdiq" disabled style="width:100%">Soatni tanlang</button>
+    <button class="qongiroq" type="button" id="vYop">Yopish</button>
+  </div>
+</div>
+<canvas id="konfetti" hidden></canvas>
+
+<script>
+(function(){
+  document.documentElement.classList.add('js');
+  const $ = (s) => document.querySelector(s);
+  const ilova = () => !!(window.flutter_inappwebview && window.flutter_inappwebview.callHandler);
+
+  // ---- ibora lentasi ----
+  const IBORALAR = ["How was your day?","I'd like to…","Could you repeat that?","Let me think…","I have been to…","What do you mean?","Nice to meet you!","I'm looking forward to it"];
+  const lenta = IBORALAR.map((t) => `<span>${t}</span>`).join('');
+  $('#lentaIchi').innerHTML = lenta + lenta;
+
+  // ---- paydo bo'lish ----
+  const koz = new IntersectionObserver((xs) => xs.forEach((x) => {
+    if (!x.isIntersecting) return;
+    x.target.classList.add('ko');
+    x.target.querySelectorAll('.bar i').forEach((b) => { b.style.width = b.dataset.w + '%'; });
+    koz.unobserve(x.target);
+  }), { threshold: .15 });
+  document.querySelectorAll('.pay').forEach((el) => koz.observe(el));
+
+  // ---- haqiqiy raqamlar (kichik bo'lsa ko'rsatilmaydi) ----
+  fetch('/api/bepul-dars/stats').then((r) => r.ok ? r.json() : null).then((d) => {
+    if (!d || !d.lessons || d.lessons < 30) return;
+    $('#raqamlar').hidden = false;
+    document.querySelectorAll('[data-son]').forEach((el) => {
+      const v = d[el.dataset.son];
+      if (v == null) { el.closest('.raqam').hidden = true; return; }
+      const kasr = el.dataset.kasr ? 1 : 0;
+      const t0 = performance.now();
+      const qadam = (t) => {
+        const p = Math.min(1, (t - t0) / 1200);
+        const x = v * (1 - Math.pow(1 - p, 3));
+        el.textContent = kasr ? x.toFixed(1) : Math.round(x).toLocaleString('ru-RU').replace(/\s/g, ' ') + (el.dataset.son === 'lessons' ? '+' : '');
+        if (p < 1) requestAnimationFrame(qadam);
+      };
+      requestAnimationFrame(qadam);
+    });
+  }).catch(() => {});
+
+  // ---- pastki tugma: hero'dan o'tgach chiqadi, yakunda yashirinadi ----
+  const pastki = $('#pastki');
+  const heroCta = document.querySelector('.hero [data-cta]');
+  const yakunEl = $('#yakun');
+  const pk = () => {
+    const h = heroCta.getBoundingClientRect();
+    const y = yakunEl.getBoundingClientRect();
+    const heroKorin = h.bottom > 0 && h.top < innerHeight;
+    const yakunKorin = y.top < innerHeight && y.bottom > 0;
+    pastki.classList.toggle('ko', !heroKorin && !yakunKorin && $('#oyna').hidden && $('#vaqtOyna').hidden);
+  };
+  addEventListener('scroll', pk, { passive: true });
+  addEventListener('resize', pk);
+  pk();
+
+  // ---- konfetti ----
+  function konfetti(){
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const c = $('#konfetti'); c.hidden = false;
+    const x = c.getContext('2d'); const d = Math.min(2, devicePixelRatio || 1);
+    c.width = innerWidth * d; c.height = innerHeight * d;
+    const R = ['#F5B700','#0D9488','#F0654F','#14b8a6','#ffffff'];
+    const p = Array.from({ length: 140 }, () => ({ x: c.width / 2, y: c.height * .55, vx: (Math.random() - .5) * 18 * d, vy: (-Math.random() * 16 - 6) * d, r: (4 + Math.random() * 5) * d, c: R[Math.floor(Math.random() * R.length)], a: Math.random() * 6, h: 1 }));
+    (function f(){
+      x.clearRect(0, 0, c.width, c.height);
+      let bor = false;
+      p.forEach((q) => { q.vy += .45 * d; q.x += q.vx; q.y += q.vy; q.a += .2; q.h -= .006;
+        if (q.h > 0 && q.y < c.height + 40) { bor = true; x.save(); x.globalAlpha = q.h; x.translate(q.x, q.y); x.rotate(q.a); x.fillStyle = q.c; x.fillRect(-q.r / 2, -q.r / 4, q.r, q.r / 2); x.restore(); } });
+      if (bor) requestAnimationFrame(f); else c.hidden = true;
+    })();
+  }
+
+  function muvaffaqiyat(oldin){
+    if (oldin) $('#oynaMatn').textContent = 'So‘rovingiz allaqachon qabul qilingan — menejerimiz tez orada qo‘ng‘iroq qiladi.';
+    if (oldin === 'qongiroq') { $('#oynaS').textContent = 'Qo‘ng‘iroqni kuting!'; $('#oynaMatn').textContent = 'Menejerimiz tez orada qo‘ng‘iroq qilib, sinov darsi vaqtini kelishadi.'; qator('#oq1', '📞', 'Telefoningiz yoniq tursin'); }
+    $('#oyna').hidden = false; pk(); konfetti();
+    try { navigator.vibrate && navigator.vibrate([30, 40, 60]); } catch (e) {}
+  }
+  $('#oynaYop').onclick = () => { $('#oyna').hidden = true; pk(); };
+
+  // ---- yozilish ----
+  let band = false;
+  async function yozil(btn){
+    if (band) return;
+    if (ilova()) {
+      // Ilova ichida — ism va telefon akkauntdan (native so'rov yuboradi)
+      band = true; const eski = btn.innerHTML; btn.innerHTML = 'Yuborilmoqda…';
+      try {
+        const r = await window.flutter_inappwebview.callHandler('trialRequest');
+        if (r && r.ok) muvaffaqiyat(r.already ? true : 'qongiroq');
+        else alertMatn(btn, (r && r.message) || 'Yuborib bo‘lmadi, qayta urinib ko‘ring');
+      } catch (e) { alertMatn(btn, 'Yuborib bo‘lmadi, qayta urinib ko‘ring'); }
+      finally { btn.innerHTML = eski; band = false; }
+      return;
+    }
+    // Brauzerda — qisqa forma
+    $('#yakunCta').hidden = true; $('#forma').hidden = false;
+    $('#forma').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => $('#fIsm').focus(), 400);
+  }
+  function alertMatn(btn, m){ const t = document.createElement('p'); t.textContent = m; t.style.cssText = 'color:#F0654F;font-weight:700;margin:10px 0 0'; btn.after(t); setTimeout(() => t.remove(), 4000); }
+  document.querySelectorAll('[data-qongiroq]').forEach((b) => b.addEventListener('click', () => yozil(b)));
+  document.querySelectorAll('[data-cta]').forEach((b) => b.addEventListener('click', vaqtOch));
+
+  const qator = (sel, e, t) => { const el = $(sel); el.querySelector('i').textContent = e; el.querySelector('span').textContent = t; };
+  // ---- vaqt tanlash ----
+  const HAFTA = ['Yak', 'Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh'];
+  const OY = ['yanvar','fevral','mart','aprel','may','iyun','iyul','avgust','sentabr','oktabr','noyabr','dekabr'];
+  let KUNLAR = [], tanKun = 0, tanSoat = null, slotYuklandi = false;
+  // Toshkent bo'yicha bugundan necha kun keyin (0 — bugun, 1 — ertaga)
+  const kunFarqi = (date) => Math.round((Date.parse(date + 'T00:00:00Z') - Date.parse(new Date(Date.now() + 5 * 3600e3).toISOString().slice(0, 10) + 'T00:00:00Z')) / 86400e3);
+  const kunNomi = (date) => { const f = kunFarqi(date); return f === 0 ? 'Bugun' : f === 1 ? 'Ertaga' : HAFTA[new Date(date + 'T12:00:00Z').getUTCDay()]; };
+  const vaqtMatni = () => {
+    const k = KUNLAR[tanKun]; if (!k || tanSoat == null) return '';
+    const [, m, d] = k.date.split('-');
+    const f = kunFarqi(k.date); const kn = f === 0 ? 'Bugun' : f === 1 ? 'Ertaga' : `${Number(d)}-${OY[Number(m) - 1]}`;
+    return `${kn}, ${String(tanSoat.hour).padStart(2, '0')}:00`;
+  };
+  // Slotlar kelmasa — o'zimiz tuzamiz (bo'sh/band belgisisiz)
+  function zaxiraKunlar(){
+    const out = []; const hozir = Date.now() + 2 * 3600e3;
+    for (let i = 0; i < 7; i++) {
+      const t = new Date(Date.now() + 5 * 3600e3 + i * 86400e3); const date = t.toISOString().slice(0, 10);
+      const hours = [];
+      for (let h = 8; h <= 21; h++) { const st = new Date(Date.parse(date + 'T00:00:00Z') + (h - 5) * 3600e3); if (st.getTime() >= hozir) hours.push({ hour: h, startsAt: st.toISOString(), free: null }); }
+      if (hours.length) out.push({ date, hours });
+    }
+    return out;
+  }
+  async function slotlar(){
+    if (slotYuklandi) return;
+    try {
+      const r = await fetch('/api/bepul-dars/slots');
+      const d = r.ok ? await r.json() : null;
+      KUNLAR = d && d.days && d.days.length ? d.days : zaxiraKunlar();
+    } catch (e) { KUNLAR = zaxiraKunlar(); }
+    slotYuklandi = true;
+    // Birinchi bo'sh soati bor kunni tanlab qo'yamiz
+    const i = KUNLAR.findIndex((k) => k.hours.some((h) => h.free));
+    tanKun = i >= 0 ? i : 0;
+    $('#vaqtYuk').hidden = true; kunChiz(); soatChiz();
+  }
+  function kunChiz(){
+    $('#kunlar').innerHTML = KUNLAR.map((k, i) => {
+      const d = Number(k.date.slice(8, 10));
+      return `<button class="kun" type="button" role="tab" aria-selected="${i === tanKun}" data-i="${i}"><b>${kunNomi(k.date, i)}</b><span>${d}-${OY[Number(k.date.slice(5, 7)) - 1].slice(0, 3)}</span></button>`;
+    }).join('');
+  }
+  function soatChiz(){
+    const k = KUNLAR[tanKun];
+    $('#soatlar').innerHTML = (k ? k.hours : []).map((h, j) =>
+      `<button class="soat ${h.free ? 'bor' : ''}" type="button" role="option" aria-selected="${tanSoat && tanSoat.startsAt === h.startsAt}" data-j="${j}" aria-label="${String(h.hour).padStart(2, '0')}:00${h.free ? ', bo‘sh ustoz bor' : ''}">${String(h.hour).padStart(2, '0')}:00</button>`).join('');
+    const b = $('#vTasdiq');
+    b.disabled = !tanSoat;
+    b.innerHTML = tanSoat ? `${vaqtMatni()} — albatta qatnashaman` : 'Soatni tanlang';
+  }
+  $('#kunlar').addEventListener('click', (e) => { const b = e.target.closest('[data-i]'); if (!b) return; tanKun = Number(b.dataset.i); tanSoat = null; kunChiz(); soatChiz(); });
+  $('#soatlar').addEventListener('click', (e) => { const b = e.target.closest('[data-j]'); if (!b) return; tanSoat = KUNLAR[tanKun].hours[Number(b.dataset.j)]; soatChiz(); });
+  function vaqtOch(){
+    $('#vaqtForma').hidden = ilova();
+    $('#vXato').textContent = '';
+    $('#vaqtOyna').hidden = false; pk(); slotlar();
+  }
+  $('#vYop').onclick = () => { $('#vaqtOyna').hidden = true; pk(); };
+  $('#vaqtOyna').addEventListener('click', (e) => { if (e.target.id === 'vaqtOyna') { $('#vaqtOyna').hidden = true; pk(); } });
+
+  $('#vTasdiq').addEventListener('click', async () => {
+    if (!tanSoat || band) return;
+    const b = $('#vTasdiq'); const matn = vaqtMatni();
+    $('#vXato').textContent = '';
+    let body = null;
+    if (!ilova()) {
+      const ism = $('#vIsm').value.trim(); const tel = $('#vTel').value.replace(/[^\d+]/g, '');
+      if (ism.length < 2) { $('#vXato').textContent = 'Ismingizni yozing'; return; }
+      if (tel.replace(/\D/g, '').length < 9) { $('#vXato').textContent = 'Telefon raqamni to‘liq yozing'; return; }
+      body = { name: ism, phone: tel, startsAt: tanSoat.startsAt };
+    }
+    band = true; b.disabled = true; b.innerHTML = 'Yuborilmoqda…';
+    try {
+      let ok = false, xabar = '';
+      if (ilova()) {
+        const r = await window.flutter_inappwebview.callHandler('trialBook', tanSoat.startsAt);
+        ok = !!(r && r.ok); xabar = (r && r.message) || '';
+      } else {
+        const r = await fetch('/api/bepul-dars', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const d = await r.json().catch(() => ({}));
+        ok = r.ok; xabar = d.error || '';
+      }
+      if (!ok) { $('#vXato').textContent = xabar || 'Yuborib bo‘lmadi, qayta urinib ko‘ring'; return; }
+      $('#vaqtOyna').hidden = true;
+      $('#oynaS').textContent = `${matn} — siz yozildingiz!`;
+      $('#oynaMatn').textContent = 'Ustoz biriktirilgach sizga xabar beramiz. Darsga vaqtida kirishni unutmang.';
+      if (!ilova()) { qator('#oq1', '📞', 'Tasdiqlash uchun siz bilan bog‘lanamiz'); qator('#oq2', '📱', 'Darsga MyTeacher ilovasi orqali kirasiz'); }
+      muvaffaqiyat(false);
+    } catch (e) {
+      $('#vXato').textContent = 'Yuborib bo‘lmadi, qayta urinib ko‘ring';
+    } finally { band = false; b.disabled = !tanSoat; if (b.innerHTML === 'Yuborilmoqda…') b.innerHTML = `${vaqtMatni()} — albatta qatnashaman`; }
+  });
+
+  $('#forma').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const ism = $('#fIsm').value.trim();
+    const tel = $('#fTel').value.replace(/[^\d+]/g, '');
+    if (ism.length < 2) return ($('#fXato').textContent = 'Ismingizni yozing');
+    if (tel.replace(/\D/g, '').length < 9) return ($('#fXato').textContent = 'Telefon raqamni to‘liq yozing');
+    $('#fXato').textContent = ''; $('#fYubor').disabled = true; $('#fYubor').textContent = 'Yuborilmoqda…';
+    try {
+      const r = await fetch('/api/bepul-dars', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: ism, phone: tel }) });
+      if (!r.ok) throw new Error();
+      $('#forma').hidden = true; muvaffaqiyat('qongiroq');
+    } catch (err) {
+      $('#fXato').textContent = 'Yuborib bo‘lmadi. Internetni tekshirib, qayta urinib ko‘ring.';
+    } finally { $('#fYubor').disabled = false; $('#fYubor').textContent = 'Bepul darsga yozilish'; }
+  });
+})();
+</script>
+</body>
+</html>
