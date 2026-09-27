@@ -851,7 +851,9 @@ body:not(.js) .nojs{display:block}
       });
       html += '</div>';
     }
-    if(pass){
+    if(d.preview){
+      html += '<div class="note" style="margin-top:18px"><b>Ko\'rish rejimi.</b> Natija saqlanmadi. Haqiqiy mentor testdan o\'tganda shu yerdan Work bo\'limiga o\'tadi va unga sinov darsi so\'rovlari kela boshlaydi.</div>';
+    } else if(pass){
       html += '<div class="unlock"><h3>Sinov darsi so\'rovlari ochildi</h3><p>Keyingi uch qadam:</p><ol>' +
         '<li>Jadval bo\'limida bo\'sh soatlaringizni belgilang — haftasiga kamida 10 soat.</li>' +
         '<li>Ochiq soatingizda ilovani yoniq tuting. So\'rov kelganda 15 daqiqa ichida qabul qiling.</li>' +
@@ -869,12 +871,21 @@ body:not(.js) .nojs{display:block}
     nextBtn.disabled = false;
     hintEl.textContent = pass ? "Natijangiz saqlandi" : "Har bir urinishda savollar bir xil qoladi";
     if(d.preview){
-      // Ko'rish rejimi: natija saqlanmaydi, Work'ga o'tkazilmaydi
-      lastResult = {...d, pass:false};
-      nextBtn.textContent = "Testni qayta topshirish"; nextBtn.className = "btn";
+      // Ko'rish rejimi: natija saqlanmaydi. Asosiy tugma — kelgan sahifaga qaytish
+      prevBtn.style.display = "";
+      prevBtn.textContent = "Qayta topshirish";
+      nextBtn.textContent = "Chiqish"; nextBtn.className = "btn";
       hintEl.textContent = "👀 Ko'rish rejimi — natija saqlanmadi";
     }
     barEl.style.width = "100%";
+  }
+
+  // Ilovadagi tab bo'yicha qaytish joyi (Home / Career / Work)
+  function chiqishYoli(){
+    const h = location.hostname;
+    if(h.startsWith("mentor-home.")) return "/home.html";
+    if(h.startsWith("mentor-career.")) return "/career.html";
+    return "/work.html";
   }
 
   let mode = "mod";
@@ -901,11 +912,17 @@ body:not(.js) .nojs{display:block}
       if(qi < QUESTIONS.length-1){ qi++; renderQuestion(); }
       else { mode = "res"; renderResult(); }
     } else {
+      if(lastResult && lastResult.preview){ location.href = chiqishYoli(); return; }
       if(lastResult && lastResult.pass){ location.href = "/work.html"; }
       else { answers = new Array(QUESTIONS.length).fill(null); mode="test"; qi=0; save(); renderQuestion(); }
     }
   });
   prevBtn.addEventListener("click", ()=>{
+    if(mode === "res" && lastResult && lastResult.preview){
+      // Ko'rish rejimi: "Qayta topshirish"
+      prevBtn.textContent = "Orqaga"; nextBtn.style.flex = "";
+      answers = new Array(QUESTIONS.length).fill(null); mode = "test"; qi = 0; save(); renderQuestion(); return;
+    }
     if(mode === "res"){ prevBtn.textContent = "Orqaga"; nextBtn.style.flex = ""; mode="mod"; idx = 0; renderModule(); return; }
     if(mode === "mod"){ if(idx > 0){ idx--; renderModule(); } }
     else if(mode === "test"){
