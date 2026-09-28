@@ -6,6 +6,7 @@
 <title>Ustoz kirishi — Jonli dars</title>
 <link rel="stylesheet" href="/app.css">
 <style>
+  [hidden]{display:none!important}
   body{display:grid;place-items:center;min-height:100dvh;padding:20px}
   .karta-oq{width:100%;max-width:380px;margin:0;padding:26px}
   label{display:block;font-size:13px;color:var(--mut2);font-weight:600;margin:16px 0 7px}
@@ -35,9 +36,57 @@
     <p class="hint">Ustoz ham, o‘quvchi ham shu yerdan kiradi — jadval o‘zi mos sahifani ochadi.</p>
   </form>
 
+  <div class="karta-oq" id="ilovaKirish" hidden style="text-align:center">
+    <b style="display:block;font-size:17px;margin-bottom:6px">Kirilmoqda…</b>
+    <span class="izoh" id="ilovaMatn">Bir soniya</span>
+    <button type="button" class="tugma" id="parolBilan" hidden>Login va parol bilan kirish</button>
+  </div>
+
+<script src="/auth-webview.js"></script>
 <script>
   const $ = (s) => document.querySelector(s);
   const keyin = new URLSearchParams(location.search).get('keyin');
+  const xavfsizKeyin = keyin && keyin.startsWith('/') && !keyin.startsWith('//') ? keyin : null;
+
+  // Mentor ilovasi ichida login/parol so'ralmaydi. Ilova sahifani #ai=<token> bilan ochadi
+  // (yoki domen ildizini — server shu yerga #ai= ni saqlab yo'naltiradi).
+  (async () => {
+    const hash = new URLSearchParams(location.hash.slice(1));
+    const token = hash.get('ai') || new URLSearchParams(location.search).get('ai');
+    const ilova = token || window.ilovadami();
+    if (!ilova) return;
+
+    // Forma DOM'da qoladi (ilovaning avtoto'ldirishi ishlashi uchun), faqat ko'rinmaydi
+    $('#form').style.display = 'none';
+    $('#ilovaKirish').hidden = false;
+
+    if (token) {
+      try { sessionStorage.setItem('ll_ilova', '1'); } catch { /* yo'q */ }
+      history.replaceState(null, '', location.pathname + location.search);
+      try {
+        const a = await fetch('/api/adopt', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }),
+        });
+        if (a.ok) {
+          const b = await fetch('/api/bosh-sahifa').then((r) => r.json());
+          location.replace(xavfsizKeyin || b.redirect || '/work.html');
+          return;
+        }
+      } catch { /* pastda ilovadan yangi token so'raymiz */ }
+    }
+
+    // Token yo'q yoki yaroqsiz — ilovadan yangisini so'raymiz (u #ai= bilan qayta ochadi)
+    window.nativeXabar({ turi: 'tokenEskirdi', sahifa: xavfsizKeyin || '/' });
+    setTimeout(() => {
+      $('#ilovaMatn').textContent = 'Sahifa o‘zi ochilmasa, ilovada bo‘limni yopib, qayta oching.';
+      $('#parolBilan').hidden = false;
+    }, 8000);
+  })();
+
+  $('#parolBilan').addEventListener('click', () => {
+    $('#ilovaKirish').hidden = true;
+    $('#form').style.display = '';
+  });
 
   $('#form').addEventListener('submit', async (e) => {
     e.preventDefault();
