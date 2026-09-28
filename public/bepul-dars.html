@@ -574,6 +574,8 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
   const iosmi = () => !/Android/i.test(navigator.userAgent) && (/iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
   // Meta reklamasidan kelganmi (lid manbasi uchun)
   const META_DAN = /[?&](fbclid=|utm_source=(fb|facebook|ig|instagram))/i.test(location.search);
+  // Qaysi sahifadan kelgani (masalan CEFR) — ustoz o'quvchining maqsadini biladi
+  const MAQSAD = (new URLSearchParams(location.search).get('maqsad') || '').slice(0, 20);
   function kuzat(){
     try { if (typeof ym === 'function') ym(100441294, 'reachGoal', 'bepul_dars_yozildi'); } catch (e) {}
     try { if (typeof fbq === 'function') fbq('track', 'Lead'); } catch (e) {}
@@ -740,7 +742,7 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
       const ism = $('#vIsm').value.trim(); const tel = $('#vTel').value.replace(/[^\d+]/g, '');
       if (ism.length < 2) { $('#vXato').textContent = 'Ismingizni yozing'; return; }
       if (tel.replace(/\D/g, '').length < 9) { $('#vXato').textContent = 'Telefon raqamni to‘liq yozing'; return; }
-      body = { name: ism, phone: tel, startsAt: tanSoat.startsAt, meta: META_DAN };
+      body = { name: ism, phone: tel, startsAt: tanSoat.startsAt, meta: META_DAN, maqsad: MAQSAD || undefined };
     }
     band = true; b.disabled = true; b.innerHTML = 'Yuborilmoqda…';
     try {

@@ -313,7 +313,7 @@ app.post('/api/bepul-dars', async (req, res) => {
       const r = await fetch(`${base}/trial-requests/public`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-lesson-secret': process.env.LESSON_TOKEN_SECRET || '' },
-        body: JSON.stringify({ name, phone: phoneNumber, startsAt, manba: bepulManba(req) }),
+        body: JSON.stringify({ name, phone: phoneNumber, startsAt, manba: bepulManba(req), maqsad: String(req.body?.maqsad || '').slice(0, 20) || undefined }),
         signal: AbortSignal.timeout(15000),
       });
       const d = await r.json().catch(() => ({}));
