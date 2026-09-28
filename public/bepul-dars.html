@@ -690,11 +690,11 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
   };
   // Slotlar kelmasa — o'zimiz tuzamiz (bo'sh/band belgisisiz)
   function zaxiraKunlar(){
-    const out = []; const hozir = Date.now() + 2 * 3600e3;
+    const out = []; const hozir = Date.now() + 90 * 60e3; // backend: kamida 1,5 soat oldin
     for (let i = 0; i < 7; i++) {
       const t = new Date(Date.now() + 5 * 3600e3 + i * 86400e3); const date = t.toISOString().slice(0, 10);
       const hours = [];
-      for (let h = 8; h <= 21; h++) { const st = new Date(Date.parse(date + 'T00:00:00Z') + (h - 5) * 3600e3); if (st.getTime() >= hozir) hours.push({ hour: h, startsAt: st.toISOString(), free: null }); }
+      for (let h = 8; h <= 23; h++) { const st = new Date(Date.parse(date + 'T00:00:00Z') + (h - 5) * 3600e3); if (st.getTime() >= hozir) hours.push({ hour: h, startsAt: st.toISOString(), free: null }); }
       if (hours.length) out.push({ date, hours });
     }
     return out;
