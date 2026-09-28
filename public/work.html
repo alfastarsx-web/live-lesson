@@ -100,6 +100,9 @@ body.work{background:var(--bg)}
 .chaqiruv .tolqin:nth-child(3){animation-delay:1.6s}
 @keyframes tolqin{from{transform:scale(1);opacity:.9}to{transform:scale(1.9);opacity:0}}
 .chaqiruv .qabul{box-shadow:none}
+/* To'lqinlar 1.9 barobar kattalashib, kichik ekranda tugmalar ustiga chiqadi — bosishni ushlab qolmasin */
+.chaqiruv .tolqin{pointer-events:none}
+.chaqiruv .qabul,.chaqiruv .rad{position:relative;z-index:1}
 
 @media (prefers-reduced-motion:reduce){
   .onlayn i,.chaqiruv .tolqin{animation:none}
@@ -375,7 +378,8 @@ $('#chRad').onclick = (e) => radEt($('#chaqiruv').dataset.id, e.currentTarget);
 async function qabulQil(id, btn) {
   if (!id) return;
   btn.disabled = true;
-  const r = await api(`/api/trial/${id}/accept`, { method: 'POST' });
+  // Tarmoq uzilsa ham tugma qotib qolmasin
+  const r = await api(`/api/trial/${id}/accept`, { method: 'POST' }).catch(() => ({ ok: false, data: { error: 'Internet aloqasini tekshiring' } }));
   btn.disabled = false;
   if (!r) return;
   SORROVLAR = SORROVLAR.filter((s) => s.requestId !== id);
@@ -392,14 +396,14 @@ async function radEt(id, btn) {
   if (!id) return;
   if (!confirm('Rad etsangiz reytingingizga ta’sir qiladi. Rad etasizmi?')) return;
   btn.disabled = true;
-  const r = await api(`/api/trial/${id}/decline`, { method: 'POST' });
+  const r = await api(`/api/trial/${id}/decline`, { method: 'POST' }).catch(() => ({ ok: false, data: { error: 'Internet aloqasini tekshiring' } }));
   btn.disabled = false;
   if (!r) return;
   SORROVLAR = SORROVLAR.filter((s) => s.requestId !== id);
   if ($('#chaqiruv').dataset.id === id) chaqiruvYop();
   sorovlarniChiz();
   smenaChiz();
-  if (!r.ok) toast(r.data.message || 'Rad etib bo‘lmadi', 'err');
+  if (!r.ok) toast(r.data.message || r.data.error || 'Rad etib bo‘lmadi', 'err');
 }
 
 // ---------- darslar ----------
