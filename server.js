@@ -261,7 +261,7 @@ app.all(/^\/api\/booking(\/.*)?$/, (req, res) => {
 // Ochiq sahifa: ilova ichida (Kurslar) va reklamada. Ilovada yozilish native orqali,
 // brauzerda esa shu forma — lid ai.myteacher.uz ga tushadi va operator qo'ng'iroq qiladi.
 // Ilova Kurslar sahifasi (app-course.myteacher.uz) landing so'rovlari uchun CORS
-const BEPUL_ORIGINS = new Set(['https://app-course.myteacher.uz']);
+const BEPUL_ORIGINS = new Set(['https://app-course.myteacher.uz', 'https://www.myteacher.uz', 'https://myteacher.uz']);
 app.use('/api/bepul-dars', (req, res, next) => {
   const o = req.headers.origin;
   if (o && BEPUL_ORIGINS.has(o)) {
@@ -289,6 +289,12 @@ app.get('/api/bepul-dars/slots', async (req, res) => {
     res.status(502).json({});
   }
 });
+// Lid manbasi: www saytidanmi yoki lesson/app-course'danmi, Meta reklamasidanmi
+function bepulManba(req) {
+  const origin = String(req.headers.origin || '');
+  const www = origin === 'https://www.myteacher.uz' || origin === 'https://myteacher.uz';
+  return `${www ? 'www' : 'web'}-bepul-dars${req.body?.meta ? '-fb' : ''}`;
+}
 app.post('/api/bepul-dars', async (req, res) => {
   const ip = String(req.headers['x-real-ip'] || req.ip || '');
   const hozir = Date.now();
@@ -307,7 +313,7 @@ app.post('/api/bepul-dars', async (req, res) => {
       const r = await fetch(`${base}/trial-requests/public`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-lesson-secret': process.env.LESSON_TOKEN_SECRET || '' },
-        body: JSON.stringify({ name, phone: phoneNumber, startsAt }),
+        body: JSON.stringify({ name, phone: phoneNumber, startsAt, manba: bepulManba(req), maqsad: String(req.body?.maqsad || '').slice(0, 20) || undefined }),
         signal: AbortSignal.timeout(15000),
       });
       const d = await r.json().catch(() => ({}));

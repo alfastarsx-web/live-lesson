@@ -281,6 +281,16 @@ canvas#konfetti{position:fixed;inset:0;pointer-events:none;z-index:70}
 .vaqtlar li small{font-weight:800;font-size:12.5px;color:var(--teal);letter-spacing:.02em}
 .vaqtlar li span{font-weight:600;font-size:14.5px;line-height:1.4}
 .vaqtlar li.oxir i{background:var(--teal);color:#fff}
+.ilova-blok{background:var(--navy);color:#fff;border-radius:20px;padding:16px;text-align:left;margin:0 0 14px}
+.ilova-blok b{display:block;font-size:15.5px;line-height:1.35;margin-bottom:12px}
+.ilova-blok p{color:#c8d3e3!important;font-size:14px;margin:12px 0 0!important}
+.ilova-blok p b{display:inline;color:#fff;margin:0}
+.dokonlar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dokon{display:grid;background:#fff;color:var(--navy);text-decoration:none;border-radius:14px;padding:10px 12px;font-weight:800;font-size:16px;line-height:1.15}
+.dokon:first-child{background:var(--sun)}
+.dokon small{font-size:11.5px;font-weight:700;color:#5b6474}
+.faqat-ilova{text-align:center;color:var(--mut);font-size:14px;margin:0;padding:18px 16px 0}
+.faqat-ilova a{color:var(--teal);font-weight:700}
 .e{display:inline-block;margin:0 .55em 0 .15em}
 .yol-eslat{margin:12px 0 0!important;font-size:14px;color:var(--ink)!important;background:#fff;border-radius:12px;padding:10px 12px}
 
@@ -497,7 +507,7 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
       <div class="bosh pay"><small>Savollar</small><h2>Ko‘p so‘raladi</h2></div>
       <details class="pay"><summary>Sinov darsi haqiqatan bepulmi?</summary><p>Ha. 60 daqiqalik birinchi dars to‘liq bepul, karta ma’lumoti so‘ralmaydi. Davom etish-etmaslikni darsdan keyin o‘zingiz hal qilasiz.</p></details>
       <details class="pay"><summary>Darajam juda past, nol bo‘lsa-chi?</summary><p>Muammo emas. Ustoz darsni darajangizga moslab olib boradi — kerak bo‘lsa, o‘zbek tilida tushuntiradi. Sinov darsining maqsadi aynan boshlang‘ich nuqtani topish.</p></details>
-      <details class="pay"><summary>Nima kerak bo‘ladi?</summary><p>Telefon, internet va 60 daqiqa tinch joy. Dars shu ilovaning ichida bo‘ladi — boshqa dastur o‘rnatish shart emas.</p></details>
+      <details class="pay"><summary>Nima kerak bo‘ladi?</summary><p>Telefon, internet va 60 daqiqa tinch joy. Dars MyTeacher ilovasi ichida bo‘ladi — boshqa dastur (Zoom va h.k.) kerak emas.</p></details>
       <details class="pay"><summary>Ustozni kim tanlaydi?</summary><p>Siz tanlagan soatda bo‘sh bo‘lgan tekshirilgan ustozlarga so‘rov boradi — birinchi qabul qilgan ustoz darsingizni oladi va sizga xabar keladi.</p></details>
       <details class="pay"><summary>Sinovdan keyin majbur bo‘lamanmi?</summary><p>Yo‘q. Dars yoqsa — haftada necha marta o‘qishni tanlab davom etasiz. Yoqmasa — hech narsa to‘lamaysiz.</p></details>
     </div>
@@ -514,6 +524,7 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
     </div>
   </section>
 </main>
+<p class="faqat-ilova" id="faqatIlova" hidden>Hozircha faqat ilova kerakmi? <a href="#" id="faqatIlovaHav" target="_blank" rel="noopener">Ilovani yuklab olish</a></p>
 <footer>© MyTeacher · Birinchi dars bepul · 60 daqiqa · yakkama-yakka</footer>
 
 <div class="pastki" id="pastki"><button class="cta" type="button" data-cta>Vaqtni tanlab yozilish <small>bepul</small></button></div>
@@ -523,6 +534,7 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
     <div class="belgi-k" aria-hidden="true">✓</div>
     <h3 id="oynaS">Siz ro‘yxatdasiz!</h3>
     <p id="oynaMatn"></p>
+    <div id="oynaIlova" hidden></div>
     <div id="oynaYol" hidden></div>
     <button class="cta oq" type="button" id="oynaYop" style="width:100%">Tushunarli</button>
   </div>
@@ -556,6 +568,30 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
   const KALIT = new URLSearchParams(location.search).get('t') || '';
   const KAPI = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://127.0.0.1:8077/api' : 'https://ai.myteacher.uz/api';
   const kalitli = () => !!KALIT;
+  // Ilova do'konlari (www.myteacher.uz bilan bir xil)
+  const IOS_URL = 'https://testflight.apple.com/join/NBNHurR2';
+  const ANDROID_URL = 'https://play.google.com/store/apps/details?id=com.myteacher.student';
+  const iosmi = () => !/Android/i.test(navigator.userAgent) && (/iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+  // Meta reklamasidan kelganmi (lid manbasi uchun)
+  const META_DAN = /[?&](fbclid=|utm_source=(fb|facebook|ig|instagram))/i.test(location.search);
+  // Qaysi sahifadan kelgani (masalan CEFR) — ustoz o'quvchining maqsadini biladi
+  const MAQSAD = (new URLSearchParams(location.search).get('maqsad') || '').slice(0, 20);
+  function kuzat(){
+    try { if (typeof ym === 'function') ym(100441294, 'reachGoal', 'bepul_dars_yozildi'); } catch (e) {}
+    try { if (typeof fbq === 'function') fbq('track', 'Lead'); } catch (e) {}
+  }
+  const yashir = (tel) => { const r = String(tel).replace(/\D/g, '').slice(-9); return r.length === 9 ? `+998 ${r.slice(0, 2)} ••• •• ${r.slice(7)}` : tel; };
+  function ilovaBlok(tel){
+    const ios = iosmi();
+    const tugma = (url, nom, kichik) => `<a class="dokon" href="${url}" target="_blank" rel="noopener"><small>${kichik}</small>${nom}</a>`;
+    const tartib = ios ? [tugma(IOS_URL, 'App Store', 'iPhone uchun'), tugma(ANDROID_URL, 'Google Play', 'Android uchun')]
+                       : [tugma(ANDROID_URL, 'Google Play', 'Android uchun'), tugma(IOS_URL, 'App Store', 'iPhone uchun')];
+    return `<div class="ilova-blok">
+      <b>Darsingiz MyTeacher ilovasida bo‘ladi — hozir yuklab oling</b>
+      <div class="dokonlar">${tartib.join('')}</div>
+      <p>Ilovaga <b>${yashir(tel)}</b> raqami bilan kiring — SMS orqali kod keladi. Darsingiz o‘sha yerda kutib turadi.</p>
+    </div>`;
+  }
   const ilova = () => !!(window.flutter_inappwebview && window.flutter_inappwebview.callHandler) && !/app-course\./.test(location.hostname);
 
   // ---- ibora lentasi ----
@@ -706,7 +742,7 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
       const ism = $('#vIsm').value.trim(); const tel = $('#vTel').value.replace(/[^\d+]/g, '');
       if (ism.length < 2) { $('#vXato').textContent = 'Ismingizni yozing'; return; }
       if (tel.replace(/\D/g, '').length < 9) { $('#vXato').textContent = 'Telefon raqamni to‘liq yozing'; return; }
-      body = { name: ism, phone: tel, startsAt: tanSoat.startsAt };
+      body = { name: ism, phone: tel, startsAt: tanSoat.startsAt, meta: META_DAN, maqsad: MAQSAD || undefined };
     }
     band = true; b.disabled = true; b.innerHTML = 'Yuborilmoqda…';
     try {
@@ -729,13 +765,23 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
       $('#oynaMatn').innerHTML = 'Tabriklaymiz!<span class="e">🎉</span>Ustoz biriktirilishi bilan sizga xabar beramiz.';
       $('#oynaYol').innerHTML = qollanma(tanSoat.startsAt);
       $('#oynaYol').hidden = false;
+      // Brauzerdan yozilgan — ilova hali yo'q: avval yuklab olish
+      const vebdan = !ilova() && !kalitli();
+      $('#oynaIlova').innerHTML = vebdan ? ilovaBlok(body.phone) : '';
+      $('#oynaIlova').hidden = !vebdan;
       yozildi = true;
+      kuzat();
       muvaffaqiyat();
     } catch (e) {
       $('#vXato').textContent = 'Yuborib bo‘lmadi, qayta urinib ko‘ring';
     } finally { band = false; b.disabled = !tanSoat; if (b.innerHTML === 'Yuborilmoqda…') b.innerHTML = `${vaqtMatni()} — albatta qatnashaman`; }
   });
 
+
+  if (!ilova() && !kalitli()) {
+    $('#faqatIlovaHav').href = iosmi() ? IOS_URL : ANDROID_URL;
+    $('#faqatIlova').hidden = false;
+  }
 
   // ---- darsga kirish yo'riqnomasi ----
   let yozildi = false;
