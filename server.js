@@ -140,16 +140,33 @@ function cookies(req) {
   );
 }
 
-function cookieHeader(req, name, value, maxAge) {
+// VAQTINCHA: mentor ilovasi tablarni (lesson, mentor-home, mentor-career) #ai= tokensiz
+// ochadi. Sessiya cookie'si uchala domenga umumiy — bitta tabda kirilsa, qolganlari so'ramaydi.
+// Ilova #ai=<token> uzatadigan bo'lgach, COOKIE_DOMAIN= (bo'sh) qilib o'chirsa bo'ladi.
+function umumiyDomen(req) {
+  if (process.env.COOKIE_DOMAIN !== undefined) return process.env.COOKIE_DOMAIN || null;
+  const host = String(req.hostname || '');
+  return host === 'myteacher.uz' || host.endsWith('.myteacher.uz') ? '.myteacher.uz' : null;
+}
+
+function cookieHeader(req, name, value, maxAge, domain = umumiyDomen(req)) {
   return `${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`
+    + (domain ? `; Domain=${domain}` : '')
     + (req.secure || req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : '');
+}
+
+// [[nom, qiymat, maxAge], ...] — umumiy domen yoqilgan bo'lsa, shu domenning eski
+// (domensiz) nusxasi o'chiriladi: aks holda brauzer ikkalasini yuborib, eskisi xalaqit beradi
+function setCookies(req, res, royxat) {
+  const domain = umumiyDomen(req);
+  const headers = royxat.map(([nom, qiymat, maxAge]) => cookieHeader(req, nom, qiymat, maxAge, domain));
+  if (domain) headers.push(...royxat.map(([nom]) => cookieHeader(req, nom, '', 0, null)));
+  res.setHeader('Set-Cookie', headers);
 }
 
 function setSession(req, res, { room, name }) {
   const token = sign({ room, role: 'teacher', name }, 12 * 3600);
-  res.setHeader('Set-Cookie',
-    `${COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${12 * 3600}`
-    + (req.secure || req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : ''));
+  setCookies(req, res, [[COOKIE, token, 12 * 3600]]);
   res.json({ ok: true, room, name, role: 'mentor', redirect: '/room.html' });
 }
 
@@ -171,15 +188,15 @@ app.post('/api/login', async (req, res) => {
   if (aiteacher.AITEACHER_ON) {
     const r = await aiteacher.signIn(login, password);
     if (r.ok) {
-      const headers = [cookieHeader(req, AI_COOKIE, r.token || '', 12 * 3600)];
+      const royxat = [[AI_COOKIE, r.token || '', 12 * 3600]];
 
       if (r.isMentor) {
         // Mentorga dars xonasi tokeni ham beriladi
         const token = sign({ room: `mentor-${r.id}`, role: 'teacher', name: r.name }, 12 * 3600);
-        headers.push(cookieHeader(req, COOKIE, token, 12 * 3600));
+        royxat.push([COOKIE, token, 12 * 3600]);
       }
 
-      res.setHeader('Set-Cookie', headers);
+      setCookies(req, res, royxat);
       return res.json({
         ok: true,
         name: r.name,
@@ -201,10 +218,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/logout', (req, res) => {
-  res.setHeader('Set-Cookie', [
-    `${COOKIE}=; Path=/; HttpOnly; Max-Age=0`,
-    `${AI_COOKIE}=; Path=/; HttpOnly; Max-Age=0`,
-  ]);
+  setCookies(req, res, [[COOKIE, '', 0], [AI_COOKIE, '', 0]]);
   res.json({ ok: true });
 });
 
@@ -393,7 +407,7 @@ app.post('/api/kirish', async (req, res) => {
     const jwt = aiteacher.findJwt(data);
     if (!jwt) return res.status(502).json({ error: 'Kirish tokeni kelmadi' });
 
-    res.setHeader('Set-Cookie', [cookieHeader(req, AI_COOKIE, jwt, 12 * 3600)]);
+    setCookies(req, res, [[AI_COOKIE, jwt, 12 * 3600]]);
     return res.json({ ok: true });
   } catch {
     return res.status(502).json({ error: 'ai.myteacher.uz javob bermadi' });
@@ -450,7 +464,7 @@ app.post('/api/adopt', (req, res) => {
   if (!payload || !payload.exp || payload.exp * 1000 < Date.now()) {
     return res.status(400).json({ error: 'token yaroqsiz' });
   }
-  res.setHeader('Set-Cookie', cookieHeader(req, AI_COOKIE, token, 12 * 3600));
+  setCookies(req, res, [[AI_COOKIE, token, 12 * 3600]]);
   const roles = aiteacher.collectRoles(payload);
   res.json({ ok: true, role: roles.includes('mentor') || roles.includes('admin') ? 'mentor' : 'student' });
 });
