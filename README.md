@@ -135,17 +135,13 @@ transcript qo‘shilganda, transcript ham shu vaqt o‘qiga tushadi.
 
 > Token rejimida bu endpointlar `x-admin-key: $ADMIN_KEY` sarlavhasini talab qiladi.
 
-## Lidlar: o‘quvchi akkauntini bitta tugma bilan ochish
+## Lidlar: Telegram orqali o‘quvchi akkauntini avtomatik ochish
 
-Mentor `/lidlar.html` da lid kartasidagi **“Akkaunt ochish”** tugmasini bosadi. Server
-`POST /api/ai/leads/:id/create-account` so‘rovini ai.myteacher.uz ga o‘tkazadi (mentor tokeni
-HttpOnly cookie’da turadi). Akkaunt ochiladi va login/parol o‘quvchiga **Telegram bot**
-(`TRIAL_BOT_TOKEN` API tomonida) orqali ilova ko‘rsatmasi va skrinshotlar bilan yuboriladi;
-Telegram bo‘lmasa SMS **yuborilmaydi**: kod kartada ko‘rinadi va mentor uni o‘quvchiga o‘zi aytadi. Batafsil oqim: aiteacher-api `CLAUDE.md`
-→ “Trial lessons: Telegram bot”.
-
-Bu yo‘l ochiq proksi emas: `server.js` da faqat aynan shu POST manzili ruxsat etilgan.
-`LESSON_TOKEN_SECRET` bu server va API’da **bir xil** bo‘lishi shart.
+O‘quvchi Telegram botga kirib `/start` berganida va telefon raqamini ulashganida (yoki qo‘lda kiritganida),
+bot uni bazadagi lidlar bilan solishtiradi. Lid topilsa, o‘quvchi akkaunti avtomatik ochiladi va login/parol
+hamda ilova ko‘rsatmalari **Telegram bot** orqali darhol yuboriladi. Mentor tomonda hech qanday qo‘shimcha
+tugma bosish talab qilinmaydi — `lidlar.html` da lidning Telegramga ulangani va akkaunt holati aks etadi.
+Batafsil oqim: aiteacher-api `CLAUDE.md` → “Trial lessons: Telegram bot”.
 
 ## Keyingi bosqich
 
