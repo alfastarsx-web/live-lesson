@@ -627,8 +627,47 @@ app.get(AKADEMIYA_YOPIQ, async (req, res, next) => {
   next();
 });
 
-// Bosh sahifa — rol tanlash yo'q, rol hisobdan aniqlanadi
-app.get('/', (req, res) => res.redirect('/login.html'));
+// Cookie'dagi ai.myteacher.uz tokeni — muddati o'tmagan bo'lsa
+function amaldagiAiToken(req) {
+  const t = cookies(req)[AI_COOKIE];
+  const p = t ? aiteacher.jwtPayload(t) : null;
+  if (!p || (p.exp && p.exp * 1000 < Date.now())) return null;
+  return t;
+}
+
+// Kirgan odam uchun shu domendagi bosh sahifa (mentor — tab sahifasi, o'quvchi — band.html)
+async function boshSahifa(req, aiToken) {
+  const roles = aiteacher.collectRoles(aiteacher.jwtPayload(aiToken));
+  const mentor = roles.includes('mentor') || roles.includes('admin');
+  return mentor ? mentorBoshSahifa(req, aiToken) : '/band.html';
+}
+
+// login.html #ai=<token> ni cookie'ga aylantirgach qayerga o'tishni shu yerdan so'raydi
+app.get('/api/bosh-sahifa', async (req, res) => {
+  const ai = amaldagiAiToken(req);
+  if (!ai) return res.status(401).json({ error: 'kirilmagan' });
+  res.json({ redirect: await boshSahifa(req, ai) });
+});
+
+// Bosh sahifa. Ilova tablari o'z domenining ildizini ochadi (#ai=<token> bilan) —
+// login emas, tab sahifasi ochilsin: sahifaning o'zi #ai= ni qabul qiladi.
+// Brauzer 302 da #... qismini saqlaydi.
+app.get('/', async (req, res) => {
+  const host = String(req.hostname || '');
+  if (host.startsWith('mentor-home.')) return res.redirect('/home.html');
+  if (host.startsWith('mentor-career.')) return res.redirect('/career.html');
+  const ai = amaldagiAiToken(req);
+  res.redirect(ai ? await boshSahifa(req, ai) : '/login.html');
+});
+
+// Sessiyasi bor odamga login formasi ko'rsatilmaydi. ?keyin= bo'lsa — sahifa hozirgina
+// 401 olgan (token bekor qilingan), qayta yo'naltirsak aylanib qoladi — formani ko'rsatamiz.
+app.get(/^\/login(\.html)?$/, async (req, res, next) => {
+  if (req.query.keyin) return next();
+  const ai = amaldagiAiToken(req);
+  if (!ai) return next();
+  res.redirect(await boshSahifa(req, ai));
+});
 
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
