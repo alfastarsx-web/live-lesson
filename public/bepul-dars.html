@@ -286,6 +286,12 @@ canvas#konfetti{position:fixed;inset:0;pointer-events:none;z-index:70}
 .ilova-blok b{display:block;font-size:15.5px;line-height:1.35;margin-bottom:12px}
 .ilova-blok p{color:#c8d3e3!important;font-size:14px;margin:12px 0 0!important}
 .ilova-blok p b{display:inline;color:#fff;margin:0}
+.tg-blok-o{margin:0 0 14px}
+.tg-blok{display:flex;gap:12px;align-items:center;background:#e8f4fd;border:1.5px solid #bfe0f7;border-radius:20px;padding:14px;text-align:left}
+.tg-blok .tg-ik{flex:none;width:44px;height:44px;border-radius:50%;background:#229ED9;display:grid;place-items:center}
+.tg-blok b{display:block;font-size:15px;line-height:1.35;color:var(--navy)}
+.tg-blok span{display:block;font-size:13.5px;color:#46607a;margin-top:2px;line-height:1.4}
+.tg-tugma{display:block;margin:10px 0 0;background:#229ED9;color:#fff;text-decoration:none;text-align:center;border-radius:14px;padding:12px;font-weight:800;font-size:15.5px}
 .dokonlar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .dokon{display:grid;background:#fff;color:var(--navy);text-decoration:none;border-radius:14px;padding:10px 12px;font-weight:800;font-size:16px;line-height:1.15}
 .dokon:first-child{background:var(--sun)}
@@ -537,6 +543,7 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
     <div class="belgi-k" aria-hidden="true">✓</div>
     <h3 id="oynaS">Siz ro‘yxatdasiz!</h3>
     <p id="oynaMatn"></p>
+    <div id="oynaTg" hidden></div>
     <div id="oynaIlova" hidden></div>
     <div id="oynaYol" hidden></div>
     <button class="cta oq" type="button" id="oynaYop" style="width:100%">Tushunarli</button>
@@ -593,6 +600,17 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
       <b>Darsingiz MyTeacher ilovasida bo‘ladi — hozir yuklab oling</b>
       <div class="dokonlar">${tartib.join('')}</div>
       <p>Ilovaga <b>${yashir(tel)}</b> raqami bilan kiring — SMS orqali kod keladi. Darsingiz o‘sha yerda kutib turadi.</p>
+    </div>`;
+  }
+  // Telegram bot: ilovani yuklab olish havolasi va darsga kirish eslatmalari shu yerga keladi
+  const TG_BOT = 'https://t.me/MT_yordam_bot';
+  function tgBlok(){
+    return `<div class="tg-blok-o">
+      <div class="tg-blok">
+        <div class="tg-ik" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M9.8 15.2l-.4 5.3c.6 0 .8-.3 1.1-.6l2.7-2.5 5.5 4c1 .6 1.7.3 2-.9l3.6-16.9c.3-1.5-.6-2.1-1.6-1.7L1.5 10.3c-1.4.6-1.4 1.4-.2 1.8l5.4 1.7L19.2 6c.6-.4 1.1-.2.7.2z"/></svg></div>
+        <div><b>Telegram botimizga kiring</b><span>Ilovani yuklab olish havolasi va darsga kirish eslatmalari shu yerga keladi.</span></div>
+      </div>
+      <a class="tg-tugma" href="${TG_BOT}" target="_blank" rel="noopener">Telegram botga kirish</a>
     </div>`;
   }
   const ilova = () => !!(window.flutter_inappwebview && window.flutter_inappwebview.callHandler) && !/app-course\./.test(location.hostname);
@@ -772,6 +790,8 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
       const vebdan = !ilova() && !kalitli();
       $('#oynaIlova').innerHTML = vebdan ? ilovaBlok(body.phone) : '';
       $('#oynaIlova').hidden = !vebdan;
+      $('#oynaTg').innerHTML = vebdan ? tgBlok() : '';
+      $('#oynaTg').hidden = !vebdan;
       yozildi = true;
       kuzat();
       muvaffaqiyat();
