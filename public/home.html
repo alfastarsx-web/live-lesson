@@ -140,6 +140,12 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
     <span><b>Akademiyani tugating</b><br><span class="xira" id="akadMatn">Testdan o‘tgach sinov darsi so‘rovlari kela boshlaydi</span></span>
   </a>
 
+  <div class="akad" id="yangilik" hidden style="position:relative">
+    <span class="ico a" aria-hidden="true">🆕</span>
+    <a href="/mentor/akademiya.html#yangiliklar" style="text-decoration:none;color:inherit;flex:1"><b>Akademiya yangilandi</b><br><span class="xira">Sentabr yangiliklari: tasdiqlash qo‘ng‘irog‘i, Telegram bot, taklif yuborish — 3 daqiqa</span></a>
+    <button type="button" id="yangilikYop" aria-label="Yopish" style="border:0;background:none;font-size:18px;color:#9a9ca3;cursor:pointer;padding:4px 6px">×</button>
+  </div>
+
   <a class="card grafik" id="grafik" href="/daromad.html" aria-label="Haftalik kirim — Daromad bo‘limini ochish">
     <div class="ch"><h2>Shu hafta</h2><span class="d" id="haftaOralik"></span></div>
     <div style="margin-top:4px"><span class="big num" id="haftaJami">—</span> <span class="xira">so‘m</span><span class="up" id="haftaFoiz" hidden></span></div>
@@ -383,6 +389,16 @@ $('#varaq').addEventListener('click', (e) => { if (e.target.id === 'varaq') $('#
   if (akad && akad.mentor && !akad.passed) {
     $('#akad').hidden = false;
     $('#akadMatn').textContent = `${akad.modulesRead}/${akad.modules} modul o‘qildi · testdan o‘tgach sinov so‘rovlari keladi`;
+  }
+  // Akademiyadan o'tgan (yoki ozod qilingan) ustozga — yangiliklar kartasi, yopilguncha
+  const YANGILIK = 'akademiya-yangilik-2026-09';
+  let korgan = false;
+  try { korgan = localStorage.getItem(YANGILIK) === '1'; } catch { /* yo'q */ }
+  if (akad && akad.mentor && akad.passed && !korgan) {
+    $('#yangilik').hidden = false;
+    const yop = () => { try { localStorage.setItem(YANGILIK, '1'); } catch { /* yo'q */ } $('#yangilik').hidden = true; };
+    $('#yangilikYop').onclick = yop;
+    $('#yangilik').querySelector('a').addEventListener('click', yop);
   }
   holatChiz(ball, progress);
   await tabriklarniKorsat(ISM);
