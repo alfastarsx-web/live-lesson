@@ -117,6 +117,9 @@ body:not(.js) .nojs{display:block}
 .note{border-left:3px solid var(--orange);background:var(--orange-soft);padding:14px 16px;font-size:15px;margin-top:14px}
 .note b{font-family:var(--display)}
 .warn{border-left:3px solid var(--red);background:var(--red-soft);padding:14px 16px;font-size:15px;margin-top:14px}
+.tez{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:#eceef2;color:#6b6e76;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;vertical-align:2px}
+.yangi{border:2px solid var(--green);background:var(--green-soft);border-radius:14px;padding:14px 16px;margin-top:14px;font-size:15px}
+.yangi b.t{display:block;margin-bottom:6px}
 .good{border-left:3px solid var(--green);background:var(--green-soft);padding:14px 16px;font-size:15px;margin-top:14px}
 /* Izoh qutilari — bitta belgi, ko'z tez ilg'aydi */
 .note::before{content:"💡 "}
@@ -297,9 +300,17 @@ body:not(.js) .nojs{display:block}
       <h1>Birinchi o'quvchingizni olishdan oldin</h1>
       <p>Sakkizta qisqa modul — ish qanday tashkil qilingani, qancha ishlashingiz va nima talab qilinishi. Oxirida qisqa test. Testdan o'tgan zahoti sizga sinov darsi so'rovlari kela boshlaydi.</p>
     </div>
+    <div class="txt">
+      <div class="yangi" id="yangiliklar"><b class="t">🆕 Sentabr yangiliklari — 3 daqiqada</b>
+        1) O'quvchi sinov vaqtini ko'pincha <b>o'zi tanlaydi</b> — qabul qilgach 10 daqiqa ichida qo'ng'iroq qilib tasdiqlaysiz (4-modul).<br>
+        2) Qo'ng'iroqda o'quvchidan <b>@MT_yordam_bot</b> ni topib Start bosishini so'raysiz — ilova havolasi va eslatmalarni bot yuboradi (5-modul).<br>
+        3) Sinovdan keyin Work'dan <b>taklif</b> yuborasiz: kunlar, soatlar, narx. Soatlar 24 soat o'quvchiga band, u Kurslar bo'limida chek bilan to'laydi (7-modul).<br>
+        4) <b>Prioritet 50 dan past</b> bo'lsa yangi o'quvchi berilmaydi (8-modul).
+      </div>
+    </div>
     <div class="facts">
-      <div><b>8</b><span>modul, taxminan 12 daqiqa</span></div>
-      <div><b>16</b><span>savol, o'tish bali 13</span></div>
+      <div><b>8</b><span>modul, taxminan 15 daqiqa</span></div>
+      <div><b>21</b><span>savol, o'tish bali 17</span></div>
       <div><b>60–85%</b><span>o'quvchi to'lovidan sizning ulushingiz</span></div>
     </div>
     <div class="txt">
@@ -317,15 +328,15 @@ body:not(.js) .nojs{display:block}
   <div class="mod-head">
     <p class="n">1-modul · Rol</p>
     <h2>🎯 Birinchi darsdan to'lovgacha — siz</h2>
-    <p>O'quvchiga qo'ng'iroq qilib, sinov darsi vaqtini operator kelishadi. Shundan keyingi hamma narsa — darsni o'tish, narxni aytish, o'quvchini ushlab qolish — sizning ishingiz. Barcha uchrashuvlar bitta so'z bilan ataladi: <b>dars</b>.</p>
+    <p>O'quvchi sinov darsiga ilovada yoki saytda o'zi yoziladi (ba'zan operator orqali). Shundan keyingi hamma narsa — tasdiqlash qo'ng'irog'i, darsni o'tish, narxni aytish va taklif yuborish, o'quvchini ushlab qolish — sizning ishingiz. Barcha uchrashuvlar bitta so'z bilan ataladi: <b>dars</b>.</p>
   </div>
   <div class="viz">
     <p class="cap">Ishning zanjiri</p>
     <div class="flow">
-      <div class="st"><i>1</i><div><b>Sinov darsi so'rovi</b><span>operator vaqtni kelishgan</span></div></div>
-      <div class="st"><i>2</i><div><b>Qabul qilish</b><span>15 daqiqa ichida</span></div></div>
+      <div class="st"><i>1</i><div><b>Sinov darsi so'rovi</b><span>o'quvchi vaqtni tanlagan</span></div></div>
+      <div class="st"><i>2</i><div><b>Qabul va qo'ng'iroq</b><span>15 daqiqada qabul, 10 daqiqada tasdiq</span></div></div>
       <div class="st hot"><i>3</i><div><b>Sinov darsi</b><span>45–60 daqiqa, bepul</span></div></div>
-      <div class="st"><i>4</i><div><b>To'lov</b><span>narxni siz aytasiz</span></div></div>
+      <div class="st"><i>4</i><div><b>Taklif</b><span>kunlar, soatlar, narx — 24 soat</span></div></div>
       <div class="st"><i>5</i><div><b>Doimiy o'quvchi</b><span>har oy daromad</span></div></div>
     </div>
   </div>
@@ -419,7 +430,7 @@ body:not(.js) .nojs{display:block}
   <div class="mod-head">
     <p class="n">4-modul · Sinov darsi so'rovlari</p>
     <h2>🔔 So'rov keldi — birinchi qabul qilgan oladi</h2>
-    <p>Operator o'quvchi bilan vaqtni kelishgach, so'rov o'sha soatda bo'sh bo'lgan barcha mentorlarga bir vaqtda ketadi.</p>
+    <p>O'quvchi vaqtni tanlagach (yoki operator kelishgach), so'rov o'sha soatda bo'sh bo'lgan barcha mentorlarga bir vaqtda ketadi.</p>
   </div>
   <div class="viz">
     <p class="cap">So'rov qanday keladi</p>
@@ -438,7 +449,17 @@ body:not(.js) .nojs{display:block}
       <li><b>Rad etish −25 ball.</b> Javob bermasangiz ham reytingingizga ta'sir qiladi. Ochiq soatda so'rovni rad etmaslik uchun — bo'lmaydigan soatni oldindan yoping.</li>
       <li>Hech kim olmasa, operator mentorni o'zi tanlaydi. Qo'lda biriktirilgan dars ham sizning jadvalingizga tushadi.</li>
     </ul>
-    <div class="note"><b>Tezlik muhim.</b> So'rov bir necha mentorga birdan boradi. Ochiq soatingizda ilovani yoniq tuting va ovozni o'chirmang.</div>
+    <div class="note"><b>Tezlik muhim.</b> So'rov bir necha mentorga birdan boradi. Ochiq soatingizda ilovani yoniq tuting va ovozni o'chirmang: ilova ochiq bo'lsa signal qaysi bo'limda bo'lsangiz ham chaladi, yopiq bo'lsa push har daqiqada qayta keladi.</div>
+  </div>
+  <div class="block">
+    <h3>Qabul qildingiz — 10 daqiqada tasdiqlang</h3>
+    <p>O'quvchi vaqtni o'zi tanlagan bo'lsa, u adashib yoki havaskorona yozilgan bo'lishi mumkin. Shuning uchun dars kalendaringizda <b>sariq bo'lib miltillaydi</b> — siz o'quvchiga qo'ng'iroq qilib, real ekanini va vaqt aniqligini bilib olasiz.</p>
+    <ul class="list">
+      <li><b>Qabul qilish</b> — gaplashdingiz, vaqt aniq. Dars tasdiqlanadi.</li>
+      <li><b>Vaqtni o'zgartirish</b> — boshqa vaqtga kelishdingiz. Yangi kun va soatni tanlaysiz, dars darhol tasdiqlanadi.</li>
+      <li><b>Bekor qilish</b> — sababini tanlaysiz: adashib yozilgan, boshqa ustozga (so'rov boshqa ustozlarga ketadi) yoki bog'lanib bo'lmadi (operator qayta urinadi). Ball ayirilmaydi.</li>
+    </ul>
+    <div class="note"><b>10 daqiqa o'tsa ham</b> slot o'zi bo'shamaydi — lekin qizil bo'lib qoladi va administrator ko'radi. Qo'ng'iroqni kechiktirmang.</div>
   </div>
   <div class="block">
     <h3>Ikki oqim</h3>
@@ -458,13 +479,13 @@ body:not(.js) .nojs{display:block}
       <li><b>Natijani belgilashda izohga yozing.</b> Operator o'quvchini sertifikatli mentorga o'tkazadi va izohingiz u bilan birga ketadi.</li>
       <li><b>Dars boshlangan bo'lsa, uni oxirigacha o'tkazing.</b> Darajasini aniqlab, yo'l xaritasini bering, keyin yangi ustozga ulang. Yarim yo'lda tashlab ketilgan odam umuman qaytmaydi.</li>
     </ul>
-    <div class="good"><b>O'tkazish sizga zarar qilmaydi — aksincha, to'lanadi:</b>
+    <div class="good"><b>O'tkazish sizga zarar qilmaydi — aksincha, to'lanadi:</b><span class="tez">tez orada</span>
       <dl class="kv" style="margin-top:10px">
         <div><dt>Suhbatda aniqlab, o'tkazdingiz</dt><dd>+15 ball</dd></div>
         <div><dt>O'sha odam 14 kun ichida to'lov qildi</dt><dd>+20 000 so'm</dd></div>
         <div><dt>Birinchi darsni o'zingiz o'tib, keyin o'tkazdingiz</dt><dd>dars balli + 40 000 so'm</dd></div>
       </dl>
-      <p style="margin-top:10px;font-size:14px">Prioritetingizga ta'sir qilmaydi. Noto'g'ri o'tkazilgan o'quvchi uchun (yangi mentor tekshiradi) ball berilmaydi.</p>
+      <p style="margin-top:10px;font-size:14px">Prioritetingizga ta'sir qilmaydi. Noto'g'ri o'tkazilgan o'quvchi uchun (yangi mentor tekshiradi) ball berilmaydi. Bu mukofotlar hali ishga tushmagan — ishga tushganda xabar beramiz.</p>
     </div>
     <div class="note"><b>Har doim o'tkazish shart emas.</b> Ko'pchilik "IELTS kerak" deydi, lekin imtihonga hali bir yil bor va aslida gapirishni o'rganishi kerak. Savol bering: "Imtihonni qachon topshirmoqchisiz va qancha ball kerak?" Aniq sana va ball bo'lsa — o'tkazasiz. Bo'lmasa, siz bilan Speaking dasturida boshlaydi.</div>
     <div class="warn"><b>Qilmang:</b> IELTS tayyorgarligini Speaking narxida va'da qilish yoki "imtihonni ham o'zim tayyorlayman" deb o'zingizda qoldirish. Bir-ikki darsdan keyin o'quvchi farqni sezadi va ketadi.</div>
@@ -472,10 +493,11 @@ body:not(.js) .nojs{display:block}
   <div class="block">
     <h3>Sinov darsi natijalari</h3>
     <dl class="kv">
-      <div><dt>O'quvchi to'lov qildi</dt><dd>To'lov qildi</dd></div>
+      <div><dt>Dars bo'ldi, taklif yubordingiz</dt><dd>Dars o'tildi</dd></div>
       <div><dt>O'ylab ko'rmoqchi yoki qiziqmadi</dt><dd>Rad etdi</dd></div>
       <div><dt>Darsga kirmadi</dt><dd>Kelmadi</dd></div>
     </dl>
+    <div class="good"><b>"To'lov qildi" o'zi qo'yiladi.</b> O'quvchi taklifingizni to'lab, administrator tasdiqlaganda holat avtomatik "To'lov qildi" bo'ladi va darslar jadvalingizga tushadi. Uni qo'lda bosmang.</div>
     <div class="note"><b>Izohni ham yozing.</b> Nima gaplashildi, qaysi dastur va narx aytildi. O'quvchi boshqa mentorga yoki operatorga o'tsa, odamdan bir xil narsani qayta so'rashmaydi.</div>
   </div>
 
@@ -496,11 +518,12 @@ body:not(.js) .nojs{display:block}
     </div>
   </div>
   <div class="block">
-    <h3>To'rt qadam</h3>
+    <h3>Besh qadam</h3>
     <ul class="list">
-      <li><b>Operator izohini o'qing.</b> Unda o'quvchining maqsadi, darajasi va qulay vaqti yozilgan bo'ladi.</li>
+      <li><b>Qo'ng'iroq qiling va Telegram botni ayting.</b> "Telegramda <b>@MT_yordam_bot</b> ni qidirib, Start bosing — ilovani yuklash havolasi va dars eslatmalari o'sha yerga keladi." Havola yoki kod yuborish shart emas.</li>
+      <li><b>Izohni o'qing.</b> Unda o'quvchining maqsadi, darajasi va qulay vaqti yozilgan bo'ladi.</li>
       <li><b>Darsdan 10 daqiqa oldin</b> Work'dagi "Darsni boshlash" tugmasi ochiladi. Kamera, mikrofon va internetni oldindan tekshiring.</li>
-      <li><b>Vaqtida kiring.</b> 5 daqiqadan ortiq kechikish −20 ball, darsga umuman chiqmaslik −80 ball.</li>
+      <li><b>Vaqtida kiring.</b> O'quvchi kutib qolgan dars — past baho va yo'qotilgan o'quvchi. Belgilangan darsga chiqmaslik eng og'ir xato.</li>
       <li><b>Dars 1 soat.</b> Diagnostika va narx gaplashilgan bo'lsa, 45-daqiqada yakunlash ham normal.</li>
     </ul>
     <div class="note"><b>Birinchi savol har doim bitta:</b> "Ingliz tili sizga nima uchun kerak — gapirish uchunmi yoki sertifikat uchunmi?" Javob dasturni va narxni belgilaydi.</div>
@@ -595,7 +618,7 @@ body:not(.js) .nojs{display:block}
     <dl class="kv">
       <div><dt>1. Sababni aniqlang</dt><dd>"Nimasi qimmat tuyuldi — summasimi yoki hozircha qiyinmi?"</dd></div>
       <div><dt>2. Bitta darsga bo'ling</dt><dd>"Bitta dars 56 250 so'm — repetitor narxidan past"</dd></div>
-      <div><dt>3. Tarifni pasaytiring</dt><dd>"Haftada 1 martadan boshlaymiz — 350 000"</dd></div>
+      <div><dt>3. Tarifni pasaytiring</dt><dd>"Haftada 1 martadan boshlaymiz — 350 000" — va shu bilan taklif yuboring</dd></div>
     </dl>
     <div class="warn"><b>Narxni tushirmang.</b> Chegirma bermaysiz — dars sonini kamaytirasiz. Narxni bir marta tushirsangiz, o'quvchi uni haqiqiy narx deb qabul qilmay qo'yadi va keyingi oyda yana so'raydi.</div>
     <div class="good"><b>Pul bo'lmasa:</b> "Tushundim. Sizga haftada 1 martalik variantni ochib qo'yaman, keyinroq kuchaytirasiz." O'quvchini yo'qotgandan ko'ra, arzon tarifda boshlagan yaxshi.</div>
@@ -606,9 +629,21 @@ body:not(.js) .nojs{display:block}
       <li><b>Narxni aytib bo'lgach jim turing.</b> Birinchi gapirgan — yon beradi.</li>
       <li><b>Uzr so'ramang.</b> "Atigi", "jami-yo'g'i" kerak emas.</li>
       <li><b>Chegirma so'ralsa</b> narxni emas, haftadagi dars sonini kamaytiring. Eng past narx — 350 000 so'm.</li>
-      <li><b>To'lovni hoziroq</b>, o'quvchi ekranda turganida qildiring.</li>
+      <li><b>Kunlarni hoziroq kelishing</b> va o'quvchi ekranda turganida taklif yuboring.</li>
     </ul>
-    <div class="good"><b>24 soat bonusi:</b> o'quvchi birinchi darsdan keyin 24 soat ichida to'lov qilsa, sizga o'sha dars uchun ham <b>bitta dars puli miqdorida bonus</b> shu zahoti tushadi.</div>
+  </div>
+  <div class="block">
+    <h3>Taklif yuborish — sinov darsining oxirgi 5 daqiqasi</h3>
+    <p>Narx aytilib, o'quvchi rozi bo'lsa, u bilan keyingi darslar kuni va soatini aniq kelishing va Work → sinov darsi kartasidagi <b>"📩 Taklif yuborish"</b> ni bosing:</p>
+    <ul class="list">
+      <li><b>Haftada necha marta</b> — narx avtomatik chiqadi (jadval yuqorida).</li>
+      <li><b>Kunlar va soat</b> — faqat jadvalingizdagi bo'sh soatlardan, bir kunga bitta dars.</li>
+      <li>O'quvchi Kurslar bo'limida taklifni ko'radi, kartaga o'tkazib <b>chek skrinshotini</b> yuklaydi. Administrator tasdiqlagach, 4 haftalik darslar ikkalangizning jadvalingizga o'zi tushadi.</li>
+    </ul>
+    <div class="note"><b>Soatlar 24 soat band.</b> Taklif qilingan soatlar boshqa o'quvchiga va sinov so'rovlariga berilmaydi. 24 soatda to'lanmasa — bo'shaydi va sizga xabar keladi.</div>
+    <div class="good"><b>Jiddiy mijoz belgisi:</b> o'quvchi kunlarini ochiq aytib, "shu vaqtlarni menga saqlab qo'ying, gaplashib to'layman" desa — bu jiddiy qaror. Darhol taklif yuboring. "O'ylab ko'raman" deganlar ko'pincha qaytmaydi.</div>
+    <div class="warn"><b>O'quvchi davom etmoqchi</b> bo'lsa (Kurslar bo'limida "Davom etmoqchiman" bosgan), sizga 🔥 xabar keladi — qo'ng'iroq qilib, kunlarni kelishing va taklif yuboring.</div>
+    <div class="good"><b>24 soat bonusi:</b> o'quvchi birinchi darsdan keyin 24 soat ichida taklifni to'lasa (chek yuklagan vaqt hisoblanadi), sizga o'sha dars uchun ham <b>bitta dars puli miqdorida bonus</b> tushadi.</div>
   </div>
 </section>
 
@@ -633,10 +668,10 @@ body:not(.js) .nojs{display:block}
     <h3>Uchta raqam</h3>
     <ul class="list">
       <li><b>Ball</b> — qancha ishladingiz. Rank va leaderboard uchun.</li>
-      <li><b>Reyting (0–100 ball)</b> — qanday ishladingiz. Retention 35, kunlik norma 25, o'quvchi bahosi 25, progress 15. Rank shartlari: Senior 92, Expert 94, Master 96, Legend 98.</li>
-      <li><b>Prioritet</b> — ertaga qancha o'quvchi olasiz.</li>
+      <li><b>Reyting (0–100 ball)</b> — qanday ishladingiz (oxirgi 30 kun): norma bajarilgan kunlar 30, ochiq soatda onlayn 25, o'quvchi bahosi 25, sinov natijasini o'z vaqtida belgilash 20. Rank shartlari: Senior 92, Expert 94, Master 96, Legend 98.</li>
+      <li><b>Prioritet (0–100)</b> — ertaga qancha o'quvchi olasiz: norma 40, so'rovga javob 25, darsga chiqish intizomi 20, status va izoh 15. <b>50 dan past bo'lsa yangi o'quvchi berilmaydi.</b> Jadval haftasiga 10 soatdan kam bo'lsa prioritet 69 dan oshmaydi.</li>
     </ul>
-    <div class="chips"><span>Leaderboard: haftalik jonli reyting</span><span>Missiyalar: pul mukofoti</span><span>Referral: 40 000 so'm</span><span>Seriya: ×1.5 gacha</span></div>
+    <div class="chips"><span>Seriya: ×1.5 gacha</span><span>Nishonlar</span><span>Leaderboard <i class="tez">tez orada</i></span><span>Missiyalar <i class="tez">tez orada</i></span><span>Referral <i class="tez">tez orada</i></span></div>
   </div>
 
   <div class="block">
@@ -665,7 +700,7 @@ body:not(.js) .nojs{display:block}
 <section class="screen" id="test">
   <div class="mod-head">
     <p class="n">Yakuniy test</p>
-    <h2 id="qTitleTop">✍️ 16 savol · o'tish uchun 13 ta to'g'ri javob</h2>
+    <h2 id="qTitleTop">✍️ 21 savol · o'tish uchun 17 ta to'g'ri javob</h2>
     <p>Hamma javob modullar ichida bor. Xato qilsangiz, qaysi modulga qaytish kerakligi ko'rsatiladi.</p>
   </div>
   <div class="q" id="qBox">
@@ -686,7 +721,7 @@ body:not(.js) .nojs{display:block}
     <button class="btn ghost" id="prev" type="button">Orqaga</button>
     <button class="btn" id="next" type="button">Boshlash</button>
   </div>
-  <p class="hint" id="hint">8 ta modul · taxminan 12 daqiqa</p>
+  <p class="hint" id="hint">8 ta modul · taxminan 15 daqiqa</p>
 </div>
 </div>
 
@@ -729,7 +764,7 @@ body:not(.js) .nojs{display:block}
       } else {
         clearInterval(kutishTaymer);
         nextBtn.disabled = false;
-        hintEl.textContent = idx === 0 ? "8 ta modul · taxminan 12 daqiqa" : (LABELS[idx] + " · " + idx + " / " + (MODS.length-1));
+        hintEl.textContent = idx === 0 ? "8 ta modul · taxminan 15 daqiqa" : (LABELS[idx] + " · " + idx + " / " + (MODS.length-1));
       }
     };
     yangila();
@@ -781,7 +816,7 @@ body:not(.js) .nojs{display:block}
     nextBtn.textContent = idx === 0 ? "Boshlash" : (idx === MODS.length-1 ? "Testni boshlash" : "Keyingisi");
     nextBtn.disabled = false;
     nextBtn.className = idx === MODS.length-1 ? "btn warn-btn" : "btn";
-    hintEl.textContent = idx === 0 ? "8 ta modul · taxminan 12 daqiqa" : (LABELS[idx] + " · " + idx + " / " + (MODS.length-1));
+    hintEl.textContent = idx === 0 ? "8 ta modul · taxminan 15 daqiqa" : (LABELS[idx] + " · " + idx + " / " + (MODS.length-1));
     if(!HOLAT.mentor && !HOLAT.passed){
       // Admin hisobi — akademiyadan ozod: ko'rish rejimi, natija yozilmaydi
       hintEl.textContent = "👀 Ko'rish rejimi · " + hintEl.textContent;
