@@ -289,7 +289,19 @@ function halqaChiz(el, expiresAt) {
 
 // Ovoz va tebranish — brauzer ruxsat bermasa jim o'tadi
 let AUDIO = null;
+let SIGNAL_TAYMER = null;
+// Oyna ochiq turguncha to'xtovsiz chaladi (qabul, rad yoki muddat tugaguncha)
 function signal() {
+  if (SIGNAL_TAYMER) return;
+  bipla();
+  SIGNAL_TAYMER = setInterval(bipla, 2600);
+}
+function signalToxtat() {
+  clearInterval(SIGNAL_TAYMER);
+  SIGNAL_TAYMER = null;
+  try { navigator.vibrate?.(0); } catch {}
+}
+function bipla() {
   try { navigator.vibrate?.([300, 150, 300, 150, 300]); } catch {}
   try {
     AUDIO = AUDIO || new (window.AudioContext || window.webkitAudioContext)();
@@ -419,6 +431,7 @@ function chaqiruvOch(s) {
   signal();
 }
 function chaqiruvYop() {
+  signalToxtat();
   const ch = $('#chaqiruv');
   ch.hidden = true;
   delete ch.dataset.id;
@@ -446,12 +459,9 @@ async function qabulQil(id, btn) {
   await darslarniYukla();
 }
 
-// Qabul qilingach mentorga: o'quvchiga Telegram bot havolasini yuborish (asosiy yo'l —
-// raqamini tasdiqlab, darsga bir bosishda kiradi), bo'lmasa kirish kodi.
+// Qabul qilingach mentorga: o'quvchiga qo'ng'iroq qilish va uni Telegram botga yo'naltirish.
 function qabulSheetOch(b) {
-  const a = b.akkaunt || {};
   $('#qsVaqt').textContent = `${b.leadName || 'O‘quvchi'} · ${vaqtYorliq(b.startsAt)}`;
-  const nusxa = (id, matn) => `<div class="havola-quti" style="margin-top:8px"><code>${esc(matn)}</code><button type="button" data-nusxa="${esc(matn)}" id="${id}">Nusxa</button></div>`;
   const qismlar = [];
   if (b.leadPhone && b.confirmPending) {
     qismlar.push(`<div class="akkaunt" style="margin-top:0;background:#fffaeb;border:1.5px solid #f1c75a"><b>1. Hozir o‘quvchiga qo‘ng‘iroq qiling</b>
@@ -461,30 +471,11 @@ function qabulSheetOch(b) {
     qismlar.push(`<div class="akkaunt" style="margin-top:0"><b>1. O‘quvchiga qo‘ng‘iroq qiling</b>
       <span>${telHavola(b.leadPhone)} — dars vaqtini tasdiqlang</span></div>`);
   }
-  if (a.telegramUrl) {
-    qismlar.push(`<div class="akkaunt akkaunt-tg"><b>2. Telegram havolasini yuboring</b>
-      <span>O‘quvchi bosadi, raqamini tasdiqlaydi va darsga bir bosishda o‘tadi — kod terish shart emas.</span>
-      ${nusxa('qsTg', a.telegramUrl)}
-      <a class="qabul" style="display:block;text-align:center;text-decoration:none;margin-top:8px;padding:12px"
-         href="https://t.me/share/url?url=${encodeURIComponent(a.telegramUrl)}&text=${encodeURIComponent('Bepul sinov darsingiz uchun shu havolani bosing:')}"
-         target="_blank" rel="noopener">Telegramda yuborish</a></div>`);
-  }
-  if (a.kod) {
-    qismlar.push(`<div class="akkaunt akkaunt-kod"><b>${a.telegramUrl ? 'Zaxira: ilovaga kirish kodi' : 'Ilovaga kirish kodi'}</b>
-      <div class="kod">${esc(a.kod)}</div>
-      <span>${a.telegramUrl ? 'Telegram ishlatmasa — telefon raqami va shu kod bilan kiradi' : 'O‘quvchiga ayting: telefon raqami va shu kod bilan kirsin'}</span></div>`);
-  } else if (a.holat === 'existing') {
-    qismlar.push(`<div class="akkaunt"><b>Ilovada akkaunti bor</b><span>O‘z paroli bilan kiradi</span></div>`);
-  }
-  if (b.joinUrl) {
-    qismlar.push(`<div class="akkaunt"><b>Ilovasiz kirish uchun zaxira havola</b>${nusxa('qsJoin', b.joinUrl)}</div>`);
-  }
+  // O'quvchi botni o'zi topib Start bosadi — bot ilova havolasi va eslatmalarni o'zi yuboradi
+  qismlar.push(`<div class="akkaunt akkaunt-tg"><b>2. Telegram botga kirishini so‘rang</b>
+    <span>Telefonda ayting: Telegramda <b>@MT_yordam_bot</b> ni qidirib, <b>Start</b> bossin — bot unga ilova havolasi va dars eslatmalarini o‘zi yuboradi.</span></div>`);
   $('#qsTana').innerHTML = qismlar.join('') +
     '<button class="qabul" type="button" id="qsYop" style="width:100%;margin-top:14px">Tushunarli</button>';
-  $('#qsTana').querySelectorAll('[data-nusxa]').forEach((btn) => {
-    btn.onclick = () => navigator.clipboard.writeText(btn.dataset.nusxa)
-      .then(() => { btn.textContent = 'Nusxalandi'; }, () => toast('Nusxalab bo‘lmadi — havolani bosib turib nusxalang', 'err'));
-  });
   $('#qsYop').onclick = qabulSheetYop;
   $('#qabulParda').onclick = qabulSheetYop;
   $('#qabulParda').classList.add('ochiq');
