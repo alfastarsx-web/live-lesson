@@ -376,6 +376,11 @@ app.post(/^\/api\/trial\/([0-9a-f-]{36})\/(accept|decline)$/, async (req, res) =
   aiProxy(req, res, `/trial-requests/${req.params[0]}/${req.params[1]}`);
 });
 
+// O'quvchi o'zi yozilgan sinov darsi: mentor qo'ng'iroq qilgach tasdiqlaydi, vaqtni ko'chiradi yoki bo'shatadi
+app.post(/^\/api\/trial\/booking\/([0-9a-f-]{36})\/(confirm|move|release)$/, (req, res) => {
+  aiProxy(req, res, `/trial-requests/booking/${req.params[0]}/${req.params[1]}`);
+});
+
 app.get('/api/my-mentor', (req, res) => aiProxy(req, res, '/assignments/my-mentor'));
 
 // Mentor bergan bir martalik kod bilan kirgan o'quvchi o'z parolini qo'yadi
