@@ -104,8 +104,30 @@ body.work{background:var(--bg)}
 .chaqiruv .tolqin{pointer-events:none}
 .chaqiruv .qabul,.chaqiruv .rad{position:relative;z-index:1}
 
+/* Tasdiqlanmagan sinov darsi — ustoz o'quvchiga qo'ng'iroq qilguncha sariq miltillaydi */
+.work .dk.kutish{background:#fffaeb;border:1.5px solid #f1c75a;animation:miltilla 1.6s ease-in-out infinite;cursor:pointer}
+.qadam.kutish .ip i{border-color:#e2a82b;background:#fff3cd;animation:miltilla 1.6s ease-in-out infinite}
+@keyframes miltilla{0%,100%{box-shadow:0 0 0 0 rgba(241,199,90,.0)}50%{box-shadow:0 0 0 5px rgba(241,199,90,.45)}}
+.kutish-yorliq{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding:9px 12px;border-radius:12px;background:#fdf0c8;color:#7a5a12;font-size:13px;font-weight:700}
+.kutish-yorliq b{font-variant-numeric:tabular-nums}
+.kutish-yorliq.otdi{background:#fbe3e0;color:#9a3b33}
+.dk.kutish .dk-past .asosiy{background:#e2a82b}
+.tanlov{display:flex;align-items:center;gap:12px;width:100%;margin-top:10px;padding:15px 16px;border-radius:16px;border:1.5px solid var(--line);background:var(--card);font:inherit;font-size:15.5px;font-weight:700;color:var(--ink);text-align:left;cursor:pointer}
+.tanlov i{font-style:normal;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;flex:0 0 auto}
+.tanlov small{display:block;font-size:12.5px;font-weight:500;color:var(--mut)}
+.tanlov.ok i{background:var(--green-soft);color:var(--green)}
+.tanlov.vaqt i{background:#e8eef9;color:var(--blue)}
+.tanlov.yoq i{background:#fbe3e0;color:var(--red)}
+.tanlov[aria-pressed="true"]{border-color:var(--blue);background:#f1f5fd}
+.tanlov:disabled{opacity:.6}
+.ts-qator{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.ts-qator select,.ts-izoh{width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font:inherit;font-size:15px;color:var(--ink)}
+.ts-izoh{margin-top:10px;min-height:64px;resize:vertical}
+.ts-orqaga{display:block;margin:14px auto 0;background:none;border:0;font:inherit;font-size:14px;font-weight:600;color:var(--mut);cursor:pointer}
+
 @media (prefers-reduced-motion:reduce){
   .onlayn i,.chaqiruv .tolqin{animation:none}
+  .work .dk.kutish,.qadam.kutish .ip i{animation:none}
   .tablar .kors{transition:none}
 }
 </style>
@@ -142,6 +164,11 @@ body.work{background:var(--bg)}
     <div id="sorovBolim" hidden>
       <div class="bolim-sarlavha"><h2>Sinov darsi so‘rovlari</h2><span class="son" id="sorovSon"></span></div>
       <div id="sorovlar"></div>
+    </div>
+
+    <div id="kutishBolim" hidden>
+      <div class="bolim-sarlavha"><h2>Tasdiqlash kutilmoqda</h2><span class="son" id="kutishSon"></span></div>
+      <div id="kutishlar"></div>
     </div>
 
     <div class="bolim-sarlavha"><h2>Bugungi kun</h2><span class="son" id="bugunSon"></span></div>
@@ -194,6 +221,14 @@ body.work{background:var(--bg)}
   <div class="tutqich"></div>
   <div class="bosh"><b id="qsSarlavha">Sinov darsi sizniki</b><span id="qsVaqt"></span></div>
   <div class="tana" id="qsTana"></div>
+</div>
+
+<!-- Tasdiqlanmagan sinov darsi: qabul / vaqtni o'zgartirish / bekor qilish -->
+<div class="parda" id="tasdiqParda"></div>
+<div class="sheet" id="tasdiqSheet" role="dialog" aria-modal="true" aria-labelledby="tsSarlavha">
+  <div class="tutqich"></div>
+  <div class="bosh"><b id="tsSarlavha">Sinov darsini tasdiqlang</b><span id="tsVaqt"></span></div>
+  <div class="tana" id="tsTana"></div>
 </div>
 
 <script src="/auth-webview.js"></script>
@@ -353,9 +388,20 @@ function taymerlar() {
     $('#chQoldi').textContent = qoldiMatn(ms);
     if (ms <= 0) { chaqiruvYop(); toast('So‘rov muddati tugadi', 'err'); }
   }
+  tasdiqTaymerlari();
   keyingiChiz();
 }
 setInterval(taymerlar, 1000);
+
+function tasdiqTaymerlari() {
+  document.querySelectorAll('[data-tasdiq-muddat]').forEach((el) => {
+    const ms = new Date(el.dataset.tasdiqMuddat).getTime() - Date.now();
+    const otdi = !(ms > 0);
+    el.classList.toggle('otdi', otdi);
+    el.querySelector('[data-tasdiq-matn]').textContent = otdi ? 'Muddat o‘tdi — tezroq tasdiqlang' : 'Qo‘ng‘iroq qilib tasdiqlang';
+    el.querySelector('[data-tasdiq-qoldi]').textContent = otdi ? '' : qoldiMatn(ms);
+  });
+}
 
 function chaqiruvOch(s) {
   KORILGAN.add(s.requestId);
@@ -407,7 +453,11 @@ function qabulSheetOch(b) {
   $('#qsVaqt').textContent = `${b.leadName || 'O‘quvchi'} · ${vaqtYorliq(b.startsAt)}`;
   const nusxa = (id, matn) => `<div class="havola-quti" style="margin-top:8px"><code>${esc(matn)}</code><button type="button" data-nusxa="${esc(matn)}" id="${id}">Nusxa</button></div>`;
   const qismlar = [];
-  if (b.leadPhone) {
+  if (b.leadPhone && b.confirmPending) {
+    qismlar.push(`<div class="akkaunt" style="margin-top:0;background:#fffaeb;border:1.5px solid #f1c75a"><b>1. Hozir o‘quvchiga qo‘ng‘iroq qiling</b>
+      <span>${telHavola(b.leadPhone)} — o‘quvchi o‘zi yozilgan. Real ekanini va vaqt aniqligini bilib oling.
+      Slot kalendaringizda sariq bo‘lib turadi: gaplashgach ustiga bosib qabul qiling, vaqtni o‘zgartiring yoki bekor qiling.</span></div>`);
+  } else if (b.leadPhone) {
     qismlar.push(`<div class="akkaunt" style="margin-top:0"><b>1. O‘quvchiga qo‘ng‘iroq qiling</b>
       <span>${telHavola(b.leadPhone)} — dars vaqtini tasdiqlang</span></div>`);
   }
@@ -459,6 +509,111 @@ async function radEt(id, btn) {
   if (!r.ok) toast(r.data.message || r.data.error || 'Rad etib bo‘lmadi', 'err');
 }
 
+// ---------- tasdiqlanmagan sinov darsi ----------
+const SABABLAR = [
+  ['adashgan', 'Adashib yozilgan / real emas', 'O‘quvchi yozilmaganman dedi yoki raqam xato'],
+  ['boshqa_ustoz', 'Boshqa ustozga', 'So‘rov boshqa bo‘sh ustozlarga yuboriladi'],
+  ['boglanib_bolmadi', 'Bog‘lanib bo‘lmadi', 'Telefonni olmadi — operator qayta urinadi'],
+];
+
+function tasdiqOch(id) {
+  const d = KELGUSI.find((x) => x.id === id);
+  if (!d) return;
+  $('#tsVaqt').innerHTML = `${esc(d.studentName || 'O‘quvchi')} · ${esc(vaqtYorliq(d.startsAt))}${d.leadPhone ? ' · ' + telHavola(d.leadPhone) : ''}`;
+  tasdiqAsosiy(d);
+  $('#tasdiqParda').onclick = tasdiqYop;
+  $('#tasdiqParda').classList.add('ochiq');
+  $('#tasdiqSheet').classList.add('ochiq');
+}
+function tasdiqYop() {
+  $('#tasdiqParda').classList.remove('ochiq');
+  $('#tasdiqSheet').classList.remove('ochiq');
+}
+
+function tasdiqAsosiy(d) {
+  $('#tsSarlavha').textContent = 'Sinov darsini tasdiqlang';
+  $('#tsTana').innerHTML = `
+    <button class="tanlov ok" type="button" id="tsQabul"><i>✓</i><span>Qabul qilish<small>Gaplashdim — vaqt aniq, o‘quvchi real</small></span></button>
+    <button class="tanlov vaqt" type="button" id="tsVaqtBtn"><i>↻</i><span>Vaqtni o‘zgartirish<small>Boshqa vaqtga kelishdik</small></span></button>
+    <button class="tanlov yoq" type="button" id="tsBekor"><i>✕</i><span>Bekor qilish<small>Sababini tanlaysiz</small></span></button>`;
+  $('#tsQabul').onclick = async (e) => {
+    const r = await tasdiqYubor(d, 'confirm', {}, e.currentTarget);
+    if (r) toast('Tasdiqlandi — dars kalendaringizda', 'ok');
+  };
+  $('#tsVaqtBtn').onclick = () => tasdiqVaqt(d);
+  $('#tsBekor').onclick = () => tasdiqBekor(d);
+}
+
+function tasdiqVaqt(d) {
+  $('#tsSarlavha').textContent = 'Yangi vaqt';
+  const joriy = new Date(d.startsAt);
+  const kunlar = Array.from({ length: 14 }, (_, i) => {
+    const k = new Date(); k.setHours(0, 0, 0, 0); k.setDate(k.getDate() + i);
+    return k;
+  });
+  const kunOpt = kunlar.map((k) => {
+    const qiymat = `${k.getFullYear()}-${k.getMonth()}-${k.getDate()}`;
+    const tanlangan = kunBoshi(k) === kunBoshi(joriy) ? ' selected' : '';
+    const nomi = kunBoshi(k) === kunBoshi(Date.now()) ? 'Bugun' : kunBoshi(k) === kunBoshi(Date.now()) + 86400000 ? 'Ertaga' : `${KUNLAR[k.getDay()]}, ${k.getDate()}-${OYLAR_TOLIQ[k.getMonth()]}`;
+    return `<option value="${qiymat}"${tanlangan}>${esc(nomi)}</option>`;
+  }).join('');
+  const soatOpt = Array.from({ length: 16 }, (_, i) => i + 8)
+    .map((h) => `<option value="${h}"${h === joriy.getHours() ? ' selected' : ''}>${String(h).padStart(2, '0')}:00</option>`).join('');
+  $('#tsTana').innerHTML = `
+    <div style="margin-top:2px;font-size:13.5px;color:var(--mut)">O‘quvchi bilan kelishilgan vaqtni tanlang — dars darhol tasdiqlanadi.</div>
+    <div class="ts-qator"><select id="tsKun" aria-label="Kun">${kunOpt}</select><select id="tsSoat" aria-label="Soat">${soatOpt}</select></div>
+    <button class="qabul" type="button" id="tsSaqla" style="width:100%;margin-top:14px">Saqlash</button>
+    <button class="ts-orqaga" type="button" id="tsOrqaga">Orqaga</button>`;
+  $('#tsOrqaga').onclick = () => tasdiqAsosiy(d);
+  $('#tsSaqla').onclick = async (e) => {
+    const [y, m, kun] = $('#tsKun').value.split('-').map(Number);
+    const t = new Date(y, m, kun, Number($('#tsSoat').value), 0, 0, 0);
+    if (t.getTime() < Date.now() + 30 * 60_000) return toast('Kamida 30 daqiqa keyingi vaqtni tanlang', 'err');
+    const r = await tasdiqYubor(d, 'move', { startsAt: t.toISOString() }, e.currentTarget);
+    if (r) toast(`Dars ${vaqtYorliq(t.toISOString())} ga ko‘chirildi`, 'ok');
+  };
+}
+
+function tasdiqBekor(d) {
+  $('#tsSarlavha').textContent = 'Nega bekor qilinyapti?';
+  let sabab = null;
+  $('#tsTana').innerHTML = SABABLAR.map(([k, nomi, izoh]) =>
+    `<button class="tanlov" type="button" data-sabab="${k}" aria-pressed="false"><span>${esc(nomi)}<small>${esc(izoh)}</small></span></button>`).join('') + `
+    <textarea class="ts-izoh" id="tsIzoh" maxlength="500" placeholder="Izoh (ixtiyoriy)"></textarea>
+    <button class="rad" type="button" id="tsBekorQil" style="width:100%;margin-top:12px;background:var(--red);color:#fff" disabled>Bekor qilish</button>
+    <button class="ts-orqaga" type="button" id="tsOrqaga">Orqaga</button>`;
+  $('#tsTana').querySelectorAll('[data-sabab]').forEach((b) => {
+    b.onclick = () => {
+      sabab = b.dataset.sabab;
+      $('#tsTana').querySelectorAll('[data-sabab]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      $('#tsBekorQil').disabled = false;
+    };
+  });
+  $('#tsOrqaga').onclick = () => tasdiqAsosiy(d);
+  $('#tsBekorQil').onclick = async (e) => {
+    if (!sabab) return;
+    const r = await tasdiqYubor(d, 'release', { reason: sabab, note: $('#tsIzoh').value.trim() || undefined }, e.currentTarget);
+    if (r) toast(sabab === 'boshqa_ustoz' ? 'Bo‘shatildi — so‘rov boshqa ustozlarga yuborildi' : 'Bekor qilindi', 'ok');
+  };
+}
+
+async function tasdiqYubor(d, amal, body, btn) {
+  btn.disabled = true;
+  const r = await api(`/api/trial/booking/${d.id}/${amal}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  }).catch(() => ({ ok: false, data: { error: 'Internet aloqasini tekshiring' } }));
+  btn.disabled = false;
+  if (!r) return null;
+  if (!r.ok) {
+    toast(r.data.message || r.data.error || 'Saqlab bo‘lmadi', 'err');
+    if (/tasdiq kutmayapti|topilmadi/.test(r.data.message || '')) { tasdiqYop(); darslarniYukla(); }
+    return null;
+  }
+  tasdiqYop();
+  await darslarniYukla();
+  return r.data;
+}
+
 // ---------- darslar ----------
 const LID_HOLAT = {
   trial_scheduled: ['Natija belgilanmagan', 't-kut'],
@@ -487,7 +642,11 @@ function darsKarta(d, { tarix = false } = {}) {
   const kun = new Date(d.startsAt);
   let past = '';
 
-  if (!tarix) {
+  if (!tarix && d.confirmPending) {
+    // O'quvchi o'zi yozilgan — ustoz qo'ng'iroq qilib, real ekanini va vaqtni aniqlaydi
+    past = `<div class="kutish-yorliq" data-tasdiq-muddat="${esc(d.confirmBy || '')}"><span data-tasdiq-matn>Qo‘ng‘iroq qilib tasdiqlang</span><b data-tasdiq-qoldi></b></div>
+      <div class="dk-past"><button class="asosiy" data-tasdiq="${esc(d.id)}">Natijani belgilash</button>${telHavola(d.leadPhone)}</div>`;
+  } else if (!tarix) {
     const ochiq = Date.now() >= kun.getTime() - 10 * 60_000;
     past = `<div class="dk-past">
       <button class="asosiy" data-kirish="${esc(d.id)}" data-sinov="${d.isTrial ? 1 : ''}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>${ochiq ? 'Darsni boshlash' : 'Kirish 10 daq oldin'}</button>
@@ -508,7 +667,7 @@ function darsKarta(d, { tarix = false } = {}) {
     }
   }
 
-  return `<div class="dk">
+  return `<div class="dk${!tarix && d.confirmPending ? ' kutish' : ''}"${!tarix && d.confirmPending ? ` data-tasdiq-karta="${esc(d.id)}"` : ''}>
     <div class="dk-bosh">
       <div class="dk-soat">${soatQisqa(d.startsAt)}<small>${kun.getDate()}.${String(kun.getMonth() + 1).padStart(2, '0')}</small></div>
       <div class="matn"><b>${ism}${teg}</b><span>${esc(vaqtYorliq(d.startsAt))} · ${d.durationMin || 60} daq${baho}</span>${holat ? `<div class="dk-holat">${holat}</div>` : ''}</div>
@@ -519,7 +678,7 @@ function darsKarta(d, { tarix = false } = {}) {
 function qadam(d, opts) {
   const kun = new Date(d.startsAt);
   const sana = kunBoshi(kun) === kunBoshi(Date.now()) ? '' : `<small>${kun.getDate()}.${String(kun.getMonth() + 1).padStart(2, '0')}</small>`;
-  return `<div class="qadam ${d.isTrial ? 'sinov' : ''}">
+  return `<div class="qadam ${d.isTrial ? 'sinov' : ''} ${d.confirmPending ? 'kutish' : ''}">
     <div class="soat">${soatQisqa(d.startsAt)}${sana}</div>
     <div class="ip"><i></i></div>
     ${darsKarta(d, opts)}
@@ -528,6 +687,12 @@ function qadam(d, opts) {
 const hozirQatori = () => `<div class="hozir" aria-label="Hozirgi vaqt"><span>${soatQisqa(new Date().toISOString())}</span><div class="ip"><i></i></div><hr></div>`;
 
 function tugmalarniUla(box) {
+  box.querySelectorAll('[data-tasdiq-karta]').forEach((k) => {
+    k.onclick = (e) => {
+      if (e.target.closest('a')) return; // telefon havolasi — qo'ng'iroq
+      tasdiqOch(k.dataset.tasdiqKarta);
+    };
+  });
   box.querySelectorAll('[data-kirish]').forEach((b) => {
     b.onclick = async () => {
       b.disabled = true;
@@ -562,6 +727,13 @@ function tugmalarniUla(box) {
 }
 
 function bugunChiz() {
+  // Bugungilari vaqt chizig'ida miltillaydi; boshqa kunlarniki — shu yerda
+  const kutish = KELGUSI.filter((d) => d.confirmPending && kunBoshi(d.startsAt) !== kunBoshi(Date.now()));
+  $('#kutishBolim').hidden = !kutish.length;
+  $('#kutishSon').textContent = kutish.length ? `${kutish.length} ta` : '';
+  $('#kutishlar').innerHTML = kutish.map((d) => darsKarta(d)).join('');
+  tugmalarniUla($('#kutishlar'));
+
   const bugun = KELGUSI.filter((d) => kunBoshi(d.startsAt) === kunBoshi(Date.now()));
   $('#bugunSon').textContent = bugun.length ? `${bugun.length} ta dars` : '';
   if (!bugun.length) {
