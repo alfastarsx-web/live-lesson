@@ -381,6 +381,11 @@ app.post(/^\/api\/trial\/booking\/([0-9a-f-]{36})\/(confirm|move|release)$/, (re
   aiProxy(req, res, `/trial-requests/booking/${req.params[0]}/${req.params[1]}`);
 });
 
+// Sinovdan keyin ustoz taklifi: haftalik jadval, takliflar ro'yxati, yuborish, bekor qilish
+app.all(/^\/api\/course-offers(\/[0-9a-z-]+)*$/, (req, res) => {
+  aiProxy(req, res, req.path.replace(/^\/api/, ''));
+});
+
 app.get('/api/my-mentor', (req, res) => aiProxy(req, res, '/assignments/my-mentor'));
 
 // Mentor bergan bir martalik kod bilan kirgan o'quvchi o'z parolini qo'yadi
