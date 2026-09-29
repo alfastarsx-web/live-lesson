@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Qo'llanma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f4f5f1; --card:#fff; --sub:#f0f1ec; --ink:#1f2a27; --mut:#8f9793; --mut2:#5f6864; --line:#e6e8e2;
+  --em:#1f6f5c; --em-soft:#e2f2ec; --amber:#f0a73a; --amber-soft:#fdf1dc; --coral:#e8715f; --coral-soft:#fce9e5;
+  --sky:#5b8def; --sky-soft:#e7eefd;
+}
+*{box-sizing:border-box}
+html,body{margin:0;overflow-x:clip}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 'Manrope',system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:600px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom))}
+a{color:var(--em);font-weight:700}
+.orqaga{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--mut2);font-weight:700;font-size:14px;margin-bottom:10px}
+.hero{background:linear-gradient(135deg,#123f35,#1f6f5c);color:#fff;border-radius:24px;padding:22px 20px}
+.hero small{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#bfe3d6}
+.hero h1{margin:6px 0 6px;font-size:24px;letter-spacing:-.5px;line-height:1.2}
+.hero p{margin:0;color:#dcefe8}
+.mundarija{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+.mundarija a{background:var(--card);border-radius:999px;padding:7px 12px;font-size:13px;text-decoration:none;color:var(--ink);box-shadow:0 1px 0 var(--line)}
+section{background:var(--card);border-radius:20px;padding:18px;margin-top:14px;box-shadow:0 1px 0 var(--line),0 6px 18px rgba(31,42,39,.05);scroll-margin-top:12px}
+section h2{margin:0 0 8px;font-size:18px;letter-spacing:-.3px}
+section p{margin:6px 0}
+.qadam{display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.qadam:first-of-type{border-top:0}
+.qadam i{flex:0 0 30px;height:30px;border-radius:10px;display:grid;place-items:center;font-style:normal;font-weight:800;background:var(--em-soft);color:var(--em)}
+.qadam > div > b{display:block}
+.qadam span{color:var(--mut2);font-size:14px}
+.tab{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.tab:first-of-type{border-top:0}
+.tab .e{flex:0 0 38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:18px;background:var(--sub)}
+.tab > div > b{display:block}
+.tab span{color:var(--mut2);font-size:14px}
+.maslahat{border-radius:14px;padding:12px 14px;margin-top:10px;font-size:14px}
+.maslahat.s{background:var(--amber-soft);color:#6b4a10}
+.maslahat.y{background:var(--em-soft);color:#174c3f}
+.maslahat.q{background:var(--coral-soft);color:#8c3a2e}
+details{border-top:1px solid var(--line);padding:10px 0}
+details:first-of-type{border-top:0}
+summary{font-weight:800;cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'＋';float:right;color:var(--mut)}
+details[open] summary::after{content:'－'}
+details p{color:var(--mut2);font-size:14px}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="orqaga" href="/home.html">‹ Home</a>
+  <div class="hero">
+    <small>Yangi ustoz uchun</small>
+    <h1>MyTeacher'da qanday ishlaysiz</h1>
+    <p>5 daqiqada: ilova bo'limlari, birinchi hafta rejasi va sinov darsidan doimiy o'quvchigacha bo'lgan yo'l.</p>
+  </div>
+  <nav class="mundarija" aria-label="Mundarija">
+    <a href="#bolimlar">Ilova bo'limlari</a>
+    <a href="#hafta">Birinchi hafta</a>
+    <a href="#sinov">Sinov darsi</a>
+    <a href="#taklif">Taklif va to'lov</a>
+    <a href="#ball">Ball va prioritet</a>
+    <a href="#savollar">Savollar</a>
+  </nav>
+
+  <section id="bolimlar">
+    <h2>📱 Ilova bo'limlari</h2>
+    <div class="tab"><span class="e">🏠</span><div><b>Home</b><span>Bugungi darslar, sizni kutayotgan ishlar, ball, reyting va prioritet, haftalik daromad.</span></div></div>
+    <div class="tab"><span class="e">💼</span><div><b>Work</b><span>Asosiy ish joyi. <b>Bugun</b> — darslar va sinov so'rovlari; <b>Sinovlar</b> — sinov darslari va natijalar; <b>O'quvchi</b> — doimiy o'quvchilaringiz; <b>Jadval</b> — bo'sh soatlaringiz; <b>Daromad</b> — hamyon va yechib olish.</span></div></div>
+    <div class="tab"><span class="e">🚀</span><div><b>Career</b><span>Ball tarixi, nishonlar, rank va ulush, Akademiya.</span></div></div>
+    <div class="tab"><span class="e">💬</span><div><b>Chat</b><span>O'quvchilaringiz va administrator bilan yozishma.</span></div></div>
+    <div class="tab"><span class="e">👤</span><div><b>Profil</b><span>Rasm, ma'lumotlar, sozlamalar.</span></div></div>
+  </section>
+
+  <section id="hafta">
+    <h2>🗓️ Birinchi hafta — 5 qadam</h2>
+    <div class="qadam"><i>1</i><div><b>Akademiyadan o'ting</b><span>8 ta qisqa modul va test — taxminan 15 daqiqa. Testdan o'tmaguningizcha sinov so'rovlari kelmaydi. <a href="/mentor/akademiya.html">Akademiya ›</a></span></div></div>
+    <div class="qadam"><i>2</i><div><b>Jadvalda haftasiga kamida 10 soat oching</b><span>Work → Jadval. Kechki soatlarga eng ko'p so'rov keladi. 10 soatdan kam bo'lsa prioritet 69 dan oshmaydi. <a href="/jadval.html">Jadval ›</a></span></div></div>
+    <div class="qadam"><i>3</i><div><b>Ochiq soatda onlayn bo'ling</b><span>Work tepasidagi "Onlayn" tugmasi yashil bo'lsin. Telefonda ilova bildirishnomalari va ovozini yoqing — so'rov kelganda signal chaladi.</span></div></div>
+    <div class="qadam"><i>4</i><div><b>Birinchi sinov darsini o'tkazing</b><span>So'rovni 15 daqiqa ichida qabul qiling, o'quvchiga qo'ng'iroq qilib tasdiqlang va darsni o'ting. Pastda — batafsil.</span></div></div>
+    <div class="qadam"><i>5</i><div><b>Birinchi taklifni yuboring</b><span>Dars oxirida kunlarni kelishing va Work'dan taklif yuboring — o'quvchi to'lasa, doimiy o'quvchingiz bo'ladi.</span></div></div>
+  </section>
+
+  <section id="sinov">
+    <h2>🔔 Sinov darsi: so'rovdan darsgacha</h2>
+    <div class="qadam"><i>1</i><div><b>Signal keladi</b><span>Ilova ochiq bo'lsa — qaysi bo'limda bo'lsangiz ham butun ekran oyna va ovoz. Yopiq bo'lsa — push har daqiqada qayta keladi. <b>15 daqiqa</b> ichida qabul qiling: so'rov bir necha ustozga ketgan, birinchi bosgan oladi.</span></div></div>
+    <div class="qadam"><i>2</i><div><b>10 daqiqa ichida qo'ng'iroq qiling</b><span>O'quvchi o'zi yozilgan bo'lsa, dars kalendaringizda <b>sariq miltillaydi</b>. Qo'ng'iroq qilib, real ekanini va vaqtni aniqlang, keyin slotga bosing: <b>Qabul</b>, <b>Vaqtni o'zgartirish</b> yoki <b>Bekor qilish</b> (sababi bilan).</span></div></div>
+    <div class="qadam"><i>3</i><div><b>Telegram botni ayting</b><span>"Telegramda <b>@MT_yordam_bot</b> ni qidirib, Start bosing — ilova havolasi va dars eslatmalari o'sha yerga keladi."</span></div></div>
+    <div class="qadam"><i>4</i><div><b>Darsga tayyorlaning</b><span>Izohni o'qing. Darsdan 10 daqiqa oldin Work'dagi "Darsni boshlash" tugmasi ochiladi — kamera, mikrofon va internetni tekshiring.</span></div></div>
+    <div class="qadam"><i>5</i><div><b>Darsni o'ting — 45–60 daqiqa</b><span>Tanishuv, ehtiyoj, diagnostika, yo'l xaritasi va narx. O'quvchi ko'p gapirsin.</span></div></div>
+    <div class="maslahat q"><b>Rad etish −25 ball.</b> Bo'lmaydigan soatni oldindan yoping — so'rov kelmaydi.</div>
+  </section>
+
+  <section id="taklif">
+    <h2>📩 Taklif va to'lov</h2>
+    <p>Narxni aytdingiz, o'quvchi rozi — endi kunlarni kelishib, Work → Sinovlar (yoki Bugun) dagi sinov kartasida <b>"📩 Taklif yuborish"</b> ni bosing:</p>
+    <div class="qadam"><i>1</i><div><b>Haftada necha marta</b><span>1× 350 000 · 2× 450 000 · 3× 550 000 · 4× 650 000 · 5× 750 000 · 6× 850 000 so'm/oy. Narx dasturga emas, dars soniga bog'liq.</span></div></div>
+    <div class="qadam"><i>2</i><div><b>Kunlar va soat</b><span>Jadvalingizdagi bo'sh soatlardan, bir kunga bitta dars.</span></div></div>
+    <div class="qadam"><i>3</i><div><b>O'quvchi to'laydi</b><span>Kurslar bo'limida taklifni ko'radi, kartaga o'tkazib chek yuklaydi. Administrator tasdiqlagach 4 haftalik darslar jadvalingizga o'zi tushadi va o'quvchi O'quvchi bo'limingizga o'tadi.</span></div></div>
+    <div class="maslahat s"><b>💡 Soatlar 24 soat band.</b> O'quvchi kunlarini ochiq aytib, "shu vaqtlarni menga saqlab qo'ying, to'layman" desa — bu jiddiy mijoz. "O'ylab ko'raman" deganlar ko'pincha qaytmaydi.</div>
+    <div class="maslahat y"><b>24 soat bonusi:</b> o'quvchi sinovdan keyin 24 soat ichida to'lasa — bitta dars puli bonus sizga.</div>
+  </section>
+
+  <section id="ball">
+    <h2>⚡ Ball, reyting, prioritet</h2>
+    <p><b>Kunlik norma — 100 faollik balli:</b> onlayn soat 10 · sinov so'rovini qabul qilish 5 · sinov darsi 30 · doimiy dars 10 · natijani belgilash 5. Yangi ustozga birinchi 14 kun norma 50.</p>
+    <p><b>Reyting (0–100)</b> rank va ulushingizni belgilaydi (60% dan 85% gacha). <b>Prioritet (0–100)</b> — ertaga qancha o'quvchi olasiz: <b>50 dan past bo'lsa yangi o'quvchi berilmaydi.</b></p>
+    <p>Batafsil — Career bo'limida: <a href="/career.html">Career ›</a></p>
+  </section>
+
+  <section id="savollar">
+    <h2>❓ Ko'p beriladigan savollar</h2>
+    <details><summary>Nega menga so'rov kelmayapti?</summary><p>Tekshiring: Akademiyadan o'tganmisiz, Jadvalda o'sha soatlar ochiqmi, "Onlayn" yoqilganmi va prioritetingiz 50 dan yuqorimi (Home'dagi 🚀).</p></details>
+    <details><summary>O'quvchi darsga kelmasa-chi?</summary><p>10 daqiqa kuting va natijani "Kelmadi" deb belgilang — operator u bilan qayta bog'lanadi.</p></details>
+    <details><summary>O'quvchi "qimmat" desa?</summary><p>Avval sababini so'rang, keyin narxni bitta darsga bo'lib ayting. Chegirma bermang — haftadagi dars sonini kamaytiring va shu bilan taklif yuboring.</p></details>
+    <details><summary>Pulni qachon yechib olaman?</summary><p>Work → Daromad bo'limida balans va har darsdan tushgan pul ko'rinadi, o'sha yerdan yechib olasiz.</p></details>
+    <details><summary>O'quvchi bilan to'g'ridan-to'g'ri kelishsam bo'ladimi?</summary><p>Yo'q. Platformadan tashqari hisob-kitob — darhol blok va barcha bonuslar bekor.</p></details>
+    <details><summary>Savolim qolsa kimga yozaman?</summary><p>Chat bo'limida administratorga yozing.</p></details>
+  </section>
+</main>
+</body>
+</html>
