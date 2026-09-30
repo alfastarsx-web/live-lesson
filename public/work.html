@@ -153,6 +153,9 @@ body.work{background:var(--bg)}
   .work .dk.kutish,.qadam.kutish .ip i{animation:none}
   .tablar .kors{transition:none}
 }
+.tg-holat{margin:8px 0 2px;padding:9px 12px;border-radius:12px;background:#fff7e6;color:#8a5a00;font-size:13px;font-weight:700;line-height:1.35}
+.tg-holat.ok{background:#e9f9ef;color:#15803d}
+.tanlov:disabled{opacity:.45;cursor:not-allowed}
 </style>
 </head>
 <body class="work">
@@ -511,9 +514,13 @@ function qabulSheetOch(b) {
     qismlar.push(`<div class="akkaunt" style="margin-top:0"><b>1. O‘quvchiga qo‘ng‘iroq qiling</b>
       <span>${telHavola(b.leadPhone)} — dars vaqtini tasdiqlang</span></div>`);
   }
-  // O'quvchi botni o'zi topib Start bosadi — bot ilova havolasi va eslatmalarni o'zi yuboradi
-  qismlar.push(`<div class="akkaunt akkaunt-tg"><b>2. Telegram botga kirishini so‘rang</b>
-    <span>Telefonda ayting: Telegramda <b>@MT_yordam_bot</b> ni qidirib, <b>Start</b> bossin — bot unga ilova havolasi va dars eslatmalarini o‘zi yuboradi.</span></div>`);
+  // O'quvchi botda raqamini ulashadi — login, parol va ilova havolasi unga shu zahoti keladi
+  qismlar.push(`<div class="akkaunt akkaunt-tg"><b>2. Telefonda Telegram botni ochtiring</b>
+    <span>Ayting: Telegramda <b>@MT_yordam_bot</b> ni qidirib, <b>Start</b> → <b>“Raqamni yuborish”</b> ni bossin. Login, parol va ilova havolasi unga <b>shu zahoti</b> keladi.</span></div>`);
+  if (b.confirmPending) {
+    qismlar.push(`<div class="akkaunt" style="margin-top:10px"><b>3. “✅ Telegram ulandi” chiqqach — qabul qiling</b>
+      <span>Kalendaringizdagi sariq slotni bosing. O‘quvchi botga ulanmaguncha darsni tasdiqlab bo‘lmaydi.</span></div>`);
+  }
   $('#qsTana').innerHTML = qismlar.join('') +
     '<button class="qabul" type="button" id="qsYop" style="width:100%;margin-top:14px">Tushunarli</button>';
   $('#qsYop').onclick = qabulSheetYop;
@@ -561,11 +568,39 @@ function tasdiqYop() {
   $('#tasdiqSheet').classList.remove('ochiq');
 }
 
+// O'quvchi Telegram botga ulandimi (ulanmaguncha dars tasdiqlanmaydi)
+const tgUlangan = (d) => d.tgConnected !== false;
+function tgHolat(d) {
+  return tgUlangan(d)
+    ? `<div class="tg-holat ok">✅ Telegram ulandi${d.tgName ? ' · ' + esc(d.tgName) : ''} — login-parol yuborildi</div>`
+    : '<div class="tg-holat">⏳ Telegram kutilmoqda — o‘quvchi @MT_yordam_bot da “Raqamni yuborish” ni bossin</div>';
+}
+
+// Sheet ochiq turganda o'quvchi botga ulanishini kutib, har 5 soniyada tekshiramiz
+let TG_KUTISH = null;
+function tgKuzat(d) {
+  clearInterval(TG_KUTISH);
+  if (tgUlangan(d)) return;
+  TG_KUTISH = setInterval(async () => {
+    if (!$('#tasdiqSheet').classList.contains('ochiq')) return clearInterval(TG_KUTISH);
+    await darslarniYukla();
+    const yangi = KELGUSI.find((x) => x.id === d.id);
+    if (!yangi || !yangi.confirmPending) { clearInterval(TG_KUTISH); return tasdiqYop(); }
+    if (tgUlangan(yangi)) {
+      clearInterval(TG_KUTISH);
+      if (typeof ding === 'function') try { ding(); } catch (e) {}
+      tasdiqAsosiy(yangi);
+    }
+  }, 5000);
+}
+
 function tasdiqAsosiy(d) {
   $('#tsSarlavha').textContent = 'Sinov darsini tasdiqlang';
+  const ulangan = tgUlangan(d);
   $('#tsTana').innerHTML = `
-    <button class="tanlov ok" type="button" id="tsQabul"><i>✓</i><span>Qabul qilish<small>Gaplashdim — vaqt aniq, o‘quvchi real</small></span></button>
-    <button class="tanlov vaqt" type="button" id="tsVaqtBtn"><i>↻</i><span>Vaqtni o‘zgartirish<small>Boshqa vaqtga kelishdik</small></span></button>
+    ${tgHolat(d)}
+    <button class="tanlov ok" type="button" id="tsQabul" ${ulangan ? '' : 'disabled'}><i>✓</i><span>Qabul qilish<small>${ulangan ? 'Gaplashdim — vaqt aniq, o‘quvchi real' : 'O‘quvchi Telegram botga ulangach yonadi'}</small></span></button>
+    <button class="tanlov vaqt" type="button" id="tsVaqtBtn" ${ulangan ? '' : 'disabled'}><i>↻</i><span>Vaqtni o‘zgartirish<small>Boshqa vaqtga kelishdik</small></span></button>
     <button class="tanlov yoq" type="button" id="tsBekor"><i>✕</i><span>Bekor qilish<small>Sababini tanlaysiz</small></span></button>`;
   $('#tsQabul').onclick = async (e) => {
     const r = await tasdiqYubor(d, 'confirm', {}, e.currentTarget);
@@ -573,6 +608,7 @@ function tasdiqAsosiy(d) {
   };
   $('#tsVaqtBtn').onclick = () => tasdiqVaqt(d);
   $('#tsBekor').onclick = () => tasdiqBekor(d);
+  tgKuzat(d);
 }
 
 function tasdiqVaqt(d) {
@@ -761,6 +797,7 @@ function darsKarta(d, { tarix = false } = {}) {
   if (!tarix && d.confirmPending) {
     // O'quvchi o'zi yozilgan — ustoz qo'ng'iroq qilib, real ekanini va vaqtni aniqlaydi
     past = `<div class="kutish-yorliq" data-tasdiq-muddat="${esc(d.confirmBy || '')}"><span data-tasdiq-matn>Qo‘ng‘iroq qilib tasdiqlang</span><b data-tasdiq-qoldi></b></div>
+      ${tgHolat(d)}
       <div class="dk-past"><button class="asosiy" data-tasdiq="${esc(d.id)}">Natijani belgilash</button>${telHavola(d.leadPhone)}</div>`;
   } else if (!tarix) {
     const ochiq = Date.now() >= kun.getTime() - 10 * 60_000;
