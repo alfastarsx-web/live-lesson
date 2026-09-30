@@ -153,8 +153,12 @@ body.work{background:var(--bg)}
   .work .dk.kutish,.qadam.kutish .ip i{animation:none}
   .tablar .kors{transition:none}
 }
-.tg-holat{margin:8px 0 2px;padding:9px 12px;border-radius:12px;background:#fff7e6;color:#8a5a00;font-size:13px;font-weight:700;line-height:1.35}
-.tg-holat.ok{background:#e9f9ef;color:#15803d}
+.tg-holat{margin:8px 0 2px;padding:8px 12px;border-radius:12px;background:#fff7e6;display:grid;gap:3px}
+.tg-holat.ok{background:#e9f9ef}
+.tg-qadam{color:#8a5a00;font-size:13px;font-weight:700;line-height:1.35}
+.tg-qadam.ok{color:#15803d}
+.telefon-qoymang{margin:8px 0 4px;padding:10px 12px;border-radius:12px;background:#fdecec;color:#9f1239;font-size:13px;line-height:1.45}
+.telefon-qoymang b{color:#881337}
 .tanlov:disabled{opacity:.45;cursor:not-allowed}
 </style>
 </head>
@@ -515,11 +519,12 @@ function qabulSheetOch(b) {
       <span>${telHavola(b.leadPhone)} — dars vaqtini tasdiqlang</span></div>`);
   }
   // O'quvchi botda raqamini ulashadi — login, parol va ilova havolasi unga shu zahoti keladi
-  qismlar.push(`<div class="akkaunt akkaunt-tg"><b>2. Telefonda Telegram botni ochtiring</b>
-    <span>Ayting: Telegramda <b>@MT_yordam_bot</b> ni qidirib, <b>Start</b> → <b>“Raqamni yuborish”</b> ni bossin. Login, parol va ilova havolasi unga <b>shu zahoti</b> keladi.</span></div>`);
+  qismlar.push(`<div class="akkaunt akkaunt-tg"><b>2. Suhbat paytida — Telegram bot va ilova</b>
+    <span>Ayting: Telegramda <b>@MT_yordam_bot</b> → <b>Start</b> → <b>“Raqamni yuborish”</b>. Login-parol va ilova havolasi <b>shu zahoti</b> keladi —
+    o‘quvchi ilovani yuklab, <b>siz bilan gaplashib turib</b> kirsin.</span></div>`);
   if (b.confirmPending) {
-    qismlar.push(`<div class="akkaunt" style="margin-top:10px"><b>3. “✅ Telegram ulandi” chiqqach — qabul qiling</b>
-      <span>Kalendaringizdagi sariq slotni bosing. O‘quvchi botga ulanmaguncha darsni tasdiqlab bo‘lmaydi.</span></div>`);
+    qismlar.push(`<div class="akkaunt" style="margin-top:10px"><b>3. Ikkala ✅ yonguncha telefonni qo‘ymang</b>
+      <span>Sariq slotni bosing: “✅ Telegram ulandi” va “✅ Ilovaga kirdi” chiqqach qabul qiling. “Keyin o‘rnataman” deganlar ko‘pincha telefonni qayta ko‘tarmaydi.</span></div>`);
   }
   $('#qsTana').innerHTML = qismlar.join('') +
     '<button class="qabul" type="button" id="qsYop" style="width:100%;margin-top:14px">Tushunarli</button>';
@@ -568,26 +573,33 @@ function tasdiqYop() {
   $('#tasdiqSheet').classList.remove('ochiq');
 }
 
-// O'quvchi Telegram botga ulandimi (ulanmaguncha dars tasdiqlanmaydi)
+// O'quvchi Telegram botga ulandimi (ulanmaguncha dars tasdiqlanmaydi) va ilovaga kirdimi
 const tgUlangan = (d) => d.tgConnected !== false;
+const ilovada = (d) => d.appLoggedIn !== false;
+const hammasiTayyor = (d) => tgUlangan(d) && ilovada(d);
 function tgHolat(d) {
-  return tgUlangan(d)
-    ? `<div class="tg-holat ok">✅ Telegram ulandi${d.tgName ? ' · ' + esc(d.tgName) : ''} — login-parol yuborildi</div>`
-    : '<div class="tg-holat">⏳ Telegram kutilmoqda — o‘quvchi @MT_yordam_bot da “Raqamni yuborish” ni bossin</div>';
+  const q = (ok, matn, kutish) => `<div class="tg-qadam${ok ? ' ok' : ''}">${ok ? '✅' : '⏳'} ${ok ? matn : kutish}</div>`;
+  return `<div class="tg-holat${hammasiTayyor(d) ? ' ok' : ''}">
+    ${q(tgUlangan(d), `Telegram ulandi${d.tgName ? ' · ' + esc(d.tgName) : ''} — login-parol yuborildi`, 'Telegram kutilmoqda — @MT_yordam_bot da “Raqamni yuborish”')}
+    ${q(ilovada(d), 'Ilovaga kirdi', 'Ilovaga hali kirmadi — yuklab, login-parol bilan kirsin')}
+  </div>`;
 }
+// Suhbat paytida ustozga eslatma: o'quvchi "keyin o'rnataman" deb ketsa, qayta ko'tarmaydi
+const TELEFON_QOYMANG = `<div class="telefon-qoymang"><b>📞 Telefonni qo‘ymang!</b>
+  O‘quvchi siz bilan gaplashib turgan holda: <b>1)</b> @MT_yordam_bot → “Raqamni yuborish”, <b>2)</b> botdagi tugma bilan ilovani yuklab olsin,
+  <b>3)</b> login-parol bilan kirsin. Ikkala ✅ yonguncha kuting — “keyin qilaman” deganlar ko‘pincha telefonni qayta ko‘tarmaydi.</div>`;
 
-// Sheet ochiq turganda o'quvchi botga ulanishini kutib, har 5 soniyada tekshiramiz
+// Sheet ochiq turganda o'quvchi botga ulanishi va ilovaga kirishini kutib, har 5 soniyada tekshiramiz
 let TG_KUTISH = null;
 function tgKuzat(d) {
   clearInterval(TG_KUTISH);
-  if (tgUlangan(d)) return;
+  if (hammasiTayyor(d)) return;
   TG_KUTISH = setInterval(async () => {
     if (!$('#tasdiqSheet').classList.contains('ochiq')) return clearInterval(TG_KUTISH);
     await darslarniYukla();
     const yangi = KELGUSI.find((x) => x.id === d.id);
     if (!yangi || !yangi.confirmPending) { clearInterval(TG_KUTISH); return tasdiqYop(); }
-    if (tgUlangan(yangi)) {
-      clearInterval(TG_KUTISH);
+    if (tgUlangan(yangi) !== tgUlangan(d) || ilovada(yangi) !== ilovada(d)) {
       if (typeof ding === 'function') try { ding(); } catch (e) {}
       tasdiqAsosiy(yangi);
     }
@@ -599,10 +611,12 @@ function tasdiqAsosiy(d) {
   const ulangan = tgUlangan(d);
   $('#tsTana').innerHTML = `
     ${tgHolat(d)}
+    ${hammasiTayyor(d) ? '' : TELEFON_QOYMANG}
     <button class="tanlov ok" type="button" id="tsQabul" ${ulangan ? '' : 'disabled'}><i>✓</i><span>Qabul qilish<small>${ulangan ? 'Gaplashdim — vaqt aniq, o‘quvchi real' : 'O‘quvchi Telegram botga ulangach yonadi'}</small></span></button>
     <button class="tanlov vaqt" type="button" id="tsVaqtBtn" ${ulangan ? '' : 'disabled'}><i>↻</i><span>Vaqtni o‘zgartirish<small>Boshqa vaqtga kelishdik</small></span></button>
     <button class="tanlov yoq" type="button" id="tsBekor"><i>✕</i><span>Bekor qilish<small>Sababini tanlaysiz</small></span></button>`;
   $('#tsQabul').onclick = async (e) => {
+    if (!ilovada(d) && !confirm('O‘quvchi hali ilovaga kirmadi. Suhbat paytida kirib ko‘rishini so‘radingizmi? Baribir tasdiqlaysizmi?')) return;
     const r = await tasdiqYubor(d, 'confirm', {}, e.currentTarget);
     if (r) toast('Tasdiqlandi — dars kalendaringizda', 'ok');
   };

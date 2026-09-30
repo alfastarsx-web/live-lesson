@@ -206,6 +206,12 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
     <button type="button" id="yangilikYop" aria-label="Yopish" style="border:0;background:none;font-size:18px;color:#9a9ca3;cursor:pointer;padding:4px 6px">×</button>
   </div>
 
+  <div class="akad" id="qoida" hidden style="position:relative;background:#fdecec">
+    <span class="ico a" aria-hidden="true">📞</span>
+    <a href="/mentor/qollanma.html#suhbat" style="text-decoration:none;color:inherit;flex:1"><b>Yangi qoida: suhbatda ilovaga kirgizing</b><br><span class="xira">O‘quvchi siz bilan gaplashib turib Telegram botga raqam yuborsin va ilovaga kirsin — ikkala ✅ yonguncha telefonni qo‘ymang</span></a>
+    <button type="button" id="qoidaYop" aria-label="Yopish" style="border:0;background:none;font-size:18px;color:#9a9ca3;cursor:pointer;padding:4px 6px">×</button>
+  </div>
+
   <a class="card grafik" id="grafik" href="/daromad.html" aria-label="Haftalik kirim — Daromad bo‘limini ochish">
     <div class="ch"><h2>Shu hafta</h2><span class="d" id="haftaOralik"></span></div>
     <div style="margin-top:4px"><span class="big num" id="haftaJami">—</span> <span class="xira">so‘m</span><span class="up" id="haftaFoiz" hidden></span></div>
@@ -502,6 +508,16 @@ function boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar }) {
     const yop = () => { try { localStorage.setItem(YANGILIK, '1'); } catch { /* yo'q */ } $('#yangilik').hidden = true; };
     $('#yangilikYop').onclick = yop;
     $('#yangilik').querySelector('a').addEventListener('click', yop);
+  }
+  // Yangi qoida (Oktabr): sinov darsi qo'ng'irog'ida o'quvchini ilovaga kirgizish — yopilguncha
+  const QOIDA = 'qoida-suhbatda-ilova-2026-10';
+  let qoidaKorgan = false;
+  try { qoidaKorgan = localStorage.getItem(QOIDA) === '1'; } catch { /* yo'q */ }
+  if (akad && akad.mentor && !qoidaKorgan) {
+    $('#qoida').hidden = false;
+    const yopQ = () => { try { localStorage.setItem(QOIDA, '1'); } catch { /* yo'q */ } $('#qoida').hidden = true; };
+    $('#qoidaYop').onclick = yopQ;
+    $('#qoida').querySelector('a').addEventListener('click', yopQ);
   }
   holatChiz(ball, progress);
   await tabriklarniKorsat(ISM);
