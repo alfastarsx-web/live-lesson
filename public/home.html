@@ -517,17 +517,20 @@ function boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar }) {
     }
     k.hidden = false;
     if (window.ilovadami && window.ilovadami() && tg.botUsername) {
-      // Ilova ichida t.me havolasi ochilmaydi (ilova "Sahifani yuklab bo'lmadi" ko'rsatadi).
-      // Bot nomini nusxalaymiz: mentor Telegramda o'zi ochib, raqamini yuborib ulanadi.
+      // Ilova ichida t.me havolasi ochilmaydi. Mentor Telegramda botni o'zi ochib, shu kodni
+      // yozadi (raqami Telegramda bo'lmasa ham ishlaydi). Bosilganda kod nusxalanadi.
       const nom = '@' + tg.botUsername;
       k.removeAttribute('href');
       k.removeAttribute('target');
-      k.querySelector('.xira').textContent = `Telegramda ${nom} ni oching → Start → «Raqamni yuborish». Bosing — nom nusxalanadi`;
+      k.querySelector('.xira').innerHTML = tg.code
+        ? `Telegramda <b>${esc(nom)}</b> ni oching va shu kodni yuboring: <b style="font-size:17px;letter-spacing:2px">${esc(tg.code)}</b><br>Bosing — kod nusxalanadi (15 daqiqa amal qiladi)`
+        : `Telegramda <b>${esc(nom)}</b> ni oching → Start → «Raqamni yuborish»`;
       k.onclick = (e) => {
         e.preventDefault();
-        const ok = () => toast(`${nom} nusxalandi — Telegramda qidiring`);
-        if (navigator.clipboard?.writeText) navigator.clipboard.writeText(nom).then(ok, () => toast(`Telegramda ${nom} ni qidiring`));
-        else toast(`Telegramda ${nom} ni qidiring`);
+        const matn = tg.code || nom;
+        const ok = () => toast(tg.code ? `Kod nusxalandi — ${nom} ga yuboring` : `${nom} nusxalandi — Telegramda qidiring`);
+        if (navigator.clipboard?.writeText) navigator.clipboard.writeText(matn).then(ok, () => toast(`Telegramda ${nom} ni oching`));
+        else toast(`Telegramda ${nom} ni oching`);
       };
     } else {
       k.href = tg.url;
