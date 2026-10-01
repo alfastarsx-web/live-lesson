@@ -438,7 +438,11 @@ const RUXSAT = [
   /^mentor-gamification\/home$/,
   /^mentor-gamification\/history$/,
   /^mentor-gamification\/progress$/,
+  /^mentor-bot\/link$/,
 ];
+
+// Mentor Telegram botidan uzish
+app.delete('/api/ai/mentor-bot/link', (req, res) => aiProxy(req, res, '/mentor-bot/link'));
 
 // Lid holati va izohi (PATCH) — ruxsat etilgan yozish amallari
 app.patch(/^\/api\/ai\/leads\/([0-9a-f-]{36})\/(status|note)$/, (req, res) => {

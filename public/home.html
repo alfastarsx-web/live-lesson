@@ -200,6 +200,11 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
     <span><b>Akademiyani tugating</b><br><span class="xira" id="akadMatn">Testdan o‘tgach sinov darsi so‘rovlari kela boshlaydi</span></span>
   </a>
 
+  <a class="akad" id="tgBot" hidden target="_blank" rel="noopener" style="background:linear-gradient(120deg,#e8f4fd,#e6f0ff);box-shadow:0 0 0 1px #cfe3f7">
+    <span class="ico a" aria-hidden="true" style="background:#229ED9;color:#fff">🤖</span>
+    <span style="flex:1"><b>Telegramga ulaning</b><br><span class="xira">Yangi so‘rovlar «Qabul qilish» tugmasi bilan, eslatmalar, prioritet va ball o‘zgarishlari — Telegramda</span></span>
+  </a>
+
   <div class="akad" id="yangilik" hidden style="position:relative">
     <span class="ico a" aria-hidden="true">🆕</span>
     <a href="/mentor/akademiya.html#yangiliklar" style="text-decoration:none;color:inherit;flex:1"><b>Akademiya yangilandi</b><br><span class="xira">Sentabr yangiliklari: tasdiqlash qo‘ng‘irog‘i, Telegram bot, taklif yuborish — 3 daqiqa</span></a>
@@ -498,6 +503,13 @@ function boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar }) {
     $('#akadMatn').textContent = `${akad.modulesRead}/${akad.modules} modul o‘qildi · testdan o‘tgach sinov so‘rovlari keladi`;
   }
   boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar });
+  // Mentor boti: ulanmagan bo'lsa bir martalik havola bilan karta
+  ol('/api/ai/mentor-bot/link').then((tg) => {
+    if (!tg || !tg.enabled || tg.linked || !tg.url) return;
+    const k = $('#tgBot');
+    k.href = tg.url;
+    k.hidden = false;
+  });
 
   // Akademiyadan o'tgan (yoki ozod qilingan) ustozga — yangiliklar kartasi, yopilguncha
   const YANGILIK = 'akademiya-yangilik-2026-09';
