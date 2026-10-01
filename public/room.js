@@ -128,7 +128,15 @@ function toast(msg, ms = 2600) {
 function setStatus(t) { el.status.textContent = t; }
 
 // ================= 1. WebSocket =================
-let ws = null, myId = null, peerId = null, isInitiator = false, retry = 0;
+let ws = null, myId = null, peerId = null, isInitiator = false, retry = 0, qaytaUlanishTaymer = null;
+
+// Internet qaytdi — kutib o'tirmay darhol ulanamiz
+window.addEventListener('online', () => {
+  if (DARS_TUGADI || (ws && ws.readyState <= WebSocket.OPEN)) return;
+  clearTimeout(qaytaUlanishTaymer);
+  retry = 0;
+  connect();
+});
 
 const outbox = [];
 function wsSend(obj) {
@@ -155,9 +163,10 @@ function connect() {
     // Dars tugagan bo'lsa qayta ulanmaymiz: aks holda o'quvchi xonaga qaytib
     // kirib qoladi va sinov darsi hisoboti kechikadi (u xona bo'shaganda ketadi)
     if (DARS_TUGADI) return;
-    setStatus('Uzildi, qayta ulanmoqda…');
+    setStatus('Internet uzildi — qayta ulanmoqda…');
     retry += 1;
-    if (retry < 40) setTimeout(connect, Math.min(1000 * retry, 8000));
+    // Internet qaytguncha urinib turamiz (~25 daqiqa); "online" bo'lishi bilan darhol
+    if (retry < 200) qaytaUlanishTaymer = setTimeout(connect, Math.min(1000 * retry, 8000));
   };
   ws.onerror = () => {};
 }
@@ -187,11 +196,15 @@ async function onSignal(m) {
     case 'joined':
       myId = m.you.id;
       if (Array.isArray(m.iceServers) && m.iceServers.length) RTC_CONFIG.iceServers = m.iceServers;
+      // Qayta ulanish: eski (uzilgan) video aloqani tashlab, yangidan quramiz
+      if (pc) teardownPeer();
       if (m.peers.length) { peerId = m.peers[0].id; isInitiator = true; onPeerReady(m.peers[0]); }
       applyState(m.state);
       break;
 
     case 'peer-join':
+      // Suhbatdosh qayta kirdi — eski aloqa yaroqsiz, yangisini kutamiz
+      if (pc) teardownPeer();
       peerId = m.peer.id;
       isInitiator = false;
       onPeerReady(m.peer);
@@ -208,12 +221,22 @@ async function onSignal(m) {
       }
       break;
 
+    // Shu dars boshqa oyna/qurilmada ochildi — bu oyna qayta ulanmasin
+    case 'replaced':
+      DARS_TUGADI = true;
+      teardownPeer();
+      setStatus('Dars boshqa oynada ochildi');
+      el.remotePh.hidden = false;
+      el.remotePh.innerHTML = '<b>Dars boshqa oynada ochildi</b><span>Shu dars boshqa qurilma yoki oynada davom etyapti.</span>';
+      break;
+
     case 'peer-leave':
+      if (m.id && peerId && m.id !== peerId) break; // eski ulanish — joriy suhbatdoshga tegishli emas
       peerId = null;
       teardownPeer();
-      setStatus('Suhbatdosh chiqdi');
+      setStatus('Suhbatdosh uzildi — qaytishini kuting');
       el.remotePh.hidden = false;
-      el.remotePh.querySelector('b').textContent = 'Suhbatdosh chiqdi';
+      el.remotePh.innerHTML = '<b>Suhbatdosh uzildi</b><span>Dars davom etadi — u qaytib kirishi bilan aloqa tiklanadi.</span>';
       el.remoteVideo.classList.add('off');
       break;
 
@@ -568,8 +591,45 @@ function bahoOynasi() {
   };
 }
 
-el.btnLeave.onclick = () => {
-  if (!confirm('Darsdan chiqasizmi?')) return;
+/** Ustoz uchun: vaqtincha chiqish (dars davom etadi) yoki darsni yakunlash */
+function ustozChiqishOynasi() {
+  return new Promise((resolve) => {
+    const fon = document.createElement('div');
+    fon.className = 'baho-fon';
+    fon.innerHTML = `<div class="baho-oyna" style="max-width:360px">
+      <h2>Darsdan chiqish</h2>
+      <p>Darsni yakunlasangiz, o‘quvchi ham chiqadi va baho so‘raladi.</p>
+      <div class="baho-amallar" style="flex-direction:column;gap:8px">
+        <button class="baho-yubor" data-j="yakun">Darsni yakunlash</button>
+        <button class="baho-otkaz" data-j="vaqtincha">Vaqtincha chiqish (qaytib kiraman)</button>
+        <button class="baho-otkaz" data-j="bekor">Bekor qilish</button>
+      </div></div>`;
+    fon.addEventListener('click', (e) => {
+      const j = e.target.dataset && e.target.dataset.j;
+      if (!j && e.target !== fon) return;
+      fon.remove();
+      resolve(j || 'bekor');
+    });
+    document.body.appendChild(fon);
+  });
+}
+
+el.btnLeave.onclick = async () => {
+  if (IS_TEACHER) {
+    const tanlov = await ustozChiqishOynasi();
+    if (tanlov === 'bekor') return;
+    if (tanlov === 'vaqtincha') {
+      // Dars yopilmaydi: o'quvchi kutib turadi, ustoz jadvaldan qaytib kiradi
+      DARS_TUGADI = true;
+      try { ws && ws.close(); } catch {}
+      teardownPeer();
+      if (localStream) localStream.getTracks().forEach((t) => t.stop());
+      location.href = '/jadval.html';
+      return;
+    }
+  } else if (!confirm('Darsdan chiqasizmi?')) {
+    return;
+  }
 
   DARS_TUGADI = true;
 
