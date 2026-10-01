@@ -152,3 +152,16 @@ body.can-draw #inkCanvas{cursor:crosshair}
   font:inherit;font-size:14px;cursor:pointer}
 /* Past baho qo'yilganda izoh maydoni e'tiborni tortsin */
 .baho-oyna textarea.sorab-turibdi{border-color:#c9a36b;background:#fbf8f2}
+
+/* ===== Ekran ulashish va o'quvchi chizishi ===== */
+.screenbox{position:relative;line-height:0;align-self:flex-start;max-width:100%;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);border-radius:8px;overflow:hidden;background:#000}
+.screenbox[hidden]{display:none}
+#screenVideo{display:block;max-width:100%;max-height:calc(100vh - 120px);width:auto;height:auto}
+#screenInk{position:absolute;left:0;top:0;touch-action:none;user-select:none;-webkit-user-select:none}
+body.can-draw #screenInk{cursor:crosshair}
+.screen-tag{position:absolute;left:8px;top:8px;line-height:1.2;font-size:12px;font-weight:600;padding:3px 9px;
+  border-radius:20px;background:rgba(0,0,0,.55);color:#fff;pointer-events:none}
+body:not(.teacher) .faqat-ustoz{display:none}
+#btnScreen.jonli{background:#dc2626;border-color:#dc2626}
+.tile .ph.ekran{background:#101113}
