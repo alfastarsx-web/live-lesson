@@ -308,6 +308,9 @@ app.get('/api/bepul-dars/slots', async (req, res) => {
 });
 // Lid manbasi: www saytidanmi yoki lesson/app-course'danmi, Meta reklamasidanmi
 function bepulManba(req) {
+  // SMS kampaniyasi: sahifa havoladagi ?s=a ni yuboradi → "sms-a"
+  const sms = String(req.body?.sms || '').toLowerCase();
+  if (/^[a-z0-9]{1,10}$/.test(sms)) return `sms-${sms}`;
   const origin = String(req.headers.origin || '');
   const www = origin === 'https://www.myteacher.uz' || origin === 'https://myteacher.uz';
   return `${www ? 'www' : 'web'}-bepul-dars${req.body?.meta ? '-fb' : ''}`;
