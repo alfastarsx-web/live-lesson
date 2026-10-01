@@ -1031,6 +1031,8 @@ wss.on('connection', async (ws, req) => {
   // telefon, yopilmay qolgan oyna) yangisiga joy bo'shatadi — "Xona to'la" chiqmaydi
   for (const [id, p] of room.peers) {
     if (p.meta.role !== role) continue;
+    // Boshqa odam (boshqa akkaunt) shu rol bilan kirsa — eski ishtirokchini chiqarib yubormaydi
+    if (claims?.userId && p.meta.userId && p.meta.userId !== claims.userId) continue;
     p.almashtirildi = true;
     if (role === 'student' && room.ishtirok.studentEnteredAt) {
       room.ishtirok.studentSeconds += Math.round((Date.now() - room.ishtirok.studentEnteredAt) / 1000);
@@ -1048,7 +1050,7 @@ wss.on('connection', async (ws, req) => {
   }
 
   const clientId = crypto.randomUUID();
-  ws.meta = { clientId, roomId, role, name };
+  ws.meta = { clientId, roomId, role, name, userId: claims?.userId || null };
   room.peers.set(clientId, ws);
 
   // Kim birinchi kirdi — o'sha "polite" bo'lmaydi (offer yaratadi yangi kelgan).
