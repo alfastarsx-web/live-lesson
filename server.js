@@ -17,6 +17,9 @@ const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
 const LOG_DIR = path.join(__dirname, 'data', 'lessons');
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 fs.mkdirSync(LOG_DIR, { recursive: true });
+// Server qayta ishga tushsa (deploy) ham dars davom etsin: doska va o'quvchi qatnashuvi shu yerda
+const ROOM_DIR = path.join(__dirname, 'data', 'rooms');
+fs.mkdirSync(ROOM_DIR, { recursive: true });
 
 const app = express();
 
@@ -770,6 +773,45 @@ function emptyState() {
   return { doc: null, page: 1, strokes: [], scroll: 0, screen: false, studentDraw: false };
 }
 
+// ---------- xona holatini saqlash (deploy/qayta ishga tushishdan keyin tiklash) ----------
+const xonaFayli = (id) => path.join(ROOM_DIR, `${id}.json`);
+
+function saqlanganXona(id) {
+  try {
+    const d = JSON.parse(fs.readFileSync(xonaFayli(id), 'utf8'));
+    return Date.now() - d.savedAt < 3 * 3600_000 ? d : null;
+  } catch {
+    return null;
+  }
+}
+
+const saqlashNavbati = new Map();
+/** Xona holatini 2 soniyada bir marta diskka yozadi (o'quvchi soniyalari hozirgacha hisoblanib) */
+function xonaniSaqla(id, room) {
+  if (saqlashNavbati.has(id)) return;
+  saqlashNavbati.set(id, setTimeout(() => {
+    saqlashNavbati.delete(id);
+    if (!rooms.has(id)) return;
+    const ish = room.ishtirok;
+    const soniya = ish.studentSeconds + (ish.studentEnteredAt ? Math.round((Date.now() - ish.studentEnteredAt) / 1000) : 0);
+    const d = {
+      savedAt: Date.now(),
+      startedAt: room.startedAt,
+      state: { ...room.state, strokes: room.state.strokes.slice(-2000) },
+      studentJoined: ish.studentJoined,
+      studentSeconds: soniya,
+      ended: room.ended,
+    };
+    fs.writeFile(xonaFayli(id), JSON.stringify(d), (err) => {
+      if (err) console.warn('Xona holati saqlanmadi:', err.message);
+    });
+  }, 2000));
+}
+
+function xonaFayliniOchir(id) {
+  fs.unlink(xonaFayli(id), () => {});
+}
+
 function getRoom(id) {
   if (!rooms.has(id)) {
     const startedAt = Date.now();
@@ -786,8 +828,17 @@ function getRoom(id) {
       endTimer: null,
       expiresAt: 0,
     };
+    // Server qayta ishga tushgan bo'lsa — doska va o'quvchi qancha o'tirgani qaytadi
+    const eski = saqlanganXona(id);
+    if (eski) {
+      room.state = { ...emptyState(), ...eski.state };
+      room.startedAt = eski.startedAt || startedAt;
+      room.ishtirok.studentJoined = Boolean(eski.studentJoined);
+      room.ishtirok.studentSeconds = Number(eski.studentSeconds) || 0;
+      room.ended = Boolean(eski.ended);
+    }
     rooms.set(id, room);
-    logEvent(room, { type: 'lesson-start', room: id });
+    logEvent(room, { type: eski ? 'lesson-restored' : 'lesson-start', room: id });
   }
   return rooms.get(id);
 }
@@ -882,7 +933,22 @@ async function sinovHisoboti(roomId, room, ended = false) {
 
 const wss = new WebSocketServer({ server, path: '/ws' });
 
+// Uzilgan (javob bermaydigan) ulanishni tez aniqlaymiz — aks holda u xonada "arvoh" bo'lib
+// qolib, qayta kirmoqchi bo'lgan ustoz yoki o'quvchiga "Xona to'la" chiqardi
+const PING_MS = 15_000;
+setInterval(() => {
+  for (const c of wss.clients) {
+    if (c.tirik === false) { c.terminate(); continue; }
+    c.tirik = false;
+    try { c.ping(); } catch { /* yopilayotgan bo'lishi mumkin */ }
+  }
+  // O'quvchi xonada o'tirgan vaqt diskda yangilanib tursin
+  for (const [id, room] of rooms) if (room.ishtirok.studentEnteredAt) xonaniSaqla(id, room);
+}, PING_MS);
+
 wss.on('connection', async (ws, req) => {
+  ws.tirik = true;
+  ws.on('pong', () => { ws.tirik = true; });
   const url = new URL(req.url, 'http://localhost');
 
   // Token rejimida xona, rol va ism faqat imzolangan tokendan olinadi —
@@ -956,6 +1022,26 @@ wss.on('connection', async (ws, req) => {
     clearTimeout(room.endTimer);
     room.endTimer = null;
   }
+  // Xona bo'shab qolgan edi — qaytib kelishdi, yakunlash bekor
+  if (room.bushTaymer) {
+    clearTimeout(room.bushTaymer);
+    room.bushTaymer = null;
+  }
+  // Bir xonada bitta ustoz va bitta o'quvchi. Shu roldagi eski ulanish (interneti uzilgan
+  // telefon, yopilmay qolgan oyna) yangisiga joy bo'shatadi — "Xona to'la" chiqmaydi
+  for (const [id, p] of room.peers) {
+    if (p.meta.role !== role) continue;
+    p.almashtirildi = true;
+    if (role === 'student' && room.ishtirok.studentEnteredAt) {
+      room.ishtirok.studentSeconds += Math.round((Date.now() - room.ishtirok.studentEnteredAt) / 1000);
+      room.ishtirok.studentEnteredAt = null;
+    }
+    room.peers.delete(id);
+    send(p, { type: 'replaced' });
+    try { p.terminate(); } catch { /* allaqachon yopilgan */ }
+    broadcast(room, { type: 'peer-leave', id });
+    logEvent(room, { type: 'replaced', role });
+  }
   if (room.peers.size >= 2) {
     send(ws, { type: 'full' });
     return ws.close();
@@ -985,6 +1071,7 @@ wss.on('connection', async (ws, req) => {
     room.ishtirok.studentJoined = true;
     room.ishtirok.studentEnteredAt = Date.now();
   }
+  xonaniSaqla(roomId, room);
 
   ws.on('message', (raw) => {
     let msg;
@@ -1094,9 +1181,14 @@ wss.on('connection', async (ws, req) => {
       default:
         break;
     }
+    if (msg.type !== 'offer' && msg.type !== 'answer' && msg.type !== 'ice' && msg.type !== 'stroke-live') {
+      xonaniSaqla(roomId, room);
+    }
   });
 
   ws.on('close', () => {
+    // Shu rol uchun yangi ulanish kelgan — eski ulanish hech narsaga ta'sir qilmasin
+    if (ws.almashtirildi) return;
     room.peers.delete(clientId);
     broadcast(room, { type: 'peer-leave', id: clientId });
     // Ustoz chiqib ketsa ekran ulashish ham tugaydi — o'quvchida qotib qolgan kadr qolmasin
@@ -1107,20 +1199,27 @@ wss.on('connection', async (ws, req) => {
       room.ishtirok.studentSeconds += Math.round((Date.now() - room.ishtirok.studentEnteredAt) / 1000);
       room.ishtirok.studentEnteredAt = null;
     }
+    // Pullik dars: ustoz qaytmasa yopiladi. Internet uzilishi/telefon almashtirish uchun 10 daqiqa
     if (role === 'teacher' && room.lessonId && !room.ended) {
       room.endTimer = setTimeout(() => {
         if (![...room.peers.values()].some((peer) => peer.meta.role === 'teacher')) {
           void endActiveRoom(roomId, room);
         }
-      }, 2 * 60 * 1000);
+      }, 10 * 60 * 1000);
     }
+    xonaniSaqla(roomId, room);
     if (room.peers.size === 0) {
       logEvent(room, { type: 'lesson-end', strokes: room.state.strokes.length });
+      // Oraliq hisobot: dars YOPILMAYDI (ikkalasi ham bir lahza uzilgan bo'lishi mumkin)
       void sinovHisoboti(roomId, room, room.ended);
-      setTimeout(() => {
+      // 10 daqiqa ichida hech kim qaytmasa — endi yakuniy: lid holati va dars yopiladi
+      room.bushTaymer = setTimeout(() => {
         const r = rooms.get(roomId);
-        if (r && r.peers.size === 0) rooms.delete(roomId);
-      }, 10 * 60 * 1000); // 10 daqiqa ichida qaytsa, doska saqlanib qoladi
+        if (!r || r.peers.size > 0) return;
+        void sinovHisoboti(roomId, r, true);
+        rooms.delete(roomId);
+        xonaFayliniOchir(roomId);
+      }, 10 * 60 * 1000);
     }
   });
 });
