@@ -730,8 +730,40 @@ async function endActiveRoom(roomId, room) {
   await report();
 }
 
+function chizaOladi(room, role) {
+  return role === 'teacher' || (role === 'student' && room.state.studentDraw);
+}
+
+/** Chiziqni tekshirib, faqat kerakli maydonlarni qoldiradi; muallifni server qo'yadi */
+function toza(st, role) {
+  if (!st || !Array.isArray(st.pts) || st.pts.length > 4000) return null;
+  const page = st.page === 'screen' ? 'screen' : Math.max(1, Number(st.page) || 1);
+  const pts = st.pts
+    .filter((p) => Array.isArray(p) && Number.isFinite(p[0]) && Number.isFinite(p[1]))
+    .map((p) => [Math.round(p[0] * 10000) / 10000, Math.round(p[1] * 10000) / 10000]);
+  if (!pts.length) return null;
+  return {
+    page,
+    tool: st.tool === 'hl' ? 'hl' : 'pen',
+    color: /^#[0-9a-f]{6}$/i.test(String(st.color)) ? st.color : '#ef4444',
+    w: Math.min(0.05, Math.max(0.001, Number(st.w) || 0.0045)),
+    pts,
+    dur: Number.isFinite(st.dur) ? st.dur : undefined,
+    by: role,
+  };
+}
+
+/** Ekran yoqilganda ham, o'chganda ham ekrandagi eski belgilar tozalanadi */
+function ekranHolati(room, on, fromId) {
+  room.state.screen = on;
+  room.state.strokes = room.state.strokes.filter((s) => s.page !== 'screen');
+  broadcast(room, { type: 'screen', on }, fromId);
+  logEvent(room, { type: 'screen', on });
+}
+
 function emptyState() {
-  return { doc: null, page: 1, strokes: [], scroll: 0 };
+  // screen — ustoz ekranini ulashyapti; studentDraw — o'quvchiga chizishga ruxsat
+  return { doc: null, page: 1, strokes: [], scroll: 0, screen: false, studentDraw: false };
 }
 
 function getRoom(id) {
@@ -1001,32 +1033,58 @@ wss.on('connection', async (ws, req) => {
         broadcast(room, { type: 'scroll', y: room.state.scroll }, clientId);
         break;
 
+      // --- Chizish: ustoz doim, o'quvchi faqat ustoz ruxsat bersa ---
       case 'stroke': {
-        if (role !== 'teacher') return;
-        const stroke = { ...msg.stroke, t: Date.now() - room.startedAt };
+        if (!chizaOladi(room, role)) return;
+        const stroke = toza(msg.stroke, role);
+        if (!stroke) return;
+        stroke.t = Date.now() - room.startedAt;
         if (room.state.strokes.length < 5000) room.state.strokes.push(stroke);
         broadcast(room, { type: 'stroke', stroke }, clientId);
         logEvent(room, { type: 'stroke', stroke });
         break;
       }
 
-      case 'stroke-live':
+      case 'stroke-live': {
+        if (!chizaOladi(room, role)) return;
+        const stroke = toza(msg.stroke, role);
+        if (stroke) broadcast(room, { type: 'stroke-live', stroke }, clientId);
+        break;
+      }
+
+      // Har kim faqat o'zining oxirgi chizig'ini qaytaradi
+      case 'undo': {
+        if (!chizaOladi(room, role)) return;
+        const list = room.state.strokes;
+        for (let i = list.length - 1; i >= 0; i--) {
+          if ((list[i].by || 'teacher') === role) { list.splice(i, 1); break; }
+        }
+        broadcast(room, { type: 'undo', by: role }, clientId);
+        logEvent(room, { type: 'undo', by: role });
+        break;
+      }
+
+      case 'clear': {
         if (role !== 'teacher') return;
-        broadcast(room, { type: 'stroke-live', stroke: msg.stroke }, clientId);
+        const page = msg.page === 'screen' ? 'screen' : room.state.page;
+        room.state.strokes = room.state.strokes.filter((s) => s.page !== page);
+        broadcast(room, { type: 'clear', page }, clientId);
+        logEvent(room, { type: 'clear', page });
+        break;
+      }
+
+      // --- Ustoz o'quvchiga chizishga ruxsat beradi / oladi ---
+      case 'student-draw':
+        if (role !== 'teacher') return;
+        room.state.studentDraw = Boolean(msg.on);
+        broadcast(room, { type: 'student-draw', on: room.state.studentDraw }, clientId);
+        logEvent(room, { type: 'student-draw', on: room.state.studentDraw });
         break;
 
-      case 'undo':
+      // --- Ustoz ekranini ulashdi / to'xtatdi (video o'zi WebRTC orqali keladi) ---
+      case 'screen':
         if (role !== 'teacher') return;
-        room.state.strokes.pop();
-        broadcast(room, { type: 'undo' }, clientId);
-        logEvent(room, { type: 'undo' });
-        break;
-
-      case 'clear':
-        if (role !== 'teacher') return;
-        room.state.strokes = room.state.strokes.filter((s) => s.page !== room.state.page);
-        broadcast(room, { type: 'clear', page: room.state.page }, clientId);
-        logEvent(room, { type: 'clear', page: room.state.page });
+        ekranHolati(room, Boolean(msg.on), clientId);
         break;
 
       default:
@@ -1037,6 +1095,8 @@ wss.on('connection', async (ws, req) => {
   ws.on('close', () => {
     room.peers.delete(clientId);
     broadcast(room, { type: 'peer-leave', id: clientId });
+    // Ustoz chiqib ketsa ekran ulashish ham tugaydi — o'quvchida qotib qolgan kadr qolmasin
+    if (role === 'teacher' && room.state.screen) ekranHolati(room, false, clientId);
     logEvent(room, { type: 'leave', role, name });
 
     if (role === 'student' && room.ishtirok.studentEnteredAt) {

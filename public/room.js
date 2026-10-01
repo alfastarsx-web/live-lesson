@@ -70,10 +70,19 @@ const el = {
   pdfbox: $('#pdfbox'), pdfCanvas: $('#pdfCanvas'), inkCanvas: $('#inkCanvas'),
   zoomBelgi: $('#zoomBelgi'), zoomFoiz: $('#zoomFoiz'), zoomTiklash: $('#zoomTiklash'),
   toast: $('#toast'),
+  btnScreen: $('#btnScreen'), btnStudentDraw: $('#btnStudentDraw'),
+  screenbox: $('#screenbox'), screenVideo: $('#screenVideo'), screenInk: $('#screenInk'),
 };
+
+// Ekran ulashish rejimi (ish maydonida ustoz ekrani) va o'quvchiga chizish ruxsati
+let EKRAN = false, STUDENT_DRAW = false;
+// Telefon brauzerlari ekranni ulasha olmaydi — tugmani faqat imkon bo'lsa ko'rsatamiz
+const EKRAN_MUMKIN = Boolean(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
 
 function interfeysniSozla() {
   el.localTag.textContent = NAME + ' (siz)';
+  document.body.classList.toggle('teacher', IS_TEACHER);
+  el.btnScreen.hidden = !EKRAN_MUMKIN;
   if (IS_TEACHER) {
     document.body.classList.remove('viewer');
     document.body.classList.add('can-draw');
@@ -91,11 +100,22 @@ function interfeysniSozla() {
     };
   } else {
     document.body.classList.add('viewer');
-    document.body.classList.remove('can-draw');
-    el.toolbar.hidden = true;
     el.emptyHint.textContent = 'Ustoz hujjat ochishini kuting';
+    chizishHolati();
   }
 }
+
+/** O'quvchida asboblar paneli faqat ustoz ruxsat berganda chiqadi */
+function chizishHolati() {
+  if (IS_TEACHER) {
+    el.btnStudentDraw.setAttribute('aria-pressed', String(STUDENT_DRAW));
+    return;
+  }
+  document.body.classList.toggle('can-draw', STUDENT_DRAW);
+  el.toolbar.hidden = !STUDENT_DRAW;
+  if (STUDENT_DRAW && color === '#ef4444') rangQoy('#3b82f6'); // ustozdan farq qilsin
+}
+const chizaOladi = () => IS_TEACHER || STUDENT_DRAW;
 interfeysniSozla();
 
 let toastTimer;
@@ -207,15 +227,24 @@ async function onSignal(m) {
     case 'page':       gotoPage(m.page, false); break;
     case 'stroke':     strokes.push(m.stroke); liveRemote = null; redraw(); break;
     case 'stroke-live': liveRemote = m.stroke; redraw(); break;
-    case 'undo':       strokes.pop(); redraw(); break;
+    case 'undo':       oxirgisiniOchir(m.by || 'teacher'); redraw(); break;
     case 'clear':      strokes = strokes.filter((s) => s.page !== m.page); redraw(); break;
     case 'scroll':     applyScroll(m.y); break;
+    case 'student-draw':
+      STUDENT_DRAW = Boolean(m.on);
+      chizishHolati();
+      if (!IS_TEACHER) toast(STUDENT_DRAW ? '✏️ Ustoz sizga chizishga ruxsat berdi' : 'Chizish yopildi', 3500);
+      break;
+    case 'screen':     if (!IS_TEACHER) ekranRejimi(Boolean(m.on)); break;
   }
 }
 
 function applyState(state) {
   if (!state) return;
   strokes = state.strokes || [];
+  STUDENT_DRAW = Boolean(state.studentDraw);
+  chizishHolati();
+  if (!IS_TEACHER && state.screen) ekranRejimi(true);
   if (state.doc && state.doc.url) {
     loadDoc(state.doc.url, state.doc.name, state.page || 1)
       .then(() => applyScroll(state.scroll || 0));
@@ -251,13 +280,17 @@ function ensurePc() {
   pc = new RTCPeerConnection(RTC_CONFIG);
 
   if (localStream) localStream.getTracks().forEach((t) => pc.addTrack(t, localStream));
+  // Ekran ulashilayotgan paytda o'quvchi qayta kirsa — unga ham ekran ketsin
+  if (screenTrack) videoniAlmashtir(screenTrack);
 
   pc.onicecandidate = (e) => { if (e.candidate) wsSend({ type: 'ice', candidate: e.candidate }); };
 
   pc.ontrack = (e) => {
     el.remoteVideo.srcObject = e.streams[0];
+    if (EKRAN && !IS_TEACHER) el.screenVideo.srcObject = e.streams[0];
     el.remoteVideo.classList.remove('off');
-    el.remotePh.hidden = true;
+    // Ekran ulashilayotgan bo'lsa plitkada "Ustoz ekranini ko'rsatyapti" qolsin
+    el.remotePh.hidden = !(EKRAN && !IS_TEACHER);
     playRemote();
   };
 
@@ -367,6 +400,116 @@ el.btnCam.onclick = () => {
   el.localVideo.classList.toggle('off', !t.enabled);
   el.localPh.hidden = t.enabled;
 };
+// ================= Ekranni ulashish =================
+// Kamera o'rniga ekran yuboriladi (replaceTrack) — qayta ulanish kerak emas, ovoz uzilmaydi.
+let screenTrack = null;
+
+/** Video yo'lagidagi uzatgich; kamera o'chirilgan bo'lsa ham yo'lak saqlanadi */
+function videoUzatgich() {
+  if (!pc) return null;
+  const tr = pc.getTransceivers().find((t) => t.receiver && t.receiver.track && t.receiver.track.kind === 'video');
+  return tr ? tr.sender : null;
+}
+
+async function videoniAlmashtir(track) {
+  const sender = videoUzatgich();
+  if (!sender) return false;
+  try { await sender.replaceTrack(track); return true; } catch (e) { console.warn('replaceTrack', e); return false; }
+}
+
+async function ekranniBoshla() {
+  if (!EKRAN_MUMKIN) return toast('Bu qurilmada ekranni ulashib bo‘lmaydi — kompyuterdan kiring', 4000);
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia({
+      video: { frameRate: { ideal: 15, max: 30 } },
+      audio: false,
+      selfBrowserSurface: 'exclude',   // dars oynasining o'zi ro'yxatda chiqmasin (cheksiz oyna)
+      surfaceSwitching: 'include',
+    });
+  } catch {
+    return; // ustoz bekor qildi
+  }
+  screenTrack = stream.getVideoTracks()[0];
+  if (!screenTrack) return;
+  screenTrack.contentHint = 'detail';     // matn aniq ko'rinsin
+  screenTrack.onended = () => ekranniTugat(); // brauzerning "Stop sharing" tugmasi
+  // Video yo'lagi kamera bilan ochiladi; kamera umuman bo'lmasa ekranni yuborishga joy yo'q
+  if (pc && !videoUzatgich()) {
+    screenTrack.stop(); screenTrack = null;
+    return toast('Ekranni ulashish uchun kameraga ruxsat bering va sahifani yangilang', 5000);
+  }
+  await videoniAlmashtir(screenTrack);
+  el.screenVideo.srcObject = new MediaStream([screenTrack]);
+  ekranRejimi(true);
+  wsSend({ type: 'screen', on: true });
+}
+
+async function ekranniTugat() {
+  if (!screenTrack) return;
+  const t = screenTrack;
+  screenTrack = null;
+  t.onended = null;
+  t.stop();
+  const kamera = localStream && localStream.getVideoTracks()[0];
+  await videoniAlmashtir(kamera || null);
+  ekranRejimi(false);
+  wsSend({ type: 'screen', on: false });
+}
+
+/** Ish maydonida ekran ko'rinishi: hujjat yashirinadi, ekran va uning chizish qatlami chiqadi */
+function ekranRejimi(on) {
+  EKRAN = on;
+  strokes = strokes.filter((x) => x.page !== 'screen');
+  el.screenbox.hidden = !on;
+  el.pdfbox.hidden = on || !pdfDoc;
+  el.empty.hidden = on || Boolean(pdfDoc);
+  el.pagePill.hidden = on || !pdfDoc || pdfDoc.numPages < 2;
+  el.btnScreen.classList.toggle('jonli', on && IS_TEACHER);
+  el.btnScreen.setAttribute('aria-pressed', String(on && IS_TEACHER));
+  el.btnScreen.title = on ? 'Ekran ulashishni to‘xtatish' : 'Ekranni ulashish';
+  $('#screenTag').textContent = IS_TEACHER ? '🔴 Ekraningiz ulashilmoqda' : '🖥️ Ustoz ekrani';
+  if (!IS_TEACHER) {
+    if (on) el.screenVideo.srcObject = el.remoteVideo.srcObject;
+    else el.screenVideo.srcObject = null;
+    // Ustoz plitkasida ham ekran turadi — ikki marta ko'rsatmaymiz
+    el.remotePh.hidden = !on;
+    el.remotePh.classList.toggle('ekran', on);
+    if (on) el.remotePh.innerHTML = '<b>🖥️ Ustoz ekranini ko‘rsatyapti</b>';
+    else if (pc && pc.connectionState === 'connected') el.remotePh.hidden = true;
+  }
+  if (on) requestAnimationFrame(ekranOlcham);
+  redraw();
+}
+
+/** Chizish qatlami videoning ko'rinib turgan o'lchamiga teng bo'lsin */
+function ekranOlcham() {
+  const v = el.screenVideo, c = el.screenInk;
+  const w = v.clientWidth, h = v.clientHeight;
+  if (!w || !h) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  c.style.width = w + 'px';
+  c.style.height = h + 'px';
+  c.width = Math.floor(w * dpr);
+  c.height = Math.floor(h * dpr);
+  redraw();
+}
+el.screenVideo.addEventListener('loadedmetadata', ekranOlcham);
+el.screenVideo.addEventListener('resize', ekranOlcham);
+el.screenVideo.play && el.screenVideo.addEventListener('canplay', () => el.screenVideo.play().catch(() => {}));
+
+el.btnScreen.onclick = () => {
+  if (!IS_TEACHER) return;
+  if (screenTrack) ekranniTugat(); else ekranniBoshla();
+};
+el.btnStudentDraw.onclick = () => {
+  if (!IS_TEACHER) return;
+  STUDENT_DRAW = !STUDENT_DRAW;
+  chizishHolati();
+  wsSend({ type: 'student-draw', on: STUDENT_DRAW });
+  toast(STUDENT_DRAW ? 'O‘quvchi endi chiza oladi' : 'O‘quvchining chizishi yopildi');
+};
+
 // --- Dars oxirida o'quvchining bahosi ---
 let TANLANGAN_BAHO = 0;
 
@@ -496,9 +639,9 @@ async function loadDoc(url, name, page = 1) {
     console.warn(e); toast('Hujjat ochilmadi'); currentDocUrl = null; return;
   }
   el.empty.hidden = true;
-  el.pdfbox.hidden = false;
+  el.pdfbox.hidden = EKRAN;
   // Rasmda sahifa yo'q — tugmalarni ko'rsatmaymiz
-  el.pagePill.hidden = pdfDoc.numPages < 2;
+  el.pagePill.hidden = EKRAN || pdfDoc.numPages < 2;
   setStatus(pc && pc.connectionState === 'connected' ? 'Aloqa o‘rnatildi' : 'Xonada');
   if (name) toast(`Hujjat: ${name}`);
   await gotoPage(page, false);
@@ -605,7 +748,7 @@ function applyScroll(frac) {
 let resizeTimer;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => { if (pdfDoc) renderPage(pageNum); }, 180);
+  resizeTimer = setTimeout(() => { if (pdfDoc) renderPage(pageNum); if (EKRAN) ekranOlcham(); }, 180);
 });
 
 // ================= Kattalashtirish (ikki barmoq) =================
@@ -707,12 +850,11 @@ document.querySelectorAll('.tool').forEach((b) => {
     document.querySelectorAll('.tool').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
   };
 });
-document.querySelectorAll('.sw').forEach((b) => {
-  b.onclick = () => {
-    color = b.dataset.color;
-    document.querySelectorAll('.sw').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-  };
-});
+function rangQoy(c) {
+  color = c;
+  document.querySelectorAll('.sw').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.color === c)));
+}
+document.querySelectorAll('.sw').forEach((b) => { b.onclick = () => rangQoy(b.dataset.color); });
 
 function drawStroke(ctx, s, W, H) {
   if (!s || !s.pts || s.pts.length === 0) return;
@@ -741,24 +883,36 @@ function drawStroke(ctx, s, W, H) {
 }
 
 function redraw() {
-  const c = el.inkCanvas;
+  // Hujjat sahifasi va ekran — ikki alohida qatlam, har biri o'z chiziqlarini chizadi
+  qatlamniChiz(el.inkCanvas, pageNum);
+  if (EKRAN) qatlamniChiz(el.screenInk, 'screen');
+}
+
+function qatlamniChiz(c, page) {
   if (!c.width) return;
   const ctx = c.getContext('2d');
   ctx.clearRect(0, 0, c.width, c.height);
   const W = c.width, H = c.height;
-  for (const s of strokes) if (s.page === pageNum) drawStroke(ctx, s, W, H);
-  if (liveRemote && liveRemote.page === pageNum) drawStroke(ctx, liveRemote, W, H);
-  if (liveLocal && liveLocal.page === pageNum) drawStroke(ctx, liveLocal, W, H);
+  for (const s of strokes) if (s.page === page) drawStroke(ctx, s, W, H);
+  if (liveRemote && liveRemote.page === page) drawStroke(ctx, liveRemote, W, H);
+  if (liveLocal && liveLocal.page === page) drawStroke(ctx, liveLocal, W, H);
+}
+
+/** Har kim faqat o'zining oxirgi chizig'ini qaytaradi */
+function oxirgisiniOchir(by) {
+  for (let i = strokes.length - 1; i >= 0; i--) {
+    if ((strokes[i].by || 'teacher') === by) { strokes.splice(i, 1); return; }
+  }
 }
 
 let bekorQilInk = () => {};   // chizish bo'limi uni to'ldiradi
 
-// --- Ustozning qo'l harakati ---
-// Rol asinxron aniqlanadi, shuning uchun hodisalar doim ulanadi va
-// har birida IS_TEACHER tekshiriladi (o'quvchida hech narsa ishlamaydi).
-{
-  const c = el.inkCanvas;
-  let drawing = false, lastSent = 0, strokeStart = 0;
+// --- Qo'l harakati: hujjat va ekran qatlamlari ---
+// Rol asinxron aniqlanadi, shuning uchun hodisalar doim ulanadi va har birida
+// ruxsat tekshiriladi: ustoz doim, o'quvchi faqat ustoz ruxsat bergan bo'lsa.
+let drawing = false;
+function qatlamgaUlash(c, sahifa, tayyor) {
+  let lastSent = 0, strokeStart = 0;
 
   const pos = (e) => {
     const r = c.getBoundingClientRect();
@@ -766,17 +920,17 @@ let bekorQilInk = () => {};   // chizish bo'limi uni to'ldiradi
   };
 
   c.addEventListener('pointerdown', (e) => {
-    if (!IS_TEACHER || !pdfDoc) return;
+    if (!chizaOladi() || !tayyor()) return;
     if (e.pointerType === 'touch' && e.isPrimary === false) return;
     drawing = true;
     c.setPointerCapture(e.pointerId);
     strokeStart = performance.now();
-    liveLocal = { page: pageNum, tool, color, w: WIDTH[tool], pts: [pos(e)] };
+    liveLocal = { page: sahifa(), tool, color, w: WIDTH[tool], pts: [pos(e)], by: ROLE };
     redraw();
   });
 
   c.addEventListener('pointermove', (e) => {
-    if (!IS_TEACHER || !drawing) return;
+    if (!drawing || !liveLocal || liveLocal.page !== sahifa()) return;
     const p = pos(e);
     const pts = liveLocal.pts;
     const last = pts[pts.length - 1];
@@ -786,14 +940,6 @@ let bekorQilInk = () => {};   // chizish bo'limi uni to'ldiradi
     const now = performance.now();
     if (now - lastSent > 70) { lastSent = now; wsSend({ type: 'stroke-live', stroke: liveLocal }); }
   });
-
-  // Ikki barmoq bilan kattalashtirish boshlansa, yarim chizilgan chiziqni tashlaymiz
-  bekorQilInk = () => {
-    if (!drawing) return;
-    drawing = false;
-    liveLocal = null;
-    redraw();
-  };
 
   const finish = () => {
     if (!drawing) return;
@@ -810,19 +956,31 @@ let bekorQilInk = () => {};   // chizish bo'limi uni to'ldiradi
   c.addEventListener('pointerup', finish);
   c.addEventListener('pointercancel', finish);
   c.addEventListener('pointerleave', finish);
-
-  el.btnUndo.onclick = () => {
-    if (!IS_TEACHER) return;
-    strokes.pop(); redraw(); wsSend({ type: 'undo' });
-  };
-  el.btnClear.onclick = () => {
-    if (!IS_TEACHER) return;
-    if (!confirm('Shu sahifadagi belgilarni o‘chirasizmi?')) return;
-    strokes = strokes.filter((s) => s.page !== pageNum);
-    redraw();
-    wsSend({ type: 'clear' });
-  };
 }
+
+qatlamgaUlash(el.inkCanvas, () => pageNum, () => Boolean(pdfDoc) && !EKRAN);
+qatlamgaUlash(el.screenInk, () => 'screen', () => EKRAN);
+
+// Ikki barmoq bilan kattalashtirish boshlansa, yarim chizilgan chiziqni tashlaymiz
+bekorQilInk = () => {
+  if (!drawing) return;
+  drawing = false;
+  liveLocal = null;
+  redraw();
+};
+
+el.btnUndo.onclick = () => {
+  if (!chizaOladi()) return;
+  oxirgisiniOchir(ROLE); redraw(); wsSend({ type: 'undo' });
+};
+el.btnClear.onclick = () => {
+  if (!IS_TEACHER) return;
+  const page = EKRAN ? 'screen' : pageNum;
+  if (!confirm(EKRAN ? 'Ekrandagi belgilarni o‘chirasizmi?' : 'Shu sahifadagi belgilarni o‘chirasizmi?')) return;
+  strokes = strokes.filter((s) => s.page !== page);
+  redraw();
+  wsSend({ type: 'clear', page });
+};
 
 // ================= 5. Ishga tushirish =================
 let AKTIV_TOKEN = TOKEN;
