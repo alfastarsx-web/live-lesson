@@ -201,7 +201,7 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
     <span><b>Akademiyani tugating</b><br><span class="xira" id="akadMatn">Testdan o‘tgach sinov darsi so‘rovlari kela boshlaydi</span></span>
   </a>
 
-  <a class="akad" id="tgBot" hidden target="_blank" rel="noopener" style="background:linear-gradient(120deg,#e8f4fd,#e6f0ff);box-shadow:0 0 0 1px #cfe3f7">
+  <a class="akad" id="tgBot" hidden target="_blank" rel="noopener" role="button" style="cursor:pointer;background:linear-gradient(120deg,#e8f4fd,#e6f0ff);box-shadow:0 0 0 1px #cfe3f7">
     <span class="ico a" aria-hidden="true" style="background:#229ED9;color:#fff">🤖</span>
     <span style="flex:1"><b>Telegramga ulaning</b><br><span class="xira">Yangi so‘rovlar «Qabul qilish» tugmasi bilan, eslatmalar, prioritet va ball o‘zgarishlari — Telegramda</span></span>
   </a>
@@ -515,8 +515,23 @@ function boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar }) {
       k.hidden = true;
       return;
     }
-    k.href = tg.url;
     k.hidden = false;
+    if (window.ilovadami && window.ilovadami() && tg.botUsername) {
+      // Ilova ichida t.me havolasi ochilmaydi (ilova "Sahifani yuklab bo'lmadi" ko'rsatadi).
+      // Bot nomini nusxalaymiz: mentor Telegramda o'zi ochib, raqamini yuborib ulanadi.
+      const nom = '@' + tg.botUsername;
+      k.removeAttribute('href');
+      k.removeAttribute('target');
+      k.querySelector('.xira').textContent = `Telegramda ${nom} ni oching → Start → «Raqamni yuborish». Bosing — nom nusxalanadi`;
+      k.onclick = (e) => {
+        e.preventDefault();
+        const ok = () => toast(`${nom} nusxalandi — Telegramda qidiring`);
+        if (navigator.clipboard?.writeText) navigator.clipboard.writeText(nom).then(ok, () => toast(`Telegramda ${nom} ni qidiring`));
+        else toast(`Telegramda ${nom} ni qidiring`);
+      };
+    } else {
+      k.href = tg.url;
+    }
   });
   tgTekshir();
   document.addEventListener('visibilitychange', () => {
