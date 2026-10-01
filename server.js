@@ -882,7 +882,27 @@ async function sinovHisoboti(roomId, room, ended = false) {
 
 const wss = new WebSocketServer({ server, path: '/ws' });
 
+function wsHeartbeat() {
+  this.isAlive = true;
+}
+
+const PING_INTERVAL_MS = 25000;
+const pingTimer = setInterval(() => {
+  for (const client of wss.clients) {
+    if (client.isAlive === false) {
+      client.terminate();
+      continue;
+    }
+    client.isAlive = false;
+    client.ping();
+  }
+}, PING_INTERVAL_MS);
+wss.on('close', () => clearInterval(pingTimer));
+
 wss.on('connection', async (ws, req) => {
+  ws.isAlive = true;
+  ws.on('pong', wsHeartbeat);
+
   const url = new URL(req.url, 'http://localhost');
 
   // Token rejimida xona, rol va ism faqat imzolangan tokendan olinadi —
@@ -956,13 +976,34 @@ wss.on('connection', async (ws, req) => {
     clearTimeout(room.endTimer);
     room.endTimer = null;
   }
+
+  // 1:1 xona: har bir roldan (teacher yoki student) faqat bittadan ishtirokchi bo'ladi.
+  // Agar o'quvchi (yoki ustoz) qayta ulansa (masalan, telefonda boshqa ilovaga o'tib qaytganda
+  // yoki tarmoq uzilib-ulanganda), eski osilib qolgan ulanishni darhol yopib, yangisiga joy beramiz.
+  const existingPeerSameRole = [...room.peers.entries()].find(([, p]) => p.meta?.role === role);
+  if (existingPeerSameRole) {
+    const [oldId, oldWs] = existingPeerSameRole;
+    // Agar ikkala ulanishda turli userId bo'lsa (boshqa o'quvchi) — xona to'la
+    if (claims?.userId && oldWs.meta?.userId && oldWs.meta.userId !== claims.userId) {
+      send(ws, { type: 'full' });
+      return ws.close();
+    }
+    // Ayni bir ishtirokchining eski/osilib qolgan ulanishini yopamiz
+    room.peers.delete(oldId);
+    try {
+      send(oldWs, { type: 'replaced', message: 'Boshqa oynada ochildi' });
+      oldWs.terminate();
+    } catch {}
+    broadcast(room, { type: 'peer-leave', id: oldId });
+  }
+
   if (room.peers.size >= 2) {
     send(ws, { type: 'full' });
     return ws.close();
   }
 
   const clientId = crypto.randomUUID();
-  ws.meta = { clientId, roomId, role, name };
+  ws.meta = { clientId, roomId, role, name, userId: claims?.userId || null };
   room.peers.set(clientId, ws);
 
   // Kim birinchi kirdi — o'sha "polite" bo'lmaydi (offer yaratadi yangi kelgan).

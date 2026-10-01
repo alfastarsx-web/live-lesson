@@ -128,7 +128,7 @@ function toast(msg, ms = 2600) {
 function setStatus(t) { el.status.textContent = t; }
 
 // ================= 1. WebSocket =================
-let ws = null, myId = null, peerId = null, isInitiator = false, retry = 0;
+let ws = null, myId = null, peerId = null, isInitiator = false, retry = 0, fullRetryCount = 0;
 
 const outbox = [];
 function wsSend(obj) {
@@ -142,6 +142,9 @@ function flushOutbox() {
 }
 
 function connect() {
+  if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN)) {
+    return;
+  }
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   const url = AKTIV_TOKEN
     ? `${proto}://${location.host}/ws?t=${encodeURIComponent(AKTIV_TOKEN)}`
@@ -149,7 +152,12 @@ function connect() {
       + `&role=${ROLE}&name=${encodeURIComponent(NAME)}`;
   ws = new WebSocket(url);
 
-  ws.onopen = () => { retry = 0; setStatus('Xonada'); flushOutbox(); };
+  ws.onopen = () => {
+    retry = 0;
+    fullRetryCount = 0;
+    setStatus('Xonada');
+    flushOutbox();
+  };
   ws.onmessage = (e) => { let m; try { m = JSON.parse(e.data); } catch { return; } onSignal(m); };
   ws.onclose = () => {
     // Dars tugagan bo'lsa qayta ulanmaymiz: aks holda o'quvchi xonaga qaytib
@@ -165,13 +173,47 @@ function connect() {
 async function onSignal(m) {
   switch (m.type) {
     case 'full':
-      // Sahifadan otib yubormaymiz — nima bo'lganini ko'rsatamiz
+      // Agar qayta ulanish bo'lsa yoki serverda oldingi ulanish yopilishi biroz vaqt olsa,
+      // darhol taslim bo'lmay, 3 marta oraliq bilan qayta ulanishga urinib ko'ramiz.
+      if (fullRetryCount < 3) {
+        fullRetryCount += 1;
+        setStatus(`Xona to‘la, qayta urinilmoqda (${fullRetryCount}/3)…`);
+        try { ws && ws.close(); } catch {}
+        setTimeout(() => {
+          if (!DARS_TUGADI) connect();
+        }, 1200 * fullRetryCount);
+        break;
+      }
       retry = 99;                       // qayta ulanishga urinmasin
       setStatus('Xona to‘la');
       el.remotePh.hidden = false;
       el.remotePh.innerHTML = '<b>Xona to‘la</b><span>Bu darsda allaqachon 2 ta ishtirokchi bor.<br>'
-        + 'Boshqa qurilmada ochiq oynangiz bo‘lsa, yoping va qayta urinib ko‘ring.</span>';
+        + 'Boshqa qurilmada ochiq oynangiz bo‘lsa, yoping va qayta urinib ko‘ring.<br><br>'
+        + '<button id="btnQaytaUlan" style="padding:8px 16px;border-radius:8px;border:none;background:#22c55e;color:#fff;font-weight:600;cursor:pointer">Qayta ulanish</button></span>';
+      const btnQ = document.getElementById('btnQaytaUlan');
+      if (btnQ) {
+        btnQ.onclick = () => {
+          retry = 0;
+          fullRetryCount = 0;
+          el.remotePh.hidden = true;
+          setStatus('Ulanmoqda…');
+          connect();
+        };
+      }
       toast('Xona to‘la — boshqa ochiq oynani yoping', 8000);
+      break;
+
+    case 'replaced':
+      // Foydalanuvchi boshqa oynada yoki boshqa qurilmada ochganida ushbu seans o'rnini bo'shatadi
+      retry = 99;
+      fullRetryCount = 99;
+      setStatus('Boshqa oynada ochildi');
+      teardownPeer();
+      if (localStream) localStream.getTracks().forEach((t) => t.stop());
+      try { ws && ws.close(); } catch {}
+      el.remotePh.hidden = false;
+      el.remotePh.innerHTML = '<b>Dars boshqa oynada ochildi</b><span>Bu oyna to‘xtatildi. Darsni faqat bitta oynada davom ettirish mumkin.</span>';
+      toast('Dars boshqa oynada ochildi', 8000);
       break;
 
     case 'error':
@@ -185,6 +227,7 @@ async function onSignal(m) {
       break;
 
     case 'joined':
+      fullRetryCount = 0;
       myId = m.you.id;
       if (Array.isArray(m.iceServers) && m.iceServers.length) RTC_CONFIG.iceServers = m.iceServers;
       if (m.peers.length) { peerId = m.peers[0].id; isInitiator = true; onPeerReady(m.peers[0]); }
@@ -1026,3 +1069,17 @@ let AKTIV_TOKEN = TOKEN;
 })();
 
 window.addEventListener('beforeunload', () => { try { ws && ws.close(); } catch {} });
+window.addEventListener('pagehide', () => { try { ws && ws.close(); } catch {} });
+
+// Mobile lifecycle: foydalanuvchi ilovani/brauzerni orqa fonga o'tkazib qaytganda (masalan, qo'ng'iroq yoki boshqa ilovadan so'ng)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && !DARS_TUGADI) {
+    if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
+      retry = 0;
+      fullRetryCount = 0;
+      setStatus('Qayta ulanmoqda…');
+      connect();
+    }
+  }
+});
+
