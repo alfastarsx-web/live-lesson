@@ -73,6 +73,7 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
 .ring{height:6px;border-radius:6px;background:rgba(31,111,92,.15);margin-top:8px;overflow:hidden}
 .ring i{display:block;height:100%;width:0;background:var(--em);border-radius:6px;transition:width .5s}
 .akad{display:flex;gap:12px;align-items:center;background:linear-gradient(120deg,#fff6e6,#fdeede);box-shadow:0 0 0 1px #f6e2c4;border-radius:18px;padding:14px;text-decoration:none}
+.akad[hidden]{display:none} /* .akad{display:flex} hidden belgisini bosib ketmasin */
 /* Yangi ustoz: xush kelibsiz va boshlash yo'li */
 .yol{background:linear-gradient(160deg,#123f35,#1f6f5c);color:#fff;border-radius:22px;padding:16px}
 .yol .ust{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
@@ -456,9 +457,10 @@ function boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar }) {
   const navbat = qadamlar.findIndex((q) => !q[3]);
   $('#yolFoiz').textContent = `${bajarildi} / ${qadamlar.length}`;
   $('#yolChiziq').style.width = `${Math.round((bajarildi / qadamlar.length) * 100)}%`;
-  $('#yolQadamlar').innerHTML = qadamlar.map(([nom, izoh, url, ok], i) => `
-    <a class="yq${ok ? ' ok' : ''}${i === navbat ? ' navbat' : ''}" href="${url}">
-      <span class="d">${ok ? '✓' : i + 1}</span>
+  // Bajarilgan qadam qayta kerak emas — ro'yxatda faqat qolganlari, bajarilgani foizda ko'rinadi
+  $('#yolQadamlar').innerHTML = qadamlar.map(([nom, izoh, url, ok], i) => ok ? '' : `
+    <a class="yq${i === navbat ? ' navbat' : ''}" href="${url}">
+      <span class="d">${i + 1}</span>
       <span class="m"><b>${esc(nom)}</b><span>${esc(izoh)}</span></span><span class="o">›</span></a>`).join('');
   $('#yol').hidden = false;
   $('#akad').hidden = true; // akademiya qadami shu kartada
@@ -504,11 +506,21 @@ function boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar }) {
   }
   boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar });
   // Mentor boti: ulanmagan bo'lsa bir martalik havola bilan karta
-  ol('/api/ai/mentor-bot/link').then((tg) => {
-    if (!tg || !tg.enabled || tg.linked || !tg.url) return;
+  // Mentor boti: ulanmagan bo'lsa bir martalik havola bilan karta. Telegramdan qaytganda
+  // sahifa yangilanmaydi — qaytgan zahoti qayta tekshiramiz, ulangan bo'lsa karta yo'qoladi.
+  const tgTekshir = () => ol('/api/ai/mentor-bot/link').then((tg) => {
     const k = $('#tgBot');
+    if (!tg || !tg.enabled || !tg.url || tg.linked) {
+      if (!k.hidden && tg && tg.linked) toast('✅ Telegram bot ulandi');
+      k.hidden = true;
+      return;
+    }
     k.href = tg.url;
     k.hidden = false;
+  });
+  tgTekshir();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && !$('#tgBot').hidden) tgTekshir();
   });
 
   // Akademiyadan o'tgan (yoki ozod qilingan) ustozga — yangiliklar kartasi, yopilguncha
