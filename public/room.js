@@ -150,6 +150,9 @@ function flushOutbox() {
 }
 
 function connect() {
+  // Ulanish allaqachon ochiq yoki ochilayotgan bo'lsa — ikkinchisini ochmaymiz
+  if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN)) return;
+  clearTimeout(qaytaUlanishTaymer);
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   const url = AKTIV_TOKEN
     ? `${proto}://${location.host}/ws?t=${encodeURIComponent(AKTIV_TOKEN)}`
@@ -1086,3 +1089,15 @@ let AKTIV_TOKEN = TOKEN;
 })();
 
 window.addEventListener('beforeunload', () => { try { ws && ws.close(); } catch {} });
+// Telefonda sahifa yopilganda "beforeunload" kelmasligi mumkin — serverga darhol bildiramiz
+window.addEventListener('pagehide', () => { try { ws && ws.close(); } catch {} });
+
+// Telefon orqa fondan qaytdi (qo'ng'iroq, boshqa ilova) — ulanish uzilgan bo'lsa darhol qayta ulanamiz
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || DARS_TUGADI) return;
+  if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
+    retry = 0;
+    setStatus('Qayta ulanmoqda…');
+    connect();
+  }
+});
