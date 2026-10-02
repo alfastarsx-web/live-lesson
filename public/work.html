@@ -132,6 +132,7 @@ body.work{background:var(--bg)}
 .taklif-q.ok{background:var(--green-soft);color:var(--green)}
 .taklif-q.req{background:#fde8e6;color:#9a3b33;animation:miltilla 1.6s ease-in-out infinite}
 .taklif-q.exp{background:#f2f2ef;color:var(--mut2)}
+.dk-past [data-payment-wait]{background:#e8e9e8;color:#65706a;cursor:help}
 .maslahat{margin:0 0 12px;padding:14px 16px;border-radius:16px;background:#fffaeb;border:1.5px solid #f1c75a;font-size:13.5px;line-height:1.5;color:#5c4710}
 .maslahat b{display:block;font-size:14px;margin-bottom:4px;color:#3d2f08}
 .tk-chiplar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
@@ -819,8 +820,14 @@ function darsKarta(d, { tarix = false } = {}) {
       <button class="asosiy" data-kirish="${esc(d.id)}" data-sinov="${d.isTrial ? 1 : ''}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>${ochiq ? 'Darsni boshlash' : 'Kirish 10 daq oldin'}</button>
       ${telHavola(d.leadPhone)}</div>`;
   } else if (d.isTrial && d.leadId) {
-    const tugmalar = d.leadStatus === 'trial_completed'
-      ? `<button class="yashil" data-holat="converted">To‘lov qildi</button><button data-holat="lost">Rad etdi</button>`
+    const offer = TAKLIFLAR.find((x) => x.trialBookingId === d.id);
+    const tolovTugma = offer?.status === 'confirmed' ? ''
+      : offer?.status === 'paying' && offer.paymentStatus === 'success'
+        ? `<button class="yashil" data-activate="${esc(offer.id)}">To‘lov qildi</button>`
+        : `<button class="yashil" aria-disabled="true" title="Avval operator to‘lovni tasdiqlashi kerak" data-payment-wait="1">To‘lov qildi 🔒</button>`;
+    const radTugma = offer?.status === 'paying' || offer?.status === 'confirmed' ? '' : '<button data-holat="lost">Rad etdi</button>';
+    const tugmalar = ['trial_completed', 'negotiating'].includes(d.leadStatus)
+      ? `${tolovTugma}${radTugma}`
       : d.leadStatus === 'trial_scheduled'
         ? `<button class="asosiy" data-holat="trial_completed">Dars o‘tildi</button><button data-holat="trial_no_show">Kelmadi</button>`
         : '';
@@ -864,7 +871,9 @@ function taklifQatori(d) {
     const qoldi = Math.max(0, new Date(o.expiresAt).getTime() - Date.now());
     return `<div class="taklif-q sent"><span>Taklif yuborildi · ${esc(o.slotsText || '')}</span><span>${Math.floor(qoldi / 3600000)} soat ${Math.floor(qoldi / 60000) % 60} daq</span></div>${tugma('O‘zgartirish')}`;
   }
-  if (o.status === 'paying') return `<div class="taklif-q paying">💳 O‘quvchi to‘ladi — tekshirilmoqda · ${esc(o.slotsText || '')}</div>`;
+  if (o.status === 'paying') return o.paymentStatus === 'success'
+    ? `<div class="taklif-q ok">✅ Operator to‘lovni tasdiqladi — “To‘lov qildi” tugmasini bosing · ${esc(o.slotsText || '')}</div>`
+    : `<div class="taklif-q paying">💳 O‘quvchi to‘ladi — operator tekshirmoqda · ${esc(o.slotsText || '')}</div>`;
   if (o.status === 'confirmed') return `<div class="taklif-q ok">✅ To‘landi — darslar jadvalingizda · ${esc(o.slotsText || '')}</div>`;
   if (o.status === 'expired') return `<div class="taklif-q exp">⏳ 24 soatda to‘lanmadi — soatlar bo‘shadi</div>${tugma('Qayta yuborish')}`;
   return '';
@@ -872,6 +881,20 @@ function taklifQatori(d) {
 
 function tugmalarniUla(box) {
   box.querySelectorAll('[data-taklif]').forEach((b) => { b.onclick = () => taklifOch(b.dataset.taklif); });
+  box.querySelectorAll('[data-payment-wait]').forEach((b) => {
+    b.onclick = () => toast('Avval operator to‘lovni tasdiqlashi kerak. Keyin “To‘lov qildi” tugmasini bosing.', 'err');
+  });
+  box.querySelectorAll('[data-activate]').forEach((b) => {
+    b.onclick = async () => {
+      b.disabled = true;
+      const r = await api(`/api/course-offers/${b.dataset.activate}/activate`, { method: 'POST' });
+      b.disabled = false;
+      if (!r) return;
+      if (!r.ok) return toast(r.data.message || 'Darslarni faollashtirib bo‘lmadi', 'err');
+      toast('To‘lov tasdiqlandi — obuna va darslar faollashdi', 'ok');
+      await darslarniYukla();
+    };
+  });
   box.querySelectorAll('[data-tasdiq-karta]').forEach((k) => {
     k.onclick = (e) => {
       if (e.target.closest('a')) return; // telefon havolasi — qo'ng'iroq

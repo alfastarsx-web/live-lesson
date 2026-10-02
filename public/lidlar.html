@@ -121,7 +121,10 @@ function kartaHtml(l) {
         <button data-h="negotiating">Muzokarada</button>
         ${l.status === 'trial_scheduled' ? '<button data-h="trial_completed" class="asosiy">Sinov darsi o‘tildi</button>' : ''}
         ${l.status === 'trial_scheduled' ? '<button data-h="trial_no_show">Kelmadi</button>' : ''}
-        ${l.status === 'trial_completed' ? '<button data-h="converted" class="asosiy">O‘quvchiga aylandi</button>' : ''}
+        ${l.status === 'trial_completed' && !['requested', 'sent', 'paying'].includes(l.offerStatus)
+          ? '<button data-h="converted" class="asosiy">O‘quvchiga aylandi</button>'
+          : l.status === 'trial_completed' && l.offerStatus
+            ? '<span class="xabar2">To‘lov tasdiqlangach Work bo‘limida “To‘lov qildi” ni bosing</span>' : ''}
         <button data-izoh>Izoh</button>
         ${l.akkauntHolati === 'yoq' ? '<button class="asosiy" data-akkaunt>Akkaunt ochish</button>' : ''}
         <button class="asosiy" data-sinov="1">Sinov darsi</button>
