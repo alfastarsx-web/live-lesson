@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>MyTeacher Mentor Ofertasi</title>
+<style>
+:root{
+  --ink:#0A1747; --brand:#0A47DB; --brand-soft:#E8EEFD; --signal:#2F7BFF;
+  --red:#C62828; --red-soft:#FDECEC; --red-line:#F3B4B4;
+  --green:#1E8E5A; --green-soft:#E6F5EE;
+  --bg:#F5F7FC; --card:#FFFFFF; --line:#E1E7F5; --line-2:#CDD8EF;
+  --text:#0A1747; --mute:#5C6A90;
+  --display:"Lexend","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Onest","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#E8EDFB; --brand:#5C8DFF; --brand-soft:#16224A; --signal:#7AA7FF;
+    --red:#FF7A7A; --red-soft:#3A1C1C; --red-line:#6E2A2A;
+    --green:#4FD198; --green-soft:#12301F;
+    --bg:#070C1E; --card:#0E1633; --line:#1E2A4E; --line-2:#2C3A66;
+    --text:#E8EDFB; --mute:#9BA9CF;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E8EDFB; --brand:#5C8DFF; --brand-soft:#16224A; --signal:#7AA7FF;
+  --red:#FF7A7A; --red-soft:#3A1C1C; --red-line:#6E2A2A;
+  --green:#4FD198; --green-soft:#12301F;
+  --bg:#070C1E; --card:#0E1633; --line:#1E2A4E; --line-2:#2C3A66;
+  --text:#E8EDFB; --mute:#9BA9CF;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:15.5px;line-height:1.6}
+h1,h2{font-family:var(--display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+p{margin:0}
+.wrap{max-width:820px;margin:0 auto;padding:20px 16px 180px}
+.top{display:flex;align-items:center;gap:10px;font:600 15px var(--display);margin-bottom:16px}
+h1{font-size:20px;line-height:1.35;margin-bottom:6px}
+.ver{color:var(--mute);font-size:13px;margin-bottom:16px}
+.ogoh{background:var(--red);color:#fff;border-radius:14px;padding:16px 18px;margin-bottom:18px}
+.ogoh b{display:block;font:700 17px var(--display);margin-bottom:4px}
+.bolim{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px}
+.bolim h2{font-size:16px;margin-bottom:8px}
+.bolim p{margin-bottom:8px}
+.bolim p:last-child{margin-bottom:0}
+.bolim.muhim{background:var(--red-soft);border:2px solid var(--red);}
+.bolim.muhim h2{color:var(--red);font-size:17px}
+.bolim.muhim p{font-weight:600}
+.holat{background:var(--green-soft);color:var(--green);border-radius:12px;padding:12px 16px;font-weight:600;margin-bottom:16px}
+.xato{color:var(--red);font-weight:600;padding:20px 0}
+.dock{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.dock .in{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.dock label{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;cursor:pointer}
+.dock label input{width:20px;height:20px;flex:0 0 auto;margin-top:1px;accent-color:var(--brand)}
+.dock label.qizil{color:var(--red);font-weight:600}
+.dock label.qizil input{accent-color:var(--red)}
+.btn{font:600 16px var(--display);padding:14px 22px;border:0;border-radius:12px;background:var(--brand);color:#fff;cursor:pointer}
+.btn:hover{background:var(--signal)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">📄 MyTeacher · Mentor ofertasi</div>
+  <div id="kontent"><p style="color:var(--mute)">Yuklanmoqda…</p></div>
+</div>
+
+<div class="dock" id="dock" hidden>
+  <div class="in">
+    <label class="qizil"><input type="checkbox" id="c1">
+      <span>4-bo‘limni o‘qidim: o‘quvchini platformadan tashqariga olib chiqsam, hisobim bloklanishi, balansim to‘lanmasligi, jarima va sud javobgarligini tushunaman.</span></label>
+    <label><input type="checkbox" id="c2">
+      <span>Ofertani to‘liq o‘qidim, shartlariga roziman. Yuklagan hujjatlarimning haqiqiyligi uchun o‘zim javob beraman.</span></label>
+    <button class="btn" id="qabul" type="button" disabled>O‘qidim, roziman</button>
+  </div>
+</div>
+
+<script src="/auth-webview.js"></script>
+<script>
+(function(){
+  const kontent = document.getElementById('kontent');
+  const dock = document.getElementById('dock');
+  const c1 = document.getElementById('c1');
+  const c2 = document.getElementById('c2');
+  const tugma = document.getElementById('qabul');
+  let VERSIYA = null;
+
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  // "03.10.2026 15:05" — Toshkent vaqti
+  const sana = (iso) => {
+    const d = new Date(new Date(iso).getTime() + 5 * 3600_000);
+    if (isNaN(d)) return iso;
+    const n = (x) => String(x).padStart(2, '0');
+    return n(d.getUTCDate()) + '.' + n(d.getUTCMonth() + 1) + '.' + d.getUTCFullYear() + ' ' + n(d.getUTCHours()) + ':' + n(d.getUTCMinutes());
+  };
+
+  function chiz(d){
+    VERSIYA = d.version;
+    let h = '<h1>' + esc(d.title) + '</h1><p class="ver">Versiya: ' + esc(d.version) + '</p>';
+    if (d.accepted) {
+      h += '<div class="holat">✅ Siz ofertani qabul qilgansiz' + (d.acceptedAt ? ' · ' + esc(sana(d.acceptedAt)) : '') + '</div>';
+    }
+    h += '<div class="ogoh"><b>⚠️ Diqqat: o‘quvchini platformadan tashqariga olib chiqish taqiqlanadi</b>'
+      + 'O‘quvchiga platformadan tashqarida dars berish yoki undan pulni to‘g‘ridan-to‘g‘ri olish — hisob bloklanishi, '
+      + 'balans to‘lanmasligi, jarima va sudga murojaat qilinishiga olib keladi. Batafsil — 4-bo‘limda.</div>';
+    for (const s of d.sections) {
+      h += '<section class="bolim' + (s.muhim ? ' muhim' : '') + '"><h2>' + (s.muhim ? '⛔ ' : '') + esc(s.title) + '</h2>'
+        + s.items.map((t) => '<p>' + esc(t) + '</p>').join('') + '</section>';
+    }
+    if (d.accepted) {
+      h += '<button class="btn" type="button" onclick="location.href=\'/work.html\'" style="width:100%;margin-top:8px">Davom etish →</button>';
+      dock.hidden = true;
+    } else {
+      dock.hidden = false;
+    }
+    kontent.innerHTML = h;
+  }
+
+  function tekshir(){ tugma.disabled = !(c1.checked && c2.checked); }
+  c1.addEventListener('change', tekshir);
+  c2.addEventListener('change', tekshir);
+
+  tugma.addEventListener('click', async () => {
+    tugma.disabled = true;
+    tugma.textContent = 'Yuborilmoqda…';
+    const r = await api('/api/mentor-oferta/qabul', {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({version: VERSIYA}),
+    }).catch(() => null);
+    if (!r) { tugma.textContent = 'O‘qidim, roziman'; tekshir(); return; }
+    if (!r.ok) {
+      alert((r.data && (r.data.message || r.data.error)) || 'Xatolik — qaytadan urinib ko‘ring');
+      tugma.textContent = 'O‘qidim, roziman';
+      // Versiya yangilangan bo'lsa — yangi matnni ko'rsatamiz
+      yukla();
+      return;
+    }
+    // Server keyingi bosqichga (akademiya yoki Work) o'zi yo'naltiradi
+    location.replace('/work.html');
+  });
+
+  async function yukla(){
+    const r = await api('/api/mentor-oferta').catch(() => null);
+    if (!r) return;
+    if (!r.ok || !r.data || !Array.isArray(r.data.sections)) {
+      kontent.innerHTML = '<p class="xato">Ofertani yuklab bo‘lmadi. Sahifani yangilang.</p>';
+      return;
+    }
+    c1.checked = c2.checked = false;
+    tekshir();
+    chiz(r.data);
+  }
+
+  // Ilova #ai=<token> bilan ochadi — avval cookie'ga aylantiramiz
+  WebViewAuth.tayyorla({ akademiya: false }).then(yukla);
+})();
+</script>
+</body>
+</html>

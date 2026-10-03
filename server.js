@@ -179,7 +179,7 @@ async function mentorBoshSahifa(req, token) {
   const host = String(req.hostname || '');
   if (host.startsWith('mentor-home.')) return '/home.html';
   if (host.startsWith('mentor-career.')) return '/career.html';
-  return (await akademiyaKerak(token)) ? '/mentor/akademiya.html' : '/work.html';
+  return (await akademiyaKerak(token)) || '/work.html';
 }
 
 app.post('/api/login', async (req, res) => {
@@ -360,9 +360,8 @@ app.post('/api/mentor-session/status', (req, res) => aiProxy(req, res, '/mentor-
 // deb biladi va lid bermaydi (mobil ilova soket orqali ulanadi, veb esa shu yo'l bilan)
 // Akademiyadan o'tmagan mentor onlayn hisoblanmaydi — ya'ni unga lid tushmaydi
 app.post('/api/mentor-session/heartbeat', async (req, res) => {
-  if (await akademiyaKerak(cookies(req)[AI_COOKIE])) {
-    return res.status(403).json({ error: 'akademiya', redirect: '/mentor/akademiya.html' });
-  }
+  const yopiq = await akademiyaKerak(cookies(req)[AI_COOKIE]);
+  if (yopiq) return res.status(403).json({ error: 'akademiya', redirect: yopiq });
   aiProxy(req, res, '/mentor-session/heartbeat');
 });
 
@@ -373,9 +372,8 @@ app.get('/api/trial/incoming', async (req, res) => {
   aiProxy(req, res, '/trial-requests/incoming');
 });
 app.post(/^\/api\/trial\/([0-9a-f-]{36})\/(accept|decline)$/, async (req, res) => {
-  if (await akademiyaKerak(cookies(req)[AI_COOKIE])) {
-    return res.status(403).json({ error: 'akademiya', redirect: '/mentor/akademiya.html' });
-  }
+  const yopiq = await akademiyaKerak(cookies(req)[AI_COOKIE]);
+  if (yopiq) return res.status(403).json({ error: 'akademiya', redirect: yopiq });
   aiProxy(req, res, `/trial-requests/${req.params[0]}/${req.params[1]}`);
 });
 
@@ -610,13 +608,16 @@ function mentorTokeni(aiToken) {
 }
 
 // Har sahifada backend'ga bormaslik uchun: o'tganlar uzoqroq, o'tmaganlar qisqa eslanadi
-const AKADEMIYA_KESH = new Map(); // userId -> { kerak, vaqt }
+const AKADEMIYA_KESH = new Map(); // userId -> { kerak, vaqt }; kerak — yo'naltiriladigan sahifa yoki null
 const KESH_OTGAN_MS = 10 * 60 * 1000;
 const KESH_KERAK_MS = 20 * 1000;
+const OFERTA_SAHIFA = '/mentor/oferta.html';
 
+// Mentor ish sahifalariga kira oladimi: yo'q bo'lsa — qayerga yuborish kerak.
+// Avval oferta (qabul qilinmagan bo'lsa), keyin akademiya. Kira olsa — null.
 async function akademiyaKerak(aiToken) {
   const id = mentorTokeni(aiToken);
-  if (!id || !aiteacher.AITEACHER_ON) return false;
+  if (!id || !aiteacher.AITEACHER_ON) return null;
 
   const k = AKADEMIYA_KESH.get(id);
   if (k && Date.now() - k.vaqt < (k.kerak ? KESH_KERAK_MS : KESH_OTGAN_MS)) return k.kerak;
@@ -628,13 +629,13 @@ async function akademiyaKerak(aiToken) {
       signal: AbortSignal.timeout(8000),
     });
     // API ishlamasa yoki token eskirgan bo'lsa ishlayotgan mentorni to'smaymiz
-    if (!r.ok) return false;
+    if (!r.ok) return null;
     const d = await r.json().catch(() => null);
-    const kerak = Boolean(d && d.required);
+    const kerak = d && d.offerRequired ? OFERTA_SAHIFA : d && d.required ? '/mentor/akademiya.html' : null;
     AKADEMIYA_KESH.set(id, { kerak, vaqt: Date.now() });
     return kerak;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -642,6 +643,13 @@ app.get('/api/akademiya/holat', (req, res) => aiProxy(req, res, '/mentor-academy
 app.post('/api/akademiya/boshla', (req, res) => aiProxy(req, res, '/mentor-academy/start'));
 app.post('/api/akademiya/modul', (req, res) => aiProxy(req, res, '/mentor-academy/progress'));
 app.get('/api/akademiya/savollar', (req, res) => aiProxy(req, res, '/mentor-academy/questions'));
+// Mentor ofertasi — qabul qilmaguncha ish sahifalari va akademiya yopiq
+app.get('/api/mentor-oferta', (req, res) => aiProxy(req, res, '/mentor-academy/offer'));
+app.post('/api/mentor-oferta/qabul', (req, res) => {
+  const id = mentorTokeni(cookies(req)[AI_COOKIE]);
+  if (id) AKADEMIYA_KESH.delete(id);
+  aiProxy(req, res, '/mentor-academy/offer/accept');
+});
 app.post('/api/akademiya/natija', (req, res) => {
   // O'tgan bo'lsa keshdagi eski "kerak" darhol unutilsin
   const id = mentorTokeni(cookies(req)[AI_COOKIE]);
@@ -654,7 +662,13 @@ app.post('/api/akademiya/natija', (req, res) => {
 // Career (yo'l, liga, akademiya) yopilmaydi — yangi mentor ham o'qib o'rganadi
 const AKADEMIYA_YOPIQ = /^\/(work|jadval|oquvchilar|oquvchi|lidlar)(\.html)?$/;
 app.get(AKADEMIYA_YOPIQ, async (req, res, next) => {
-  if (await akademiyaKerak(cookies(req)[AI_COOKIE])) return res.redirect('/mentor/akademiya.html');
+  const yopiq = await akademiyaKerak(cookies(req)[AI_COOKIE]);
+  if (yopiq) return res.redirect(yopiq);
+  next();
+});
+// Akademiyaning o'zi ham oferta qabul qilingandan keyin ochiladi
+app.get(/^\/mentor\/akademiya(\.html)?$/, async (req, res, next) => {
+  if ((await akademiyaKerak(cookies(req)[AI_COOKIE])) === OFERTA_SAHIFA) return res.redirect(OFERTA_SAHIFA);
   next();
 });
 
