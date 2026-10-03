@@ -62,13 +62,15 @@ window.WebViewAuth = {
       history.replaceState(null, '', location.pathname);
     }
 
-    // Yangi mentor avval akademiyadan o'tadi. Brauzerda buni server qiladi,
+    // Yangi mentor avval ofertani qabul qilib, akademiyadan o'tadi. Brauzerda buni server qiladi,
     // WebView esa birinchi ochilishda cookie'siz keladi — shuning uchun shu yerda ham.
     if (opts.akademiya === false) return;
     try {
       const h = await fetch('/api/akademiya/holat').then((r) => r.json());
-      if (h && h.required && location.pathname !== '/mentor/akademiya.html') {
-        location.replace('/mentor/akademiya.html');
+      // Avval oferta, keyin akademiya
+      const kerak = h && h.offerRequired ? '/mentor/oferta.html' : h && h.required ? '/mentor/akademiya.html' : null;
+      if (kerak && location.pathname !== kerak) {
+        location.replace(kerak);
         await new Promise(() => {}); // sahifa qolgan kodini ishga tushirmasin
       }
     } catch { /* tekshirib bo'lmasa — to'smaymiz */ }
