@@ -377,8 +377,9 @@ app.post(/^\/api\/trial\/([0-9a-f-]{36})\/(accept|decline)$/, async (req, res) =
   aiProxy(req, res, `/trial-requests/${req.params[0]}/${req.params[1]}`);
 });
 
-// O'quvchi o'zi yozilgan sinov darsi: mentor qo'ng'iroq qilgach tasdiqlaydi, vaqtni ko'chiradi yoki bo'shatadi
-app.post(/^\/api\/trial\/booking\/([0-9a-f-]{36})\/(confirm|move|release)$/, (req, res) => {
+// O'quvchi o'zi yozilgan sinov darsi: mentor qo'ng'iroq qilgach tasdiqlaydi, vaqtni ko'chiradi yoki bo'shatadi;
+// start-now — o'quvchi oldinroq tayyor bo'lsa darsni shu daqiqaga ko'chirib boshlash
+app.post(/^\/api\/trial\/booking\/([0-9a-f-]{36})\/(confirm|move|release|start-now)$/, (req, res) => {
   aiProxy(req, res, `/trial-requests/booking/${req.params[0]}/${req.params[1]}`);
 });
 

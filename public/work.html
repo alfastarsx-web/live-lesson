@@ -132,6 +132,8 @@ body.work{background:var(--bg)}
 .taklif-q.ok{background:var(--green-soft);color:var(--green)}
 .taklif-q.req{background:#fde8e6;color:#9a3b33;animation:miltilla 1.6s ease-in-out infinite}
 .taklif-q.exp{background:#f2f2ef;color:var(--mut2)}
+.hozir-bosh{display:block;width:100%;margin-top:8px;padding:10px 12px;border-radius:12px;border:1.5px dashed #0f766e;background:#ecfdf5;color:#0f766e;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.hozir-bosh:disabled{opacity:.6;cursor:default}
 .maslahat{margin:0 0 12px;padding:14px 16px;border-radius:16px;background:#fffaeb;border:1.5px solid #f1c75a;font-size:13.5px;line-height:1.5;color:#5c4710}
 .maslahat b{display:block;font-size:14px;margin-bottom:4px;color:#3d2f08}
 .taklif-q.bron{background:#e0f2fe;color:#075985}
@@ -818,6 +820,12 @@ async function darslarniYukla() {
   smenaChiz();
 }
 
+// Sinov darsi hali boshlanmagan bo'lsa — o'quvchi oldinroq tayyor bo'lganda shu daqiqada boshlash
+function hozirTugma(d) {
+  if (!d.isTrial || new Date(d.startsAt).getTime() <= Date.now()) return '';
+  return `<button class="hozir-bosh" data-hozir="${esc(d.id)}">▶ O‘quvchi tayyor — hozir boshlash</button>`;
+}
+
 function darsKarta(d, { tarix = false } = {}) {
   const ism = esc(d.studentName || 'O‘quvchi');
   const teg = d.isTrial ? '<span class="teg sinov">Sinov</span>' : '';
@@ -831,12 +839,14 @@ function darsKarta(d, { tarix = false } = {}) {
     // O'quvchi o'zi yozilgan — ustoz qo'ng'iroq qilib, real ekanini va vaqtni aniqlaydi
     past = `<div class="kutish-yorliq" data-tasdiq-muddat="${esc(d.confirmBy || '')}"><span data-tasdiq-matn>Qo‘ng‘iroq qilib tasdiqlang</span><b data-tasdiq-qoldi></b></div>
       ${tgHolat(d)}
-      <div class="dk-past"><button class="asosiy" data-tasdiq="${esc(d.id)}">Natijani belgilash</button>${telHavola(d.leadPhone)}</div>`;
+      <div class="dk-past"><button class="asosiy" data-tasdiq="${esc(d.id)}">Natijani belgilash</button>${telHavola(d.leadPhone)}</div>
+      ${hozirTugma(d)}`;
   } else if (!tarix) {
     const ochiq = Date.now() >= kun.getTime() - 10 * 60_000;
     past = `<div class="dk-past">
       <button class="asosiy" data-kirish="${esc(d.id)}" data-sinov="${d.isTrial ? 1 : ''}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>${ochiq ? 'Darsni boshlash' : 'Kirish 10 daq oldin'}</button>
-      ${telHavola(d.leadPhone)}</div>`;
+      ${telHavola(d.leadPhone)}</div>
+      ${ochiq ? '' : hozirTugma(d)}`;
   } else if (d.isTrial && d.leadId) {
     const tugmalar = d.leadStatus === 'trial_completed'
       ? `<button class="yashil" data-holat="converted">To‘lov qildi</button><button data-holat="lost">Rad etdi</button>`
@@ -899,6 +909,21 @@ function tugmalarniUla(box) {
     k.onclick = (e) => {
       if (e.target.closest('a')) return; // telefon havolasi — qo'ng'iroq
       tasdiqOch(k.dataset.tasdiqKarta);
+    };
+  });
+  box.querySelectorAll('[data-hozir]').forEach((b) => {
+    b.onclick = async () => {
+      if (!confirm('O‘quvchi hozir darsga tayyor ekanini telefonda aniqladingizmi?\n\nDars shu daqiqaga ko‘chadi, o‘quvchiga “Darsga kiring” xabari boradi. Keyingi darsingizgacha kamida 30 daqiqa bo‘lishi kerak.')) return;
+      b.disabled = true;
+      const r = await api(`/api/trial/booking/${b.dataset.hozir}/start-now`, { method: 'POST' })
+        .catch(() => ({ ok: false, data: { message: 'Internet aloqasini tekshiring' } }));
+      if (!r) { b.disabled = false; return; }
+      if (!r.ok) { b.disabled = false; return toast(r.data.message || 'Boshlab bo‘lmadi', 'err'); }
+      toast('Dars hozirga ko‘chdi — o‘quvchiga xabar ketdi', 'ok');
+      const e = await api(`/api/booking/${b.dataset.hozir}/entry`);
+      const url = e && e.ok && (e.data.url || e.data.teacherUrl);
+      if (url) location.href = url;
+      else await darslarniYukla();
     };
   });
   box.querySelectorAll('[data-kirish]').forEach((b) => {
