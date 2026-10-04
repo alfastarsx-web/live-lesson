@@ -10,14 +10,14 @@ body{margin:0;background:var(--bg);color:var(--fg);overflow:hidden;
 
 .app{height:100dvh;display:flex;flex-direction:column}
 
-/* ============ TEPA YARIM: video ============ */
+/* ============ TEPA: video (ixcham — darsning asosiy joyi pastdagi ish maydoni) ============ */
 .stage{
-  position:relative;flex:0 0 50%;min-height:0;
+  position:relative;flex:0 0 clamp(130px, 26vh, 260px);min-height:0;
   display:grid;grid-template-columns:1fr 1fr;gap:2px;background:#111214;
   padding-top:env(safe-area-inset-top);
 }
 .tile{position:relative;overflow:hidden;background:#1b1c1f}
-.tile video{width:100%;height:100%;object-fit:cover;display:block;background:#1b1c1f}
+.tile video{width:100%;height:100%;object-fit:cover;display:block;background:#1b1c1f;pointer-events:none}
 .tile video.off{visibility:hidden}
 .tile .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
           gap:8px;color:var(--mut);font-size:12px;text-align:center;padding:8px}
@@ -79,7 +79,7 @@ body.viewer .pagepill .ic{display:none}
 .sw[aria-pressed="true"]{border-color:var(--panel);box-shadow:0 0 0 2px var(--acc)}
 
 .board{flex:1;min-height:0;overflow:auto;background:#141517;display:flex;justify-content:center;
-       align-items:flex-start;padding:8px;-webkit-overflow-scrolling:touch}
+       align-items:safe center;padding:8px;-webkit-overflow-scrolling:touch}
 .empty{margin:auto;text-align:center;color:var(--mut);font-size:13px;display:flex;flex-direction:column;gap:6px}
 .empty b{color:var(--fg);font-size:15px}
 .empty[hidden]{display:none}
@@ -154,10 +154,10 @@ body.can-draw #inkCanvas{cursor:crosshair}
 .baho-oyna textarea.sorab-turibdi{border-color:#c9a36b;background:#fbf8f2}
 
 /* ===== Ekran ulashish va o'quvchi chizishi ===== */
-.screenbox{position:relative;line-height:0;align-self:flex-start;max-width:100%;
+.screenbox{position:relative;line-height:0;align-self:safe center;max-width:100%;
   box-shadow:0 4px 20px rgba(0,0,0,.3);border-radius:8px;overflow:hidden;background:#000}
 .screenbox[hidden]{display:none}
-#screenVideo{display:block;max-width:100%;max-height:calc(100vh - 120px);width:auto;height:auto}
+#screenVideo{display:block;max-width:100%;max-height:calc(100dvh - clamp(130px, 26vh, 260px) - 70px);width:auto;height:auto}
 #screenInk{position:absolute;left:0;top:0;touch-action:none;user-select:none;-webkit-user-select:none}
 body.can-draw #screenInk{cursor:crosshair}
 .screen-tag{position:absolute;left:8px;top:8px;line-height:1.2;font-size:12px;font-weight:600;padding:3px 9px;
@@ -165,3 +165,7 @@ body.can-draw #screenInk{cursor:crosshair}
 body:not(.teacher) .faqat-ustoz{display:none}
 #btnScreen.jonli{background:#dc2626;border-color:#dc2626}
 .tile .ph.ekran{background:#101113}
+
+/* iPhone'da videoga bosilsa tizim pleyeri (LIVE / pauza) ochilmasin — videolar faqat ko'rsatish uchun */
+video{pointer-events:none}
+video::-webkit-media-controls{display:none !important}

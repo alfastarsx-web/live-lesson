@@ -9,15 +9,15 @@
 <body>
 <div class="app">
 
-  <!-- ===== TEPA: ishtirokchilar (ekranning yarmi) ===== -->
+  <!-- ===== TEPA: ishtirokchilar (ixcham qator — asosiy joy ish maydonida) ===== -->
   <section class="stage" id="stage">
     <div class="tile" id="tileRemote">
-      <video id="remoteVideo" playsinline autoplay></video>
+      <video id="remoteVideo" playsinline autoplay muted disablepictureinpicture></video>
       <div class="ph" id="remotePh"><span class="spin"></span><b>Kutilmoqda…</b></div>
       <div class="tag" id="remoteTag">Suhbatdosh</div>
     </div>
     <div class="tile" id="tileLocal">
-      <video id="localVideo" playsinline autoplay muted></video>
+      <video id="localVideo" playsinline autoplay muted disablepictureinpicture></video>
       <div class="ph" id="localPh"><b>Kamera o‘chiq</b></div>
       <div class="tag" id="localTag">Siz</div>
     </div>
@@ -68,7 +68,7 @@
         <span id="emptyHint">Ustoz hujjat ochishini kuting</span>
       </div>
       <div class="screenbox" id="screenbox" hidden>
-        <video id="screenVideo" playsinline autoplay muted></video>
+        <video id="screenVideo" playsinline autoplay muted disablepictureinpicture></video>
         <canvas id="screenInk"></canvas>
         <div class="screen-tag" id="screenTag">🖥️ Ustoz ekrani</div>
       </div>
@@ -101,6 +101,8 @@
   </div>
 </div>
 
+<!-- Suhbatdosh ovozi alohida: video pauza bo'lsa yoki ekran ulashilsa ham ovoz uzilmaydi -->
+<audio id="remoteAudio" autoplay playsinline></audio>
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
