@@ -59,7 +59,7 @@ rolniQoy(CLAIMS);
 const $ = (s) => document.querySelector(s);
 const el = {
   stage: $('#stage'), status: $('#status'),
-  localVideo: $('#localVideo'), remoteVideo: $('#remoteVideo'),
+  localVideo: $('#localVideo'), remoteVideo: $('#remoteVideo'), remoteAudio: $('#remoteAudio'),
   localPh: $('#localPh'), remotePh: $('#remotePh'),
   localTag: $('#localTag'), remoteTag: $('#remoteTag'),
   btnMic: $('#btnMic'), btnCam: $('#btnCam'), btnLeave: $('#btnLeave'),
@@ -87,17 +87,8 @@ function interfeysniSozla() {
     document.body.classList.remove('viewer');
     document.body.classList.add('can-draw');
     el.toolbar.hidden = false;
-    el.emptyHint.innerHTML = 'PDF yoki rasm ochish uchun 📄 tugmasini bosing'
-      + (ROOM ? `<br><br><span style="opacity:.75">O‘quvchi havolasi:</span><br>`
-        + `<code id="oqHavola" style="cursor:pointer;color:#8fbfa6" title="Nusxalash">`
-        + `${location.origin}/dars/${ROOM}</code>` : '');
-    const h = document.getElementById('oqHavola');
-    if (h) h.onclick = () => {
-      navigator.clipboard.writeText(h.textContent).then(
-        () => toast('Havola nusxalandi'),
-        () => toast('Nusxalab bo‘lmadi'),
-      );
-    };
+    // O'quvchi darsga ilovadan kiradi — havola ko'rsatilmaydi
+    el.emptyHint.textContent = 'PDF yoki rasm ochish uchun 📄 tugmasini bosing';
   } else {
     document.body.classList.add('viewer');
     el.emptyHint.textContent = 'Ustoz hujjat ochishini kuting';
@@ -284,13 +275,20 @@ const RTC_CONFIG = {
   iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }],
 };
 
-let pc = null, localStream = null, pendingIce = [];
+let pc = null, localStream = null, pendingIce = [], remoteStream = null;
+
+// Telefonda kamera yengilroq: 720p kodlash telefonni qizdiradi va batareyani tez yeydi,
+// kichik plitkada esa farqi ko'rinmaydi
+const TELEFON = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+const KAMERA = TELEFON
+  ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 15, max: 20 }, facingMode: 'user' }
+  : { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24, max: 30 }, facingMode: 'user' };
 
 async function initMedia() {
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-      video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+      video: KAMERA,
     });
   } catch (err) {
     console.warn('getUserMedia:', err);
@@ -312,8 +310,12 @@ function ensurePc() {
   pc.onicecandidate = (e) => { if (e.candidate) wsSend({ type: 'ice', candidate: e.candidate }); };
 
   pc.ontrack = (e) => {
-    el.remoteVideo.srcObject = e.streams[0];
-    if (EKRAN && !IS_TEACHER) el.screenVideo.srcObject = e.streams[0];
+    // Ovoz — alohida <audio> da; videolarga faqat tasvir. iPhone bir oqimni ikki video elementga
+    // berilganda birini to'xtatadi — ekran ulashilganda ovoz shu sabab yo'qolardi
+    remoteStream = e.streams[0];
+    el.remoteAudio.srcObject = remoteStream;
+    el.remoteVideo.srcObject = faqatVideo();
+    if (EKRAN && !IS_TEACHER) el.screenVideo.srcObject = faqatVideo();
     el.remoteVideo.classList.remove('off');
     // Ekran ulashilayotgan bo'lsa plitkada "Ustoz ekranini ko'rsatyapti" qolsin
     el.remotePh.hidden = !(EKRAN && !IS_TEACHER);
@@ -346,13 +348,24 @@ async function reportPath() {
   } catch {}
 }
 
+/** Suhbatdoshning faqat video yo'lagi (ovozsiz) — video elementlar uchun */
+function faqatVideo() {
+  return remoteStream ? new MediaStream(remoteStream.getVideoTracks()) : null;
+}
+
 function playRemote() {
-  el.remoteVideo.play().catch(() => {
+  el.remoteVideo.play().catch(() => {});
+  el.remoteAudio.play().catch(() => {
     toast('Ovozni yoqish uchun ekranga bosing', 4000);
-    const once = () => { el.remoteVideo.play().catch(() => {}); document.removeEventListener('click', once); };
+    const once = () => { el.remoteAudio.play().catch(() => {}); document.removeEventListener('click', once); };
     document.addEventListener('click', once);
   });
 }
+
+// Video yoki ovoz tizim tomonidan to'xtatilsa (iPhone, fonga o'tish) — darhol davom ettiramiz
+[el.remoteVideo, el.localVideo, el.screenVideo, el.remoteAudio].forEach((m) => {
+  m.addEventListener('pause', () => { if (m.srcObject) m.play().catch(() => {}); });
+});
 
 async function onPeerReady(peer) {
   el.remoteTag.textContent = peer.name || (peer.role === 'teacher' ? 'Ustoz' : 'O‘quvchi');
@@ -407,7 +420,9 @@ async function restartIce() {
 function teardownPeer() {
   if (pc) { pc.close(); pc = null; }
   pendingIce = [];
+  remoteStream = null;
   el.remoteVideo.srcObject = null;
+  el.remoteAudio.srcObject = null;
 }
 
 // --- Mic / Cam ---
@@ -496,7 +511,7 @@ function ekranRejimi(on) {
   el.btnScreen.title = on ? 'Ekran ulashishni to‘xtatish' : 'Ekranni ulashish';
   $('#screenTag').textContent = IS_TEACHER ? '🔴 Ekraningiz ulashilmoqda' : '🖥️ Ustoz ekrani';
   if (!IS_TEACHER) {
-    if (on) el.screenVideo.srcObject = el.remoteVideo.srcObject;
+    if (on) el.screenVideo.srcObject = faqatVideo();
     else el.screenVideo.srcObject = null;
     // Ustoz plitkasida ham ekran turadi — ikki marta ko'rsatmaymiz
     el.remotePh.hidden = !on;
