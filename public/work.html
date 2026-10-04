@@ -134,6 +134,13 @@ body.work{background:var(--bg)}
 .taklif-q.exp{background:#f2f2ef;color:var(--mut2)}
 .maslahat{margin:0 0 12px;padding:14px 16px;border-radius:16px;background:#fffaeb;border:1.5px solid #f1c75a;font-size:13.5px;line-height:1.5;color:#5c4710}
 .maslahat b{display:block;font-size:14px;margin-bottom:4px;color:#3d2f08}
+.taklif-q.bron{background:#e0f2fe;color:#075985}
+.bron-ruxsat{margin-top:16px;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line,#e5e2da);background:#fff}
+.bron-ruxsat label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-size:14px;font-weight:700}
+.bron-ruxsat input{width:20px;height:20px;margin:1px 0 0;flex:0 0 auto;accent-color:#0f766e}
+.bron-ruxsat.yoniq{border-color:#0f766e;background:#ecfdf5}
+.bron-ruxsat .qoida{margin:8px 0 0 30px;font-size:12.5px;line-height:1.5;color:var(--mut);font-weight:500}
+.bron-ruxsat .qoida b{color:#9a3b33}
 .tk-chiplar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
 .tk-chip{min-width:0;padding:10px 4px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font:inherit;text-align:center;cursor:pointer}
 .tk-chip b{display:block;font-size:16px}
@@ -710,6 +717,8 @@ async function taklifOch(trialId) {
   if (!r || !r.ok) { $('#tkTana').innerHTML = `<div class="bosh-kichik">${esc((r && r.data && r.data.message) || 'Jadvalni yuklab bo‘lmadi')}</div>`; return; }
   const J = r.data;
   let perWeek = (o && o.perWeek) || 3;
+  // Bron — istisno: oldindan o'chiq, faqat o'quvchi o'zi "hammasini hozir to'lay olmayman" desa yoqiladi
+  let bron = !!(o && o.bronAllowed);
   // O'zgartirishda — avvalgi soatlar tanlangan turadi (ular "held" emas, shu taklifniki)
   let tanlov = new Map(((o && o.slots) || []).map((s) => [s.weekday, s.minute]));
   const oz = new Set(((o && o.slots) || []).map((s) => `${s.weekday}|${s.minute}`));
@@ -738,8 +747,18 @@ async function taklifOch(trialId) {
           return `<button type="button" data-w="${w}" data-m="${m}" aria-pressed="${tanlov.get(w) === m}" aria-label="${KUN_NOMI[w]} ${soatM(m)}">${soatM(m).slice(0, 2)}</button>`;
         }).join('')}`).join('')}</div>`
         : '<div class="bosh-kichik" style="margin-top:10px">Jadvalingizda ochiq soat yo‘q — avval Jadval bo‘limida soatlarni oching</div>'}
+      <div class="bron-ruxsat${bron ? ' yoniq' : ''}">
+        <label><input type="checkbox" id="tkBron"${bron ? ' checked' : ''}><span>O‘quvchi bron so‘radi (hozir hammasini to‘lay olmaydi)</span></label>
+        <div class="qoida">
+          Oldindan o‘chiq — o‘quvchiga faqat <b>to‘liq to‘lov</b> ko‘rinadi.<br>
+          <b>Bron haqida o‘zingiz gap ochmang.</b> Faqat o‘quvchi o‘zi “hozir hammasini to‘lay olmayman” desa yoqing:
+          shunda u kamida 100 000 so‘m to‘lab, soatlarni 3 kunga band qila oladi.<br>
+          Bonus faqat to‘liq to‘lovda: bron qilsa, qolgani 3 kun ichida to‘lansagina bonus sizniki.
+        </div>
+      </div>
       <button class="qabul" type="button" id="tkYubor" style="width:100%;margin-top:16px" ${tayyor ? '' : 'disabled'}>${tayyor ? `Yuborish · ${narx(perWeek).toLocaleString('ru-RU')} so‘m` : `Yana ${perWeek - tanlov.size} ta kun tanlang`}</button>
       <p style="font-size:12.5px;color:var(--mut);text-align:center;margin:8px 0 0">${tayyor ? esc(matn()) + ' · ' : ''}o‘quvchiga 24 soat band turadi</p>`;
+    $('#tkBron').onchange = (e) => { bron = e.currentTarget.checked; chiz(); };
     $('#tkTana').querySelectorAll('[data-pw]').forEach((b) => {
       b.onclick = () => {
         perWeek = Number(b.dataset.pw);
@@ -761,7 +780,7 @@ async function taklifOch(trialId) {
       const slots = [...tanlov].map(([weekday, minute]) => ({ weekday, minute }));
       const res = await api('/api/course-offers', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trialBookingId: trialId, perWeek, slots }),
+        body: JSON.stringify({ trialBookingId: trialId, perWeek, slots, bronAllowed: bron }),
       }).catch(() => ({ ok: false, data: { message: 'Internet aloqasini tekshiring' } }));
       if (!res) return;
       if (!res.ok) { toast(res.data.message || 'Yuborib bo‘lmadi', 'err'); chiz(); return; }
@@ -865,8 +884,12 @@ function taklifQatori(d) {
     return `<div class="taklif-q sent"><span>Taklif yuborildi · ${esc(o.slotsText || '')}</span><span>${Math.floor(qoldi / 3600000)} soat ${Math.floor(qoldi / 60000) % 60} daq</span></div>${tugma('O‘zgartirish')}`;
   }
   if (o.status === 'paying') return `<div class="taklif-q paying">💳 O‘quvchi to‘ladi — tekshirilmoqda · ${esc(o.slotsText || '')}</div>`;
+  if (o.status === 'reserved') {
+    const gacha = o.reservedUntil ? vaqtYorliq(o.reservedUntil) : '';
+    return `<div class="taklif-q bron"><span>🔖 Bron qildi · ${Number(o.bronAmount || 0).toLocaleString('ru-RU')} so‘m · qolgani ${esc(gacha)} gacha</span></div>`;
+  }
   if (o.status === 'confirmed') return `<div class="taklif-q ok">✅ To‘landi — darslar jadvalingizda · ${esc(o.slotsText || '')}</div>`;
-  if (o.status === 'expired') return `<div class="taklif-q exp">⏳ 24 soatda to‘lanmadi — soatlar bo‘shadi</div>${tugma('Qayta yuborish')}`;
+  if (o.status === 'expired') return `<div class="taklif-q exp">${o.bronAmount ? '⌛ Bronning qolgani 3 kunda to‘lanmadi' : '⏳ 24 soatda to‘lanmadi'} — soatlar bo‘shadi</div>${tugma('Qayta yuborish')}`;
   return '';
 }
 
