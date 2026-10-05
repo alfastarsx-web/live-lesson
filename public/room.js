@@ -253,6 +253,7 @@ async function onSignal(m) {
       if (!IS_TEACHER) toast(STUDENT_DRAW ? '✏️ Ustoz sizga chizishga ruxsat berdi' : 'Chizish yopildi', 3500);
       break;
     case 'screen':     if (!IS_TEACHER) ekranRejimi(Boolean(m.on)); break;
+    case 'notes':      daftarKeldi(m.notes, m.tab); break;
   }
 }
 
@@ -262,6 +263,7 @@ function applyState(state) {
   STUDENT_DRAW = Boolean(state.studentDraw);
   chizishHolati();
   if (!IS_TEACHER && state.screen) ekranRejimi(true);
+  daftarKeldi(state.notes, null, true);
   if (state.doc && state.doc.url) {
     loadDoc(state.doc.url, state.doc.name, state.page || 1)
       .then(() => applyScroll(state.scroll || 0));
@@ -1116,3 +1118,117 @@ document.addEventListener('visibilitychange', () => {
     connect();
   }
 });
+
+// ================= Dars daftari =================
+// Ustoz slayd ostida yozadi (eslatma, yangi so'zlar, uyga vazifa), o'quvchi jonli ko'radi.
+// Server uni API ga saqlaydi — o'quvchi darsdan keyin Kurslar bo'limida qayta o'qiydi.
+const DAFTAR = { matn: '', sozlar: '', vazifa: '' };
+let daftarTab = 'matn', daftarTaymer = null;
+const dEl = {
+  box: document.getElementById('daftar'),
+  matn: document.getElementById('daftarMatn'),
+  kor: document.getElementById('daftarKor'),
+  holat: document.getElementById('daftarHolat'),
+  yig: document.getElementById('daftarYig'),
+  tablar: [...document.querySelectorAll('.daftar-tab')],
+};
+const DAFTAR_NAMUNA = {
+  matn: 'Masalan: Present Simple — he/she/it + s\nI work → She works\nXato: She go ❌ → She goes ✅',
+  sozlar: 'Har qatorga bitta so‘z:\napple — olma\nto borrow — qarzga olmoq',
+  vazifa: 'Masalan: 47-bet, 3-mashq. 5 ta gap tuzing (Present Simple).',
+};
+const DAFTAR_BOSH = {
+  matn: 'Ustoz bu yerga dars eslatmalarini yozadi.',
+  sozlar: 'Yangi so‘zlar shu yerda paydo bo‘ladi.',
+  vazifa: 'Uyga vazifa shu yerda paydo bo‘ladi.',
+};
+const dEsc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function daftarJoy() {
+  document.documentElement.style.setProperty('--daftar-joy', dEl.box.offsetHeight + 'px');
+}
+
+function daftarYigish(yig) {
+  dEl.box.classList.toggle('yigiq', yig);
+  dEl.yig.setAttribute('aria-expanded', String(!yig));
+  setTimeout(() => {
+    daftarJoy();
+    if (pdfDoc) renderPage(pageNum);
+    if (EKRAN) ekranOlcham();
+  }, 220);
+}
+
+function daftarKorsat() {
+  dEl.tablar.forEach((b) => {
+    b.setAttribute('aria-pressed', String(b.dataset.d === daftarTab));
+    if (b.dataset.d === daftarTab) b.classList.remove('yangi');
+  });
+  if (IS_TEACHER) {
+    if (dEl.matn.value !== DAFTAR[daftarTab]) dEl.matn.value = DAFTAR[daftarTab];
+    dEl.matn.placeholder = DAFTAR_NAMUNA[daftarTab];
+    return;
+  }
+  const t = DAFTAR[daftarTab].trim();
+  if (!t) { dEl.kor.innerHTML = `<span class="bosh">${DAFTAR_BOSH[daftarTab]}</span>`; return; }
+  if (daftarTab === 'sozlar') {
+    dEl.kor.innerHTML = t.split('\n').filter((q) => q.trim()).map((q) => {
+      const [soz, ...qolgan] = q.split(/\s[—–-]\s|\s*[—–=:]\s*/);
+      return `<div class="soz"><b>${dEsc(soz.trim())}</b><span>${dEsc(qolgan.join(' — ').trim())}</span></div>`;
+    }).join('');
+  } else {
+    dEl.kor.textContent = t;
+  }
+  dEl.kor.scrollTop = dEl.kor.scrollHeight;
+}
+
+// Serverdan kelgan holat: kirganda (boshlang'ich) yoki ustoz yozganda
+function daftarKeldi(notes, tab, boshlangich = false) {
+  if (!notes) return;
+  const eski = { ...DAFTAR };
+  for (const k of ['matn', 'sozlar', 'vazifa']) DAFTAR[k] = typeof notes[k] === 'string' ? notes[k] : '';
+  const bor = Object.values(DAFTAR).some((v) => v.trim());
+  if (!IS_TEACHER) {
+    if (tab && tab !== daftarTab && DAFTAR[tab] !== eski[tab]) {
+      // Ustoz boshqa bo'limga yozyapti — o'quvchini o'sha yerga olib o'tamiz
+      daftarTab = tab;
+    }
+    for (const k of ['matn', 'sozlar', 'vazifa']) {
+      const b = dEl.tablar.find((x) => x.dataset.d === k);
+      if (k !== daftarTab && DAFTAR[k] !== eski[k] && DAFTAR[k].trim()) b.classList.add('yangi');
+    }
+    if (boshlangich) daftarYigish(!bor);
+    else if (bor && dEl.box.classList.contains('yigiq')) daftarYigish(false);
+    dEl.holat.textContent = bor ? '✍️ Ustoz eslatmalari' : '';
+  } else if (boshlangich && bor) {
+    dEl.holat.textContent = '✓ saqlangan';
+  }
+  daftarKorsat();
+}
+
+function daftarYubor() {
+  clearTimeout(daftarTaymer);
+  daftarTaymer = null;
+  wsSend({ type: 'notes', notes: { ...DAFTAR }, tab: daftarTab });
+  dEl.holat.textContent = '✓ o‘quvchiga ko‘rinmoqda';
+}
+
+dEl.tablar.forEach((b) => b.addEventListener('click', () => {
+  if (daftarTaymer) daftarYubor();
+  daftarTab = b.dataset.d;
+  if (dEl.box.classList.contains('yigiq')) daftarYigish(false);
+  daftarKorsat();
+  if (IS_TEACHER) dEl.matn.focus();
+}));
+dEl.yig.addEventListener('click', () => daftarYigish(!dEl.box.classList.contains('yigiq')));
+dEl.matn.addEventListener('input', () => {
+  DAFTAR[daftarTab] = dEl.matn.value.slice(0, 10000);
+  dEl.holat.textContent = 'yozilmoqda…';
+  clearTimeout(daftarTaymer);
+  daftarTaymer = setTimeout(daftarYubor, 400);
+});
+dEl.matn.addEventListener('blur', () => { if (daftarTaymer) daftarYubor(); });
+// Ustoz qo'lida klaviatura yozganda chizish/sahifa tugmalari ishga tushmasin
+dEl.matn.addEventListener('keydown', (e) => e.stopPropagation());
+daftarKorsat();
+requestAnimationFrame(daftarJoy);
+window.addEventListener('resize', daftarJoy);
