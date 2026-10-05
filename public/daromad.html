@@ -375,23 +375,22 @@ $('#yechTugma').onclick = () => {
   oyna(`<h3 id="pastkiSarlavha">Kartaga yechib olish</h3>
     <p class="xira" style="margin:0">Balansda <b class="num">${pul(S.balance)} so‘m</b>. Soliq allaqachon ushlangan — kartangizga aynan shu summa tushadi.</p>
     <label>Summa (so‘m)<input id="yS" inputmode="decimal" placeholder="${pul(S.rules.minWithdraw)} dan"></label>
-    <label>Karta<select id="yK">${S.cards.map((c) => `<option value="${c.id}">${esc(c.masked)}</option>`).join('')}</select></label>
-    <button class="tugma ikkinchi" id="ySms" type="button">SMS kod olish</button>
-    <label>SMS kod<input id="yKod" inputmode="numeric" autocomplete="one-time-code" maxlength="5" placeholder="5 xonali kod"></label>
+    <label>Karta<select id="yK">${S.cards.map((c) => `<option value="${c.id}">${esc(c.masked)}${c.holderName ? ` (${esc(c.holderName)})` : ''}</option>`).join('')}</select></label>
     <div class="xato" id="yXato" role="alert"></div>
     <div class="qator3"><button class="tugma ikkinchi" type="button" id="yBekor">Bekor</button><button class="tugma" type="button" id="yOk">So‘rov yuborish</button></div>`);
   $('#yBekor').onclick = yop;
-  $('#ySms').onclick = async () => { $('#yXato').textContent = (await smsYubor('withdraw', $('#ySms'))) || ''; $('#yKod').focus(); };
   $('#yOk').onclick = async () => {
     const amount = Number($('#yS').value.replace(/\s/g, '').replace(',', '.'));
-    if (!amount) { $('#yXato').textContent = 'Summani kiriting'; return; }
+    if (!amount || amount <= 0) { $('#yXato').textContent = 'Summani to‘g‘ri kiriting'; return; }
+    if (amount < S.rules.minWithdraw) { $('#yXato').textContent = `Minimal summa: ${pul(S.rules.minWithdraw)} so‘m`; return; }
+    if (amount > S.balance) { $('#yXato').textContent = 'Balansda yetarli mablag‘ yo‘q'; return; }
     $('#yOk').disabled = true;
     const r = await api('/api/wallet/withdrawals', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ amount, cardId: $('#yK').value, code: $('#yKod').value.trim() }) });
+      body: JSON.stringify({ amount, cardId: $('#yK').value }) });
     $('#yOk').disabled = false;
     if (!r) return;
     if (!r.ok) { $('#yXato').textContent = xatoMatn(r.data); return; }
-    yop(); toast('So‘rov yuborildi — holati tarixda ko‘rinadi', 'ok'); yukla();
+    yop(); toast('So‘rov yuborildi — admin ko‘rib chiqqach o‘tkaziladi', 'ok'); yukla();
   };
 };
 
@@ -470,8 +469,19 @@ function chekHtml(e) {
   q.push([e.status === 'posted' ? 'Balansga' : 'Balansga (tasdiqlansa)', belgili(e.net), 'sof']);
   q.push(['Yozuv raqami', `#${e.code}`]);
   const w = YECHISH.get(e.withdrawalId);
-  if (w?.reason) q.push(['Sabab', w.reason]);
+  if (w) {
+    if (w.panMasked) q.push(['Karta', `${w.panMasked}${w.holderName ? ` (${w.holderName})` : ''}`]);
+    if (w.providerRef) q.push(['Kvitansiya / Tranzaksiya', w.providerRef]);
+    if (w.paidAt) q.push(['To‘langan vaqti', `${kunNomi(w.paidAt.slice(0, 10))}, ${soat(w.paidAt)}`]);
+    if (w.adminNote) q.push(['Admin izohi', w.adminNote]);
+    if (w.reason) q.push(['Rad etish sababi', w.reason]);
+  }
+  const chequeUrl = w?.chequeFullUrl || w?.chequeUrl;
+  const chequeBtn = chequeUrl
+    ? `<div style="margin-top:10px"><a href="${esc(chequeUrl)}" target="_blank" rel="noopener noreferrer" class="tugma ikkinchi" style="display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;padding:9px 14px;font-size:13px;font-weight:700;border-radius:10px;width:100%;box-sizing:border-box">📄 To‘lov chekini ko‘rish</a></div>`
+    : '';
   return `<div class="chek">${q.map(([a, b, c]) => `<div class="q ${c || ''}"><span>${esc(a)}</span><b>${esc(b)}</b></div>`).join('')}</div>
+    ${chequeBtn}
     ${e.note ? `<p class="izohq">${esc(e.note)}</p>` : ''}
     ${e.type === 'lesson' && e.status !== 'posted' ? `<button class="mayda-t" type="button" data-etiroz="${e.id}" data-booking="${e.bookingId || ''}">Pul tushmadi — bildirish</button>` : ''}`;
 }
