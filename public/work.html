@@ -176,6 +176,30 @@ body.work{background:var(--bg)}
 .telefon-qoymang{margin:8px 0 4px;padding:10px 12px;border-radius:12px;background:#fdecec;color:#9f1239;font-size:13px;line-height:1.45}
 .telefon-qoymang b{color:#881337}
 .tanlov:disabled{opacity:.45;cursor:not-allowed}
+.dk-kch{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;color:var(--mut)}
+.kelmadi-yorliq{margin-top:10px;padding:9px 12px;border-radius:12px;background:var(--red-soft);color:var(--red);font-size:13px;font-weight:700}
+.qoida-k{margin:18px 0 0;background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px}
+.qoida-k summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:15px}
+.qoida-k summary::-webkit-details-marker{display:none}
+.qoida-k summary::after{content:"+";font-size:20px;font-weight:800;color:var(--green)}
+.qoida-k[open] summary::after{content:"−"}
+.qoida-k ul{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
+.qoida-k li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.5}
+.qoida-k li i{flex:none;width:30px;height:30px;border-radius:10px;background:var(--green-soft);display:grid;place-items:center;font-style:normal;font-size:15px}
+.qoida-k li.ogoh i{background:var(--red-soft)}
+.kc-kunlar{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:12px 0 8px}
+.kc-kunlar::-webkit-scrollbar{display:none}
+.kc-kun{flex:none;min-width:58px;padding:8px 10px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font:inherit;font-size:12px;text-align:center;cursor:pointer}
+.kc-kun b{display:block;font-size:14px}
+.kc-kun[aria-pressed="true"]{background:var(--ink,#111);border-color:var(--ink,#111);color:#fff}
+.kc-soatlar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.kc-soat{padding:10px 0;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:inherit;font-weight:800;font-size:14px;cursor:pointer}
+.kc-soat[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
+.kc-ogoh{margin:10px 0 0;padding:10px 12px;border-radius:12px;font-size:13px;font-weight:700}
+.kc-ogoh.qizil{background:var(--red-soft);color:var(--red)}
+.kc-ogoh.yashil{background:var(--green-soft);color:var(--green)}
+.kc-tasdiq{width:100%;margin-top:14px;padding:14px;border:0;border-radius:14px;background:var(--green);color:#fff;font:inherit;font-weight:800;font-size:15px;cursor:pointer}
+.kc-tasdiq:disabled{background:#d8d8d3;color:var(--mut);cursor:not-allowed}
 </style>
 </head>
 <body class="work">
@@ -227,6 +251,16 @@ body.work{background:var(--bg)}
       <div class="bolim-sarlavha"><h2>Natijasini belgilang</h2><span class="son" id="diqqatSon"></span></div>
       <div id="diqqat"></div>
     </div>
+
+    <div id="keyingiBolim" hidden>
+      <div class="bolim-sarlavha"><h2>Keyingi doimiy darslar</h2><span class="son" id="keyingiSon"></span></div>
+      <div id="keyingi"></div>
+    </div>
+
+    <details class="qoida-k" id="qoidaK">
+      <summary>📘 Doimiy darslar qoidalari</summary>
+      <ul id="qoidaRoyxat"></ul>
+    </details>
   </section>
 
   <!-- ===== Sinovlar ===== -->
@@ -286,6 +320,14 @@ body.work{background:var(--bg)}
   <div class="tutqich"></div>
   <div class="bosh"><b id="tsSarlavha">Sinov darsini tasdiqlang</b><span id="tsVaqt"></span></div>
   <div class="tana" id="tsTana"></div>
+</div>
+
+<!-- Doimiy darsni ko'chirish -->
+<div class="parda" id="kochParda"></div>
+<div class="sheet" id="kochSheet" role="dialog" aria-modal="true" aria-labelledby="kcSarlavha">
+  <div class="tutqich"></div>
+  <div class="bosh"><b id="kcSarlavha">Darsni ko‘chirish</b><span id="kcKim"></span></div>
+  <div class="tana" id="kcTana"></div>
 </div>
 
 <script src="/auth-webview.js"></script>
@@ -928,10 +970,18 @@ function darsKarta(d, { tarix = false } = {}) {
       ${hozirTugma(d)}`;
   } else if (!tarix) {
     const ochiq = Date.now() >= kun.getTime() - 10 * 60_000;
+    const doimiy = !d.isTrial;
+    const boshlanmagan = Date.now() < kun.getTime();
     past = `<div class="dk-past">
       <button class="asosiy" data-kirish="${esc(d.id)}" data-sinov="${d.isTrial ? 1 : ''}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>${ochiq ? 'Darsni boshlash' : 'Kirish 10 daq oldin'}</button>
+      ${doimiy && boshlanmagan ? `<button data-kochir="${esc(d.id)}">↻ Ko‘chirish</button>` : ''}
+      ${doimiy && kelmadiMumkin(d) ? `<button data-kelmadi="${esc(d.id)}">O‘quvchi kelmadi</button>` : ''}
       ${telHavola(d.leadPhone)}</div>
       ${ochiq ? '' : hozirTugma(d)}`;
+  } else if (!d.isTrial) {
+    // Doimiy dars tarixda: o'quvchi kirmagan — "Kelmadi"; belgilangan bo'lsa natijasi
+    if (d.outcome) past = `<div class="kelmadi-yorliq">${d.outcome === 'student_no_show_forgiven' ? '🤝 Kelmadi — kechirildi, dars oxiriga qo‘shildi' : '✕ Kelmadi — dars o‘tilgan hisoblandi'}</div>`;
+    else if (kelmadiMumkin(d)) past = `<div class="dk-past"><button class="asosiy" data-kelmadi="${esc(d.id)}">O‘quvchi kelmadi</button></div>`;
   } else if (d.isTrial && d.leadId) {
     const tugmalar = d.leadStatus === 'trial_completed'
       ? `<button class="yashil" data-holat="converted">To‘lov qildi</button><button data-holat="lost">Rad etdi</button>`
@@ -952,7 +1002,7 @@ function darsKarta(d, { tarix = false } = {}) {
   return `<div class="dk${!tarix && d.confirmPending ? ' kutish' : ''}"${!tarix && d.confirmPending ? ` data-tasdiq-karta="${esc(d.id)}"` : ''}>
     <div class="dk-bosh">
       <div class="dk-soat">${soatQisqa(d.startsAt)}<small>${kun.getDate()}.${String(kun.getMonth() + 1).padStart(2, '0')}</small></div>
-      <div class="matn"><b>${ism}${teg}</b><span>${esc(vaqtYorliq(d.startsAt))} · ${d.durationMin || 60} daq${baho}</span>${holat ? `<div class="dk-holat">${holat}</div>` : ''}</div>
+      <div class="matn"><b>${ism}${teg}</b><span>${esc(vaqtYorliq(d.startsAt))} · ${d.durationMin || 60} daq${baho}</span>${holat ? `<div class="dk-holat">${holat}</div>` : ''}${!d.isTrial && d.movedFrom ? `<span class="dk-kch">↻ ko‘chirilgan · avval ${esc(vaqtYorliq(d.movedFrom))}</span>` : ''}</div>
     </div>${past}</div>`;
 }
 
@@ -967,6 +1017,100 @@ function qadam(d, opts) {
   </div>`;
 }
 const hozirQatori = () => `<div class="hozir" aria-label="Hozirgi vaqt"><span>${soatQisqa(new Date().toISOString())}</span><div class="ip"><i></i></div><hr></div>`;
+
+// ---------- Doimiy darslar: "Kelmadi", ko'chirish, qoidalar ----------
+let QOIDA = { kutishDaq: 15, kelmadiMuddatSoat: 24, kochirishOldinSoat: 12, paketDars: 12, paketKochirish: 3,
+  paketFavqulodda: 1, paketKechirim: 1, ustozBepulKochirish: 2, ustozKechJarima: 20, kechirimUlush: 0.5, kochirishKun: 7 };
+// Doimiy dars: kutish vaqti o'tgan, o'quvchi xonaga kirmagan, natija belgilanmagan
+function kelmadiMumkin(d) {
+  if (d.isTrial || d.outcome || d.status !== 'booked' || d.studentJoined) return false;
+  const otdi = Date.now() - new Date(d.startsAt).getTime();
+  return otdi >= QOIDA.kutishDaq * 60_000 && otdi <= QOIDA.kelmadiMuddatSoat * 3600_000;
+}
+function qoidalarChiz() {
+  const q = QOIDA;
+  $('#qoidaRoyxat').innerHTML = [
+    ['⏰', `Darsni o‘z vaqtida boshlang va o‘quvchini <b>${q.kutishDaq} daqiqa</b> kuting. Kelmasa — <b>“O‘quvchi kelmadi”</b> tugmasini bosing. Tugma faqat siz xonada kutgan bo‘lsangiz ishlaydi.`],
+    ['💰', `O‘quvchi kelmasa: har ${q.paketDars} darsdagi <b>birinchi kelmaslik kechiriladi</b> — dars o‘quvchiga jadval oxiriga qo‘shiladi, sizga dars haqining <b>${Math.round(q.kechirimUlush * 100)}%</b> to‘lanadi. Keyingilarida dars kuyadi — sizga <b>to‘liq haq</b>.`],
+    ['⭐', `+10 ball faqat <b>o‘tkazilgan</b> darsga beriladi. O‘quvchi xonaga kirmagan dars “o‘tildi” hisoblanmaydi.`],
+    ['↻', `O‘quvchi darsni <b>${q.kochirishOldinSoat} soat oldin</b> o‘zi ko‘chira oladi (har ${q.paketDars} darsga ${q.paketKochirish} marta) yoki favqulodda kupon bilan (${q.paketFavqulodda} ta). Yangi vaqt faqat <b>bo‘sh soatlaringizdan</b> tanlanadi — sizga xabar keladi.`],
+    ['👩‍🏫', `Siz ko‘chirsangiz: ${q.kochirishOldinSoat} soatdan oldin va 30 kunda bir o‘quvchi uchun <b>${q.ustozBepulKochirish} martagacha — jarimasiz</b>. O‘quvchi o‘zi so‘ragan bo‘lsa, “O‘quvchi so‘radi”ni tanlang — jarima yo‘q.`, 'ogoh'],
+    ['⚠️', `Kech ko‘chirish (${q.kochirishOldinSoat} soatdan kam qolganda) yoki limitdan ortig‘i — <b>−${q.ustozKechJarima} ball</b>.`, 'ogoh'],
+    ['🗓️', `Darsingiz turgan soatni jadvaldan yopib bo‘lmaydi — avval darsni ko‘chiring.`],
+  ].map(([e, t, c]) => `<li class="${c || ''}"><i>${e}</i><span>${t}</span></li>`).join('');
+}
+async function qoidalarYukla() {
+  const r = await api('/api/booking/regular/rules').catch(() => null);
+  if (r && r.ok && r.data) QOIDA = { ...QOIDA, ...r.data };
+  qoidalarChiz();
+}
+
+function kochYop() {
+  $('#kochParda').classList.remove('ochiq');
+  $('#kochSheet').classList.remove('ochiq');
+}
+async function kochOch(id) {
+  const d = KELGUSI.find((x) => x.id === id);
+  $('#kcKim').textContent = d ? `${d.studentName || 'O‘quvchi'} · ${vaqtYorliq(d.startsAt)}` : '';
+  $('#kcTana').innerHTML = '<div class="skelet"></div>';
+  $('#kochParda').onclick = kochYop;
+  $('#kochParda').classList.add('ochiq');
+  $('#kochSheet').classList.add('ochiq');
+  const r = await api(`/api/booking/regular/${id}/slots`);
+  if (!r || !r.ok) { $('#kcTana').innerHTML = `<div class="bosh-kichik">${esc((r && r.data && r.data.message) || 'Bo‘sh vaqtlarni yuklab bo‘lmadi')}</div>`; return; }
+  const J = r.data;
+  const kunlar = [];
+  for (const iso of J.vaqtlar) {
+    const t = new Date(iso);
+    const k = kunBoshi(t);
+    let x = kunlar.find((y) => y.k === k);
+    if (!x) { x = { k, t, soatlar: [] }; kunlar.push(x); }
+    x.soatlar.push(iso);
+  }
+  let sabab = null, tanKun = 0, tan = null;
+  const chiz = () => {
+    const ogoh = sabab === 'ustoz' && J.jarima
+      ? `<div class="kc-ogoh qizil">⚠️ ${J.jarima === 'kech' ? `Darsga ${QOIDA.kochirishOldinSoat} soatdan kam qoldi` : `30 kunlik bepul limit (${QOIDA.ustozBepulKochirish} ta) tugagan`} — <b>−${QOIDA.ustozKechJarima} ball</b> yoziladi</div>`
+      : sabab === 'ustoz' ? `<div class="kc-ogoh yashil">Jarimasiz — bu o‘quvchi uchun yana ${J.ustozBepulQoldi} ta bepul ko‘chirish qoldi</div>`
+        : sabab === 'oquvchi' ? `<div class="kc-ogoh yashil">Jarima yo‘q. ${J.oquvchiKochirishQoldi > 0 ? `O‘quvchining bepul ko‘chirishlaridan biri ishlatiladi (${J.oquvchiKochirishQoldi} ta qolgan).` : 'O‘quvchining bepul ko‘chirishlari tugagan — sizning roziligingiz bilan ko‘chiriladi.'} O‘quvchiga xabar boradi.</div>` : '';
+    const k = kunlar[tanKun];
+    $('#kcTana').innerHTML = `
+      <b style="font-size:14px">Kim so‘radi?</b>
+      <div class="tk-chiplar" style="grid-template-columns:1fr 1fr">
+        <button type="button" class="tk-chip" data-sabab="oquvchi" aria-pressed="${sabab === 'oquvchi'}"><b>🙋 O‘quvchi</b><small>o‘zi iltimos qildi</small></button>
+        <button type="button" class="tk-chip" data-sabab="ustoz" aria-pressed="${sabab === 'ustoz'}"><b>👩‍🏫 Men</b><small>menga noqulay</small></button>
+      </div>
+      ${ogoh}
+      ${kunlar.length ? `
+      <div class="kc-kunlar">${kunlar.map((x, i) => `<button type="button" class="kc-kun" data-kun="${i}" aria-pressed="${i === tanKun}"><b>${KUN_NOMI[x.t.getDay()]}</b>${x.t.getDate()}.${String(x.t.getMonth() + 1).padStart(2, '0')}</button>`).join('')}</div>
+      <div class="kc-soatlar">${k.soatlar.map((iso) => `<button type="button" class="kc-soat" data-v="${esc(iso)}" aria-pressed="${tan === iso}">${soatQisqa(iso)}</button>`).join('')}</div>`
+      : '<div class="bosh-kichik">Yaqin 14 kunda bo‘sh soatingiz yo‘q — jadvalingizga vaqt qo‘shing.</div>'}
+      <button type="button" class="kc-tasdiq" id="kcTasdiq" ${sabab && tan ? '' : 'disabled'}>${!sabab ? 'Kim so‘raganini tanlang' : tan ? `${vaqtYorliq(tan)} ga ko‘chirish` : 'Yangi vaqtni tanlang'}</button>`;
+    $('#kcTana').querySelectorAll('[data-sabab]').forEach((b) => { b.onclick = () => { sabab = b.dataset.sabab; chiz(); }; });
+    $('#kcTana').querySelectorAll('[data-kun]').forEach((b) => { b.onclick = () => { tanKun = Number(b.dataset.kun); tan = null; chiz(); }; });
+    $('#kcTana').querySelectorAll('[data-v]').forEach((b) => { b.onclick = () => { tan = b.dataset.v; chiz(); }; });
+    $('#kcTasdiq').onclick = async () => {
+      const b = $('#kcTasdiq'); b.disabled = true; b.textContent = 'Ko‘chirilmoqda…';
+      const res = await api(`/api/booking/regular/${id}/move`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ startsAt: tan, sabab }),
+      }).catch(() => null);
+      if (!res || !res.ok) { toast((res && res.data && res.data.message) || 'Ko‘chirib bo‘lmadi', 'err'); chiz(); return; }
+      kochYop();
+      toast(res.data.jarima ? `Ko‘chirildi · −${QOIDA.ustozKechJarima} ball` : 'Ko‘chirildi — o‘quvchiga xabar ketdi', res.data.jarima ? 'err' : 'ok');
+      await darslarniYukla();
+    };
+  };
+  chiz();
+}
+async function kelmadiBos(id, b) {
+  if (!confirm(`O‘quvchi ${QOIDA.kutishDaq} daqiqa ichida darsga kirmadimi?\n\nBirinchi kelmaslik kechiriladi (dars o‘quvchiga oxiriga qo‘shiladi, sizga ${Math.round(QOIDA.kechirimUlush * 100)}%), keyingilarida dars kuyadi va sizga to‘liq haq to‘lanadi.`)) return;
+  b.disabled = true;
+  const r = await api(`/api/booking/regular/${id}/no-show`, { method: 'POST' }).catch(() => null);
+  b.disabled = false;
+  if (!r || !r.ok) return toast((r && r.data && r.data.message) || 'Belgilab bo‘lmadi', 'err');
+  toast(r.data.kechirildi ? `Belgilandi — birinchi kelmaslik kechirildi, sizga ${Math.round(QOIDA.kechirimUlush * 100)}%` : 'Belgilandi — dars o‘tilgan hisoblandi, haq to‘liq', 'ok');
+  await darslarniYukla();
+}
 
 // Sinov darsi kartasida taklif holati va tugmasi
 function taklifQatori(d) {
@@ -990,6 +1134,8 @@ function taklifQatori(d) {
 
 function tugmalarniUla(box) {
   box.querySelectorAll('[data-taklif]').forEach((b) => { b.onclick = () => taklifOch(b.dataset.taklif); });
+  box.querySelectorAll('[data-kochir]').forEach((b) => { b.onclick = () => kochOch(b.dataset.kochir); });
+  box.querySelectorAll('[data-kelmadi]').forEach((b) => { b.onclick = () => kelmadiBos(b.dataset.kelmadi, b); });
   box.querySelectorAll('[data-tasdiq-karta]').forEach((k) => {
     k.onclick = (e) => {
       if (e.target.closest('a')) return; // telefon havolasi — qo'ng'iroq
@@ -1073,7 +1219,7 @@ function bugunChiz() {
   tugmalarniUla($('#bugungi'));
 
   // Natijasi belgilanmagan yoki javob kutilayotgan sinovlar
-  const diqqat = TARIX.filter((d) => d.isTrial && ['trial_scheduled', 'trial_completed'].includes(d.leadStatus));
+  const diqqat = TARIX.filter((d) => (d.isTrial && ['trial_scheduled', 'trial_completed'].includes(d.leadStatus)) || kelmadiMumkin(d));
   // Maslahat — sinov darslari bo'lsa, har ochilganda navbatdagisi
   const bugungiSinov = KELGUSI.some((d) => d.isTrial) || diqqat.length;
   const m = MASLAHATLAR[Math.floor(Date.now() / 3600000) % MASLAHATLAR.length];
@@ -1083,6 +1229,14 @@ function bugunChiz() {
   $('#diqqatSon').textContent = diqqat.length ? `${diqqat.length} ta` : '';
   $('#diqqat').innerHTML = diqqat.map((d) => darsKarta(d, { tarix: true })).join('');
   tugmalarniUla($('#diqqat'));
+
+  // Keyingi 7 kundagi doimiy darslar (bugungidan tashqari) — ko'chirish shu yerdan
+  const hafta = Date.now() + 7 * 864e5;
+  const keyingi = KELGUSI.filter((d) => !d.isTrial && kunBoshi(d.startsAt) !== kunBoshi(Date.now()) && new Date(d.startsAt).getTime() < hafta);
+  $('#keyingiBolim').hidden = !keyingi.length;
+  $('#keyingiSon').textContent = keyingi.length ? `${keyingi.length} ta` : '';
+  $('#keyingi').innerHTML = keyingi.map((d) => darsKarta(d)).join('');
+  tugmalarniUla($('#keyingi'));
 }
 
 function sinovChiz() {
@@ -1185,7 +1339,8 @@ window.addEventListener('hashchange', tabKorsat);
   if (!w) return;
   ISM = w.data.name || '';
 
-  await Promise.all([sorovlarniYukla(), darslarniYukla(), holatYukla()]);
+  qoidalarChiz();
+  await Promise.all([sorovlarniYukla(), darslarniYukla(), holatYukla(), qoidalarYukla()]);
   tabriklarniKorsat((ISM || '').split(/\s+/)[0]);
 
   // Ball qo'shilganda yengil ding (Onlayn tugmasi yonidan "+N" ko'tariladi)
