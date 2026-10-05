@@ -206,6 +206,12 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
     <span style="flex:1"><b>Telegramga ulaning</b><br><span class="xira">Yangi so‘rovlar «Qabul qilish» tugmasi bilan, eslatmalar, prioritet va ball o‘zgarishlari — Telegramda</span></span>
   </a>
 
+  <div class="akad" id="doimiyQoida" hidden style="position:relative;background:linear-gradient(120deg,#e8f6ef,#e6f2ff);box-shadow:0 0 0 1px #cde8da">
+    <span class="ico a" aria-hidden="true" style="background:#2f7a5c;color:#fff">📘</span>
+    <a href="/mentor/qollanma.html#doimiy" style="text-decoration:none;color:inherit;flex:1"><b>Yangi qoidalar: doimiy darslar</b><br><span class="xira">O‘quvchi kelmasa ham haq olasiz, darsni ko‘chirish tartibi va −20 ball qachon yoziladi — 2 daqiqa</span></a>
+    <button type="button" id="doimiyQoidaYop" aria-label="Yopish" style="border:0;background:none;font-size:18px;color:#9a9ca3;cursor:pointer;padding:4px 6px">×</button>
+  </div>
+
   <div class="akad" id="yangilik" hidden style="position:relative">
     <span class="ico a" aria-hidden="true">🆕</span>
     <a href="/mentor/akademiya.html#yangiliklar" style="text-decoration:none;color:inherit;flex:1"><b>Akademiya yangilandi</b><br><span class="xira">Sentabr yangiliklari: tasdiqlash qo‘ng‘irog‘i, Telegram bot, taklif yuborish — 3 daqiqa</span></a>
@@ -560,6 +566,16 @@ function boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar }) {
     const yopQ = () => { try { localStorage.setItem(QOIDA, '1'); } catch { /* yo'q */ } $('#qoida').hidden = true; };
     $('#qoidaYop').onclick = yopQ;
     $('#qoida').querySelector('a').addEventListener('click', yopQ);
+  }
+  // Yangi qoidalar (Oktabr): doimiy darslar — kelmadi, ko'chirish, jarima. O'qiguncha (yoki yopguncha) turadi
+  const DOIMIY = 'qoida-doimiy-darslar-2026-10';
+  let doimiyKorgan = false;
+  try { doimiyKorgan = localStorage.getItem(DOIMIY) === '1'; } catch { /* yo'q */ }
+  if (akad && akad.mentor && !doimiyKorgan) {
+    $('#doimiyQoida').hidden = false;
+    const yopD = () => { try { localStorage.setItem(DOIMIY, '1'); } catch { /* yo'q */ } $('#doimiyQoida').hidden = true; };
+    $('#doimiyQoidaYop').onclick = yopD;
+    $('#doimiyQoida').querySelector('a').addEventListener('click', yopD);
   }
   holatChiz(ball, progress);
   await tabriklarniKorsat(ISM);

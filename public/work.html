@@ -1037,7 +1037,8 @@ function qoidalarChiz() {
     ['👩‍🏫', `Siz ko‘chirsangiz: ${q.kochirishOldinSoat} soatdan oldin va 30 kunda bir o‘quvchi uchun <b>${q.ustozBepulKochirish} martagacha — jarimasiz</b>. O‘quvchi o‘zi so‘ragan bo‘lsa, “O‘quvchi so‘radi”ni tanlang — jarima yo‘q.`, 'ogoh'],
     ['⚠️', `Kech ko‘chirish (${q.kochirishOldinSoat} soatdan kam qolganda) yoki limitdan ortig‘i — <b>−${q.ustozKechJarima} ball</b>.`, 'ogoh'],
     ['🗓️', `Darsingiz turgan soatni jadvaldan yopib bo‘lmaydi — avval darsni ko‘chiring.`],
-  ].map(([e, t, c]) => `<li class="${c || ''}"><i>${e}</i><span>${t}</span></li>`).join('');
+  ].map(([e, t, c]) => `<li class="${c || ''}"><i>${e}</i><span>${t}</span></li>`).join('') +
+    '<li><i>📖</i><span><a href="/mentor/qollanma.html#doimiy">Qo‘llanmada batafsil ›</a></span></li>';
 }
 async function qoidalarYukla() {
   const r = await api('/api/booking/regular/rules').catch(() => null);
