@@ -62,6 +62,9 @@ app.post('/api/upload', (req, res, next) => {
   if (!c || c.role !== 'teacher') return res.status(403).json({ error: 'ruxsat yo\u2018q' });
   next();
 }, (req, res, next) => {
+  if (!diskdaJoyBor()) return res.status(507).json({ error: 'Serverda joy vaqtincha tugagan — faylni ekran ulashish orqali ko‘rsating' });
+  next();
+}, (req, res, next) => {
   // Multer xatosini o'zimiz ushlaymiz — aks holda hajm chegarasida 500 qaytardi
   pdfYukla(req, res, (err) => {
     if (!err) return next();
@@ -75,7 +78,68 @@ app.post('/api/upload', (req, res, next) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Fayl mos emas. PDF yoki rasm (JPG, PNG) tanlang' });
   }
-  res.json({ url: `/uploads/${req.file.filename}`, name: req.file.originalname });
+  // Bir xil fayl (masalan, har darsda ochiladigan "Lesson 5.pdf") diskda bitta nusxa bo'lib turadi:
+  // nomi — mazmunining xeshi. Takror yuklansa, yangisi o'chiriladi va eskisining muddati yangilanadi.
+  try {
+    const xesh = crypto.createHash('sha256').update(fs.readFileSync(req.file.path)).digest('hex');
+    const kengaytma = (path.extname(req.file.originalname).toLowerCase().match(/^\.(pdf|png|jpe?g|webp|gif)$/) || ['.pdf'])[0];
+    const nom = `${xesh}${kengaytma}`;
+    const yol = path.join(UPLOAD_DIR, nom);
+    if (fs.existsSync(yol)) {
+      fs.unlinkSync(req.file.path);
+      const hozir = new Date();
+      fs.utimesSync(yol, hozir, hozir);
+    } else {
+      fs.renameSync(req.file.path, yol);
+    }
+    return res.json({ url: `/uploads/${nom}`, name: req.file.originalname });
+  } catch (e) {
+    console.warn('Faylni joylab bo\u2018lmadi:', e.message);
+    return res.json({ url: `/uploads/${req.file.filename}`, name: req.file.originalname });
+  }
+});
+
+// ---------- Dars materiallari: diskni tejash ----------
+// Darsda ochilgan fayl o'quvchining Kurslar bo'limida shuncha kun ko'rinadi; oxirgi marta
+// ishlatilganidan shuncha kun o'tgan fayl o'chiriladi (har darsda ochilsa — muddati yangilanadi).
+const MATERIAL_KUN = 60;
+// Serverda shundan kam joy qolsa, yangi fayl qabul qilinmaydi (dars to'xtamasin, disk to'lmasin)
+const MIN_BOSH_JOY = 2 * 1024 ** 3;
+function diskdaJoyBor() {
+  try {
+    const s = fs.statfsSync(UPLOAD_DIR);
+    return s.bavail * s.bsize >= MIN_BOSH_JOY;
+  } catch { return true; }
+}
+function materialniYangila(url) {
+  const m = /^\/uploads\/([\w.\-]+)$/.exec(String(url || ''));
+  if (!m) return;
+  const hozir = new Date();
+  fs.utimes(path.join(UPLOAD_DIR, m[1]), hozir, hozir, () => {});
+}
+function eskiMateriallarniTozala() {
+  const chegara = Date.now() - MATERIAL_KUN * 86_400_000;
+  let n = 0;
+  for (const nom of fs.readdirSync(UPLOAD_DIR)) {
+    if (nom.startsWith('.')) continue; // .gitkeep
+    const yol = path.join(UPLOAD_DIR, nom);
+    try {
+      const st = fs.statSync(yol);
+      if (st.isFile() && st.mtimeMs < chegara) { fs.unlinkSync(yol); n += 1; }
+    } catch { /* boshqa jarayon o'chirgan bo'lishi mumkin */ }
+  }
+  if (n) console.log(`Eski dars materiallari o'chirildi: ${n} ta (${MATERIAL_KUN} kundan eski)`);
+}
+setTimeout(eskiMateriallarniTozala, 60_000);
+setInterval(eskiMateriallarniTozala, 12 * 3600_000);
+
+// O'quvchining Kurslar sahifasi (app-course) materialni ilova ichida ochadi — PDF'ni shu yerdan oladi
+app.use('/uploads', (req, res, next) => {
+  const o = req.headers.origin;
+  if (o === 'https://app-course.myteacher.uz' || /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(o || '')) {
+    res.set({ 'Access-Control-Allow-Origin': o, Vary: 'Origin' });
+  }
+  next();
 });
 
 // Sinov uchun token yasash — faqat DEV_TOKENS=true bo'lganda ochiladi
@@ -882,7 +946,11 @@ function daftarSaqla(roomId, room, darhol = false) {
   clearTimeout(room.daftarTaymer);
   const yubor = () => {
     room.daftarTaymer = null;
-    liveApi('notes', { room: roomId, lessonId: room.lessonId || undefined, notes: room.state.notes })
+    liveApi('notes', {
+      room: roomId,
+      lessonId: room.lessonId || undefined,
+      notes: { ...room.state.notes, materiallar: room.state.materiallar || [] },
+    })
       .catch((err) => console.warn('Dars daftari saqlanmadi:', err.message));
   };
   if (darhol) yubor();
@@ -939,7 +1007,7 @@ function emptyState() {
   // screen — ustoz ekranini ulashyapti; studentDraw — o'quvchiga chizishga ruxsat
   // notes — dars daftari: ustoz yozadi, o'quvchi jonli ko'radi, API ga saqlanadi
   return { doc: null, page: 1, strokes: [], scroll: 0, screen: false, studentDraw: false,
-    notes: { matn: '', sozlar: '', vazifa: '' } };
+    notes: { matn: '', sozlar: '', vazifa: '' }, materiallar: [] };
 }
 
 // ---------- xona holatini saqlash (deploy/qayta ishga tushishdan keyin tiklash) ----------
@@ -1280,6 +1348,16 @@ wss.on('connection', async (ws, req) => {
         room.state.scroll = 0;
         broadcast(room, { type: 'doc', ...room.state.doc }, clientId);
         logEvent(room, { type: 'doc', url: room.state.doc.url, name: room.state.doc.name });
+        // Darsda ochilgan fayl dars daftariga "Dars materiallari" bo'lib qo'shiladi (o'quvchi keyin ham ochadi)
+        if (/^\/uploads\/[\w.\-]+$/.test(room.state.doc.url)) {
+          const royxat = Array.isArray(room.state.materiallar) ? room.state.materiallar : [];
+          if (!royxat.some((m) => m.url === room.state.doc.url)) {
+            royxat.push({ url: room.state.doc.url, name: room.state.doc.name.slice(0, 120) || 'Material' });
+            room.state.materiallar = royxat.slice(-10);
+            materialniYangila(room.state.doc.url);
+            daftarSaqla(roomId, room);
+          }
+        }
         break;
 
       case 'page':
