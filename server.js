@@ -169,6 +169,12 @@ function setCookies(req, res, royxat) {
   const domain = umumiyDomen(req);
   const headers = royxat.map(([nom, qiymat, maxAge]) => cookieHeader(req, nom, qiymat, maxAge, domain));
   if (domain) headers.push(...royxat.map(([nom]) => cookieHeader(req, nom, '', 0, null)));
+  // ll_k — kim kirganining qisqa belgisi (JS o'qiy oladi): sahifa keshi boshqa akkauntga aralashmasin
+  for (const [nom, qiymat] of royxat) {
+    if (nom !== AI_COOKIE) continue;
+    const k = qiymat ? kimBelgisi(tokenSub(aiteacher.jwtPayload(qiymat))) : '';
+    headers.push(cookieHeader(req, KIM, k, k ? ESLAB_MUDDAT : 0, domain).replace('; HttpOnly', ''));
+  }
   // Sessiya yangilash middleware'i oldinroq cookie qo'ygan bo'lishi mumkin — ustidan yozmaymiz, qo'shamiz
   const oldin = res.getHeader('Set-Cookie');
   res.setHeader('Set-Cookie', [...(oldin ? [].concat(oldin) : []), ...headers]);
@@ -178,6 +184,12 @@ function setCookies(req, res, royxat) {
 // ll_eslab — 180 kunlik imzolangan kalit (faqat userId). ai.myteacher.uz tokeni (1 kun) eskirsa,
 // server uni shu kalit bilan parolsiz yangilaydi. Ilova (WebView) ham, brauzer ham shu bilan ishlaydi.
 const ESLAB = 'll_eslab';
+const KIM = 'll_k';
+// userId ning o'zi emas — maxfiy kalit bilan qisqa xesh (taxmin qilib bo'lmaydi)
+function kimBelgisi(userId) {
+  if (!userId) return '';
+  return crypto.createHmac('sha256', process.env.LESSON_TOKEN_SECRET || 'kim').update(`kim:${userId}`).digest('hex').slice(0, 16);
+}
 const ESLAB_MUDDAT = 180 * 24 * 3600;
 const AI_COOKIE_MUDDAT = 7 * 24 * 3600;
 const XONA_MUDDAT = 12 * 3600;
@@ -276,6 +288,11 @@ async function sessiyaniYangila(req, res) {
     }
     // Kalit muddati har kuni uzayadi — faol odam hech qachon chiqib ketmaydi
     if (eslab.iat * 1000 < Date.now() - 24 * 3600_000) royxat.push(eslabCookie(eslab.userId));
+    // Deploydan oldin kirganlarda kim-belgisi yo'q — bir marta qo'yamiz
+    if (!royxat.some(([nom]) => nom === AI_COOKIE) && !c[KIM]) {
+      const k = kimBelgisi(eslab.userId);
+      res.append('Set-Cookie', cookieHeader(req, KIM, k, ESLAB_MUDDAT).replace('; HttpOnly', ''));
+    }
     if (royxat.length) setCookies(req, res, royxat);
     return;
   }
@@ -283,7 +300,10 @@ async function sessiyaniYangila(req, res) {
   // 2) Eslab yo'q, lekin hozir amaldagi sessiya bor (deploydan oldin kirganlar) — bir marta tekshirib, kalit beramiz
   if (ai && p && p.exp * 1000 > Date.now()) {
     const id = await tokenEgasi(ai);
-    if (id && id === tokenSub(p)) setCookies(req, res, [eslabCookie(id)]);
+    if (id && id === tokenSub(p)) {
+      setCookies(req, res, [eslabCookie(id)]);
+      if (!c[KIM]) res.append('Set-Cookie', cookieHeader(req, KIM, kimBelgisi(id), ESLAB_MUDDAT).replace('; HttpOnly', ''));
+    }
   }
 }
 
@@ -611,9 +631,13 @@ app.post('/api/adopt', async (req, res) => {
     return res.status(400).json({ error: 'token yaroqsiz' });
   }
   // Ilova tokeni — eslab kaliti faqat API tasdiqlasa beriladi (aks holda soxta token bilan kirib bo'lardi)
-  const egasi = AUTH_ON && aiteacher.AITEACHER_ON ? await tokenEgasi(token) : null;
+  // Shu odamning kaliti allaqachon bor bo'lsa — tekshiruvsiz (ilova har ochilganda kutib o'tirmasin)
+  const bor = verifyEslab(cookies(req)[ESLAB]);
   const royxat = [[AI_COOKIE, token, AI_COOKIE_MUDDAT]];
-  if (egasi && egasi === tokenSub(payload)) royxat.push(eslabCookie(egasi));
+  if (!bor || bor.userId !== tokenSub(payload)) {
+    const egasi = AUTH_ON && aiteacher.AITEACHER_ON ? await tokenEgasi(token) : null;
+    if (egasi && egasi === tokenSub(payload)) royxat.push(eslabCookie(egasi));
+  }
   setCookies(req, res, royxat);
   const roles = aiteacher.collectRoles(payload);
   res.json({ ok: true, role: roles.includes('mentor') || roles.includes('admin') ? 'mentor' : 'student' });

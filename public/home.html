@@ -7,7 +7,8 @@
 <title>Home</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<!-- Shrift sahifani to'xtatib turmasin: avval tizim shrifti, Manrope yuklangach almashadi -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
 <style>
 :root{
   color-scheme:light;
@@ -61,6 +62,13 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
 .ico.c{background:var(--coral-soft);color:var(--coral)} .ico.a{background:var(--amber-soft);color:#b7761c}
 .ico.s{background:var(--sky-soft);color:var(--sky)} .ico.g{background:var(--em-soft);color:var(--em)}
 .bosh{padding:14px 2px;color:var(--mut2);font-size:13.5px;text-align:center}
+/* Yuklanish skeleti — "Yuklanmoqda…" yozuvi o'rniga */
+.sk{display:flex;align-items:center;gap:11px;padding:10px 2px}
+.sk i,.sk b,.sk s{display:block;border-radius:10px;background:linear-gradient(90deg,#eceee9 25%,#f6f7f4 50%,#eceee9 75%);background-size:200% 100%;animation:sk 1.2s linear infinite}
+.sk i{width:38px;height:38px;border-radius:12px;flex:0 0 auto}.sk span{flex:1;display:grid;gap:7px}.sk b{height:12px;width:70%}.sk s{height:10px;width:45%}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.maslahat{font-size:12.5px;color:var(--mut2);padding:4px 2px 2px;text-align:center}
+@media (prefers-reduced-motion:reduce){.sk i,.sk b,.sk s{animation:none}}
 .tinch{display:flex;align-items:center;gap:10px;padding:12px 0;color:var(--em);font-weight:700}
 
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -231,10 +239,10 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
   </a>
 
   <div class="lbl">Bugungi darslar</div>
-  <section class="card ruyxat" id="darslar" aria-label="Bugungi darslar"><div class="bosh">Yuklanmoqda…</div></section>
+  <section class="card ruyxat" id="darslar" aria-label="Bugungi darslar" aria-busy="true"><div class="sk"><i></i><span><b></b><s></s></span></div><div class="sk"><i></i><span><b></b><s></s></span></div><div class="maslahat" id="maslahat"></div></section>
 
   <div class="lbl">Sizni kutyapti</div>
-  <section class="card ruyxat" id="kutyapti" aria-label="Sizni kutyapti"><div class="bosh">Yuklanmoqda…</div></section>
+  <section class="card ruyxat" id="kutyapti" aria-label="Sizni kutyapti" aria-busy="true"><div class="sk"><i></i><span><b></b><s></s></span></div><div class="sk"><i></i><span><b></b><s></s></span></div></section>
 
 </main>
 <div class="varaq" id="varaq" hidden><div class="ichi" role="dialog" aria-modal="true" aria-labelledby="varaqS"><h3 id="varaqS"></h3><div id="varaqT"></div><button class="yop" type="button" id="varaqYop">Yopish</button></div></div>
@@ -374,7 +382,7 @@ function holatChiz(ball, p) {
     $('#bugunBall').textContent = `${bugun.points > 0 ? '+' : ''}${bugun.points}`;
     $('#bugunIzoh').textContent = ball.streakDays ? `🔥 ${ball.streakDays} kun` : `${bugun.activity}/${bugun.normTarget}`;
     halqa('#normaHalqa', bugun.activity / (bugun.normTarget || 100));
-    if (ball.enabled) ballKuzat(bugun.points, $('#bugunBall'), bugun.day);
+    if (ball.enabled && !KESHDAN) ballKuzat(bugun.points, $('#bugunBall'), bugun.day);
   }
   if (p) {
     $('#reyting').textContent = p.rating;
@@ -389,7 +397,7 @@ function holatChiz(ball, p) {
     $('#priorNom').textContent = p.priority.level.name.toLowerCase();
     $('#priorPl').className = `pl prior ${p.priority.level.code}`;
     $('#priorOgoh').hidden = !(p.parts?.limits || []).length;
-    prioritetKuzat(p.priority.value);
+    if (!KESHDAN) prioritetKuzat(p.priority.value);
     $('#nishonlar').innerHTML = p.badges.map((b) =>
       `<button class="nsh ${b.earned ? '' : 'yoq'}" type="button" data-nishon="${b.code}" aria-label="${esc(b.name)}${b.earned ? '' : ' — hali olinmagan'}">${b.emoji}</button>`).join('');
   }
@@ -485,10 +493,50 @@ function boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar }) {
   }
 }
 
-(async () => {
-  salomChiz();
-  await WebViewAuth.tayyorla({ akademiya: false });
-  const ol = (u) => api(u).then((r) => (r && r.ok ? r.data : null)).catch(() => null);
+// ---------- tez ochilish: oxirgi ma'lumot darhol ko'rinadi, yangisi orqada yuklanadi ----------
+// Kesh kalitida akkaunt belgisi (ll_k): bitta telefonda boshqa mentor kirsa, eskisi ko'rinmaydi
+const KESH_MUDDAT = 3 * 24 * 3600e3;
+const keshKalit = () => { const m = document.cookie.match(/(?:^|; )ll_k=([0-9a-f]{8,})/); return m ? `home-kesh-v1-${m[1]}` : null; };
+function keshOl() {
+  try {
+    const k = keshKalit();
+    const v = k && JSON.parse(localStorage.getItem(k) || 'null');
+    return v && Date.now() - v.at < KESH_MUDDAT ? v.d : null;
+  } catch { return null; }
+}
+function keshYoz(d) {
+  try { const k = keshKalit(); if (k) localStorage.setItem(k, JSON.stringify({ at: Date.now(), d })); } catch { /* joy yo'q */ }
+}
+let KESHDAN = false;
+const MASLAHATLAR = [
+  '💡 Sinov darsi oxirida keyingi dars kunini shu yerning o‘zida kelishing — taklif shunda tez qabul qilinadi.',
+  '💡 Jadvalda soat qancha ko‘p ochiq bo‘lsa, so‘rovlar shuncha ko‘p keladi.',
+  '💡 Dars daftarida yangi so‘zlarni yozing — o‘quvchi darsdan keyin ham ko‘radi.',
+  '💡 O‘quvchini ismi bilan chaqiring va birinchi daqiqada maqtang — kayfiyat darsni hal qiladi.',
+  '💡 Darsga 2 daqiqa oldin kiring — o‘quvchi kutib qolmasin.',
+  '💡 Har dars oxirida uyga kichik vazifa bering — o‘quvchi keyingi darsni kutadi.',
+];
+function maslahatQoy() {
+  const el = $('#maslahat');
+  if (el) el.textContent = MASLAHATLAR[Math.floor(Math.random() * MASLAHATLAR.length)];
+}
+function korsat(d) {
+  const { hamyon, my, tarix, jadval, oquvchilar, ball, progress, akad } = d;
+  if (hamyon?.firstName) { ISM = hamyon.firstName.trim().split(/\s+/)[0]; salomChiz(); }
+  if (hamyon?.week) { $('#grafik').hidden = false; shamChiz(hamyon.week); } else $('#grafik').hidden = true;
+  DARSLAR = Array.isArray(my) ? my : [];
+  darslarChiz();
+  kutyaptiChiz({ tarix: Array.isArray(tarix) ? tarix : [], jadval, oquvchilar: Array.isArray(oquvchilar) ? oquvchilar : [], hamyon });
+  $('#darslar').removeAttribute('aria-busy');
+  $('#kutyapti').removeAttribute('aria-busy');
+  if (akad && akad.mentor && !akad.passed && $('#yol').hidden) {
+    $('#akad').hidden = false;
+    $('#akadMatn').textContent = `${akad.modulesRead}/${akad.modules} modul o‘qildi · testdan o‘tgach sinov so‘rovlari keladi`;
+  }
+  holatChiz(ball, progress);
+}
+const ol = (u) => api(u).then((r) => (r && r.ok ? r.data : null)).catch(() => null);
+async function yukla() {
   const [hamyon, my, tarix, jadval, oquvchilar, ball, progress, akad, sessiya, takliflar] = await Promise.all([
     ol('/api/wallet/summary'),
     ol('/api/booking/mentor/my'),
@@ -501,15 +549,24 @@ function boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar }) {
     ol('/api/mentor-session/me'),
     ol('/api/course-offers/my'),
   ]);
-  if (hamyon?.firstName) { ISM = hamyon.firstName.trim().split(/\s+/)[0]; salomChiz(); }
-  if (hamyon?.week) shamChiz(hamyon.week); else $('#grafik').hidden = true;
-  DARSLAR = Array.isArray(my) ? my : [];
-  darslarChiz();
-  kutyaptiChiz({ tarix: Array.isArray(tarix) ? tarix : [], jadval, oquvchilar: Array.isArray(oquvchilar) ? oquvchilar : [], hamyon });
-  if (akad && akad.mentor && !akad.passed) {
-    $('#akad').hidden = false;
-    $('#akadMatn').textContent = `${akad.modulesRead}/${akad.modules} modul o‘qildi · testdan o‘tgach sinov so‘rovlari keladi`;
+  const d = { hamyon, my, tarix, jadval, oquvchilar, ball, progress, akad, sessiya, takliflar };
+  korsat(d);
+  if (hamyon || my) keshYoz(d);
+  return d;
+}
+
+(async () => {
+  salomChiz();
+  const kesh = keshOl();
+  if (kesh) {
+    KESHDAN = true;
+    try { korsat(kesh); } catch { /* eski kesh — yangisi baribir keladi */ }
+    KESHDAN = false;
+  } else {
+    maslahatQoy();
   }
+  await WebViewAuth.tayyorla({ akademiya: false });
+  const { my, tarix, jadval, ball, progress, akad, sessiya, takliflar } = await yukla();
   boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar });
   // Mentor boti: ulanmagan bo'lsa bir martalik havola bilan karta
   // Mentor boti: ulanmagan bo'lsa bir martalik havola bilan karta. Telegramdan qaytganda
@@ -577,7 +634,6 @@ function boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar }) {
     $('#doimiyQoidaYop').onclick = yopD;
     $('#doimiyQoida').querySelector('a').addEventListener('click', yopD);
   }
-  holatChiz(ball, progress);
   await tabriklarniKorsat(ISM);
   if (progress) nishonTabrik(progress.badges);
   setInterval(() => { salomChiz(); darslarChiz(); }, 60e3);
@@ -588,10 +644,14 @@ function boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar }) {
     holatChiz(b, p);
     if (p) nishonTabrik(p.badges);
   }, 60e3);
-  // Ilovaga qaytganda (2 daqiqadan ko'p o'tgan bo'lsa) ma'lumot yangilansin
-  const yuklandi = Date.now();
+  // Ilovaga qaytganda (2 daqiqadan ko'p o'tgan bo'lsa) ma'lumot jimgina yangilanadi — sahifa qayta
+  // yuklanmaydi (oq ekran yo'q). Ertasi kuni qaytsa — to'liq yangilanadi (yangi versiya ham keladi).
+  const ochildi = Date.now();
+  let oxirgi = Date.now();
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && Date.now() - yuklandi > 120e3) location.reload();
+    if (document.visibilityState !== 'visible') return;
+    if (Date.now() - ochildi > 6 * 3600e3) { location.reload(); return; }
+    if (Date.now() - oxirgi > 120e3) { oxirgi = Date.now(); yukla(); }
   });
 })();
 </script>
