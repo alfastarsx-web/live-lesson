@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const express = require('express');
 const multer = require('multer');
 const { WebSocketServer } = require('ws');
-const { AUTH_ON, sign, verify, ROOM_RE } = require('./lib/token');
+const { AUTH_ON, sign, verify, ROOM_RE, signEslab, verifyEslab } = require('./lib/token');
 const { TURN_ON, TURN_HOST, iceServers } = require('./lib/turn');
 const teachers = require('./lib/teachers');
 const aiteacher = require('./lib/aiteacher');
@@ -134,6 +134,11 @@ app.use(express.json({ limit: '10kb' }));
 const COOKIE = 'll_sessiya';        // ustozning dars xonasi tokeni
 const AI_COOKIE = 'll_aiteacher';   // ai.myteacher.uz kirish tokeni (jadval uchun)
 
+// Haqiqiy mijoz IP si (nginx ortida) — API kirish urinishlarini shu bo'yicha cheklaydi, server IP si bo'yicha emas
+function mijozIp(req) {
+  return String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.headers['x-real-ip'] || req.socket.remoteAddress || '';
+}
+
 function cookies(req) {
   return Object.fromEntries(
     (req.headers.cookie || '').split(';').map((c) => {
@@ -164,8 +169,131 @@ function setCookies(req, res, royxat) {
   const domain = umumiyDomen(req);
   const headers = royxat.map(([nom, qiymat, maxAge]) => cookieHeader(req, nom, qiymat, maxAge, domain));
   if (domain) headers.push(...royxat.map(([nom]) => cookieHeader(req, nom, '', 0, null)));
-  res.setHeader('Set-Cookie', headers);
+  // Sessiya yangilash middleware'i oldinroq cookie qo'ygan bo'lishi mumkin — ustidan yozmaymiz, qo'shamiz
+  const oldin = res.getHeader('Set-Cookie');
+  res.setHeader('Set-Cookie', [...(oldin ? [].concat(oldin) : []), ...headers]);
 }
+
+// ---------- "Meni eslab qol": bir marta kirgan odamdan parol qayta so'ralmaydi ----------
+// ll_eslab — 180 kunlik imzolangan kalit (faqat userId). ai.myteacher.uz tokeni (1 kun) eskirsa,
+// server uni shu kalit bilan parolsiz yangilaydi. Ilova (WebView) ham, brauzer ham shu bilan ishlaydi.
+const ESLAB = 'll_eslab';
+const ESLAB_MUDDAT = 180 * 24 * 3600;
+const AI_COOKIE_MUDDAT = 7 * 24 * 3600;
+const XONA_MUDDAT = 12 * 3600;
+
+function eslabCookie(userId) {
+  return [ESLAB, signEslab(userId, ESLAB_MUDDAT), ESLAB_MUDDAT];
+}
+
+// Bir vaqtda kelgan so'rovlar API ni bir necha marta chaqirmasin
+const SESSIYA_KESH = new Map(); // userId -> { promise, until }
+function aiSessiya(userId) {
+  const k = SESSIYA_KESH.get(userId);
+  if (k && k.until > Date.now()) return k.promise;
+  const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
+  const promise = fetch(`${base}/auth/live-session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-lesson-secret': process.env.LESSON_TOKEN_SECRET || '' },
+    body: JSON.stringify({ userId }),
+    signal: AbortSignal.timeout(8000),
+  }).then(async (r) => {
+    if (!r.ok) return { ok: false, status: r.status };
+    const d = await r.json().catch(() => ({}));
+    return d.accessToken ? { ok: true, token: d.accessToken, roles: d.roles || [], name: d.firstName || 'Ustoz' } : { ok: false, status: 502 };
+  }).catch(() => ({ ok: false, status: 502 }));
+  SESSIYA_KESH.set(userId, { promise, until: Date.now() + 10 * 60_000 });
+  // Xato bo'lsa keshda qolmasin — keyingi so'rov qayta urinsin
+  promise.then((x) => { if (!x.ok) SESSIYA_KESH.delete(userId); });
+  if (SESSIYA_KESH.size > 5000) SESSIYA_KESH.delete(SESSIYA_KESH.keys().next().value);
+  return promise;
+}
+
+// Token haqiqatan ai.myteacher.uz niki ekanini API dan so'raymiz (imzoni bu server tekshira olmaydi)
+const TEKSHIRILGAN = new Map(); // token -> Promise<userId|null>
+function tokenEgasi(token) {
+  if (TEKSHIRILGAN.has(token)) return TEKSHIRILGAN.get(token);
+  const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
+  const p = fetch(`${base}/users/me`, { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(8000) })
+    .then(async (r) => {
+      if (!r.ok) return null;
+      const d = await r.json().catch(() => ({}));
+      const id = String(d.id || d.data?.id || '').toLowerCase();
+      return /^[0-9a-f-]{36}$/.test(id) ? id : null;
+    })
+    .catch(() => undefined); // tarmoq xatosi — keshlamaymiz
+  TEKSHIRILGAN.set(token, p);
+  p.then((x) => { if (x === undefined) TEKSHIRILGAN.delete(token); });
+  if (TEKSHIRILGAN.size > 5000) TEKSHIRILGAN.delete(TEKSHIRILGAN.keys().next().value);
+  return p;
+}
+
+// Yangi qiymatni shu so'rovning o'zida ham ko'rinadigan qilamiz (keyingi handlerlar cookies(req) o'qiydi)
+function reqCookie(req, nom, qiymat) {
+  const c = cookies(req);
+  c[nom] = qiymat;
+  req.headers.cookie = Object.entries(c).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('; ');
+}
+
+const tokenSub = (p) => String(p?.sub || p?.id || p?.userId || '').toLowerCase();
+
+async function sessiyaniYangila(req, res) {
+  if (!AUTH_ON || !aiteacher.AITEACHER_ON) return;
+  const c = cookies(req);
+  const ai = c[AI_COOKIE];
+  const p = ai ? aiteacher.jwtPayload(ai) : null;
+  const tirik = p && p.exp && p.exp * 1000 > Date.now() + 3600_000;
+  const eslab = verifyEslab(c[ESLAB]);
+
+  // 1) Eslab kaliti bor — token eskirgan/yo'q bo'lsa parolsiz yangilaymiz
+  if (eslab) {
+    const boshqaOdam = p && tokenSub(p) && tokenSub(p) !== eslab.userId;
+    if (boshqaOdam) return;
+    const royxat = [];
+    let rollar = p ? aiteacher.collectRoles(p) : [];
+    let ism = null;
+    if (!tirik) {
+      const s = await aiSessiya(eslab.userId);
+      if (!s.ok) {
+        // Akkaunt o'chirilgan / ruxsat yo'q — kalitni tozalaymiz; tarmoq xatosida tegmaymiz
+        if (s.status === 401 || s.status === 403) setCookies(req, res, [[ESLAB, '', 0]]);
+        return;
+      }
+      royxat.push([AI_COOKIE, s.token, AI_COOKIE_MUDDAT]);
+      reqCookie(req, AI_COOKIE, s.token);
+      rollar = aiteacher.collectRoles({ roles: s.roles });
+      ism = s.name;
+      req.sessiyaYangilandi = true;
+    }
+    // Mentorning dars xonasi tokeni ham yangilanadi
+    const mentor = rollar.includes('mentor') || rollar.includes('admin');
+    if (mentor && !verify(c[COOKIE])) {
+      if (!ism) ism = (await aiSessiya(eslab.userId)).name || 'Ustoz';
+      const safeId = eslab.userId.replace(/[^a-z0-9-]+/g, '').slice(0, 50);
+      const xona = sign({ room: `mentor-${safeId}`, role: 'teacher', name: String(ism).slice(0, 40) }, XONA_MUDDAT);
+      royxat.push([COOKIE, xona, XONA_MUDDAT]);
+      reqCookie(req, COOKIE, xona);
+    }
+    // Kalit muddati har kuni uzayadi — faol odam hech qachon chiqib ketmaydi
+    if (eslab.iat * 1000 < Date.now() - 24 * 3600_000) royxat.push(eslabCookie(eslab.userId));
+    if (royxat.length) setCookies(req, res, royxat);
+    return;
+  }
+
+  // 2) Eslab yo'q, lekin hozir amaldagi sessiya bor (deploydan oldin kirganlar) — bir marta tekshirib, kalit beramiz
+  if (ai && p && p.exp * 1000 > Date.now()) {
+    const id = await tokenEgasi(ai);
+    if (id && id === tokenSub(p)) setCookies(req, res, [eslabCookie(id)]);
+  }
+}
+
+// Statik fayllar (js/css/rasm) uchun API chaqirmaymiz — faqat sahifalar va /api so'rovlari
+const YANGILANMAYDI = /\.(js|css|png|jpe?g|svg|ico|webp|gif|woff2?|ttf|map|json|txt|mp3|wav|pdf)$/i;
+app.use(async (req, res, next) => {
+  if (YANGILANMAYDI.test(req.path) || req.path === '/api/logout' || req.path === '/api/login') return next();
+  try { await sessiyaniYangila(req, res); } catch (e) { console.warn('Sessiya yangilanmadi:', e.message); }
+  next();
+});
 
 function setSession(req, res, { room, name }) {
   const token = sign({ room, role: 'teacher', name }, 12 * 3600);
@@ -189,9 +317,10 @@ app.post('/api/login', async (req, res) => {
 
   // 1) Asosiy yo'l — ai.myteacher.uz dagi mavjud hisob (mentor ham, o'quvchi ham)
   if (aiteacher.AITEACHER_ON) {
-    const r = await aiteacher.signIn(login, password);
+    const r = await aiteacher.signIn(login, password, mijozIp(req));
     if (r.ok) {
-      const royxat = [[AI_COOKIE, r.token || '', 12 * 3600]];
+      const royxat = [[AI_COOKIE, r.token || '', AI_COOKIE_MUDDAT]];
+      if (AUTH_ON && /^[0-9a-f-]{36}$/.test(r.id)) royxat.push(eslabCookie(r.id));
 
       if (r.isMentor) {
         // Mentorga dars xonasi tokeni ham beriladi
@@ -221,7 +350,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/logout', (req, res) => {
-  setCookies(req, res, [[COOKIE, '', 0], [AI_COOKIE, '', 0]]);
+  setCookies(req, res, [[COOKIE, '', 0], [AI_COOKIE, '', 0], [ESLAB, '', 0]]);
   res.json({ ok: true });
 });
 
@@ -419,7 +548,8 @@ app.post('/api/kirish', async (req, res) => {
     const jwt = aiteacher.findJwt(data);
     if (!jwt) return res.status(502).json({ error: 'Kirish tokeni kelmadi' });
 
-    setCookies(req, res, [[AI_COOKIE, jwt, 12 * 3600]]);
+    const sub = tokenSub(aiteacher.jwtPayload(jwt));
+    setCookies(req, res, [[AI_COOKIE, jwt, AI_COOKIE_MUDDAT], ...(AUTH_ON && /^[0-9a-f-]{36}$/.test(sub) ? [eslabCookie(sub)] : [])]);
     return res.json({ ok: true });
   } catch {
     return res.status(502).json({ error: 'ai.myteacher.uz javob bermadi' });
@@ -474,13 +604,17 @@ app.get(/^\/api\/ai\/(.+)$/, (req, res) => {
 
 // Ilova WebView'ni #ai=<token> bilan ochadi — sahifa tokenni shu yerga uzatib,
 // cookie'ga aylantiradi. Hash serverga umuman yuborilmaydi, ya'ni loglarga tushmaydi.
-app.post('/api/adopt', (req, res) => {
+app.post('/api/adopt', async (req, res) => {
   const token = String(req.body?.token || '');
   const payload = aiteacher.jwtPayload(token);
   if (!payload || !payload.exp || payload.exp * 1000 < Date.now()) {
     return res.status(400).json({ error: 'token yaroqsiz' });
   }
-  setCookies(req, res, [[AI_COOKIE, token, 12 * 3600]]);
+  // Ilova tokeni — eslab kaliti faqat API tasdiqlasa beriladi (aks holda soxta token bilan kirib bo'lardi)
+  const egasi = AUTH_ON && aiteacher.AITEACHER_ON ? await tokenEgasi(token) : null;
+  const royxat = [[AI_COOKIE, token, AI_COOKIE_MUDDAT]];
+  if (egasi && egasi === tokenSub(payload)) royxat.push(eslabCookie(egasi));
+  setCookies(req, res, royxat);
   const roles = aiteacher.collectRoles(payload);
   res.json({ ok: true, role: roles.includes('mentor') || roles.includes('admin') ? 'mentor' : 'student' });
 });
@@ -709,9 +843,14 @@ app.get('/', async (req, res) => {
 // Sessiyasi bor odamga login formasi ko'rsatilmaydi. ?keyin= bo'lsa — sahifa hozirgina
 // 401 olgan (token bekor qilingan), qayta yo'naltirsak aylanib qoladi — formani ko'rsatamiz.
 app.get(/^\/login(\.html)?$/, async (req, res, next) => {
-  if (req.query.keyin) return next();
   const ai = amaldagiAiToken(req);
   if (!ai) return next();
+  if (req.query.keyin) {
+    // Sessiya hozirgina eslab kaliti bilan yangilandi — formani emas, so'ralgan sahifani ochamiz
+    const keyin = String(req.query.keyin);
+    if (!req.sessiyaYangilandi || !keyin.startsWith('/') || keyin.startsWith('//')) return next();
+    return res.redirect(keyin);
+  }
   res.redirect(await boshSahifa(req, ai));
 });
 
