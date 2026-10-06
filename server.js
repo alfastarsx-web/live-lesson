@@ -737,6 +737,19 @@ async function liveApi(action, data) {
   return response.json();
 }
 
+// Dars daftarini API ga saqlash (ustoz yozishdan to'xtagach 3 soniyada; dars tugaganda darhol)
+const DAFTAR_KUTISH_MS = 3000;
+function daftarSaqla(roomId, room, darhol = false) {
+  clearTimeout(room.daftarTaymer);
+  const yubor = () => {
+    room.daftarTaymer = null;
+    liveApi('notes', { room: roomId, lessonId: room.lessonId || undefined, notes: room.state.notes })
+      .catch((err) => console.warn('Dars daftari saqlanmadi:', err.message));
+  };
+  if (darhol) yubor();
+  else room.daftarTaymer = setTimeout(yubor, DAFTAR_KUTISH_MS);
+}
+
 async function endActiveRoom(roomId, room) {
   if (!room.lessonId || room.ended) return;
   room.ended = true;
@@ -785,7 +798,9 @@ function ekranHolati(room, on, fromId) {
 
 function emptyState() {
   // screen — ustoz ekranini ulashyapti; studentDraw — o'quvchiga chizishga ruxsat
-  return { doc: null, page: 1, strokes: [], scroll: 0, screen: false, studentDraw: false };
+  // notes — dars daftari: ustoz yozadi, o'quvchi jonli ko'radi, API ga saqlanadi
+  return { doc: null, page: 1, strokes: [], scroll: 0, screen: false, studentDraw: false,
+    notes: { matn: '', sozlar: '', vazifa: '' } };
 }
 
 // ---------- xona holatini saqlash (deploy/qayta ishga tushishdan keyin tiklash) ----------
@@ -1106,6 +1121,7 @@ wss.on('connection', async (ws, req) => {
       // --- Ustoz darsni yakunladi: o'quvchida baho oynasi ochiladi ---
       case 'dars-tugadi':
         if (role !== 'teacher') return;
+        if (room.daftarTaymer) daftarSaqla(roomId, room, true);
         if (roomId.startsWith('sinov-')) {
           room.ended = true;
           void sinovHisoboti(roomId, room, true);
@@ -1188,6 +1204,18 @@ wss.on('connection', async (ws, req) => {
         broadcast(room, { type: 'student-draw', on: room.state.studentDraw }, clientId);
         logEvent(room, { type: 'student-draw', on: room.state.studentDraw });
         break;
+
+      // --- Dars daftari: eslatmalar, yangi so'zlar, uyga vazifa (faqat ustoz yozadi) ---
+      case 'notes': {
+        if (role !== 'teacher') return;
+        const n = msg.notes || {};
+        const toza = (v) => (typeof v === 'string' ? v.slice(0, 10000) : '');
+        room.state.notes = { matn: toza(n.matn), sozlar: toza(n.sozlar), vazifa: toza(n.vazifa) };
+        const tab = ['matn', 'sozlar', 'vazifa'].includes(msg.tab) ? msg.tab : null;
+        broadcast(room, { type: 'notes', notes: room.state.notes, tab }, clientId);
+        daftarSaqla(roomId, room);
+        break;
+      }
 
       // --- Ustoz ekranini ulashdi / to'xtatdi (video o'zi WebRTC orqali keladi) ---
       case 'screen':

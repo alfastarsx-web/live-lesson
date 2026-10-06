@@ -169,3 +169,40 @@ body:not(.teacher) .faqat-ustoz{display:none}
 /* iPhone'da videoga bosilsa tizim pleyeri (LIVE / pauza) ochilmasin — videolar faqat ko'rsatish uchun */
 video{pointer-events:none}
 video::-webkit-media-controls{display:none !important}
+
+/* ===== Dars daftari (slayd ostida): eslatmalar, yangi so'zlar, uyga vazifa ===== */
+.daftar{flex:0 0 auto;display:flex;flex-direction:column;border-top:1px solid var(--line);background:#1b1c20;
+  height:var(--daftar-h, 30vh);min-height:0;transition:height .2s}
+.daftar.yigiq{height:42px}
+.daftar-bosh{display:flex;align-items:center;gap:4px;padding:5px 8px;flex:0 0 auto;overflow-x:auto;scrollbar-width:none}
+.daftar-bosh::-webkit-scrollbar{display:none}
+.daftar-tab{position:relative;flex:0 0 auto;border:1px solid var(--line);background:#26282c;color:var(--mut);border-radius:999px;
+  padding:5px 11px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.daftar-tab[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#17181b}
+.daftar-tab i{position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:#f59e0b;display:none}
+.daftar-tab.yangi i{display:block}
+.daftar-holat{flex:1;font-size:11.5px;color:var(--mut);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.daftar-yig{flex:0 0 auto;width:30px;height:30px;border-radius:10px;border:1px solid var(--line);background:#26282c;color:var(--fg);cursor:pointer}
+.daftar.yigiq .daftar-yig{transform:rotate(180deg)}
+.daftar-tana{flex:1;min-height:0;display:flex;padding:0 8px 8px}
+.daftar.yigiq .daftar-tana{display:none}
+#daftarMatn{flex:1;resize:none;border:1px solid var(--line);border-radius:12px;background:#f7f7f5;color:#1f2937;
+  padding:10px 12px;font:inherit;font-size:14.5px;line-height:1.5;outline:none}
+#daftarMatn:focus{border-color:var(--acc);box-shadow:0 0 0 2px rgba(111,165,136,.35)}
+.daftar-kor{flex:1;overflow:auto;border-radius:12px;background:#f7f7f5;color:#1f2937;padding:10px 12px;
+  font-size:14.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+body.teacher .daftar-kor{display:none}
+.daftar-kor .bosh{color:#8b8f97;font-size:13px}
+.daftar-kor .soz{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid #e7e7e2;white-space:normal}
+.daftar-kor .soz:last-child{border-bottom:0}
+.daftar-kor .soz b{min-width:40%;color:#111827}
+.daftar-kor .soz span{color:#4b5563}
+@media (min-width:900px) and (orientation:landscape){
+  .daftar{--daftar-h:190px}
+}
+/* Ekran ulashilganda video daftar bilan birga sig'sin */
+#screenVideo{max-height:calc(100dvh - clamp(130px, 26vh, 260px) - 70px - var(--daftar-joy, 0px))}
+@media (min-width:900px) and (orientation:landscape){
+  #screenVideo{max-height:calc(100dvh - 60px - var(--daftar-joy, 0px))}
+}
+@media (max-width:480px){body:not(.teacher) .daftar-holat{visibility:hidden}}

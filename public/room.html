@@ -77,6 +77,21 @@
         <canvas id="inkCanvas"></canvas>
       </div>
     </div>
+  
+    <!-- Dars daftari: ustoz yozadi, o'quvchi jonli ko'radi; darsdan keyin Kurslar bo'limida saqlanadi -->
+    <div class="daftar" id="daftar">
+      <div class="daftar-bosh">
+        <button type="button" class="daftar-tab" data-d="matn" aria-pressed="true">📝 Eslatmalar<i></i></button>
+        <button type="button" class="daftar-tab" data-d="sozlar" aria-pressed="false">📚 So‘zlar<i></i></button>
+        <button type="button" class="daftar-tab" data-d="vazifa" aria-pressed="false">🏠 Vazifa<i></i></button>
+        <span class="daftar-holat" id="daftarHolat"></span>
+        <button type="button" class="daftar-yig" id="daftarYig" title="Yig‘ish / ochish">▾</button>
+      </div>
+      <div class="daftar-tana">
+        <textarea id="daftarMatn" class="faqat-ustoz" maxlength="10000" spellcheck="false"></textarea>
+        <div id="daftarKor" class="daftar-kor"></div>
+      </div>
+    </div>
   </section>
 </div>
 
