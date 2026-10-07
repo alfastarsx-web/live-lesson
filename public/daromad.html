@@ -346,22 +346,21 @@ function kunlikChiz() {
 }
 $('#kartaQosh').onclick = () => {
   oyna(`<h3 id="pastkiSarlavha">Karta qo‘shish</h3>
-    <p class="xira" style="margin:0">Karta raqami bizda saqlanmaydi — faqat oxirgi 4 raqami ko‘rinadi. Karta sizning nomingizda bo‘lishi kerak.</p>
+    <p class="xira" style="margin:0">Karta raqami va egasining ismini kiriting. Karta o‘z nomingizda bo‘lishi tavsiya etiladi.</p>
     <label>Karta raqami<input id="kPan" inputmode="numeric" autocomplete="cc-number" placeholder="8600 0000 0000 0000" maxlength="19"></label>
     <label>Karta egasi<input id="kIsm" autocomplete="cc-name" placeholder="ISM FAMILIYA"></label>
-    <button class="tugma ikkinchi" id="kSms" type="button">SMS kod olish</button>
-    <label>SMS kod<input id="kKod" inputmode="numeric" autocomplete="one-time-code" maxlength="5" placeholder="5 xonali kod"></label>
     <div class="xato" id="kXato" role="alert"></div>
     <div class="qator3"><button class="tugma ikkinchi" type="button" id="kBekor">Bekor</button><button class="tugma" type="button" id="kSaqla">Qo‘shish</button></div>`);
   $('#kPan').addEventListener('input', (e) => { const d = e.target.value.replace(/\D/g, '').slice(0, 16); e.target.value = d.replace(/(\d{4})(?=\d)/g, '$1 '); });
   $('#kBekor').onclick = yop;
-  $('#kSms').onclick = async () => { $('#kXato').textContent = (await smsYubor('card', $('#kSms'))) || ''; $('#kKod').focus(); };
   $('#kSaqla').onclick = async () => {
     const pan = $('#kPan').value.replace(/\D/g, '');
+    const holderName = $('#kIsm').value.trim();
     if (pan.length !== 16) { $('#kXato').textContent = 'Karta raqami 16 ta raqam bo‘lishi kerak'; return; }
+    if (holderName.length < 3) { $('#kXato').textContent = 'Karta egasining ismini kiriting'; return; }
     $('#kSaqla').disabled = true;
     const r = await api('/api/wallet/cards', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ pan, holderName: $('#kIsm').value.trim(), code: $('#kKod').value.trim() }) });
+      body: JSON.stringify({ pan, holderName }) });
     $('#kSaqla').disabled = false;
     if (!r) return;
     if (!r.ok) { $('#kXato').textContent = xatoMatn(r.data); return; }
