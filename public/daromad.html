@@ -346,21 +346,22 @@ function kunlikChiz() {
 }
 $('#kartaQosh').onclick = () => {
   oyna(`<h3 id="pastkiSarlavha">Karta qo‘shish</h3>
-    <p class="xira" style="margin:0">Karta raqami va egasining ismini kiriting. Karta o‘z nomingizda bo‘lishi tavsiya etiladi.</p>
+    <p class="xira" style="margin:0">Karta raqami bizda saqlanmaydi — faqat oxirgi 4 raqami ko‘rinadi. Karta sizning nomingizda bo‘lishi kerak.</p>
     <label>Karta raqami<input id="kPan" inputmode="numeric" autocomplete="cc-number" placeholder="8600 0000 0000 0000" maxlength="19"></label>
     <label>Karta egasi<input id="kIsm" autocomplete="cc-name" placeholder="ISM FAMILIYA"></label>
+    <button class="tugma ikkinchi" id="kSms" type="button">SMS kod olish</button>
+    <label>SMS kod<input id="kKod" inputmode="numeric" autocomplete="one-time-code" maxlength="5" placeholder="5 xonali kod"></label>
     <div class="xato" id="kXato" role="alert"></div>
     <div class="qator3"><button class="tugma ikkinchi" type="button" id="kBekor">Bekor</button><button class="tugma" type="button" id="kSaqla">Qo‘shish</button></div>`);
   $('#kPan').addEventListener('input', (e) => { const d = e.target.value.replace(/\D/g, '').slice(0, 16); e.target.value = d.replace(/(\d{4})(?=\d)/g, '$1 '); });
   $('#kBekor').onclick = yop;
+  $('#kSms').onclick = async () => { $('#kXato').textContent = (await smsYubor('card', $('#kSms'))) || ''; $('#kKod').focus(); };
   $('#kSaqla').onclick = async () => {
     const pan = $('#kPan').value.replace(/\D/g, '');
-    const holderName = $('#kIsm').value.trim();
     if (pan.length !== 16) { $('#kXato').textContent = 'Karta raqami 16 ta raqam bo‘lishi kerak'; return; }
-    if (holderName.length < 3) { $('#kXato').textContent = 'Karta egasining ismini kiriting'; return; }
     $('#kSaqla').disabled = true;
     const r = await api('/api/wallet/cards', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ pan, holderName }) });
+      body: JSON.stringify({ pan, holderName: $('#kIsm').value.trim(), code: $('#kKod').value.trim() }) });
     $('#kSaqla').disabled = false;
     if (!r) return;
     if (!r.ok) { $('#kXato').textContent = xatoMatn(r.data); return; }
@@ -370,26 +371,73 @@ $('#kartaQosh').onclick = () => {
 
 // ---------- yechib olish ----------
 $('#yechTugma').onclick = () => {
-  if (!S.cards.length) { toast('Avval karta qo‘shing'); $('#kartaQosh').click(); return; }
+  const cards = S?.cards || [];
+  const birlamchi = cards.find((c) => c.isPrimary) || cards[0];
+  const mavjudKartaHtml = cards.length
+    ? `<div style="margin-bottom:10px">
+        <label>Karta<select id="yK">
+          ${cards.map((c) => `<option value="${c.id}" ${birlamchi && c.id === birlamchi.id ? 'selected' : ''}>${esc(c.cardPan || c.masked)}${c.holderName ? ` (${esc(c.holderName)})` : ''}</option>`).join('')}
+          <option value="yangi">+ Boshqa karta raqamini kiritish</option>
+        </select></label>
+      </div>`
+    : '';
+
   oyna(`<h3 id="pastkiSarlavha">Kartaga yechib olish</h3>
     <p class="xira" style="margin:0">Balansda <b class="num">${pul(S.balance)} so‘m</b>. Soliq allaqachon ushlangan — kartangizga aynan shu summa tushadi.</p>
     <label>Summa (so‘m)<input id="yS" inputmode="decimal" placeholder="${pul(S.rules.minWithdraw)} dan"></label>
-    <label>Karta<select id="yK">${S.cards.map((c) => `<option value="${c.id}">${esc(c.masked)}${c.holderName ? ` (${esc(c.holderName)})` : ''}</option>`).join('')}</select></label>
+    ${mavjudKartaHtml}
+    <div id="yKartaKiritish" ${cards.length ? 'style="display:none"' : ''}>
+      <label>Karta raqami<input id="yPan" inputmode="numeric" autocomplete="cc-number" placeholder="8600 0000 0000 0000" maxlength="19"></label>
+      <label>Karta egasi<input id="yIsm" autocomplete="cc-name" placeholder="ISM FAMILIYA"></label>
+    </div>
     <div class="xato" id="yXato" role="alert"></div>
     <div class="qator3"><button class="tugma ikkinchi" type="button" id="yBekor">Bekor</button><button class="tugma" type="button" id="yOk">So‘rov yuborish</button></div>`);
+
+  $('#yPan')?.addEventListener('input', (e) => {
+    const d = e.target.value.replace(/\D/g, '').slice(0, 16);
+    e.target.value = d.replace(/(\d{4})(?=\d)/g, '$1 ');
+  });
+
+  if ($('#yK')) {
+    $('#yK').onchange = () => {
+      const yangi = $('#yK').value === 'yangi';
+      $('#yKartaKiritish').style.display = yangi ? 'block' : 'none';
+      if (yangi) $('#yPan').focus();
+    };
+  }
+
   $('#yBekor').onclick = yop;
   $('#yOk').onclick = async () => {
     const amount = Number($('#yS').value.replace(/\s/g, '').replace(',', '.'));
     if (!amount || amount <= 0) { $('#yXato').textContent = 'Summani to‘g‘ri kiriting'; return; }
     if (amount < S.rules.minWithdraw) { $('#yXato').textContent = `Minimal summa: ${pul(S.rules.minWithdraw)} so‘m`; return; }
     if (amount > S.balance) { $('#yXato').textContent = 'Balansda yetarli mablag‘ yo‘q'; return; }
+
+    const tanlangan = $('#yK') ? $('#yK').value : 'yangi';
+    const payload = { amount };
+    if (tanlangan && tanlangan !== 'yangi') {
+      payload.cardId = tanlangan;
+    } else {
+      const pan = $('#yPan').value.replace(/\D/g, '');
+      const holderName = $('#yIsm').value.trim();
+      if (pan.length !== 16) { $('#yXato').textContent = 'Karta raqami 16 ta raqam bo‘lishi kerak'; return; }
+      if (holderName.length < 3) { $('#yXato').textContent = 'Karta egasining ismini kiriting'; return; }
+      payload.pan = pan;
+      payload.holderName = holderName;
+    }
+
     $('#yOk').disabled = true;
-    const r = await api('/api/wallet/withdrawals', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ amount, cardId: $('#yK').value }) });
+    const r = await api('/api/wallet/withdrawals', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
     $('#yOk').disabled = false;
     if (!r) return;
     if (!r.ok) { $('#yXato').textContent = xatoMatn(r.data); return; }
-    yop(); toast('So‘rov yuborildi — admin ko‘rib chiqqach o‘tkaziladi', 'ok'); yukla();
+    yop();
+    toast('So‘rov yuborildi — admin ko‘rib chiqqach o‘tkaziladi', 'ok');
+    yukla();
   };
 };
 
