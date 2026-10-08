@@ -286,19 +286,46 @@ const KAMERA = TELEFON
   ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 15, max: 20 }, facingMode: 'user' }
   : { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24, max: 30 }, facingMode: 'user' };
 
+const AUDIO_SOZLAMALARI = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+
 async function initMedia() {
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      audio: AUDIO_SOZLAMALARI,
       video: KAMERA,
     });
   } catch (err) {
-    console.warn('getUserMedia:', err);
-    toast('Kamera/mikrofonga ruxsat berilmadi', 5000);
-    return;
+    console.warn('getUserMedia audio+video xato, faqat ovozni sinab ko‘ramiz:', err);
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: AUDIO_SOZLAMALARI });
+      toast('Kamera topilmadi yoki ruxsat yo‘q — faqat ovoz ulandi', 4000);
+    } catch (err2) {
+      console.warn('getUserMedia faqat audio xato, faqat kamerani sinaymiz:', err2);
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: KAMERA });
+        toast('Mikrofon topilmadi yoki ruxsat yo‘q — faqat kamera ulandi', 4000);
+      } catch (err3) {
+        console.warn('getUserMedia barcha qurilmalar xato:', err3);
+        toast('Kamera/mikrofonga ruxsat berilmadi. Suhbatdoshni eshitish uchun sahifada qoling', 6000);
+        return;
+      }
+    }
   }
-  el.localVideo.srcObject = localStream;
-  el.localPh.hidden = true;
+  if (localStream) {
+    const hasVideo = localStream.getVideoTracks().length > 0;
+    const hasAudio = localStream.getAudioTracks().length > 0;
+    if (hasVideo) {
+      el.localVideo.srcObject = localStream;
+      el.localPh.hidden = true;
+    } else {
+      el.localPh.hidden = false;
+      const b = el.localPh.querySelector('b');
+      if (b) b.textContent = 'Kamera o‘chiq';
+    }
+    el.btnMic.classList.toggle('off', !hasAudio);
+    el.btnMic.textContent = hasAudio ? '🎤' : '🔇';
+    el.btnCam.classList.toggle('off', !hasVideo);
+  }
 }
 
 function ensurePc() {
@@ -306,6 +333,16 @@ function ensurePc() {
   pc = new RTCPeerConnection(RTC_CONFIG);
 
   if (localStream) localStream.getTracks().forEach((t) => pc.addTrack(t, localStream));
+
+  // Agar mahalliy mikrofon yoki kamera bo'lmasa — qabul qilish (recvonly) yo'lagini qo'shamiz,
+  // shunda suhbatdoshning ovozi va videosi keladi va ekran ulashish ishlaydi
+  try {
+    const senders = pc.getSenders();
+    const hasAudio = senders.some((s) => s.track && s.track.kind === 'audio');
+    const hasVideo = senders.some((s) => s.track && s.track.kind === 'video');
+    if (!hasAudio) pc.addTransceiver('audio', { direction: 'recvonly' });
+    if (!hasVideo) pc.addTransceiver('video', { direction: 'recvonly' });
+  } catch (e) { console.warn('transceivers', e); }
   // Ekran ulashilayotgan paytda o'quvchi qayta kirsa — unga ham ekran ketsin
   if (screenTrack) videoniAlmashtir(screenTrack);
 
@@ -428,16 +465,61 @@ function teardownPeer() {
 }
 
 // --- Mic / Cam ---
-el.btnMic.onclick = () => {
-  const t = localStream && localStream.getAudioTracks()[0];
-  if (!t) return toast('Mikrofon yo‘q');
+el.btnMic.onclick = async () => {
+  let t = localStream && localStream.getAudioTracks()[0];
+  if (!t) {
+    try {
+      const ms = await navigator.mediaDevices.getUserMedia({ audio: AUDIO_SOZLAMALARI });
+      t = ms.getAudioTracks()[0];
+      if (!localStream) localStream = new MediaStream();
+      localStream.addTrack(t);
+      if (pc) {
+        const sender = pc.getSenders().find((s) => s.track && s.track.kind === 'audio');
+        if (sender) {
+          await sender.replaceTrack(t);
+        } else {
+          pc.addTrack(t, localStream);
+          if (pc.signalingState === 'stable') restartIce();
+        }
+      }
+      el.btnMic.classList.remove('off');
+      el.btnMic.textContent = '🎤';
+      toast('Mikrofon yoqildi', 3000);
+      return;
+    } catch {
+      return toast('Mikrofon ruxsati berilmadi');
+    }
+  }
   t.enabled = !t.enabled;
   el.btnMic.classList.toggle('off', !t.enabled);
   el.btnMic.textContent = t.enabled ? '🎤' : '🔇';
 };
-el.btnCam.onclick = () => {
-  const t = localStream && localStream.getVideoTracks()[0];
-  if (!t) return toast('Kamera yo‘q');
+el.btnCam.onclick = async () => {
+  let t = localStream && localStream.getVideoTracks()[0];
+  if (!t) {
+    try {
+      const ms = await navigator.mediaDevices.getUserMedia({ video: KAMERA });
+      t = ms.getVideoTracks()[0];
+      if (!localStream) localStream = new MediaStream();
+      localStream.addTrack(t);
+      el.localVideo.srcObject = localStream;
+      el.localPh.hidden = true;
+      if (pc) {
+        const sender = pc.getSenders().find((s) => s.track && s.track.kind === 'video');
+        if (sender) {
+          await sender.replaceTrack(t);
+        } else {
+          pc.addTrack(t, localStream);
+          if (pc.signalingState === 'stable') restartIce();
+        }
+      }
+      el.btnCam.classList.remove('off');
+      toast('Kamera yoqildi', 3000);
+      return;
+    } catch {
+      return toast('Kamera ruxsati berilmadi');
+    }
+  }
   t.enabled = !t.enabled;
   el.btnCam.classList.toggle('off', !t.enabled);
   el.localVideo.classList.toggle('off', !t.enabled);
