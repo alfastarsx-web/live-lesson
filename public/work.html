@@ -398,9 +398,22 @@ async function kamSinash() {
     s.getTracks().forEach((t) => t.stop());
     return { ok: true };
   } catch (e) {
+    try {
+      const s2 = await navigator.mediaDevices.getUserMedia({ audio: true });
+      s2.getTracks().forEach((t) => t.stop());
+      return { ok: true, faqatAudio: true };
+    } catch {}
     const n = (e && e.name) || '';
     if (!/NotAllowed|Security|PermissionDenied/.test(n)) return { ok: true, n }; // band / topilmadi — ruxsat masalasi emas
-    const bor = async (c) => { try { const x = await navigator.mediaDevices.getUserMedia(c); x.getTracks().forEach((t) => t.stop()); return true; } catch { return false; } };
+    const bor = async (c) => {
+      try {
+        const p = navigator.mediaDevices.getUserMedia(c);
+        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 1500));
+        const x = await Promise.race([p, timeout]);
+        x.getTracks().forEach((t) => t.stop());
+        return true;
+      } catch { return false; }
+    };
     return { ok: false, mik: await bor({ audio: true }), kam: await bor({ video: true }) };
   }
 }
@@ -410,14 +423,8 @@ async function kamTekshir() {
   kamKartChiz(r.ok ? 'ok' : 'xato', r);
   return r.ok;
 }
-// Darsga kirish / boshlashdan oldin: ruxsat yo'q bo'lsa — kirgizmaymiz
 async function kamDarsOldi() {
-  const r = await kamSinash();
-  if (r.ok) return true;
-  kamKartChiz('xato', r);
-  document.getElementById('kamUstoz')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  toast('Avval kamera va mikrofonga ruxsat bering — yo‘riqnoma yuqorida', 'err');
-  return false;
+  return true;
 }
 async function kamDastlab() {
   try {
@@ -1145,7 +1152,6 @@ function tugmalarniUla(box) {
   });
   box.querySelectorAll('[data-hozir]').forEach((b) => {
     b.onclick = async () => {
-      if (!(await kamDarsOldi())) return;
       if (!confirm('O‘quvchi hozir darsga tayyor ekanini telefonda aniqladingizmi?\n\nDars shu daqiqaga ko‘chadi, o‘quvchiga “Darsga kiring” xabari boradi. Keyingi darsingizgacha kamida 30 daqiqa bo‘lishi kerak.')) return;
       b.disabled = true;
       const r = await api(`/api/trial/booking/${b.dataset.hozir}/start-now`, { method: 'POST' })
@@ -1162,7 +1168,6 @@ function tugmalarniUla(box) {
   box.querySelectorAll('[data-kirish]').forEach((b) => {
     b.onclick = async () => {
       b.disabled = true;
-      if (!(await kamDarsOldi())) { b.disabled = false; return; }
       // Sinov darsi — /entry (lidga ochiq havola bilan bir xil xona); oddiy dars — /start
       // (o'quvchiga "dars boshlandi" push'i ketadi va faol xona ochiladi)
       const e = b.dataset.sinov
