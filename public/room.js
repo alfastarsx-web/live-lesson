@@ -280,42 +280,168 @@ const RTC_CONFIG = {
 let pc = null, localStream = null, pendingIce = [], remoteStream = null;
 
 // Telefonda kamera yengilroq: 720p kodlash telefonni qizdiradi va batareyani tez yeydi,
-// kichik plitkada esa farqi ko'rinmaydi
+// kichik plitkada esa farqi ko'rinmaydi.
+// Kompyuterlarda esa facingMode ko'rsatilmaydi, chunki tashqi USB veb-kameralar va
+// virtual kameralar (OBS, ManyCam va h.k.) facingMode talab qilinsa OverconstrainedError beradi.
 const TELEFON = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 const KAMERA = TELEFON
   ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 15, max: 20 }, facingMode: 'user' }
-  : { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24, max: 30 }, facingMode: 'user' };
+  : { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24, max: 30 } };
 
 const AUDIO_SOZLAMALARI = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
 
+/** Kamera xatolarini foydalanuvchiga tushunarli tarzda ko'rsatish */
+function kameraXatosiniKorsat(err) {
+  if (!err) return;
+  const name = err.name || '';
+  if (name === 'NotAllowedError' || name === 'PermissionDeniedError' || name === 'SecurityError') {
+    if (TELEFON) {
+      toast('Kameraga ruxsat berilmagan. Telefon Sozlamalari -> Ilovalar -> Mentor -> Ruxsatlar orqali yoqing', 7000);
+    } else {
+      toast('Kameraga ruxsat berilmagan. Brauzer qidiruv qatoridagi qulf 🔒 belgisidan ruxsat bering', 7000);
+    }
+  } else if (name === 'NotReadableError' || name === 'TrackStartError') {
+    toast('Kamera boshqa dastur (Telegram/Zoom) tomonidan band qilingan. Uni yopib qayta urinib ko‘ring', 7000);
+  } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+    toast('Kamera qurilmasi topilmadi. Qurilma ulanganini tekshiring', 5000);
+  } else if (name === 'OverconstrainedError') {
+    toast('Kamera ruxsati berildi, ammo kiritilgan parametrlar mos kelmadi', 5000);
+  } else if (name === 'NotSupportedError') {
+    toast('Brauzeringizda video/audio qo‘llab-quvvatlanmaydi yoki sayt HTTPS emas', 6000);
+  } else {
+    toast('Kamerani yoqib bo‘lmadi: ' + (err.message || name || 'xatolik yuz berdi'), 5000);
+  }
+}
+
+/** Mikrofon xatolarini tushunarli tarzda ko'rsatish */
+function mikrofonXatosiniKorsat(err) {
+  if (!err) return;
+  const name = err.name || '';
+  if (name === 'NotAllowedError' || name === 'PermissionDeniedError' || name === 'SecurityError') {
+    if (TELEFON) {
+      toast('Mikrofonga ruxsat berilmagan. Telefon Sozlamalari orqali ruxsat bering', 6000);
+    } else {
+      toast('Mikrofonga ruxsat berilmagan. Brauzer qidiruv qatoridagi qulf 🔒 belgisidan ruxsat bering', 6000);
+    }
+  } else if (name === 'NotReadableError' || name === 'TrackStartError') {
+    toast('Mikrofon boshqa ilova tomonidan band qilingan', 6000);
+  } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+    toast('Mikrofon qurilmasi topilmadi', 5000);
+  } else {
+    toast('Mikrofonni yoqib bo‘lmadi: ' + (err.message || name), 5000);
+  }
+}
+
+/** Kamerani optimal sozlamada olish; o'xshamasa cheklovsiz ({ video: true }) yumshoq sozlamada qayta urinish */
+async function videoOlish() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    const err = new Error('NOT_SUPPORTED');
+    err.name = 'NotSupportedError';
+    throw err;
+  }
+  try {
+    return await navigator.mediaDevices.getUserMedia({ video: KAMERA });
+  } catch (err1) {
+    console.warn('[kamera] optimal sozlamalar bilan xato:', err1);
+    // Agar foydalanuvchi rad etgan bo'lsa yoki apparat band bo'lsa, qayta urinish befoyda
+    if (err1.name === 'NotAllowedError' || err1.name === 'PermissionDeniedError' || err1.name === 'NotReadableError') {
+      throw err1;
+    }
+    // Tashqi USB kameralar, virtual kameralar va nozik drayverlar uchun yumshoq cheklov bilan qayta urinish
+    try {
+      console.log('[kamera] yumshoq { video: true } sozlamasi bilan qayta urinilmoqda...');
+      return await navigator.mediaDevices.getUserMedia({ video: true });
+    } catch (err2) {
+      console.warn('[kamera] yumshoq sozlama bilan ham xato:', err2);
+      throw err2;
+    }
+  }
+}
+
+/** Mikrofonni optimal, bo'lmasa oddiy sozlamada olish */
+async function audioOlish() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    const err = new Error('NOT_SUPPORTED');
+    err.name = 'NotSupportedError';
+    throw err;
+  }
+  try {
+    return await navigator.mediaDevices.getUserMedia({ audio: AUDIO_SOZLAMALARI });
+  } catch (err1) {
+    console.warn('[audio] optimal sozlamalar bilan xato:', err1);
+    if (err1.name === 'NotAllowedError' || err1.name === 'PermissionDeniedError' || err1.name === 'NotReadableError') {
+      throw err1;
+    }
+    try {
+      console.log('[audio] yumshoq { audio: true } bilan qayta urinilmoqda...');
+      return await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err2) {
+      console.warn('[audio] yumshoq sozlama bilan ham xato:', err2);
+      throw err2;
+    }
+  }
+}
+
 async function initMedia() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    toast('Brauzeringizda video/audio qo‘llab-quvvatlanmaydi yoki sayt HTTPS emas', 6000);
+    return;
+  }
+
+  // 1. Dastlab audio va videoni birgalikda so'raymiz (foydalanuvchiga bitta ruxsat oynasi chiqishi uchun)
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
       audio: AUDIO_SOZLAMALARI,
       video: KAMERA,
     });
-  } catch (err) {
-    console.warn('getUserMedia audio+video xato, faqat ovozni sinab ko‘ramiz:', err);
+  } catch (birgalikdaErr) {
+    console.warn('[initMedia] audio+video birgalikda olishda xato, alohida sinab ko‘ramiz:', birgalikdaErr);
+
+    // Agar birgalikda olish xato bersa, audio va videoni alohida olib ko'ramiz
+    let aStream = null;
+    let vStream = null;
+    let vErr = null;
+
     try {
-      localStream = await navigator.mediaDevices.getUserMedia({ audio: AUDIO_SOZLAMALARI });
-      toast('Kamera topilmadi yoki ruxsat yo‘q — faqat ovoz ulandi', 4000);
-    } catch (err2) {
-      console.warn('getUserMedia faqat audio xato, faqat kamerani sinaymiz:', err2);
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: KAMERA });
-        toast('Mikrofon topilmadi yoki ruxsat yo‘q — faqat kamera ulandi', 4000);
-      } catch (err3) {
-        console.warn('getUserMedia barcha qurilmalar xato:', err3);
-        toast('Kamera/mikrofonga ruxsat berilmadi. Suhbatdoshni eshitish uchun sahifada qoling', 6000);
-        return;
-      }
+      aStream = await audioOlish();
+    } catch (aErr) {
+      console.warn('[initMedia] audio olinmadi:', aErr);
+    }
+
+    try {
+      vStream = await videoOlish();
+    } catch (err) {
+      vErr = err;
+      console.warn('[initMedia] video olinmadi:', err);
+    }
+
+    if (aStream && vStream) {
+      localStream = new MediaStream([
+        ...aStream.getAudioTracks(),
+        ...vStream.getVideoTracks(),
+      ]);
+    } else if (aStream) {
+      localStream = aStream;
+      if (vErr) kameraXatosiniKorsat(vErr);
+      else toast('Kamera topilmadi yoki ruxsat yo‘q — faqat ovoz ulandi', 4000);
+    } else if (vStream) {
+      localStream = vStream;
+      toast('Faqat kamera ulandi — mikrofon o‘chiq', 4000);
+    } else {
+      toast('Kamera/mikrofonga ruxsat berilmadi. Suhbatdoshni eshitish uchun sahifada qoling', 7000);
+      return;
     }
   }
+
   if (localStream) {
     const hasVideo = localStream.getVideoTracks().length > 0;
     const hasAudio = localStream.getAudioTracks().length > 0;
     if (hasVideo) {
+      el.localVideo.setAttribute('playsinline', 'true');
+      el.localVideo.setAttribute('webkit-playsinline', 'true');
+      el.localVideo.muted = true;
       el.localVideo.srcObject = localStream;
+      el.localVideo.play().catch(() => {});
       el.localPh.hidden = true;
     } else {
       el.localPh.hidden = false;
@@ -467,10 +593,11 @@ function teardownPeer() {
 // --- Mic / Cam ---
 el.btnMic.onclick = async () => {
   let t = localStream && localStream.getAudioTracks()[0];
-  if (!t) {
+  if (!t || t.readyState === 'ended') {
     try {
-      const ms = await navigator.mediaDevices.getUserMedia({ audio: AUDIO_SOZLAMALARI });
+      const ms = await audioOlish();
       t = ms.getAudioTracks()[0];
+      if (!t) throw new Error('AUDIO_TRACK_EMPTY');
       if (!localStream) localStream = new MediaStream();
       localStream.addTrack(t);
       if (pc) {
@@ -486,8 +613,10 @@ el.btnMic.onclick = async () => {
       el.btnMic.textContent = '🎤';
       toast('Mikrofon yoqildi', 3000);
       return;
-    } catch {
-      return toast('Mikrofon ruxsati berilmadi');
+    } catch (err) {
+      console.warn('[btnMic] xato:', err);
+      mikrofonXatosiniKorsat(err);
+      return;
     }
   }
   t.enabled = !t.enabled;
@@ -496,13 +625,18 @@ el.btnMic.onclick = async () => {
 };
 el.btnCam.onclick = async () => {
   let t = localStream && localStream.getVideoTracks()[0];
-  if (!t) {
+  if (!t || t.readyState === 'ended') {
     try {
-      const ms = await navigator.mediaDevices.getUserMedia({ video: KAMERA });
+      const ms = await videoOlish();
       t = ms.getVideoTracks()[0];
+      if (!t) throw new Error('VIDEO_TRACK_EMPTY');
       if (!localStream) localStream = new MediaStream();
       localStream.addTrack(t);
+      el.localVideo.setAttribute('playsinline', 'true');
+      el.localVideo.setAttribute('webkit-playsinline', 'true');
+      el.localVideo.muted = true;
       el.localVideo.srcObject = localStream;
+      el.localVideo.play().catch(() => {});
       el.localPh.hidden = true;
       if (pc) {
         const sender = pc.getSenders().find((s) => s.track && s.track.kind === 'video');
@@ -516,8 +650,10 @@ el.btnCam.onclick = async () => {
       el.btnCam.classList.remove('off');
       toast('Kamera yoqildi', 3000);
       return;
-    } catch {
-      return toast('Kamera ruxsati berilmadi');
+    } catch (err) {
+      console.warn('[btnCam] xato:', err);
+      kameraXatosiniKorsat(err);
+      return;
     }
   }
   t.enabled = !t.enabled;
