@@ -451,8 +451,9 @@ app.get('/api/session', (req, res) => {
 // cookie'da yotadi va JS uni o'qiy olmaydi. Shu sabab so'rovlar shu yerdan o'tadi.
 async function aiProxy(req, res, targetPath) {
   const token = cookies(req)[AI_COOKIE];
-  if (!token) return res.status(401).json({ error: 'kirilmagan' });
-  if (!aiteacher.AITEACHER_ON) return res.status(500).json({ error: 'AITEACHER_API sozlanmagan' });
+  // `message` — sahifalar shuni ko'rsatadi (faqat `error` bo'lganda mentor "Saqlab bo'lmadi" ko'rardi)
+  if (!token) return res.status(401).json({ error: 'kirilmagan', message: 'Sessiya tugagan — qayta kiring' });
+  if (!aiteacher.AITEACHER_ON) return res.status(500).json({ error: 'AITEACHER_API sozlanmagan', message: 'Server sozlanmagan' });
 
   const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
   const qs = req.originalUrl.includes('?') ? `?${req.originalUrl.split('?')[1]}` : '';
@@ -469,9 +470,11 @@ async function aiProxy(req, res, targetPath) {
       signal: AbortSignal.timeout(15000),
     });
     const data = await r.json().catch(() => ({}));
+    if (r.status >= 500) console.warn(`aiProxy ${req.method} ${targetPath} -> ${r.status}`);
     res.status(r.status).json(data);
-  } catch {
-    res.status(502).json({ error: 'ai.myteacher.uz javob bermadi' });
+  } catch (e) {
+    console.warn(`aiProxy ${req.method} ${targetPath} xato: ${e.message}`);
+    res.status(502).json({ error: 'ai.myteacher.uz javob bermadi', message: 'Server vaqtincha javob bermadi — qayta bosing' });
   }
 }
 
