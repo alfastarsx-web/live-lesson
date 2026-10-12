@@ -69,7 +69,7 @@ const el = {
   board: $('#board'), empty: $('#empty'), emptyHint: $('#emptyHint'),
   pdfbox: $('#pdfbox'), pdfCanvas: $('#pdfCanvas'), inkCanvas: $('#inkCanvas'),
   zoomBelgi: $('#zoomBelgi'), zoomFoiz: $('#zoomFoiz'), zoomTiklash: $('#zoomTiklash'),
-  toast: $('#toast'),
+  toast: $('#toast'), peerMedia: $('#peerMedia'), ozMedia: $('#ozMedia'),
   btnScreen: $('#btnScreen'), btnStudentDraw: $('#btnStudentDraw'),
   screenbox: $('#screenbox'), screenVideo: $('#screenVideo'), screenInk: $('#screenInk'),
 };
@@ -228,6 +228,7 @@ async function onSignal(m) {
       if (m.id && peerId && m.id !== peerId) break; // eski ulanish — joriy suhbatdoshga tegishli emas
       peerId = null;
       teardownPeer();
+      peerMediaChiz(null);
       setStatus('Suhbatdosh uzildi — qaytishini kuting');
       el.remotePh.hidden = false;
       el.remotePh.innerHTML = '<b>Suhbatdosh uzildi</b><span>Dars davom etadi — u qaytib kirishi bilan aloqa tiklanadi.</span>';
@@ -254,6 +255,7 @@ async function onSignal(m) {
       break;
     case 'screen':     if (!IS_TEACHER) ekranRejimi(Boolean(m.on)); break;
     case 'notes':      daftarKeldi(m.notes, m.tab); break;
+    case 'media':      peerMediaChiz(m); break;
   }
 }
 
@@ -289,6 +291,83 @@ const KAMERA = TELEFON
   : { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24, max: 30 } };
 
 const AUDIO_SOZLAMALARI = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+
+// ===== Kamera/mikrofon holati: suhbatdoshga ko'rinadi, o'zida — yo'qolmaydigan ogohlantirish =====
+// Holat: on | off (o'zi o'chirgan) | ruxsat (ruxsat berilmagan) | band (boshqa ilovada) | yoq (topilmadi)
+const mediaXato = { mic: null, cam: null };
+function xatoTuri(err) {
+  const n = (err && err.name) || '';
+  if (/NotAllowed|PermissionDenied|Security/.test(n)) return 'ruxsat';
+  if (/NotReadable|TrackStart|Abort/.test(n)) return 'band';
+  return 'yoq';
+}
+function trekHolati(t, xato) {
+  if (t && t.readyState !== 'ended') return t.enabled ? 'on' : 'off';
+  return xato || 'yoq';
+}
+function mediaHolati() {
+  return {
+    mic: trekHolati(localStream && localStream.getAudioTracks()[0], mediaXato.mic),
+    cam: trekHolati(localStream && localStream.getVideoTracks()[0], mediaXato.cam),
+  };
+}
+const ILOVADA = Boolean(window.flutter_inappwebview);
+const MUAMMO = { ruxsat: 1, band: 1, yoq: 1 };
+
+/** Suhbatdoshga holatni yuboradi va o'zida ogohlantirishni yangilaydi */
+function mediaYubor() {
+  const h = mediaHolati();
+  wsSend({ type: 'media', mic: h.mic, cam: h.cam });
+  ozMediaChiz(h);
+}
+
+/** O'zida: mikrofon/kamera ishlamasa — nima qilish kerakligi yozilgan, yopilmaydigan panel */
+function ozMediaChiz(h) {
+  const qism = [];
+  if (MUAMMO[h.mic]) qism.push(['mic', h.mic]);
+  if (h.cam === 'ruxsat' || h.cam === 'band') qism.push(['cam', h.cam]);
+  if (!qism.length) { el.ozMedia.hidden = true; return; }
+  const nom = { mic: 'Mikrofon', cam: 'Kamera' };
+  const sabab = (k, v) => v === 'ruxsat'
+    ? `${nom[k]}ga ruxsat berilmagan`
+    : v === 'band' ? `${nom[k]} boshqa ilovada band (Telegram, Zoom…) — o‘sha ilovani yoping` : `${nom[k]} topilmadi`;
+  const ruxsatYoq = qism.some(([, v]) => v === 'ruxsat');
+  const yoriq = !ruxsatYoq ? '' : ILOVADA
+    ? 'Pastdagi «Sozlamalarni ochish» → <b>Ruxsatlar</b> → Kamera va Mikrofon → <b>Ruxsat berish</b>. Keyin «Qayta urinish» ni bosing.'
+    : TELEFON
+      ? 'Manzil satridagi 🔒 belgisi → <b>Ruxsatlar</b> → Kamera va Mikrofon → <b>Ruxsat berish</b>. Keyin «Qayta urinish» ni bosing.'
+      : 'Manzil satridagi 🔒 belgisidan kamera va mikrofonga ruxsat bering, keyin «Qayta urinish» ni bosing.';
+  el.ozMedia.innerHTML =
+    `<b>${MUAMMO[h.mic] ? '🔇 Ustoz sizni eshitmayapti' : '📷 Ustoz sizni ko‘rmayapti'}</b>`
+    + `<span>${qism.map(([k, v]) => sabab(k, v)).join('. ')}.</span>`
+    + (yoriq ? `<span>${yoriq}</span>` : '')
+    + '<div class="oz-media-tugmalar">'
+    + (ILOVADA && ruxsatYoq ? '<button type="button" data-oz="sozlama">⚙️ Sozlamalarni ochish</button>' : '')
+    + '<button type="button" data-oz="qayta">🔄 Qayta urinish</button></div>';
+  el.ozMedia.hidden = false;
+}
+
+/** Suhbatdoshning kamera/mikrofon holati — videosi ustida */
+function peerMediaChiz(m) {
+  const kim = IS_TEACHER ? 'O‘quvchi' : 'Ustoz';
+  const mic = {
+    ruxsat: `🔇 ${kim} mikrofonga ruxsat bermagan — telefon sozlamalaridan yoqishini ayting`,
+    band: `🔇 ${kim}ning mikrofoni boshqa ilovada band`,
+    yoq: `🔇 ${kim}da mikrofon ishlamayapti`,
+    off: `🔇 ${kim} mikrofonini o‘chirgan`,
+  }[m && m.mic];
+  const cam = {
+    ruxsat: `📷 ${kim} kameraga ruxsat bermagan`,
+    band: `📷 ${kim}ning kamerasi boshqa ilovada band (Telegram/Zoom)`,
+    yoq: `📷 ${kim}da kamera topilmadi`,
+    off: `📷 ${kim} kamerasini o‘chirgan`,
+  }[m && m.cam];
+  const qator = [];
+  if (mic) qator.push(`<span class="${MUAMMO[m.mic] ? 'xavf' : ''}">${mic}</span>`);
+  if (cam) qator.push(`<span>${cam}</span>`);
+  el.peerMedia.innerHTML = qator.join('');
+  el.peerMedia.hidden = !qator.length;
+}
 
 /** Kamera xatolarini foydalanuvchiga tushunarli tarzda ko'rsatish */
 function kameraXatosiniKorsat(err) {
@@ -385,6 +464,7 @@ async function audioOlish() {
 async function initMedia() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     toast('Brauzeringizda video/audio qo‘llab-quvvatlanmaydi yoki sayt HTTPS emas', 6000);
+    mediaXato.mic = mediaXato.cam = 'yoq';
     return;
   }
 
@@ -405,6 +485,7 @@ async function initMedia() {
     try {
       aStream = await audioOlish();
     } catch (aErr) {
+      mediaXato.mic = xatoTuri(aErr);
       console.warn('[initMedia] audio olinmadi:', aErr);
     }
 
@@ -412,6 +493,7 @@ async function initMedia() {
       vStream = await videoOlish();
     } catch (err) {
       vErr = err;
+      mediaXato.cam = xatoTuri(err);
       console.warn('[initMedia] video olinmadi:', err);
     }
 
@@ -533,6 +615,7 @@ function playRemote() {
 });
 
 async function onPeerReady(peer) {
+  mediaYubor(); // yangi kirgan suhbatdosh holatimizni bilsin
   el.remoteTag.textContent = peer.name || (peer.role === 'teacher' ? 'Ustoz' : 'O‘quvchi');
   el.remotePh.querySelector('b').textContent = 'Video kutilmoqda…';
   ensurePc();
@@ -611,10 +694,14 @@ el.btnMic.onclick = async () => {
       }
       el.btnMic.classList.remove('off');
       el.btnMic.textContent = '🎤';
+      mediaXato.mic = null;
+      mediaYubor();
       toast('Mikrofon yoqildi', 3000);
       return;
     } catch (err) {
       console.warn('[btnMic] xato:', err);
+      mediaXato.mic = xatoTuri(err);
+      mediaYubor();
       mikrofonXatosiniKorsat(err);
       return;
     }
@@ -622,6 +709,7 @@ el.btnMic.onclick = async () => {
   t.enabled = !t.enabled;
   el.btnMic.classList.toggle('off', !t.enabled);
   el.btnMic.textContent = t.enabled ? '🎤' : '🔇';
+  mediaYubor();
 };
 el.btnCam.onclick = async () => {
   let t = localStream && localStream.getVideoTracks()[0];
@@ -648,10 +736,14 @@ el.btnCam.onclick = async () => {
         }
       }
       el.btnCam.classList.remove('off');
+      mediaXato.cam = null;
+      mediaYubor();
       toast('Kamera yoqildi', 3000);
       return;
     } catch (err) {
       console.warn('[btnCam] xato:', err);
+      mediaXato.cam = xatoTuri(err);
+      mediaYubor();
       kameraXatosiniKorsat(err);
       return;
     }
@@ -660,7 +752,23 @@ el.btnCam.onclick = async () => {
   el.btnCam.classList.toggle('off', !t.enabled);
   el.localVideo.classList.toggle('off', !t.enabled);
   el.localPh.hidden = t.enabled;
+  mediaYubor();
 };
+
+// O'zidagi ogohlantirish tugmalari: ilova sozlamalarini ochish / ruxsatni qayta so'rash
+el.ozMedia.addEventListener('click', async (e) => {
+  const b = e.target.closest('button[data-oz]');
+  if (!b) return;
+  if (b.dataset.oz === 'sozlama') {
+    try { await window.flutter_inappwebview.callHandler('sozlamalarniOch'); } catch {
+      toast('Telefon Sozlamalari → Ilovalar → MyTeacher → Ruxsatlar', 6000);
+    }
+    return;
+  }
+  const h = mediaHolati();
+  if (MUAMMO[h.mic]) await el.btnMic.onclick();
+  if (h.cam === 'ruxsat' || h.cam === 'band') await el.btnCam.onclick();
+});
 // ================= Ekranni ulashish =================
 // Kamera o'rniga ekran yuboriladi (replaceTrack) — qayta ulanish kerak emas, ovoz uzilmaydi.
 let screenTrack = null;
@@ -1320,6 +1428,7 @@ let AKTIV_TOKEN = TOKEN;
   if (AKTIV_TOKEN) { rolniQoy(peekToken(AKTIV_TOKEN)); interfeysniSozla(); }
 
   await initMedia();
+  ozMediaChiz(mediaHolati());
   connect();
 })();
 
