@@ -1461,6 +1461,15 @@ wss.on('connection', async (ws, req) => {
         break;
       }
 
+      // --- Kamera/mikrofon holati: suhbatdosh videosi ustida ko'rsatiladi ---
+      case 'media': {
+        const HOLAT = ['on', 'off', 'ruxsat', 'band', 'yoq'];
+        const mic = HOLAT.includes(msg.mic) ? msg.mic : 'yoq';
+        const cam = HOLAT.includes(msg.cam) ? msg.cam : 'yoq';
+        broadcast(room, { type: 'media', role, mic, cam }, clientId);
+        return;
+      }
+
       // --- Ustoz ekranini ulashdi / to'xtatdi (video o'zi WebRTC orqali keladi) ---
       case 'screen':
         if (role !== 'teacher') return;

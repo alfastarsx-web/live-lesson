@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Dars xonasi</title>
-<link rel="stylesheet" href="/room.css">
+<link rel="stylesheet" href="/room.css?v=20261012_media">
 </head>
 <body>
 <div class="app">
@@ -15,6 +15,7 @@
       <video id="remoteVideo" playsinline webkit-playsinline autoplay muted disablepictureinpicture></video>
       <div class="ph" id="remotePh"><span class="spin"></span><b>Kutilmoqda…</b></div>
       <div class="tag" id="remoteTag">Suhbatdosh</div>
+      <div class="peer-media" id="peerMedia" hidden></div>
     </div>
     <div class="tile" id="tileLocal">
       <video id="localVideo" playsinline webkit-playsinline autoplay muted disablepictureinpicture></video>
@@ -118,9 +119,10 @@
 
 <!-- Suhbatdosh ovozi alohida: video pauza bo'lsa yoki ekran ulashilsa ham ovoz uzilmaydi -->
 <audio id="remoteAudio" autoplay playsinline></audio>
+<div class="oz-media" id="ozMedia" hidden role="alert"></div>
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="/room.js?v=20261011_camfix"></script>
+<script src="/room.js?v=20261012_media"></script>
 </body>
 </html>
