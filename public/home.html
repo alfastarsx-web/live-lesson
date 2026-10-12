@@ -322,10 +322,19 @@ function darslarChiz() {
     return `<div class="qator ${i === 0 ? 'hozir' : ''}">
       <div class="vaqt"><b class="num">${soat(d.startsAt)}</b><span>${qoldi > 0 ? qTexti(qoldi) : 'hozir'}</span></div>
       <div class="b"><div class="t1">${ism}<span class="teg ${d.isTrial ? 's' : 'd'}">${d.isTrial ? 'sinov' : 'dars'}</span></div><div class="t2">${d.durationMin || 60} daqiqa</div></div>
+      ${d.isTrial && d.studentJoinUrl ? `<button class="btn" type="button" data-havola="${esc(d.studentJoinUrl)}" title="O‘quvchiga loginsiz havola — nusxalanadi" style="background:transparent;border:1.5px solid currentColor;margin-right:6px">🔗</button>` : ''}
       <button class="btn" type="button" data-kirish="${esc(d.id)}" data-sinov="${d.isTrial ? 1 : ''}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>Kirish</button></div>`;
   }).join('');
 }
 $('#darslar').addEventListener('click', async (e) => {
+  // Sinov darsi: o'quvchiga loginsiz havolani nusxalash
+  const h = e.target.closest('[data-havola]');
+  if (h) {
+    const matn = `Sinov darsiga kirish havolasi 👇\n${h.dataset.havola}\n\nDars vaqtida oching — login va parol kerak emas. 🎧 Quloqchinni tayyorlab qo‘ying.`;
+    try { await navigator.clipboard.writeText(matn); toast('Havola nusxalandi — o‘quvchiga yuboring'); }
+    catch { window.prompt('Havolani nusxalab, o‘quvchiga yuboring:', h.dataset.havola); }
+    return;
+  }
   const b = e.target.closest('[data-kirish]');
   if (!b) return;
   b.disabled = true;
