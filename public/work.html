@@ -356,6 +356,24 @@ let FILTR = 'kelgusi';
 let ISM = '';
 
 // ---------- yordamchi ----------
+// Sinov darsi: o'quvchiga loginsiz havola (dars vaqtida ochiladi) — nusxalab Telegram/SMS da yuboriladi
+function havolaTugma(d) {
+  return d.isTrial && d.studentJoinUrl ? `<button data-havola="${esc(d.studentJoinUrl)}" title="O‘quvchi login-parolsiz to‘g‘ri darsga kiradi">🔗 O‘quvchiga havola</button>` : '';
+}
+async function havolaNusxala(url) {
+  const matn = `Sinov darsiga kirish havolasi 👇\n${url}\n\nDars vaqtida oching — login va parol kerak emas. 🎧 Quloqchinni tayyorlab qo‘ying.`;
+  try {
+    await navigator.clipboard.writeText(matn);
+    toast('Havola nusxalandi — o‘quvchiga Telegram yoki SMS da yuboring', 'ok');
+  } catch {
+    window.prompt('Havolani nusxalab, o‘quvchiga yuboring:', url);
+  }
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-havola]');
+  if (b) havolaNusxala(b.dataset.havola);
+});
+
 function toast(t, turi) {
   document.querySelectorAll('.toast').forEach((x) => x.remove());
   const d = document.createElement('div');
@@ -973,7 +991,7 @@ function darsKarta(d, { tarix = false } = {}) {
     // O'quvchi o'zi yozilgan — ustoz qo'ng'iroq qilib, real ekanini va vaqtni aniqlaydi
     past = `<div class="kutish-yorliq" data-tasdiq-muddat="${esc(d.confirmBy || '')}"><span data-tasdiq-matn>Qo‘ng‘iroq qilib tasdiqlang</span><b data-tasdiq-qoldi></b></div>
       ${tgHolat(d)}
-      <div class="dk-past"><button class="asosiy" data-tasdiq="${esc(d.id)}">Natijani belgilash</button>${telHavola(d.leadPhone)}</div>
+      <div class="dk-past"><button class="asosiy" data-tasdiq="${esc(d.id)}">Natijani belgilash</button>${havolaTugma(d)}${telHavola(d.leadPhone)}</div>
       ${hozirTugma(d)}`;
   } else if (!tarix) {
     const ochiq = Date.now() >= kun.getTime() - 10 * 60_000;
@@ -983,7 +1001,7 @@ function darsKarta(d, { tarix = false } = {}) {
       <button class="asosiy" data-kirish="${esc(d.id)}" data-sinov="${d.isTrial ? 1 : ''}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>${ochiq ? 'Darsni boshlash' : 'Kirish 10 daq oldin'}</button>
       ${doimiy && boshlanmagan ? `<button data-kochir="${esc(d.id)}">↻ Ko‘chirish</button>` : ''}
       ${doimiy && kelmadiMumkin(d) ? `<button data-kelmadi="${esc(d.id)}">O‘quvchi kelmadi</button>` : ''}
-      ${telHavola(d.leadPhone)}</div>
+      ${havolaTugma(d)}${telHavola(d.leadPhone)}</div>
       ${ochiq ? '' : hozirTugma(d)}`;
   } else if (!d.isTrial) {
     // Doimiy dars tarixda: o'quvchi kirmagan — "Kelmadi"; belgilangan bo'lsa natijasi
