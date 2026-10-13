@@ -459,6 +459,8 @@ const qoldiMatn = (ms) => {
 const bosh = (ism) => String(ism || '?').trim().split(/\s+/).slice(0, 2).map((x) => x[0]).join('').toUpperCase();
 // Telefon — bosiladigan havola va ko'rinadigan raqam (havola ishlamasa ham raqam ko'rinib turadi)
 const telHavola = (t) => t ? `<a href="tel:${esc(t.replace(/[^\d+]/g, ''))}">${esc(t)}</a>` : '';
+// O'quvchining qo'shimcha raqami (operator sinovga yozganda oladi) — asosiysi javob bermasa
+const qoshTel = (t) => t ? ` <a href="tel:${esc(t.replace(/[^\d+]/g, ''))}" title="Qo‘shimcha raqam">📱 ${esc(t)}</a>` : '';
 
 function halqaChiz(el, expiresAt) {
   const ms = new Date(expiresAt).getTime() - Date.now();
@@ -648,11 +650,11 @@ function qabulSheetOch(b) {
   const qismlar = [];
   if (b.leadPhone && b.confirmPending) {
     qismlar.push(`<div class="akkaunt" style="margin-top:0;background:#fffaeb;border:1.5px solid #f1c75a"><b>1. Hozir o‘quvchiga qo‘ng‘iroq qiling</b>
-      <span>${telHavola(b.leadPhone)} — o‘quvchi o‘zi yozilgan. Real ekanini va vaqt aniqligini bilib oling.
+      <span>${telHavola(b.leadPhone)}${qoshTel(b.leadExtraPhone)} — o‘quvchi o‘zi yozilgan. Real ekanini va vaqt aniqligini bilib oling.
       Slot kalendaringizda sariq bo‘lib turadi: gaplashgach ustiga bosib qabul qiling, vaqtni o‘zgartiring yoki bekor qiling.</span></div>`);
   } else if (b.leadPhone) {
     qismlar.push(`<div class="akkaunt" style="margin-top:0"><b>1. O‘quvchiga qo‘ng‘iroq qiling</b>
-      <span>${telHavola(b.leadPhone)} — dars vaqtini tasdiqlang</span></div>`);
+      <span>${telHavola(b.leadPhone)}${qoshTel(b.leadExtraPhone)} — dars vaqtini tasdiqlang</span></div>`);
   }
   // O'quvchi botda raqamini ulashadi — dars havolasi unga shu zahoti keladi (ilova shart emas)
   qismlar.push(`<div class="akkaunt akkaunt-tg"><b>2. Suhbat paytida — Telegram bot</b>
@@ -698,7 +700,7 @@ const SABABLAR = [
 function tasdiqOch(id) {
   const d = KELGUSI.find((x) => x.id === id);
   if (!d) return;
-  $('#tsVaqt').innerHTML = `${esc(d.studentName || 'O‘quvchi')} · ${esc(vaqtYorliq(d.startsAt))}${d.leadPhone ? ' · ' + telHavola(d.leadPhone) : ''}`;
+  $('#tsVaqt').innerHTML = `${esc(d.studentName || 'O‘quvchi')} · ${esc(vaqtYorliq(d.startsAt))}${d.leadPhone ? ' · ' + telHavola(d.leadPhone) + qoshTel(d.leadExtraPhone) : ''}`;
   tasdiqAsosiy(d);
   $('#tasdiqParda').onclick = tasdiqYop;
   $('#tasdiqParda').classList.add('ochiq');
@@ -971,7 +973,7 @@ function darsKarta(d, { tarix = false } = {}) {
     // O'quvchi o'zi yozilgan — ustoz qo'ng'iroq qilib, real ekanini va vaqtni aniqlaydi
     past = `<div class="kutish-yorliq" data-tasdiq-muddat="${esc(d.confirmBy || '')}"><span data-tasdiq-matn>Qo‘ng‘iroq qilib tasdiqlang</span><b data-tasdiq-qoldi></b></div>
       ${tgHolat(d)}
-      <div class="dk-past"><button class="asosiy" data-tasdiq="${esc(d.id)}">Natijani belgilash</button>${telHavola(d.leadPhone)}</div>
+      <div class="dk-past"><button class="asosiy" data-tasdiq="${esc(d.id)}">Natijani belgilash</button>${telHavola(d.leadPhone)}${qoshTel(d.leadExtraPhone)}</div>
       ${hozirTugma(d)}`;
   } else if (!tarix) {
     const ochiq = Date.now() >= kun.getTime() - 10 * 60_000;
@@ -981,7 +983,7 @@ function darsKarta(d, { tarix = false } = {}) {
       <button class="asosiy" data-kirish="${esc(d.id)}" data-sinov="${d.isTrial ? 1 : ''}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>${ochiq ? 'Darsni boshlash' : 'Kirish 10 daq oldin'}</button>
       ${doimiy && boshlanmagan ? `<button data-kochir="${esc(d.id)}">↻ Ko‘chirish</button>` : ''}
       ${doimiy && kelmadiMumkin(d) ? `<button data-kelmadi="${esc(d.id)}">O‘quvchi kelmadi</button>` : ''}
-      ${telHavola(d.leadPhone)}</div>
+      ${telHavola(d.leadPhone)}${qoshTel(d.leadExtraPhone)}</div>
       ${ochiq ? '' : hozirTugma(d)}`;
   } else if (!d.isTrial) {
     // Doimiy dars tarixda: o'quvchi kirmagan — "Kelmadi"; belgilangan bo'lsa natijasi
@@ -993,7 +995,7 @@ function darsKarta(d, { tarix = false } = {}) {
       : d.leadStatus === 'trial_scheduled'
         ? `<button class="asosiy" data-holat="trial_completed">Dars o‘tildi</button><button data-holat="trial_no_show">Kelmadi</button>`
         : '';
-    if (tugmalar || d.leadPhone) past = `<div class="dk-past" data-lid="${esc(d.leadId)}">${tugmalar}${telHavola(d.leadPhone)}</div>`;
+    if (tugmalar || d.leadPhone) past = `<div class="dk-past" data-lid="${esc(d.leadId)}">${tugmalar}${telHavola(d.leadPhone)}${qoshTel(d.leadExtraPhone)}</div>`;
     if (['trial_scheduled', 'trial_completed', 'negotiating'].includes(d.leadStatus)) past += taklifQatori(d);
     const tugadi = kun.getTime() + (d.durationMin || 60) * 60_000;
     const qoldi = tugadi + BONUS_MS - Date.now();
