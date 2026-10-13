@@ -372,7 +372,7 @@ async function sessiyaniYangila(req, res) {
 }
 
 // Statik fayllar (js/css/rasm) uchun API chaqirmaymiz — faqat sahifalar va /api so'rovlari
-const YANGILANMAYDI = /\.(js|css|png|jpe?g|svg|ico|webp|gif|woff2?|ttf|map|json|txt|mp3|wav|pdf)$/i;
+const YANGILANMAYDI = /\.(js|css|png|jpe?g|svg|ico|webp|gif|woff2?|ttf|map|json|txt|mp3|wav|pdf|webmanifest)$/i;
 app.use(async (req, res, next) => {
   if (YANGILANMAYDI.test(req.path) || req.path === '/api/logout' || req.path === '/api/login') return next();
   try { await sessiyaniYangila(req, res); } catch (e) { console.warn('Sessiya yangilanmadi:', e.message); }
