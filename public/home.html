@@ -543,24 +543,23 @@ function qirolChiz(q) {
   if (!q || !Array.isArray(q.top)) { el.hidden = true; return; }
   const oy = QIROL_OYLAR[Number(String(q.month).slice(5, 7)) - 1] || '';
   const TOJ = ['👑', '🥈', '🥉'];
-  const qator = (r, men) => `<div class="q${men ? ' men' : ''}"><span class="o">${r.place && r.place <= 3 ? TOJ[r.place - 1] : (r.place ?? '—')}</span>
-    <span class="n">${men ? 'Siz' : esc(qisqaIsm(r.name))}</span><span class="s">${r.trials} sinov · ${r.conversion}% to‘lov</span></div>`;
-  const top = q.top.slice(0, 3);
-  let men = '';
+  const qator = (r, men) => `<div class="q${men ? ' men' : ''}"><span class="o">${r.place <= 3 ? TOJ[r.place - 1] : r.place}</span>
+    <span class="n">${men ? 'Siz' : esc(qisqaIsm(r.name))}</span><span class="s">${r.trials} ta sinov</span></div>`;
+  const top = q.top.slice(0, 5);
   const m = q.me;
-  if (m && m.place && m.place <= 3) men = '';
-  else if (m && m.eligible) men = qator(m, true) + `<div class="men-h">3-o‘ringa yetish uchun yana <b>${Math.max(1, (top[2]?.trials ?? 0) - m.trials + 1)} ta</b> sinov kerak</div>`;
-  else {
-    const t = m?.trials ?? 0;
-    const kerak = [];
-    if (t < q.minTrials) kerak.push(`yana <b>${q.minTrials - t} ta</b> sinov`);
-    if (!m || m.conversion < q.minConversion) kerak.push(`kamida <b>${q.minConversion}%</b> to‘lovga aylansin${m ? ` (hozir ${m.conversion}%)` : ''}`);
-    men = `<div class="men-h">Siz: ${t} sinov. Reytingga kirish uchun ${kerak.join(' va ')}</div>`;
+  let men = '';
+  if (m && m.place > 5) {
+    const oldingi = top[top.length - 1];
+    men = qator(m, true) + `<div class="men-h">Top-5 ga kirish uchun yana <b>${Math.max(1, oldingi.trials - m.trials + 1)} ta</b> sinov</div>`;
+  } else if (!m) {
+    men = '<div class="men-h">Siz bu oy hali sinov darsi o‘tkazmadingiz — birinchisini oling va reytingga kiring!</div>';
   }
+  const shart = m && m.trials < q.minTrials
+    ? `<div class="men-h">Bonus uchun oyiga kamida ${q.minTrials} ta sinov kerak — sizga yana <b>${q.minTrials - m.trials} ta</b></div>` : '';
   el.innerHTML = `<div class="ch"><h2>👑 Sinov qiroli · ${esc(oy)}</h2><span class="mukofot">${q.prizes.map(ming).join(' · ')}</span></div>
-    ${top.length ? top.map((r) => qator(r, r.me)).join('') : '<div class="men-h">Hali hech kim reytingga kirmadi — birinchi bo‘ling!</div>'}
-    ${men}
-    <div class="shart">Oy oxirida top-3 ga bonus hamyonga tushadi · shart: kamida ${q.minTrials} sinov va ${q.minConversion}% to‘lovga aylangan</div>`;
+    ${top.length ? top.map((r) => qator(r, r.me)).join('') : '<div class="men-h">Bu oy hali hech kim sinov o‘tkazmadi — birinchi bo‘ling!</div>'}
+    ${men}${shart}
+    <div class="shart">Oy oxirida eng ko‘p sinov o‘tkazgan top-3 ga bonus hamyonga tushadi (kamida ${q.minTrials} ta sinov)</div>`;
   el.hidden = false;
 }
 function korsat(d) {
