@@ -658,6 +658,7 @@ const RUXSAT = [
   /^mentor-gamification\/history$/,
   /^mentor-gamification\/progress$/,
   /^mentor-bot\/link$/,
+  /^mentor-wallet\/sinov-qiroli$/,
 ];
 
 // Mentor Telegram botidan uzish

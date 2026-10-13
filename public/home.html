@@ -67,6 +67,18 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
 .sk i,.sk b,.sk s{display:block;border-radius:10px;background:linear-gradient(90deg,#eceee9 25%,#f6f7f4 50%,#eceee9 75%);background-size:200% 100%;animation:sk 1.2s linear infinite}
 .sk i{width:38px;height:38px;border-radius:12px;flex:0 0 auto}.sk span{flex:1;display:grid;gap:7px}.sk b{height:12px;width:70%}.sk s{height:10px;width:45%}
 @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.qirol .ch{flex-wrap:wrap;align-items:center}
+.qirol .ch h2{font-size:16px;white-space:nowrap}
+.qirol .mukofot{font-size:12px;font-weight:800;color:#9a6315;background:var(--amber-soft);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.qirol .q{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.qirol .q:last-of-type{border-bottom:0}
+.qirol .q .o{width:26px;text-align:center;font-size:18px}
+.qirol .q .n{flex:1;min-width:0;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qirol .q .s{font-size:12.5px;color:var(--mut2);white-space:nowrap}
+.qirol .q.men{background:var(--em-soft);border-radius:12px;padding:8px 10px;margin:4px -6px 0;border:0}
+.qirol .men-h{margin-top:8px;font-size:13px;color:var(--mut2)}
+.qirol .men-h b{color:var(--ink)}
+.qirol .shart{margin-top:8px;font-size:12px;color:var(--mut)}
 .maslahat{font-size:12.5px;color:var(--mut2);padding:4px 2px 2px;text-align:center}
 @media (prefers-reduced-motion:reduce){.sk i,.sk b,.sk s{animation:none}}
 .tinch{display:flex;align-items:center;gap:10px;padding:12px 0;color:var(--em);font-weight:700}
@@ -204,6 +216,8 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
   </div>
   <div class="nishonlar" id="nishonlar" aria-label="Nishonlar"></div>
 
+  <section class="card qirol" id="qirol" hidden aria-label="Sinov qiroli reytingi"></section>
+
   <a class="akad" id="akad" href="/mentor/akademiya.html" hidden>
     <span class="ico a" aria-hidden="true">A</span>
     <span><b>Akademiyani tugating</b><br><span class="xira" id="akadMatn">Testdan o‘tgach sinov darsi so‘rovlari kela boshlaydi</span></span>
@@ -228,7 +242,7 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
 
   <div class="akad" id="qoida" hidden style="position:relative;background:#fdecec">
     <span class="ico a" aria-hidden="true">📞</span>
-    <a href="/mentor/qollanma.html#suhbat" style="text-decoration:none;color:inherit;flex:1"><b>Yangi qoida: suhbatda ilovaga kirgizing</b><br><span class="xira">O‘quvchi siz bilan gaplashib turib Telegram botga raqam yuborsin va ilovaga kirsin — ikkala ✅ yonguncha telefonni qo‘ymang</span></a>
+    <a href="/mentor/qollanma.html#suhbat" style="text-decoration:none;color:inherit;flex:1"><b>Yangilik: o‘quvchiga ilova shart emas</b><br><span class="xira">O‘quvchi darsga Telegram botdagi «▶️ Darsga kirish» havolasi orqali kiradi. Suhbatda faqat @MT_yordam_bot ga raqamini yuborsin — ✅ Telegram yonsa yetarli</span></a>
     <button type="button" id="qoidaYop" aria-label="Yopish" style="border:0;background:none;font-size:18px;color:#9a9ca3;cursor:pointer;padding:4px 6px">×</button>
   </div>
 
@@ -520,8 +534,38 @@ function maslahatQoy() {
   const el = $('#maslahat');
   if (el) el.textContent = MASLAHATLAR[Math.floor(Math.random() * MASLAHATLAR.length)];
 }
+// 👑 Sinov qiroli: joriy oy reytingi (shartga mos top-3) va ustozning o'z o'rni
+const QIROL_OYLAR = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+const qisqaIsm = (n) => { const [a, b] = String(n || 'Ustoz').trim().split(/\s+/); return b ? `${a} ${b[0]}.` : a; };
+const ming = (n) => `${Math.round(n / 1000)} ming`;
+function qirolChiz(q) {
+  const el = $('#qirol');
+  if (!q || !Array.isArray(q.top)) { el.hidden = true; return; }
+  const oy = QIROL_OYLAR[Number(String(q.month).slice(5, 7)) - 1] || '';
+  const TOJ = ['👑', '🥈', '🥉'];
+  const qator = (r, men) => `<div class="q${men ? ' men' : ''}"><span class="o">${r.place && r.place <= 3 ? TOJ[r.place - 1] : (r.place ?? '—')}</span>
+    <span class="n">${men ? 'Siz' : esc(qisqaIsm(r.name))}</span><span class="s">${r.trials} sinov · ${r.conversion}% to‘lov</span></div>`;
+  const top = q.top.slice(0, 3);
+  let men = '';
+  const m = q.me;
+  if (m && m.place && m.place <= 3) men = '';
+  else if (m && m.eligible) men = qator(m, true) + `<div class="men-h">3-o‘ringa yetish uchun yana <b>${Math.max(1, (top[2]?.trials ?? 0) - m.trials + 1)} ta</b> sinov kerak</div>`;
+  else {
+    const t = m?.trials ?? 0;
+    const kerak = [];
+    if (t < q.minTrials) kerak.push(`yana <b>${q.minTrials - t} ta</b> sinov`);
+    if (!m || m.conversion < q.minConversion) kerak.push(`kamida <b>${q.minConversion}%</b> to‘lovga aylansin${m ? ` (hozir ${m.conversion}%)` : ''}`);
+    men = `<div class="men-h">Siz: ${t} sinov. Reytingga kirish uchun ${kerak.join(' va ')}</div>`;
+  }
+  el.innerHTML = `<div class="ch"><h2>👑 Sinov qiroli · ${esc(oy)}</h2><span class="mukofot">${q.prizes.map(ming).join(' · ')}</span></div>
+    ${top.length ? top.map((r) => qator(r, r.me)).join('') : '<div class="men-h">Hali hech kim reytingga kirmadi — birinchi bo‘ling!</div>'}
+    ${men}
+    <div class="shart">Oy oxirida top-3 ga bonus hamyonga tushadi · shart: kamida ${q.minTrials} sinov va ${q.minConversion}% to‘lovga aylangan</div>`;
+  el.hidden = false;
+}
 function korsat(d) {
-  const { hamyon, my, tarix, jadval, oquvchilar, ball, progress, akad } = d;
+  const { hamyon, my, tarix, jadval, oquvchilar, ball, progress, akad, qirol } = d;
+  qirolChiz(qirol);
   if (hamyon?.firstName) { ISM = hamyon.firstName.trim().split(/\s+/)[0]; salomChiz(); }
   if (hamyon?.week) { $('#grafik').hidden = false; shamChiz(hamyon.week); } else $('#grafik').hidden = true;
   DARSLAR = Array.isArray(my) ? my : [];
@@ -537,7 +581,7 @@ function korsat(d) {
 }
 const ol = (u) => api(u).then((r) => (r && r.ok ? r.data : null)).catch(() => null);
 async function yukla() {
-  const [hamyon, my, tarix, jadval, oquvchilar, ball, progress, akad, sessiya, takliflar] = await Promise.all([
+  const [hamyon, my, tarix, jadval, oquvchilar, ball, progress, akad, sessiya, takliflar, qirol] = await Promise.all([
     ol('/api/wallet/summary'),
     ol('/api/booking/mentor/my'),
     ol('/api/booking/mentor/history'),
@@ -548,8 +592,9 @@ async function yukla() {
     fetch('/api/akademiya/holat').then((x) => (x.ok ? x.json() : null)).catch(() => null),
     ol('/api/mentor-session/me'),
     ol('/api/course-offers/my'),
+    ol('/api/ai/mentor-wallet/sinov-qiroli'),
   ]);
-  const d = { hamyon, my, tarix, jadval, oquvchilar, ball, progress, akad, sessiya, takliflar };
+  const d = { hamyon, my, tarix, jadval, oquvchilar, ball, progress, akad, sessiya, takliflar, qirol };
   korsat(d);
   if (hamyon || my) keshYoz(d);
   return d;
@@ -614,8 +659,8 @@ async function yukla() {
     $('#yangilikYop').onclick = yop;
     $('#yangilik').querySelector('a').addEventListener('click', yop);
   }
-  // Yangi qoida (Oktabr): sinov darsi qo'ng'irog'ida o'quvchini ilovaga kirgizish — yopilguncha
-  const QOIDA = 'qoida-suhbatda-ilova-2026-10';
+  // Yangilik (Oktabr): o'quvchiga ilova shart emas — botdagi havola orqali kiradi. Yopilguncha turadi
+  const QOIDA = 'qoida-ilova-shart-emas-2026-10';
   let qoidaKorgan = false;
   try { qoidaKorgan = localStorage.getItem(QOIDA) === '1'; } catch { /* yo'q */ }
   if (akad && akad.mentor && !qoidaKorgan) {
