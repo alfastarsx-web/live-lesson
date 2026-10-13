@@ -279,7 +279,7 @@ const RTC_CONFIG = {
   iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }],
 };
 
-let pc = null, localStream = null, pendingIce = [], remoteStream = null;
+let pc = null, localStream = null, pendingIce = [], remoteStream = null, PEER_CAM = null;
 
 // Telefonda kamera yengilroq: 720p kodlash telefonni qizdiradi va batareyani tez yeydi,
 // kichik plitkada esa farqi ko'rinmaydi.
@@ -360,13 +360,24 @@ function peerMediaChiz(m) {
     ruxsat: `📷 ${kim} kameraga ruxsat bermagan`,
     band: `📷 ${kim}ning kamerasi boshqa ilovada band (Telegram/Zoom)`,
     yoq: `📷 ${kim}da kamera topilmadi`,
-    off: `📷 ${kim} kamerasini o‘chirgan`,
   }[m && m.cam];
   const qator = [];
   if (mic) qator.push(`<span class="${MUAMMO[m.mic] ? 'xavf' : ''}">${mic}</span>`);
   if (cam) qator.push(`<span>${cam}</span>`);
   el.peerMedia.innerHTML = qator.join('');
   el.peerMedia.hidden = !qator.length;
+  PEER_CAM = m ? m.cam : null;
+  remoteKamChiz();
+}
+
+/** Suhbatdosh kamerasi o'chiq bo'lsa — qora video o'rniga plitkada "kamerasi o'chiq" */
+function remoteKamChiz() {
+  if (!remoteStream || !pc || pc.connectionState === 'closed') return;
+  if (EKRAN && !IS_TEACHER) return; // plitkada "Ustoz ekranini ko'rsatyapti" turadi
+  const off = Boolean(PEER_CAM) && PEER_CAM !== 'on';
+  el.remoteVideo.classList.toggle('off', off);
+  el.remotePh.hidden = !off;
+  if (off) el.remotePh.innerHTML = `<b>📷 ${IS_TEACHER ? 'O‘quvchi' : 'Ustoz'} kamerasi o‘chiq</b>`;
 }
 
 /** Kamera xatolarini foydalanuvchiga tushunarli tarzda ko'rsatish */
@@ -524,7 +535,11 @@ async function initMedia() {
       el.localVideo.muted = true;
       el.localVideo.srcObject = localStream;
       el.localVideo.play().catch(() => {});
-      el.localPh.hidden = true;
+      // Kamera kirishda o'chiq (ustoz ham, o'quvchi ham) — o'quvchilar noqulay his qilmasin.
+      // Trek saqlanadi (ekran ulashish yo'lagi uchun), faqat yuborilmaydi; 📷 tugmasi bilan yoqiladi.
+      localStream.getVideoTracks().forEach((t) => { t.enabled = false; });
+      el.localVideo.classList.add('off');
+      el.localPh.hidden = false;
     } else {
       el.localPh.hidden = false;
       const b = el.localPh.querySelector('b');
@@ -532,7 +547,7 @@ async function initMedia() {
     }
     el.btnMic.classList.toggle('off', !hasAudio);
     el.btnMic.textContent = hasAudio ? '🎤' : '🔇';
-    el.btnCam.classList.toggle('off', !hasVideo);
+    el.btnCam.classList.add('off');
   }
 }
 
@@ -566,6 +581,7 @@ function ensurePc() {
     el.remoteVideo.classList.remove('off');
     // Ekran ulashilayotgan bo'lsa plitkada "Ustoz ekranini ko'rsatyapti" qolsin
     el.remotePh.hidden = !(EKRAN && !IS_TEACHER);
+    remoteKamChiz();
     playRemote();
   };
 
@@ -845,7 +861,7 @@ function ekranRejimi(on) {
     el.remotePh.hidden = !on;
     el.remotePh.classList.toggle('ekran', on);
     if (on) el.remotePh.innerHTML = '<b>🖥️ Ustoz ekranini ko‘rsatyapti</b>';
-    else if (pc && pc.connectionState === 'connected') el.remotePh.hidden = true;
+    else if (pc && pc.connectionState === 'connected') { el.remotePh.hidden = true; remoteKamChiz(); }
   }
   if (on) requestAnimationFrame(ekranOlcham);
   redraw();
