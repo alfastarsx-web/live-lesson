@@ -62,6 +62,9 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
 .ico.c{background:var(--coral-soft);color:var(--coral)} .ico.a{background:var(--amber-soft);color:#b7761c}
 .ico.s{background:var(--sky-soft);color:var(--sky)} .ico.g{background:var(--em-soft);color:var(--em)}
 .bosh{padding:14px 2px;color:var(--mut2);font-size:13.5px;text-align:center}
+.lbl .son{color:var(--mut2);font-weight:700}
+.qator .tel{color:var(--em);font-weight:700;text-decoration:none}
+.teg.k{background:var(--coral-soft);color:var(--coral)}
 /* Yuklanish skeleti — "Yuklanmoqda…" yozuvi o'rniga */
 .sk{display:flex;align-items:center;gap:11px;padding:10px 2px}
 .sk i,.sk b,.sk s{display:block;border-radius:10px;background:linear-gradient(90deg,#eceee9 25%,#f6f7f4 50%,#eceee9 75%);background-size:200% 100%;animation:sk 1.2s linear infinite}
@@ -255,6 +258,9 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
   <div class="lbl">Bugungi darslar</div>
   <section class="card ruyxat" id="darslar" aria-label="Bugungi darslar" aria-busy="true"><div class="sk"><i></i><span><b></b><s></s></span></div><div class="sk"><i></i><span><b></b><s></s></span></div><div class="maslahat" id="maslahat"></div></section>
 
+  <div class="lbl">Biriktirilgan sinov darslari <span class="son" id="sinovSon"></span></div>
+  <section class="card ruyxat" id="sinovlar" aria-label="Biriktirilgan sinov darslari" aria-busy="true"><div class="sk"><i></i><span><b></b><s></s></span></div></section>
+
   <div class="lbl">Sizni kutyapti</div>
   <section class="card ruyxat" id="kutyapti" aria-label="Sizni kutyapti" aria-busy="true"><div class="sk"><i></i><span><b></b><s></s></span></div><div class="sk"><i></i><span><b></b><s></s></span></div></section>
 
@@ -350,6 +356,30 @@ $('#darslar').addEventListener('click', async (e) => {
   if (r.ok && url) location.href = url;
   else toast(r.data.message || 'Hozircha kirib bo‘lmaydi');
 });
+
+// ---------- biriktirilgan sinov darslari ----------
+// Ustozga biriktirilgan barcha kelgusi sinovlar (bugungi va keyingi kunlar) — sana, vaqt, telefon bilan.
+function kunYorliq(iso) {
+  const k = kunKalit(new Date(iso));
+  if (k === kunKalit(new Date())) return 'Bugun';
+  if (k === kunKalit(new Date(Date.now() + 864e5))) return 'Ertaga';
+  const t = tash(new Date(iso));
+  return `${t.getUTCDate()}-${OY_NOM[t.getUTCMonth()].slice(0, 3)}`;
+}
+function sinovlarChiz() {
+  const r = DARSLAR.filter((d) => d.isTrial && new Date(d.startsAt).getTime() + (d.durationMin || 60) * 60e3 > Date.now())
+    .sort((a, b) => new Date(a.startsAt) - new Date(b.startsAt));
+  $('#sinovSon').textContent = r.length ? `· ${r.length} ta` : '';
+  if (!r.length) { $('#sinovlar').innerHTML = '<div class="bosh">Hozircha biriktirilgan sinov darsi yo‘q. Biriktirilishi bilan shu yerda ko‘rinadi.</div>'; return; }
+  const tel = (p) => (p ? `<a class="tel" href="tel:${esc(p)}">${esc(p)}</a>` : '');
+  $('#sinovlar').innerHTML = r.map((d) => {
+    const tellar = [tel(d.leadPhone), tel(d.leadExtraPhone)].filter(Boolean).join(' · ');
+    return `<div class="qator">
+      <div class="vaqt"><b class="num">${soat(d.startsAt)}</b><span>${kunYorliq(d.startsAt)}</span></div>
+      <div class="b"><div class="t1">${esc(d.studentName || 'O‘quvchi')}${d.confirmPending ? '<span class="teg k">tasdiqlang</span>' : ''}</div><div class="t2">${tellar || `${d.durationMin || 60} daqiqa`}</div></div>
+      <a class="btn soft" href="/work.html#sinovlar">Ochish</a></div>`;
+  }).join('');
+}
 
 // ---------- sizni kutyapti ----------
 function kutyaptiChiz({ tarix, jadval, oquvchilar, hamyon }) {
@@ -569,6 +599,8 @@ function korsat(d) {
   if (hamyon?.week) { $('#grafik').hidden = false; shamChiz(hamyon.week); } else $('#grafik').hidden = true;
   DARSLAR = Array.isArray(my) ? my : [];
   darslarChiz();
+  sinovlarChiz();
+  $('#sinovlar').removeAttribute('aria-busy');
   kutyaptiChiz({ tarix: Array.isArray(tarix) ? tarix : [], jadval, oquvchilar: Array.isArray(oquvchilar) ? oquvchilar : [], hamyon });
   $('#darslar').removeAttribute('aria-busy');
   $('#kutyapti').removeAttribute('aria-busy');
