@@ -40,6 +40,7 @@ body.oquvchilar{background:var(--bg)}
 .kutish{margin-top:14px;background:#f6f0e6;border-radius:12px;padding:10px 12px}
 .kutish b{display:block;font-size:13.5px;font-weight:800;color:#8a6a36}
 .kutish span{font-size:12.5px;color:#7a5d30}
+.oq.yopiq{cursor:default}
 .malumot b{font-size:13.5px;font-weight:800;color:#23262d;font-variant-numeric:tabular-nums}
 </style>
 </head>
@@ -96,10 +97,12 @@ function keyingiMatn(iso) {
   return `${sanaUzun(iso)} ${soat}`;
 }
 
-// Mentor "To'lov qildi" belgilagan, operator hali obunani kiritmagan
+// Mentor "To'lov qildi" belgilagan, operator hali obunani kiritmagan. Biriktirma yo'q (assignmentId null) —
+// admin to'lovni tasdiqlab doimiy darslarni qo'ymaguncha chat, qo'ng'iroq va dars ochilmaydi
 function kutilayotganHtml(x) {
+  const yopiq = !x.assignmentId;
   return `
-    <div class="oq kutilmoqda" data-id="${esc(x.student.id)}" tabindex="0" role="link" aria-label="${esc(ism(x.student))}">
+    <div class="oq kutilmoqda${yopiq ? ' yopiq' : ''}" data-id="${esc(x.student.id)}" ${yopiq ? 'aria-disabled="true"' : 'tabindex="0" role="link"'} aria-label="${esc(ism(x.student))}">
       <div class="oq-ust">
         <div class="avatar">${esc(bosh(ism(x.student)))}</div>
         <div class="ism">
@@ -109,16 +112,18 @@ function kutilayotganHtml(x) {
       </div>
       <div class="kutish">
         <b>To‘lov tasdiqlanmoqda</b>
-        <span>Operator to‘lovni kiritgach, tarif va obuna muddati shu yerda chiqadi.</span>
+        <span>${yopiq
+          ? 'Admin to‘lovni tasdiqlab, dars jadvalini qo‘ygach o‘quvchi sizga biriktiriladi — shundan keyin chat va darslar ochiladi.'
+          : 'Operator to‘lovni kiritgach, tarif va obuna muddati shu yerda chiqadi.'}</span>
       </div>
-      <div class="oq-past">
+      ${yopiq ? '' : `<div class="oq-past">
         <div class="malumot">
           <div><small>Keyingi dars</small><b>${esc(keyingiMatn(x.nextLessonAt))}</b></div>
           <div><small>O‘tilgan darslar</small><b>${x.lessonsDone}</b></div>
         </div>
         <button class="dumaloq" type="button" data-amal="chat" aria-label="Chat">${IKON.chat}</button>
         <button class="dumaloq qongiroq" type="button" data-amal="qongiroq" aria-label="Qo‘ng‘iroq">${IKON.qongiroq}</button>
-      </div>
+      </div>`}
     </div>`;
 }
 
@@ -165,7 +170,7 @@ function chiz() {
       : '<div class="bosh-holat"><b>Hali to‘lov qilgan o‘quvchi yo‘q</b>'
         + '<span>Sinov darsidan keyin doimiy darslar uchun to‘lov qilgan o‘quvchilar shu yerda chiqadi</span></div>';
 
-  document.querySelectorAll('.oq').forEach((k) => {
+  document.querySelectorAll('.oq:not(.yopiq)').forEach((k) => {
     const och = () => { location.href = `/oquvchi.html?id=${encodeURIComponent(k.dataset.id)}`; };
     k.onclick = (e) => {
       const amal = e.target.closest('[data-amal]');
