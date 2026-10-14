@@ -643,6 +643,8 @@ async function yukla() {
 
 (async () => {
   await WebViewAuth.tayyorla();
+  // Brauzerdan kirgan mentor shu sahifada ham adminda onlayn ko'rinsin (Work, Jadval kabi)
+  mentorNabzi();
   oylarniTayyorla();
   await yukla();
   await tabriklarniKorsat(S?.firstName || '');

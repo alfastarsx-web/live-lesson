@@ -56,6 +56,14 @@ function rolniQoy(claims) {
 }
 rolniQoy(CLAIMS);
 
+// Ustoz brauzerdan (ilovasiz) dars o'tayotganda ham adminda "onlayn" ko'rinsin: dars xonasi ham
+// mentor sessiyasiga signal beradi (aks holda 3 daqiqada oflayn bo'lib qolardi). Ilovada onlayn
+// holatni ilovaning o'zi ushlaydi. Ekran ulashilganda sahifa fonda bo'lsa ham dars davom etadi.
+setInterval(() => {
+  if (!IS_TEACHER || window.flutter_inappwebview || window.MyTeacher?.postMessage) return;
+  fetch('/api/mentor-session/heartbeat', { method: 'POST' }).catch(() => {});
+}, 60_000);
+
 const $ = (s) => document.querySelector(s);
 const el = {
   stage: $('#stage'), status: $('#status'),
