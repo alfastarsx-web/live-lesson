@@ -126,6 +126,25 @@ function toast(msg, ms = 2600) {
 }
 function setStatus(t) { el.status.textContent = t; }
 
+// Ustozga: dars qancha davom etayotgani — kichik, ko'zga tashlanmaydigan taymer (o'quvchi bilan
+// birinchi uchrashgandan beri; vaqtni server beradi, qayta ulanishda ham o'zgarmaydi)
+let DARS_BOSHI = null;
+const taymerEl = document.getElementById('darsTaymer');
+function darsBoshiniQoy(otganMs) {
+  if (!IS_TEACHER || !taymerEl || otganMs == null) return;
+  DARS_BOSHI = Date.now() - otganMs;
+  taymerChiz();
+}
+function taymerChiz() {
+  if (!DARS_BOSHI || !taymerEl) return;
+  const s = Math.max(0, Math.floor((Date.now() - DARS_BOSHI) / 1000));
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), c = s % 60;
+  const mm = String(m).padStart(2, '0'), cc = String(c).padStart(2, '0');
+  taymerEl.textContent = `⏱ ${h ? `${h}:${mm}` : m}:${cc}`;
+  taymerEl.hidden = false;
+}
+setInterval(taymerChiz, 1000);
+
 // ================= 1. WebSocket =================
 let ws = null, myId = null, peerId = null, isInitiator = false, retry = 0, qaytaUlanishTaymer = null;
 
@@ -202,7 +221,10 @@ async function onSignal(m) {
       if (pc) teardownPeer();
       if (m.peers.length) { peerId = m.peers[0].id; isInitiator = true; onPeerReady(m.peers[0]); }
       applyState(m.state);
+      darsBoshiniQoy(m.darsOtganMs);
       break;
+
+    case 'dars-vaqti': darsBoshiniQoy(m.otganMs); break;
 
     case 'peer-join':
       // Suhbatdosh qayta kirdi — eski aloqa yaroqsiz, yangisini kutamiz

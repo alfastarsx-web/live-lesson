@@ -36,6 +36,7 @@ body{margin:0;background:var(--bg);color:var(--fg);overflow:hidden;
   display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:999px;
   background:rgba(23,24,27,.72);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08)
 }
+.bar .taymer{font-size:11px;color:var(--mut);opacity:.75;font-variant-numeric:tabular-nums;padding:0 4px;white-space:nowrap}
 .bar .status{font-size:11px;color:var(--mut);padding:0 4px;max-width:140px;
              overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 

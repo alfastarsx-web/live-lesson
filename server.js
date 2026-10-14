@@ -1052,6 +1052,32 @@ function saqlanganXona(id) {
 
 const saqlashNavbati = new Map();
 /** Xona holatini 2 soniyada bir marta diskka yozadi (o'quvchi soniyalari hozirgacha hisoblanib) */
+/** Ustoz va o'quvchi birga o'tirgan jami soniya (hozirgi uchrashuv bilan) */
+function birgaSoniya(room) {
+  const ish = room.ishtirok;
+  return ish.birgaSeconds + (ish.birgaBoshi ? Math.round((Date.now() - ish.birgaBoshi) / 1000) : 0);
+}
+
+/**
+ * Xonadagilar o'zgarganda: ikkalasi (ustoz + o'quvchi) bo'lsa birga vaqt sanaladi, biri chiqsa to'xtaydi.
+ * Birinchi uchrashuvda dars boshlanish vaqti barchaga yuboriladi (ustoz taymeri).
+ */
+function birgaYangila(room) {
+  const ish = room.ishtirok;
+  const rollar = new Set([...room.peers.values()].map((p) => p.meta.role));
+  const ikkalasi = rollar.has('teacher') && rollar.has('student');
+  if (ikkalasi && !ish.birgaBoshi) {
+    ish.birgaBoshi = Date.now();
+    if (!ish.darsBoshi) {
+      ish.darsBoshi = ish.birgaBoshi;
+      broadcast(room, { type: 'dars-vaqti', otganMs: 0 });
+    }
+  } else if (!ikkalasi && ish.birgaBoshi) {
+    ish.birgaSeconds += Math.round((Date.now() - ish.birgaBoshi) / 1000);
+    ish.birgaBoshi = null;
+  }
+}
+
 function xonaniSaqla(id, room) {
   if (saqlashNavbati.has(id)) return;
   saqlashNavbati.set(id, setTimeout(() => {
@@ -1065,6 +1091,8 @@ function xonaniSaqla(id, room) {
       state: { ...room.state, strokes: room.state.strokes.slice(-2000) },
       studentJoined: ish.studentJoined,
       studentSeconds: soniya,
+      birgaSeconds: birgaSoniya(room),
+      darsBoshi: ish.darsBoshi,
       ended: room.ended,
     };
     fs.writeFile(xonaFayli(id), JSON.stringify(d), (err) => {
@@ -1087,7 +1115,9 @@ function getRoom(id) {
       startedAt,
       logFile: path.join(LOG_DIR, `${id}__${stamp}.jsonl`),
       // Sinov darsi hisoboti uchun: o'quvchi qachon kirdi va qancha turdi
-      ishtirok: { studentJoined: false, studentSeconds: 0, studentEnteredAt: null },
+      // birga* — ustoz va o'quvchi ikkalasi xonada bo'lgan vaqt (dars davomiyligi); darsBoshi — birinchi marta
+      // ikkalasi uchrashgan payt (ustoz ekranidagi taymer shundan sanaydi, qayta ulanishda ham o'zgarmaydi)
+      ishtirok: { studentJoined: false, studentSeconds: 0, studentEnteredAt: null, birgaSeconds: 0, birgaBoshi: null, darsBoshi: null },
       lessonId: null,
       ended: false,
       endTimer: null,
@@ -1100,6 +1130,8 @@ function getRoom(id) {
       room.startedAt = eski.startedAt || startedAt;
       room.ishtirok.studentJoined = Boolean(eski.studentJoined);
       room.ishtirok.studentSeconds = Number(eski.studentSeconds) || 0;
+      room.ishtirok.birgaSeconds = Number(eski.birgaSeconds) || 0;
+      room.ishtirok.darsBoshi = Number(eski.darsBoshi) || null;
       room.ended = Boolean(eski.ended);
     }
     rooms.set(id, room);
@@ -1181,14 +1213,17 @@ async function sinovHisoboti(roomId, room, ended = false) {
       ? Math.round((Date.now() - room.ishtirok.studentEnteredAt) / 1000) : 0);
 
   try {
-    const r = await fetch(`${base}/lesson-booking/trial/report`, {
+    const yubor = (body) => fetch(`${base}/lesson-booking/trial/report`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-lesson-secret': secret },
-      body: JSON.stringify({ room: roomId, studentJoined, studentSeconds, ended }),
+      body: JSON.stringify(body),
       signal: AbortSignal.timeout(10000),
     });
+    let r = await yubor({ room: roomId, studentJoined, studentSeconds, lessonSeconds: birgaSoniya(room), ended });
+    // API hali eski bo'lsa (lessonSeconds ni tanimaydi — 400) — eski ko'rinishda qayta: lid holati to'xtamasin
+    if (r.status === 400) r = await yubor({ room: roomId, studentJoined, studentSeconds, ended });
     const d = await r.json().catch(() => ({}));
-    console.log(`Sinov darsi hisoboti: ${roomId} kirdi=${studentJoined} soniya=${studentSeconds} -> `
+    console.log(`Sinov darsi hisoboti: ${roomId} kirdi=${studentJoined} soniya=${studentSeconds} birga=${birgaSoniya(room)} -> `
       + `${r.ok ? (d.status || 'qabul qilindi') : `xato ${r.status}`}`);
   } catch (e) {
     // Hisobot ketmasa dars baribir o'tgan — mentor holatni qo'lda qo'yadi
@@ -1309,6 +1344,7 @@ wss.on('connection', async (ws, req) => {
     broadcast(room, { type: 'peer-leave', id });
     logEvent(room, { type: 'replaced', role });
   }
+  birgaYangila(room);
   if (room.peers.size >= 2) {
     send(ws, { type: 'full' });
     return ws.close();
@@ -1317,6 +1353,7 @@ wss.on('connection', async (ws, req) => {
   const clientId = crypto.randomUUID();
   ws.meta = { clientId, roomId, role, name, userId: claims?.userId || null };
   room.peers.set(clientId, ws);
+  birgaYangila(room);
 
   // Kim birinchi kirdi — o'sha "polite" bo'lmaydi (offer yaratadi yangi kelgan).
   const peerList = [...room.peers.values()]
@@ -1329,6 +1366,8 @@ wss.on('connection', async (ws, req) => {
     peers: peerList,
     state: room.state,
     iceServers: iceServers(roomId),
+    // Boshlanish vaqti emas, o'tgan vaqt — telefon soati noto'g'ri bo'lsa ham taymer to'g'ri
+    darsOtganMs: room.ishtirok.darsBoshi ? Date.now() - room.ishtirok.darsBoshi : null,
   });
 
   broadcast(room, { type: 'peer-join', peer: { id: clientId, role, name } }, clientId);
@@ -1491,6 +1530,7 @@ wss.on('connection', async (ws, req) => {
     // Shu rol uchun yangi ulanish kelgan — eski ulanish hech narsaga ta'sir qilmasin
     if (ws.almashtirildi) return;
     room.peers.delete(clientId);
+    birgaYangila(room);
     broadcast(room, { type: 'peer-leave', id: clientId });
     // Ustoz chiqib ketsa ekran ulashish ham tugaydi — o'quvchida qotib qolgan kadr qolmasin
     if (role === 'teacher' && room.state.screen) ekranHolati(room, false, clientId);
