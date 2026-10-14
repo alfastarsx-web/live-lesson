@@ -1064,7 +1064,8 @@ function birgaSoniya(room) {
  */
 function birgaYangila(room) {
   const ish = room.ishtirok;
-  const rollar = new Set([...room.peers.values()].map((p) => p.meta.role));
+  // Admin texnik yordam (tekshiruv) dars vaqtiga kirmaydi — faqat haqiqiy ustoz va o'quvchi
+  const rollar = new Set([...room.peers.values()].filter((p) => !p.meta.yordam).map((p) => p.meta.role));
   const ikkalasi = rollar.has('teacher') && rollar.has('student');
   if (ikkalasi && !ish.birgaBoshi) {
     ish.birgaBoshi = Date.now();
@@ -1294,6 +1295,7 @@ wss.on('connection', async (ws, req) => {
         const result = await liveApi('validate', {
           lessonId: claims.lessonId, bookingId: claims.bookingId,
           room: roomId, userId: claims.userId, role,
+          ...(claims.yordam ? { yordam: true } : {}),
         });
         if (!result.allowed) {
           send(ws, { type: 'error', message: 'Bu dars siz uchun faol emas' });
@@ -1331,15 +1333,17 @@ wss.on('connection', async (ws, req) => {
   // telefon, yopilmay qolgan oyna) yangisiga joy bo'shatadi — "Xona to'la" chiqmaydi
   for (const [id, p] of room.peers) {
     if (p.meta.role !== role) continue;
+    // Admin texnik yordam o'tirgan bo'lsa — haqiqiy ustoz kirishi bilan joy bo'shatadi
+    const yordamChiqadi = p.meta.yordam && !claims?.yordam;
     // Boshqa odam (boshqa akkaunt) shu rol bilan kirsa — eski ishtirokchini chiqarib yubormaydi
-    if (claims?.userId && p.meta.userId && p.meta.userId !== claims.userId) continue;
+    if (!yordamChiqadi && claims?.userId && p.meta.userId && p.meta.userId !== claims.userId) continue;
     p.almashtirildi = true;
     if (role === 'student' && room.ishtirok.studentEnteredAt) {
       room.ishtirok.studentSeconds += Math.round((Date.now() - room.ishtirok.studentEnteredAt) / 1000);
       room.ishtirok.studentEnteredAt = null;
     }
     room.peers.delete(id);
-    send(p, { type: 'replaced' });
+    send(p, { type: 'replaced', ...(yordamChiqadi ? { sabab: 'ustoz-keldi' } : {}) });
     try { p.terminate(); } catch { /* allaqachon yopilgan */ }
     broadcast(room, { type: 'peer-leave', id });
     logEvent(room, { type: 'replaced', role });
@@ -1351,7 +1355,7 @@ wss.on('connection', async (ws, req) => {
   }
 
   const clientId = crypto.randomUUID();
-  ws.meta = { clientId, roomId, role, name, userId: claims?.userId || null };
+  ws.meta = { clientId, roomId, role, name, userId: claims?.userId || null, yordam: Boolean(claims?.yordam) };
   room.peers.set(clientId, ws);
   birgaYangila(room);
 
