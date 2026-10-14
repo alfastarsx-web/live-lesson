@@ -97,6 +97,22 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
 .ring i{display:block;height:100%;width:0;background:var(--em);border-radius:6px;transition:width .5s}
 .akad{display:flex;gap:12px;align-items:center;background:linear-gradient(120deg,#fff6e6,#fdeede);box-shadow:0 0 0 1px #f6e2c4;border-radius:18px;padding:14px;text-decoration:none}
 .akad[hidden]{display:none} /* .akad{display:flex} hidden belgisini bosib ketmasin */
+.ilova{position:relative;border-radius:22px;padding:18px;color:#fff;overflow:hidden;
+  background:radial-gradient(circle at 88% 12%,rgba(255,255,255,.18),transparent 45%),linear-gradient(135deg,#1f6f5c,#2c8c73 55%,#3aa58a);
+  box-shadow:0 10px 28px rgba(31,111,92,.32)}
+.ilova[hidden]{display:none}
+.ilova .bosh{display:flex;gap:14px;align-items:center}
+.ilova .logo{flex:0 0 auto;width:56px;height:56px;border-radius:16px;background:#fff;display:grid;place-items:center;font-size:30px;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.ilova h2{margin:0;font-size:18px;line-height:1.25;color:#fff;text-align:left}
+.ilova p{margin:4px 0 0;font-size:13.5px;line-height:1.45;color:rgba(255,255,255,.92);text-align:left}
+.ilova .tugmalar{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.ilova .tg{flex:1 1 150px;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;border-radius:14px;padding:12px 14px;font-weight:800;font-size:14.5px}
+.ilova .tg.asosiy{background:#fff;color:#1f6f5c}
+.ilova .tg.ikkinchi{background:rgba(255,255,255,.16);color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55)}
+.ilova details{margin-top:12px;font-size:13px;background:rgba(0,0,0,.12);border-radius:12px;padding:8px 12px}
+.ilova summary{cursor:pointer;font-weight:700}
+.ilova ol{margin:8px 0 2px;padding-left:18px;line-height:1.55}
+.ilova .yop{position:absolute;top:10px;right:10px;border:0;background:rgba(255,255,255,.18);color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px}
 /* Yangi ustoz: xush kelibsiz va boshlash yo'li */
 .yol{background:linear-gradient(160deg,#123f35,#1f6f5c);color:#fff;border-radius:22px;padding:16px}
 .yol .ust{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
@@ -190,6 +206,31 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
     <div class="ph" id="ph" aria-hidden="true">·</div>
     <div><small id="sana"></small><h1 id="salomMatn">Xush kelibsiz!</h1></div>
   </header>
+
+  <!-- Brauzerdan kirgan ustozga: hujjatlar va bildirishnomalar ilovada — ilovani o'rnatish banneri -->
+  <section class="ilova" id="ilova" hidden aria-label="MyTeacher Mentor ilovasi">
+    <button type="button" class="yop" id="ilovaYop" aria-label="Yopish">✕</button>
+    <div class="bosh">
+      <div class="logo" aria-hidden="true">📱</div>
+      <div>
+        <h2>MyTeacher Mentor ilovasini o‘rnating</h2>
+        <p>Hujjatlaringizni (pasport, diplom, sertifikat) faqat ilova orqali yuklaysiz — hujjatsiz ish to‘liq boshlanmaydi. Yangi so‘rovlar va eslatmalar ham ilovada keladi.</p>
+      </div>
+    </div>
+    <div class="tugmalar">
+      <a class="tg" id="ilovaAndroid" href="/ilova.apk" download>🤖 Android — APK yuklab olish</a>
+      <a class="tg" id="ilovaIos" href="https://apps.apple.com/us/app/myteacher-mentor/id6771919240" target="_blank" rel="noopener">🍏 iPhone — App Store</a>
+    </div>
+    <details id="ilovaYoriq">
+      <summary>Android’da qanday o‘rnataman?</summary>
+      <ol>
+        <li>«APK yuklab olish»ni bosing (≈90 MB, Wi-Fi tavsiya).</li>
+        <li>Yuklab bo‘lgach faylni oching — telefon «Noma’lum manbadan o‘rnatish»ni so‘rasa, <b>Ruxsat berish</b>ni bosing.</li>
+        <li>«O‘rnatish»ni bosing, ilovani ochib, shu login va parol bilan kiring.</li>
+        <li>Ilovadagi «Hujjatlar» bo‘limida hujjatlaringizni yuklang.</li>
+      </ol>
+    </details>
+  </section>
 
   <section class="yol" id="yol" hidden aria-label="Boshlash yo'li">
     <div class="ust"><h2>🚀 Boshlash yo'li</h2><span class="foiz" id="yolFoiz"></span></div>
@@ -610,6 +651,29 @@ function korsat(d) {
   }
   holatChiz(ball, progress);
 }
+// Ilovani o'rnatish banneri: faqat brauzerda (ilova ichida emas). Telefoniga qarab asosiy tugma —
+// Android: APK, iPhone: App Store. Yopsa 3 kun ko'rinmaydi (ilovani o'rnatgan bo'lsa brauzerni ochmaydi ham)
+const ILOVA_YOP = 'ilova-banner-yopildi';
+function ilovaBanner() {
+  if (window.ilovadami && window.ilovadami()) return;
+  try {
+    const t = Number(localStorage.getItem(ILOVA_YOP) || 0);
+    if (t && Date.now() - t < 3 * 86400000) return;
+  } catch { /* yo'q */ }
+  const ua = navigator.userAgent || '';
+  const ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const and = $('#ilovaAndroid');
+  const iph = $('#ilovaIos');
+  and.className = 'tg ' + (ios ? 'ikkinchi' : 'asosiy');
+  iph.className = 'tg ' + (ios ? 'asosiy' : 'ikkinchi');
+  if (ios) { iph.parentNode.prepend(iph); $('#ilovaYoriq').hidden = true; }
+  $('#ilova').hidden = false;
+  $('#ilovaYop').onclick = () => {
+    try { localStorage.setItem(ILOVA_YOP, String(Date.now())); } catch { /* yo'q */ }
+    $('#ilova').hidden = true;
+  };
+}
+
 const ol = (u) => api(u).then((r) => (r && r.ok ? r.data : null)).catch(() => null);
 async function yukla() {
   const [hamyon, my, tarix, jadval, oquvchilar, ball, progress, akad, sessiya, takliflar, qirol] = await Promise.all([
@@ -642,6 +706,7 @@ async function yukla() {
     maslahatQoy();
   }
   await WebViewAuth.tayyorla({ akademiya: false });
+  ilovaBanner();
   // Brauzerdan kirgan mentor shu sahifada ham adminda onlayn ko'rinsin (Work, Jadval kabi)
   mentorNabzi();
   const { my, tarix, jadval, ball, progress, akad, sessiya, takliflar } = await yukla();

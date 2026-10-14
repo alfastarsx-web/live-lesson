@@ -921,6 +921,14 @@ app.get('/api/bosh-sahifa', async (req, res) => {
   res.json({ redirect: await boshSahifa(req, ai) });
 });
 
+// Mentor ilovasi APK — bosh sahifadagi "Ilovani o'rnating" bannerining tugmasi. Fayl API serverida
+// (admin "Ustoz arizalari"da yuklaydi); shu yerdan yo'naltiramiz, toki sahifa API manzilini bilmasin.
+app.get('/ilova.apk', (req, res) => {
+  const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
+  if (!base) return res.status(404).send('APK hozircha yo‘q');
+  res.redirect(302, `${base}/mentor-vacancy/apk`);
+});
+
 // Bosh sahifa. Ilova tablari o'z domenining ildizini ochadi (#ai=<token> bilan) —
 // login emas, tab sahifasi ochilsin: sahifaning o'zi #ai= ni qabul qiladi.
 // Brauzer 302 da #... qismini saqlaydi.
