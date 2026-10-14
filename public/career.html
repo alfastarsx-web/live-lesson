@@ -299,6 +299,8 @@ async function akademiya() {
 (async () => {
   // Career yangi mentorga ham ochiq — akademiyaga yo'naltirmaymiz
   await WebViewAuth.tayyorla({ akademiya: false });
+  // Brauzerdan kirgan mentor shu sahifada ham adminda onlayn ko'rinsin (Work, Jadval kabi)
+  mentorNabzi();
   const w = await api('/api/whoami');
   if (w && w.ok && w.data.name && w.data.name !== 'Ustoz') $('#salom').textContent = `Career · ${w.data.name.split(/\s+/)[0]}`;
   await Promise.all([ball(), progress(), akademiya()]);

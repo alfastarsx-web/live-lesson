@@ -1337,6 +1337,8 @@ wss.on('connection', async (ws, req) => {
   if (role === 'student') {
     room.ishtirok.studentJoined = true;
     room.ishtirok.studentEnteredAt = Date.now();
+    // Oraliq hisobot: admin panel o'quvchi darsga kirganini dars tugashini kutmasdan ko'rsin
+    void sinovHisoboti(roomId, room, false);
   }
   xonaniSaqla(roomId, room);
 

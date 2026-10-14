@@ -642,6 +642,8 @@ async function yukla() {
     maslahatQoy();
   }
   await WebViewAuth.tayyorla({ akademiya: false });
+  // Brauzerdan kirgan mentor shu sahifada ham adminda onlayn ko'rinsin (Work, Jadval kabi)
+  mentorNabzi();
   const { my, tarix, jadval, ball, progress, akad, sessiya, takliflar } = await yukla();
   boshlashYoli({ akad, jadval, sessiya, my, tarix, takliflar });
   // Mentor boti: ulanmagan bo'lsa bir martalik havola bilan karta
