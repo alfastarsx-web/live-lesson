@@ -60,7 +60,7 @@ rolniQoy(CLAIMS);
 // mentor sessiyasiga signal beradi (aks holda 3 daqiqada oflayn bo'lib qolardi). Ilovada onlayn
 // holatni ilovaning o'zi ushlaydi. Ekran ulashilganda sahifa fonda bo'lsa ham dars davom etadi.
 setInterval(() => {
-  if (!IS_TEACHER || window.flutter_inappwebview || window.MyTeacher?.postMessage) return;
+  if (!IS_TEACHER || CLAIMS?.yordam || window.flutter_inappwebview || window.MyTeacher?.postMessage) return;
   fetch('/api/mentor-session/heartbeat', { method: 'POST' }).catch(() => {});
 }, 60_000);
 
@@ -249,6 +249,12 @@ async function onSignal(m) {
     case 'replaced':
       DARS_TUGADI = true;
       teardownPeer();
+      if (m.sabab === 'ustoz-keldi') {
+        setStatus('Ustoz kirdi');
+        el.remotePh.hidden = false;
+        el.remotePh.innerHTML = '<b>✅ Ustoz darsga kirdi</b><span>Texnik tekshiruv tugadi — dars ustozga o‘tdi. Rahmat!</span>';
+        break;
+      }
       setStatus('Dars boshqa oynada ochildi');
       el.remotePh.hidden = false;
       el.remotePh.innerHTML = '<b>Dars boshqa oynada ochildi</b><span>Shu dars boshqa qurilma yoki oynada davom etyapti.</span>';
