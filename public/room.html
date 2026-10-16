@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Dars xonasi</title>
-<link rel="stylesheet" href="/room.css?v=20261012_media">
+<link rel="stylesheet" href="/room.css?v=20261016_mobile_v5">
 </head>
 <body>
 <div class="app">
@@ -26,6 +26,7 @@
     <div class="bar">
       <button id="btnMic" class="ic" title="Mikrofon">🎤</button>
       <button id="btnCam" class="ic" title="Kamera">🎥</button>
+      <button id="btnChat" class="ic" title="Chat" aria-label="Chat" style="position:relative">💬<span class="chat-nuqta" id="chatNuqta" hidden></span></button>
       <span class="status" id="status">Ulanmoqda…</span>
       <span class="taymer" id="darsTaymer" hidden title="Dars davomiyligi (o‘quvchi kirgandan beri)"></span>
       <button id="btnLeave" class="ic danger" title="Chiqish">✕</button>
@@ -73,11 +74,14 @@
         <video id="screenVideo" playsinline webkit-playsinline autoplay muted disablepictureinpicture></video>
         <canvas id="screenInk"></canvas>
         <div class="screen-tag" id="screenTag">🖥️ Ustoz ekrani</div>
+        <button type="button" class="btn-full-ekran" id="btnFullEkran" title="To‘liq ekran">⛶</button>
       </div>
       <div class="pdfbox" id="pdfbox" hidden>
         <canvas id="pdfCanvas"></canvas>
         <canvas id="inkCanvas"></canvas>
+        <button type="button" class="btn-full-ekran" id="btnFullPdf" title="To‘liq ekran">⛶</button>
       </div>
+      <button type="button" class="btn-exit-fullscreen" id="btnExitFs" hidden title="To‘liq ekrandan chiqish">✕ Chiqish</button>
     </div>
   
     <!-- Dars daftari: ustoz yozadi, o'quvchi jonli ko'radi; darsdan keyin Kurslar bo'limida saqlanadi -->
@@ -95,6 +99,21 @@
       </div>
     </div>
   </section>
+</div>
+
+<!-- Alohida mustaqil Jonli Chat paneli -->
+<div class="chat-panel" id="chatPanel" hidden>
+  <div class="chat-panel-bosh">
+    <div class="chat-panel-nomi">💬 Jonli chat</div>
+    <button type="button" class="chat-panel-yop" id="btnChatYop" title="Yopish">✕</button>
+  </div>
+  <div class="chat-xabarlar" id="chatXabarlar">
+    <div class="chat-eslatma">💬 Jonli dars chati. Xabarlar bu yerda ko‘rinadi.</div>
+  </div>
+  <form class="chat-yubor" id="chatForm">
+    <input type="text" id="chatKirit" placeholder="Xabar yozing…" autocomplete="off" maxlength="1000">
+    <button type="submit" id="chatYuborBtn" class="chat-tugma" title="Yuborish">➤</button>
+  </form>
 </div>
 
 <!-- O'quvchi dars oxirida baho qoldiradi -->
@@ -124,6 +143,6 @@
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="/room.js?v=20261014_yordam"></script>
+<script src="/room.js?v=20261016_mobile_v5"></script>
 </body>
 </html>

@@ -1,6 +1,8 @@
 'use strict';
 
 const http = require('http');
+const https = require('https');
+const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -367,6 +369,34 @@ async function sessiyaniYangila(req, res) {
     if (id && id === tokenSub(p)) {
       setCookies(req, res, [eslabCookie(id)]);
       if (!c[KIM]) res.append('Set-Cookie', cookieHeader(req, KIM, kimBelgisi(id), ESLAB_MUDDAT).replace('; HttpOnly', ''));
+    }
+    return;
+  }
+
+  // 3) Eslab yo'q, lekin so'rovda imzolangan dars tokeni bor (?t=...) — darsga kirishda sessiyani tiklaymiz
+  if (req.query && req.query.t) {
+    const rt = verify(req.query.t);
+    if (rt && rt.userId && /^[0-9a-f-]{36}$/.test(rt.userId)) {
+      const s = await aiSessiya(rt.userId);
+      if (s.ok) {
+        const royxat = [
+          [AI_COOKIE, s.token, AI_COOKIE_MUDDAT],
+          eslabCookie(rt.userId),
+        ];
+        if (rt.role === 'teacher') {
+          const safeId = rt.userId.replace(/[^a-z0-9-]+/g, '').slice(0, 50);
+          const xona = sign({ room: `mentor-${safeId}`, role: 'teacher', name: String(s.name || rt.name || 'Ustoz').slice(0, 40) }, XONA_MUDDAT);
+          royxat.push([COOKIE, xona, XONA_MUDDAT]);
+          reqCookie(req, COOKIE, xona);
+        }
+        reqCookie(req, AI_COOKIE, s.token);
+        reqCookie(req, ESLAB, royxat[1][1]);
+        setCookies(req, res, royxat);
+      }
+    } else if (rt && rt.role === 'teacher' && !verify(c[COOKIE])) {
+      const xona = sign({ room: rt.room, role: 'teacher', name: String(rt.name || 'Ustoz').slice(0, 40) }, XONA_MUDDAT);
+      setCookies(req, res, [[COOKIE, xona, XONA_MUDDAT]]);
+      reqCookie(req, COOKIE, xona);
     }
   }
 }
@@ -954,7 +984,14 @@ app.get(/^\/login(\.html)?$/, async (req, res, next) => {
   res.redirect(await boshSahifa(req, ai));
 });
 
-app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
+app.use(express.static(path.join(__dirname, 'public'), {
+  extensions: ['html'],
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+}));
 
 const server = http.createServer(app);
 
@@ -1042,8 +1079,9 @@ function ekranHolati(room, on, fromId) {
 function emptyState() {
   // screen — ustoz ekranini ulashyapti; studentDraw — o'quvchiga chizishga ruxsat
   // notes — dars daftari: ustoz yozadi, o'quvchi jonli ko'radi, API ga saqlanadi
+  // messages — dars chati
   return { doc: null, page: 1, strokes: [], scroll: 0, screen: false, studentDraw: false,
-    notes: { matn: '', sozlar: '', vazifa: '' }, materiallar: [] };
+    notes: { matn: '', sozlar: '', vazifa: '' }, materiallar: [], messages: [] };
 }
 
 // ---------- xona holatini saqlash (deploy/qayta ishga tushishdan keyin tiklash) ----------
@@ -1240,7 +1278,17 @@ async function sinovHisoboti(roomId, room, ended = false) {
   }
 }
 
-const wss = new WebSocketServer({ server, path: '/ws' });
+const wss = new WebSocketServer({ noServer: true });
+
+const onUpgrade = (request, socket, head) => {
+  const pathname = new URL(request.url, 'http://localhost').pathname;
+  if (pathname === '/ws') {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  }
+};
+server.on('upgrade', onUpgrade);
 
 // Uzilgan (javob bermaydigan) ulanishni tez aniqlaymiz — aks holda u xonada "arvoh" bo'lib
 // qolib, qayta kirmoqchi bo'lgan ustoz yoki o'quvchiga "Xona to'la" chiqardi
@@ -1524,6 +1572,27 @@ wss.on('connection', async (ws, req) => {
         return;
       }
 
+      // --- Jonli chat: o'quvchi va ustoz yozishishi uchun ---
+      case 'chat': {
+        const text = String(msg.text || '').trim().slice(0, 1000);
+        if (!text) return;
+        const xabar = {
+          type: 'chat',
+          id: crypto.randomBytes(6).toString('hex'),
+          from: clientId,
+          role,
+          name: name || (role === 'teacher' ? 'Ustoz' : 'O‘quvchi'),
+          text,
+          time: new Date().toISOString(),
+        };
+        room.state.messages = room.state.messages || [];
+        room.state.messages.push(xabar);
+        if (room.state.messages.length > 100) room.state.messages.shift();
+        broadcast(room, xabar);
+        logEvent(room, { type: 'chat', role, name, len: text.length });
+        break;
+      }
+
       // --- Ustoz ekranini ulashdi / to'xtatdi (video o'zi WebRTC orqali keladi) ---
       case 'screen':
         if (role !== 'teacher') return;
@@ -1577,10 +1646,46 @@ wss.on('connection', async (ws, req) => {
   });
 });
 
+const HTTPS_PORT = process.env.HTTPS_PORT ? Number(process.env.HTTPS_PORT) : 0;
+
+async function startHttps() {
+  if (!HTTPS_PORT) return;
+  try {
+    const selfsigned = require('selfsigned');
+    const ips = ['127.0.0.1'];
+    const nets = os.networkInterfaces();
+    for (const name of Object.keys(nets)) {
+      for (const net of nets[name]) {
+        if (net.family === 'IPv4' && !net.internal) ips.push(net.address);
+      }
+    }
+    const altNames = [{ type: 2, value: 'localhost' }];
+    for (const ip of ips) altNames.push({ type: 7, ip });
+
+    const pems = await selfsigned.generate([{ name: 'commonName', value: ips[1] || 'localhost' }], {
+      days: 365,
+      keySize: 2048,
+      extensions: [{ name: 'subjectAltName', altNames }],
+    });
+
+    const httpsServer = https.createServer({ key: pems.private, cert: pems.cert }, app);
+    httpsServer.on('upgrade', onUpgrade);
+    httpsServer.listen(HTTPS_PORT, () => {
+      console.log(`Jonli dars (HTTPS): https://127.0.0.1:${HTTPS_PORT}`);
+      for (const ip of ips.filter((x) => x !== '127.0.0.1')) {
+        console.log(`Telefonda ochish (HTTPS): https://${ip}:${HTTPS_PORT}`);
+      }
+    });
+  } catch (err) {
+    console.warn('HTTPS ishga tushmadi:', err.message);
+  }
+}
+
 server.listen(PORT, () => {
   console.log(`Jonli dars: http://127.0.0.1:${PORT}`);
   console.log(TURN_ON ? `TURN: ${TURN_HOST}` : 'TURN: yo‘q — faqat STUN (qattiq NAT ortida ulanmasligi mumkin)');
   console.log(AUTH_ON
     ? 'Rejim: TOKEN — kirish faqat imzolangan token bilan'
     : 'Rejim: OCHIQ — LESSON_TOKEN_SECRET yo‘q, havola bilan kiriladi (faqat ishlab chiqish uchun)');
+  if (HTTPS_PORT) startHttps();
 });

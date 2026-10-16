@@ -71,6 +71,7 @@ const el = {
   localPh: $('#localPh'), remotePh: $('#remotePh'),
   localTag: $('#localTag'), remoteTag: $('#remoteTag'),
   btnMic: $('#btnMic'), btnCam: $('#btnCam'), btnLeave: $('#btnLeave'),
+  btnChat: $('#btnChat'), chatNuqta: $('#chatNuqta'),
   toolbar: $('#toolbar'), fileInput: $('#fileInput'),
   btnUndo: $('#btnUndo'), btnClear: $('#btnClear'),
   btnPrev: $('#btnPrev'), btnNext: $('#btnNext'), pageNo: $('#pageNo'), pagePill: $('#pagePill'),
@@ -85,7 +86,21 @@ const el = {
 // Ekran ulashish rejimi (ish maydonida ustoz ekrani) va o'quvchiga chizish ruxsati
 let EKRAN = false, STUDENT_DRAW = false;
 // Telefon brauzerlari ekranni ulasha olmaydi — tugmani faqat imkon bo'lsa ko'rsatamiz
+const TELEFON = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+const IS_MOBILE_DEVICE = TELEFON || (window.matchMedia && window.matchMedia('(pointer: coarse) and (max-width: 1024px)').matches);
 const EKRAN_MUMKIN = Boolean(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+
+function orientatsiyaYangila() {
+  const landscape = window.innerWidth > window.innerHeight;
+  document.body.classList.toggle('landscape', landscape);
+  document.body.classList.toggle('portrait', !landscape);
+}
+if (IS_MOBILE_DEVICE) {
+  document.body.classList.add('is-mobile');
+}
+orientatsiyaYangila();
+window.addEventListener('resize', orientatsiyaYangila);
+window.addEventListener('orientationchange', () => setTimeout(orientatsiyaYangila, 120));
 
 function interfeysniSozla() {
   el.localTag.textContent = NAME + ' (siz)';
@@ -292,6 +307,7 @@ async function onSignal(m) {
     case 'screen':     if (!IS_TEACHER) ekranRejimi(Boolean(m.on)); break;
     case 'notes':      daftarKeldi(m.notes, m.tab); break;
     case 'media':      peerMediaChiz(m); break;
+    case 'chat':       chatQosh(m); break;
   }
 }
 
@@ -302,6 +318,7 @@ function applyState(state) {
   chizishHolati();
   if (!IS_TEACHER && state.screen) ekranRejimi(true);
   daftarKeldi(state.notes, null, true);
+  if (Array.isArray(state.messages)) chatTikla(state.messages);
   if (state.doc && state.doc.url) {
     loadDoc(state.doc.url, state.doc.name, state.page || 1)
       .then(() => applyScroll(state.scroll || 0));
@@ -321,7 +338,6 @@ let pc = null, localStream = null, pendingIce = [], remoteStream = null, PEER_CA
 // kichik plitkada esa farqi ko'rinmaydi.
 // Kompyuterlarda esa facingMode ko'rsatilmaydi, chunki tashqi USB veb-kameralar va
 // virtual kameralar (OBS, ManyCam va h.k.) facingMode talab qilinsa OverconstrainedError beradi.
-const TELEFON = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 const KAMERA = TELEFON
   ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 15, max: 20 }, facingMode: 'user' }
   : { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24, max: 30 } };
@@ -357,8 +373,10 @@ function mediaYubor() {
   ozMediaChiz(h);
 }
 
-/** O'zida: mikrofon/kamera ishlamasa — nima qilish kerakligi yozilgan, yopilmaydigan panel */
-function ozMediaChiz(h) {
+let OZ_MEDIA_YOPILDI = false;
+/** O'zida: mikrofon/kamera ishlamasa — yo'riqnoma va chat tugmasi */
+function ozMediaChiz(h, majburiy = false) {
+  if (OZ_MEDIA_YOPILDI && !majburiy) return;
   const qism = [];
   if (MUAMMO[h.mic]) qism.push(['mic', h.mic]);
   if (h.cam === 'ruxsat' || h.cam === 'band') qism.push(['cam', h.cam]);
@@ -366,20 +384,21 @@ function ozMediaChiz(h) {
   const nom = { mic: 'Mikrofon', cam: 'Kamera' };
   const sabab = (k, v) => v === 'ruxsat'
     ? `${nom[k]}ga ruxsat berilmagan`
-    : v === 'band' ? `${nom[k]} boshqa ilovada band (Telegram, Zoom…) — o‘sha ilovani yoping` : `${nom[k]} topilmadi`;
+    : v === 'band' ? `${nom[k]} boshqa ilovada band (Telegram, Zoom…)` : `${nom[k]} topilmadi`;
   const ruxsatYoq = qism.some(([, v]) => v === 'ruxsat');
   const yoriq = !ruxsatYoq ? '' : ILOVADA
-    ? 'Pastdagi «Sozlamalarni ochish» → <b>Ruxsatlar</b> → Kamera va Mikrofon → <b>Ruxsat berish</b>. Keyin «Qayta urinish» ni bosing.'
+    ? '«Sozlamalarni ochish» → Ruxsat berish.'
     : TELEFON
-      ? 'Manzil satridagi 🔒 belgisi → <b>Ruxsatlar</b> → Kamera va Mikrofon → <b>Ruxsat berish</b>. Keyin «Qayta urinish» ni bosing.'
-      : 'Manzil satridagi 🔒 belgisidan kamera va mikrofonga ruxsat bering, keyin «Qayta urinish» ni bosing.';
+      ? '🔒 belgisi → Ruxsat berish.'
+      : 'Brauzer 🔒 belgisidan ruxsat bering.';
   el.ozMedia.innerHTML =
-    `<b>${MUAMMO[h.mic] ? '🔇 Ustoz sizni eshitmayapti' : '📷 Ustoz sizni ko‘rmayapti'}</b>`
-    + `<span>${qism.map(([k, v]) => sabab(k, v)).join('. ')}.</span>`
-    + (yoriq ? `<span>${yoriq}</span>` : '')
+    '<button type="button" class="oz-media-yop" data-oz="yop" title="Yopish" aria-label="Yopish">✕</button>'
+    + `<b>${MUAMMO[h.mic] ? '🔇 Ustoz sizni eshitmayapti' : '📷 Ustoz sizni ko‘rmayapti'}</b>`
+    + `<span>${qism.map(([k, v]) => sabab(k, v)).join('. ')}. ${yoriq}</span>`
     + '<div class="oz-media-tugmalar">'
-    + (ILOVADA && ruxsatYoq ? '<button type="button" data-oz="sozlama">⚙️ Sozlamalarni ochish</button>' : '')
-    + '<button type="button" data-oz="qayta">🔄 Qayta urinish</button></div>';
+    + (ILOVADA && ruxsatYoq ? '<button type="button" data-oz="sozlama">⚙️ Sozlamalar</button>' : '')
+    + '<button type="button" data-oz="qayta">🔄 Qayta urinish</button>'
+    + '<button type="button" data-oz="chat">💬 Chat orqali yozish</button></div>';
   el.ozMedia.hidden = false;
 }
 
@@ -510,8 +529,9 @@ async function audioOlish() {
 
 async function initMedia() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    toast('Brauzeringizda video/audio qo‘llab-quvvatlanmaydi yoki sayt HTTPS emas', 6000);
+    toast('Brauzerda video/audio qo‘llab-quvvatlanmadi. Suhbatdosh bilan chat orqali yozishingiz mumkin 💬', 7000);
     mediaXato.mic = mediaXato.cam = 'yoq';
+    if (el.chatNuqta) el.chatNuqta.hidden = false;
     return;
   }
 
@@ -557,7 +577,8 @@ async function initMedia() {
       localStream = vStream;
       toast('Faqat kamera ulandi — mikrofon o‘chiq', 4000);
     } else {
-      toast('Kamera/mikrofonga ruxsat berilmadi. Suhbatdoshni eshitish uchun sahifada qoling', 7000);
+      toast('Kamera/mikrofonga ruxsat berilmadi. Suhbatdosh bilan chat orqali yozishingiz mumkin 💬', 7000);
+      if (el.chatNuqta) el.chatNuqta.hidden = false;
       return;
     }
   }
@@ -807,19 +828,34 @@ el.btnCam.onclick = async () => {
   mediaYubor();
 };
 
-// O'zidagi ogohlantirish tugmalari: ilova sozlamalarini ochish / ruxsatni qayta so'rash
+// O'zidagi ogohlantirish tugmalari: yopish / chat / sozlamalar / qayta urinish
 el.ozMedia.addEventListener('click', async (e) => {
   const b = e.target.closest('button[data-oz]');
   if (!b) return;
-  if (b.dataset.oz === 'sozlama') {
+  const oz = b.dataset.oz;
+  if (oz === 'yop') {
+    el.ozMedia.hidden = true;
+    OZ_MEDIA_YOPILDI = true;
+    return;
+  }
+  if (oz === 'chat') {
+    el.ozMedia.hidden = true;
+    OZ_MEDIA_YOPILDI = true;
+    chatOch(true, true);
+    return;
+  }
+  if (oz === 'sozlama') {
     try { await window.flutter_inappwebview.callHandler('sozlamalarniOch'); } catch {
       toast('Telefon Sozlamalari → Ilovalar → MyTeacher → Ruxsatlar', 6000);
     }
     return;
   }
-  const h = mediaHolati();
-  if (MUAMMO[h.mic]) await el.btnMic.onclick();
-  if (h.cam === 'ruxsat' || h.cam === 'band') await el.btnCam.onclick();
+  if (oz === 'qayta') {
+    OZ_MEDIA_YOPILDI = false;
+    const h = mediaHolati();
+    if (MUAMMO[h.mic]) await el.btnMic.onclick();
+    if (h.cam === 'ruxsat' || h.cam === 'band') await el.btnCam.onclick();
+  }
 });
 // ================= Ekranni ulashish =================
 // Kamera o'rniga ekran yuboriladi (replaceTrack) — qayta ulanish kerak emas, ovoz uzilmaydi.
@@ -881,6 +917,10 @@ async function ekranniTugat() {
 /** Ish maydonida ekran ko'rinishi: hujjat yashirinadi, ekran va uning chizish qatlami chiqadi */
 function ekranRejimi(on) {
   EKRAN = on;
+  document.body.classList.toggle('has-screen', Boolean(on));
+  if (on && (TELEFON || IS_MOBILE_DEVICE)) {
+    try { daftarYigish(true); } catch {}
+  }
   strokes = strokes.filter((x) => x.page !== 'screen');
   el.screenbox.hidden = !on;
   el.pdfbox.hidden = on || !pdfDoc;
@@ -911,6 +951,8 @@ function ekranOlcham() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   c.style.width = w + 'px';
   c.style.height = h + 'px';
+  c.style.left = (v.offsetLeft || 0) + 'px';
+  c.style.top = (v.offsetTop || 0) + 'px';
   c.width = Math.floor(w * dpr);
   c.height = Math.floor(h * dpr);
   redraw();
@@ -970,7 +1012,59 @@ function bahoOynasi() {
     };
   });
 
-  const chiq = () => { location.href = '/band.html'; };
+  const chiq = async () => {
+    // 1. Ilova ko'prigi (Flutter / InAppWebView / MyTeacher / iframe)
+    try {
+      if (window.flutter_inappwebview?.callHandler) {
+        window.flutter_inappwebview.callHandler('lessonAction', { turi: 'darsTugadi' });
+        window.flutter_inappwebview.callHandler('mentorAction', { turi: 'darsTugadi' });
+      }
+      if (window.MyTeacher?.postMessage) {
+        window.MyTeacher.postMessage(JSON.stringify({ turi: 'darsTugadi' }));
+      }
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'lesson-ended' }, '*');
+      }
+    } catch {}
+
+    // 2. Agar sahifaga ichki sahifadan (masalan band.html) kelingan bo'lsa
+    if (document.referrer && document.referrer.startsWith(location.origin)) {
+      try {
+        const refUrl = new URL(document.referrer);
+        const refPath = refUrl.pathname;
+        if (refPath !== '/login.html' && refPath !== '/room.html' && !refPath.startsWith('/dars/')) {
+          location.href = document.referrer;
+          return;
+        }
+      } catch {}
+    }
+
+    // 3. Agar tizimga kirgan o'quvchi bo'lsa (sessiyasi bor)
+    try {
+      const w = await fetch('/api/whoami').then((r) => (r.ok ? r.json() : null));
+      if (w && (w.role === 'student' || w.hasSchedule)) {
+        location.href = '/band.html';
+        return;
+      }
+    } catch {}
+
+    // 4. Havola bilan kirgan yoki sessiyasiz o'quvchi uchun — login sahifasiga HECH QACHON otmaymiz!
+    // Buning o'rniga dars yakunlanganini bildiruvchi xushmuomala oyna ko'rsatamiz
+    const oyna = document.querySelector('.baho-oyna');
+    if (oyna) {
+      oyna.innerHTML = `
+        <div style="font-size:42px;margin-bottom:8px">🎉</div>
+        <h2 style="margin:0 0 8px;font-size:20px;font-weight:800">Dars yakunlandi!</h2>
+        <p style="color:#6b6e76;margin:0 0 20px;font-size:14.5px;line-height:1.4">Ishtirokingiz uchun rahmat. Endi bu sahifani bemalol yopishingiz mumkin.</p>
+        <div class="baho-amallar" style="justify-content:center">
+          <button class="baho-yubor" id="bahoYopish" style="min-width:140px;padding:12px 24px">Oynani yopish</button>
+        </div>
+      `;
+      document.getElementById('bahoYopish').onclick = () => {
+        try { window.close(); } catch {}
+      };
+    }
+  };
   document.getElementById('bahoOtkaz').onclick = chiq;
   yubor.onclick = async () => {
     yubor.disabled = true;
@@ -985,8 +1079,36 @@ function bahoOynasi() {
         }),
       });
     } catch { /* baho ketmasa ham dars tugagan — o'quvchini ushlab turmaymiz */ }
-    chiq();
+    await chiq();
   };
+}
+
+/** Ustoz darsdan chiqqanda xavfsiz qaytish (ilovaga xabar, referrer yoki /work.html) */
+async function ustozChiqishi() {
+  try {
+    if (window.flutter_inappwebview?.callHandler) {
+      window.flutter_inappwebview.callHandler('mentorAction', { turi: 'darsTugadi' });
+    }
+    if (window.MyTeacher?.postMessage) {
+      window.MyTeacher.postMessage(JSON.stringify({ turi: 'darsTugadi' }));
+    }
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'lesson-ended' }, '*');
+    }
+  } catch {}
+
+  if (document.referrer && document.referrer.startsWith(location.origin)) {
+    try {
+      const refUrl = new URL(document.referrer);
+      const refPath = refUrl.pathname;
+      if (refPath !== '/login.html' && refPath !== '/room.html' && !refPath.startsWith('/dars/')) {
+        location.href = document.referrer;
+        return;
+      }
+    } catch {}
+  }
+
+  location.href = '/work.html';
 }
 
 /** Ustoz uchun: vaqtincha chiqish (dars davom etadi) yoki darsni yakunlash */
@@ -1017,12 +1139,12 @@ el.btnLeave.onclick = async () => {
     const tanlov = await ustozChiqishOynasi();
     if (tanlov === 'bekor') return;
     if (tanlov === 'vaqtincha') {
-      // Dars yopilmaydi: o'quvchi kutib turadi, ustoz jadvaldan qaytib kiradi
+      // Dars yopilmaydi: o'quvchi kutib turadi, ustoz ish joyidan qaytib kiradi
       DARS_TUGADI = true;
       try { ws && ws.close(); } catch {}
       teardownPeer();
       if (localStream) localStream.getTracks().forEach((t) => t.stop());
-      location.href = '/jadval.html';
+      await ustozChiqishi();
       return;
     }
   } else if (!confirm('Darsdan chiqasizmi?')) {
@@ -1035,11 +1157,11 @@ el.btnLeave.onclick = async () => {
     // O'quvchida baho oynasi o'zi ochilsin — u chiqish tugmasini bosmasligi mumkin
     wsSend({ type: 'dars-tugadi' });
     // Xabar ketib ulgursin, keyin yopamiz
-    setTimeout(() => {
+    setTimeout(async () => {
       try { ws && ws.close(); } catch {}
       teardownPeer();
       if (localStream) localStream.getTracks().forEach((t) => t.stop());
-      location.href = '/jadval.html';
+      await ustozChiqishi();
     }, 200);
     return;
   }
@@ -1097,6 +1219,8 @@ async function loadDoc(url, name, page = 1) {
     console.warn(e); toast('Hujjat ochilmadi'); currentDocUrl = null; return;
   }
   el.empty.hidden = true;
+  document.body.classList.add('has-doc');
+  if (TELEFON || IS_MOBILE_DEVICE) { try { daftarYigish(true); } catch {} }
   el.pdfbox.hidden = EKRAN;
   // Rasmda sahifa yo'q — tugmalarni ko'rsatmaymiz
   el.pagePill.hidden = EKRAN || pdfDoc.numPages < 2;
@@ -1537,18 +1661,83 @@ function daftarYigish(yig) {
   }, 220);
 }
 
+const chatEl = {
+  panel: document.getElementById('chatPanel'),
+  xabarlar: document.getElementById('chatXabarlar'),
+  form: document.getElementById('chatForm'),
+  kirit: document.getElementById('chatKirit'),
+  btnYop: document.getElementById('btnChatYop'),
+};
+
+function chatOch(och = true, focus = false) {
+  if (!chatEl.panel) return;
+  chatEl.panel.hidden = !och;
+  if (el.btnChat) {
+    el.btnChat.classList.toggle('jonli', och);
+    el.btnChat.setAttribute('aria-expanded', String(och));
+  }
+  if (och) {
+    if (el.chatNuqta) el.chatNuqta.hidden = true;
+    if (chatEl.xabarlar) chatEl.xabarlar.scrollTop = chatEl.xabarlar.scrollHeight;
+    if (focus) setTimeout(() => chatEl.kirit && chatEl.kirit.focus(), 60);
+  }
+}
+
+function chatQosh(m, boshlangich = false) {
+  if (!chatEl.xabarlar || !m || !m.text) return;
+  const isMe = m.from === myId;
+  const div = document.createElement('div');
+  div.className = 'chat-xabar ' + (isMe ? 'men' : 'u');
+
+  const vaqt = m.time
+    ? new Date(m.time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
+    : '';
+
+  div.innerHTML = `
+    <div class="chat-xabar-bosh">
+      <span>${dEsc(m.name || (m.role === 'teacher' ? 'Ustoz' : 'O‘quvchi'))}</span>
+      <span>${vaqt}</span>
+    </div>
+    <div class="chat-matn">${dEsc(m.text || '')}</div>
+  `;
+  chatEl.xabarlar.appendChild(div);
+  chatEl.xabarlar.scrollTop = chatEl.xabarlar.scrollHeight;
+
+  // Yangi habar kelganda: agar o'quvchida chat yopiq turgan bo'lsa — alohida chat paneli ochiladi
+  const yopiq = !chatEl.panel || chatEl.panel.hidden;
+  if (!IS_TEACHER && !isMe && !boshlangich) {
+    if (yopiq) chatOch(true, false);
+  } else if (yopiq && !isMe) {
+    if (el.chatNuqta) el.chatNuqta.hidden = false;
+  }
+
+  if (!isMe) {
+    toast(`💬 ${m.name || (m.role === 'teacher' ? 'Ustoz' : 'O‘quvchi')}: ${m.text}`, 3500);
+  }
+}
+
+function chatTikla(messages) {
+  if (!chatEl.xabarlar || !Array.isArray(messages)) return;
+  chatEl.xabarlar.innerHTML = '<div class="chat-eslatma">💬 Jonli dars chati. Xabarlar bu yerda ko‘rinadi.</div>';
+  messages.forEach((m) => chatQosh(m, true));
+}
+
 function daftarKorsat() {
   dEl.tablar.forEach((b) => {
     b.setAttribute('aria-pressed', String(b.dataset.d === daftarTab));
     if (b.dataset.d === daftarTab) b.classList.remove('yangi');
   });
+
+  dEl.matn.hidden = !IS_TEACHER;
+  dEl.kor.hidden = IS_TEACHER;
+
   if (IS_TEACHER) {
-    if (dEl.matn.value !== DAFTAR[daftarTab]) dEl.matn.value = DAFTAR[daftarTab];
-    dEl.matn.placeholder = DAFTAR_NAMUNA[daftarTab];
+    if (dEl.matn.value !== (DAFTAR[daftarTab] || '')) dEl.matn.value = DAFTAR[daftarTab] || '';
+    dEl.matn.placeholder = DAFTAR_NAMUNA[daftarTab] || '';
     return;
   }
-  const t = DAFTAR[daftarTab].trim();
-  if (!t) { dEl.kor.innerHTML = `<span class="bosh">${DAFTAR_BOSH[daftarTab]}</span>`; return; }
+  const t = (DAFTAR[daftarTab] || '').trim();
+  if (!t) { dEl.kor.innerHTML = `<span class="bosh">${DAFTAR_BOSH[daftarTab] || ''}</span>`; return; }
   if (daftarTab === 'sozlar') {
     dEl.kor.innerHTML = t.split('\n').filter((q) => q.trim()).map((q) => {
       const [soz, ...qolgan] = q.split(/\s[—–-]\s|\s*[—–=:]\s*/);
@@ -1568,7 +1757,6 @@ function daftarKeldi(notes, tab, boshlangich = false) {
   const bor = Object.values(DAFTAR).some((v) => v.trim());
   if (!IS_TEACHER) {
     if (tab && tab !== daftarTab && DAFTAR[tab] !== eski[tab]) {
-      // Ustoz boshqa bo'limga yozyapti — o'quvchini o'sha yerga olib o'tamiz
       daftarTab = tab;
     }
     for (const k of ['matn', 'sozlar', 'vazifa']) {
@@ -1608,6 +1796,99 @@ dEl.matn.addEventListener('input', () => {
 dEl.matn.addEventListener('blur', () => { if (daftarTaymer) daftarYubor(); });
 // Ustoz qo'lida klaviatura yozganda chizish/sahifa tugmalari ishga tushmasin
 dEl.matn.addEventListener('keydown', (e) => e.stopPropagation());
+
+if (chatEl.form) {
+  chatEl.form.onsubmit = (e) => {
+    e.preventDefault();
+    const text = (chatEl.kirit.value || '').trim();
+    if (!text) return;
+    wsSend({ type: 'chat', text });
+    chatEl.kirit.value = '';
+    chatEl.kirit.focus();
+  };
+}
+
+if (el.btnChat) {
+  el.btnChat.onclick = () => {
+    const hozirOchiq = chatEl.panel && !chatEl.panel.hidden;
+    chatOch(!hozirOchiq, !hozirOchiq);
+  };
+}
+
+if (chatEl.btnYop) {
+  chatEl.btnYop.onclick = () => chatOch(false);
+}
+
+if (el.toast) {
+  el.toast.style.cursor = 'pointer';
+  el.toast.onclick = () => {
+    if (el.board && el.board.classList.contains('toliq-rejim')) toliqEkran(false);
+    chatOch(true, true);
+    el.toast.hidden = true;
+  };
+}
+
+if (chatEl.kirit) {
+  chatEl.kirit.addEventListener('keydown', (e) => e.stopPropagation());
+}
+
+// ===== To'liq ekran (Fullscreen) boshqaruvi (telefon va planshetlar uchun) =====
+function toliqEkran(yoq) {
+  const board = el.board;
+  if (!board) return;
+  const hozir = board.classList.contains('toliq-rejim');
+  const maqsad = typeof yoq === 'boolean' ? yoq : !hozir;
+
+  board.classList.toggle('toliq-rejim', maqsad);
+  document.body.classList.toggle('board-fullscreen', maqsad);
+
+  const btnExit = document.getElementById('btnExitFs');
+  if (btnExit) btnExit.hidden = !maqsad;
+
+  if (maqsad) {
+    if (board.requestFullscreen && !document.fullscreenElement) {
+      board.requestFullscreen().catch(() => {});
+    }
+  } else {
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  setTimeout(() => {
+    if (pdfDoc) renderPage(pageNum);
+    if (EKRAN) ekranOlcham();
+  }, 100);
+}
+
+const btnFullEkran = document.getElementById('btnFullEkran');
+if (btnFullEkran) btnFullEkran.onclick = (e) => { e.stopPropagation(); toliqEkran(true); };
+
+const btnFullPdf = document.getElementById('btnFullPdf');
+if (btnFullPdf) btnFullPdf.onclick = (e) => { e.stopPropagation(); toliqEkran(true); };
+
+const btnExitFs = document.getElementById('btnExitFs');
+if (btnExitFs) btnExitFs.onclick = (e) => { e.stopPropagation(); toliqEkran(false); };
+
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement && el.board && el.board.classList.contains('toliq-rejim')) {
+    toliqEkran(false);
+  }
+});
+
+let lastBoardTap = 0;
+if (el.board) {
+  el.board.addEventListener('touchend', (e) => {
+    if (e.target.closest('button, input, textarea')) return;
+    const now = Date.now();
+    if (now - lastBoardTap < 320) {
+      toliqEkran();
+      e.preventDefault();
+    }
+    lastBoardTap = now;
+  });
+}
+
 daftarKorsat();
 requestAnimationFrame(daftarJoy);
 window.addEventListener('resize', daftarJoy);
