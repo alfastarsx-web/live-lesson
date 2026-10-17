@@ -177,6 +177,7 @@ body.work{background:var(--bg)}
 .telefon-qoymang b{color:#881337}
 .tanlov:disabled{opacity:.45;cursor:not-allowed}
 .dk-kch{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;color:var(--mut)}
+.qoida{margin-top:10px;font-size:12.5px;line-height:1.45;color:var(--muted,#6b7280)}
 .tq{margin-top:10px;padding:8px 12px;border-radius:12px;font-size:13px;font-weight:700}
 .tq.ok{background:var(--green-soft);color:var(--green)}
 .tq.kut{background:var(--amber-soft);color:var(--amber)}
@@ -985,6 +986,8 @@ function darsKarta(d, { tarix = false } = {}) {
   const teg = d.isTrial ? '<span class="teg sinov">Sinov</span>' : '';
   const holat = tarix && d.isTrial && LID_HOLAT[d.leadStatus]
     ? `<span class="teg ${LID_HOLAT[d.leadStatus][1]}">${LID_HOLAT[d.leadStatus][0]}</span>` : '';
+  // Sinov darsi 40 daqiqadan kam davom etgan — "chala o'tildi" (ball berilmaydi)
+  const chala = tarix && d.isTrial && d.outcome === 'chala' ? '<span class="teg t-yoq" title="40 daqiqadan kam davom etgan">⚠️ Chala o‘tildi</span>' : '';
   const baho = tarix && d.rating ? ` · ${'★'.repeat(d.rating)}` : '';
   const kun = new Date(d.startsAt);
   let past = '';
@@ -999,7 +1002,8 @@ function darsKarta(d, { tarix = false } = {}) {
     const ochiq = Date.now() >= kun.getTime() - 10 * 60_000;
     const doimiy = !d.isTrial;
     const boshlanmagan = Date.now() < kun.getTime();
-    past = `${tasdiqQator(d)}<div class="dk-past">
+    const qoida = d.isTrial ? '<div class="qoida">💡 Narx haqida dars oxirida gaplashing. Dars kamida 40 daqiqa — qisqa dars “chala o‘tildi” hisoblanadi.</div>' : '';
+    past = `${qoida}${tasdiqQator(d)}<div class="dk-past">
       <button class="asosiy" data-kirish="${esc(d.id)}" data-sinov="${d.isTrial ? 1 : ''}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>${ochiq ? 'Darsni boshlash' : 'Kirish 10 daq oldin'}</button>
       ${doimiy && boshlanmagan ? `<button data-kochir="${esc(d.id)}">↻ Ko‘chirish</button>` : ''}
       ${doimiy && kelmadiMumkin(d) ? `<button data-kelmadi="${esc(d.id)}">O‘quvchi kelmadi</button>` : ''}
@@ -1010,10 +1014,11 @@ function darsKarta(d, { tarix = false } = {}) {
     if (d.outcome) past = `<div class="kelmadi-yorliq">${d.outcome === 'student_no_show_forgiven' ? '🤝 Kelmadi — kechirildi, dars oxiriga qo‘shildi' : '✕ Kelmadi — dars o‘tilgan hisoblandi'}</div>`;
     else if (kelmadiMumkin(d)) past = `<div class="dk-past"><button class="asosiy" data-kelmadi="${esc(d.id)}">O‘quvchi kelmadi</button></div>`;
   } else if (d.isTrial && d.leadId) {
+    // "O'tildi" ni ustoz qo'ymaydi — dars xonasi birga o'tirilgan vaqtga qarab o'zi belgilaydi
     const tugmalar = d.leadStatus === 'trial_completed'
       ? `<button class="yashil" data-holat="converted">To‘lov qildi</button><button data-holat="lost">Rad etdi</button>`
-      : d.leadStatus === 'trial_scheduled'
-        ? `<button class="asosiy" data-holat="trial_completed">Dars o‘tildi</button><button data-holat="trial_no_show">Kelmadi</button>`
+      : d.leadStatus === 'trial_scheduled' && !d.studentJoined
+        ? `<button data-holat="trial_no_show">Kelmadi</button>`
         : '';
     if (tugmalar || d.leadPhone) past = `<div class="dk-past" data-lid="${esc(d.leadId)}">${tugmalar}${telHavola(d.leadPhone)}${qoshTel(d.leadExtraPhone)}</div>`;
     if (['trial_scheduled', 'trial_completed', 'negotiating'].includes(d.leadStatus)) past += taklifQatori(d);
@@ -1029,7 +1034,7 @@ function darsKarta(d, { tarix = false } = {}) {
   return `<div class="dk${!tarix && d.confirmPending ? ' kutish' : ''}"${!tarix && d.confirmPending ? ` data-tasdiq-karta="${esc(d.id)}"` : ''}>
     <div class="dk-bosh">
       <div class="dk-soat">${soatQisqa(d.startsAt)}<small>${kun.getDate()}.${String(kun.getMonth() + 1).padStart(2, '0')}</small></div>
-      <div class="matn"><b>${ism}${teg}</b><span>${esc(vaqtYorliq(d.startsAt))} · ${d.durationMin || 60} daq${baho}</span>${holat ? `<div class="dk-holat">${holat}</div>` : ''}${!d.isTrial && d.movedFrom ? `<span class="dk-kch">↻ ko‘chirilgan · avval ${esc(vaqtYorliq(d.movedFrom))}</span>` : ''}</div>
+      <div class="matn"><b>${ism}${teg}</b><span>${esc(vaqtYorliq(d.startsAt))} · ${d.durationMin || 60} daq${baho}</span>${holat || chala ? `<div class="dk-holat">${holat}${chala}</div>` : ''}${!d.isTrial && d.movedFrom ? `<span class="dk-kch">↻ ko‘chirilgan · avval ${esc(vaqtYorliq(d.movedFrom))}</span>` : ''}</div>
     </div>${past}</div>`;
 }
 
