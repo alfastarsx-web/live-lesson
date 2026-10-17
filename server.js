@@ -515,6 +515,12 @@ app.all(/^\/api\/wallet(\/.*)?$/, (req, res) => {
   aiProxy(req, res, `/mentor-wallet${sub}`);
 });
 
+// Darsga kelish tasdig'i: ustoz o'z darsidagi o'quvchiga qo'ng'iroq qilib natijani belgilaydi
+app.all(/^\/api\/dars-tasdiq(\/.*)?$/, (req, res) => {
+  const sub = req.path.replace(/^\/api\/dars-tasdiq/, '');
+  aiProxy(req, res, `/dars-tasdiq${sub}`);
+});
+
 app.all(/^\/api\/booking(\/.*)?$/, (req, res) => {
   const sub = req.path.replace(/^\/api\/booking/, '');
   aiProxy(req, res, `/lesson-booking${sub}`);

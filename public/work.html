@@ -177,6 +177,10 @@ body.work{background:var(--bg)}
 .telefon-qoymang b{color:#881337}
 .tanlov:disabled{opacity:.45;cursor:not-allowed}
 .dk-kch{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;color:var(--mut)}
+.tq{margin-top:10px;padding:8px 12px;border-radius:12px;font-size:13px;font-weight:700}
+.tq.ok{background:var(--green-soft);color:var(--green)}
+.tq.kut{background:var(--amber-soft);color:var(--amber)}
+.tq.yomon{background:var(--red-soft);color:var(--red)}
 .kelmadi-yorliq{margin-top:10px;padding:9px 12px;border-radius:12px;background:var(--red-soft);color:var(--red);font-size:13px;font-weight:700}
 .qoida-k{margin:18px 0 0;background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px}
 .qoida-k summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:15px}
@@ -954,6 +958,22 @@ async function darslarniYukla() {
   smenaChiz();
 }
 
+// O'quvchi darsga kelishini tasdiqladimi (botdagi savol yoki qo'ng'iroq). Darsga 3 soat qolganda
+// ustoz ham qo'ng'iroq qilib natijani belgilay oladi — o'quvchi kelmasa behuda kutib o'tirmaydi
+function tasdiqQator(d) {
+  if (d.tasdiq === 'ha') {
+    return `<div class="tq ok">✅ O‘quvchi kelishini tasdiqladi${d.tasdiqManba === 'bot' ? ' (Telegram)' : ' (telefonda)'}</div>`;
+  }
+  const yaqin = new Date(d.startsAt).getTime() - Date.now() <= 3 * 3600_000;
+  const matn = d.tasdiq === 'yoq' ? '❌ O‘quvchi kela olmasligini aytdi — operator boshqa vaqtga yozadi'
+    : d.tasdiq === 'kochirish' ? '🔁 O‘quvchi vaqtni ko‘chirishni so‘radi — operator bog‘lanadi'
+      : `❓ O‘quvchi hali kelishini tasdiqlamagan${yaqin ? ' — qo‘ng‘iroq qilib so‘rang' : ''}`;
+  const tugma = (javob, t) => `<button data-tq="${javob}" data-tq-id="${esc(d.id)}">${t}</button>`;
+  const tugmalar = yaqin
+    ? `<div class="dk-past">${tugma('ha', '✅ Ha dedi')}${d.tasdiq === 'yoq' ? '' : tugma('yoq', '❌ Kelmaydi')}</div>` : '';
+  return `<div class="tq ${d.tasdiq ? 'yomon' : 'kut'}">${matn}</div>${tugmalar}`;
+}
+
 // Sinov darsi hali boshlanmagan bo'lsa — o'quvchi oldinroq tayyor bo'lganda shu daqiqada boshlash
 function hozirTugma(d) {
   if (!d.isTrial || new Date(d.startsAt).getTime() <= Date.now()) return '';
@@ -979,11 +999,11 @@ function darsKarta(d, { tarix = false } = {}) {
     const ochiq = Date.now() >= kun.getTime() - 10 * 60_000;
     const doimiy = !d.isTrial;
     const boshlanmagan = Date.now() < kun.getTime();
-    past = `<div class="dk-past">
+    past = `${tasdiqQator(d)}<div class="dk-past">
       <button class="asosiy" data-kirish="${esc(d.id)}" data-sinov="${d.isTrial ? 1 : ''}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>${ochiq ? 'Darsni boshlash' : 'Kirish 10 daq oldin'}</button>
       ${doimiy && boshlanmagan ? `<button data-kochir="${esc(d.id)}">↻ Ko‘chirish</button>` : ''}
       ${doimiy && kelmadiMumkin(d) ? `<button data-kelmadi="${esc(d.id)}">O‘quvchi kelmadi</button>` : ''}
-      ${telHavola(d.leadPhone)}${qoshTel(d.leadExtraPhone)}</div>
+      ${telHavola(d.leadPhone || d.studentPhone)}${qoshTel(d.leadExtraPhone)}</div>
       ${ochiq ? '' : hozirTugma(d)}`;
   } else if (!d.isTrial) {
     // Doimiy dars tarixda: o'quvchi kirmagan — "Kelmadi"; belgilangan bo'lsa natijasi
@@ -1144,6 +1164,21 @@ function tugmalarniUla(box) {
   box.querySelectorAll('[data-taklif]').forEach((b) => { b.onclick = () => taklifOch(b.dataset.taklif); });
   box.querySelectorAll('[data-kochir]').forEach((b) => { b.onclick = () => kochOch(b.dataset.kochir); });
   box.querySelectorAll('[data-kelmadi]').forEach((b) => { b.onclick = () => kelmadiBos(b.dataset.kelmadi, b); });
+  box.querySelectorAll('[data-tq]').forEach((b) => {
+    b.onclick = async () => {
+      const javob = b.dataset.tq;
+      if (javob === 'yoq' && !confirm('O‘quvchi darsga kela olmasligini aytdimi?\n\nOperatorga xabar boradi — u boshqa vaqtga yozadi.')) return;
+      b.disabled = true;
+      const r = await api(`/api/dars-tasdiq/${b.dataset.tqId}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ javob }),
+      }).catch(() => ({ ok: false, data: { message: 'Internet aloqasini tekshiring' } }));
+      b.disabled = false;
+      if (!r) return;
+      if (!r.ok) return toast(r.data.message || 'Saqlab bo‘lmadi', 'err');
+      toast(javob === 'ha' ? 'Belgilandi: o‘quvchi keladi' : 'Belgilandi: o‘quvchi kelmaydi', 'ok');
+      await darslarniYukla();
+    };
+  });
   box.querySelectorAll('[data-tasdiq-karta]').forEach((k) => {
     k.onclick = (e) => {
       if (e.target.closest('a')) return; // telefon havolasi — qo'ng'iroq
