@@ -147,6 +147,8 @@ let DARS_BOSHI = null;
 const taymerEl = document.getElementById('darsTaymer');
 function darsBoshiniQoy(otganMs) {
   if (!IS_TEACHER || !taymerEl || otganMs == null) return;
+  // Qayta ulanishda o'tib ketgan 10 daqiqaliklar uchun motivatsiya birdaniga chiqmasin
+  if (!DARS_BOSHI) motivBosqich = Math.floor(otganMs / MOTIV_ORALIQ_MS);
   DARS_BOSHI = Date.now() - otganMs;
   taymerChiz();
 }
@@ -159,6 +161,71 @@ function taymerChiz() {
   taymerEl.hidden = false;
 }
 setInterval(taymerChiz, 1000);
+
+// ---------- Ustozga motivatsiya va sinov darsi qoidasi (faqat ustoz ekranida) ----------
+// Xona nomi tokendan keyinroq ham yangilanishi mumkin (rolniQoy) — har safar tekshiramiz
+const sinovmi = () => /^sinov-/.test(ROOM);
+/** Sinov darsi shuncha davom etsa to'liq hisoblanadi (kamroq — "chala o'tildi") */
+const TOLIQ_MS = 40 * 60_000;
+const MOTIV_ORALIQ_MS = 10 * 60_000;
+const MOTIVATSIYA = [
+  '🔥 Zo‘r ketyapsiz, barakalla!', '💪 To‘xtab qolmang — o‘quvchi sizni tinglayapti!',
+  '🤲 Siz ham pul ishlayapsiz, ham savob!', '🌟 Har bir daqiqangiz o‘quvchining kelajagiga hissa!',
+  '😊 Tabassumingiz — eng yaxshi dars quroli!', '🚀 Ajoyib temp, shunday davom eting!',
+  '👏 O‘quvchi sizdan ilhom olyapti!', '🎯 Aniq va tushunarli — aynan shunday!',
+  '💎 Sifatli dars — sodiq o‘quvchi!', '🌱 Bugun ekkan bilimingiz ertaga hosil beradi!',
+  '⭐ Siz zo‘r ustozsiz, buni o‘quvchi ham sezyapti!', '🙌 Sabr va mehr — sizning kuchingiz!',
+  '📚 Har bir yangi so‘z — o‘quvchi uchun katta g‘alaba!', '❤️ Mehr bilan o‘tilgan dars unutilmaydi!',
+  '🏆 Professional darajada ketyapsiz!', '✨ O‘quvchini gapirtiring — u o‘zini ishonchli his qilsin!',
+  '🤝 Ishonch qozonyapsiz — bu eng qimmat narsa!', '🎉 Barakalla, darsingiz jonli chiqyapti!',
+  '🧠 Savol bering, o‘quvchi o‘ylasin — zo‘r usul!', '🌈 Ijobiy kayfiyatingiz o‘quvchiga ham yuqyapti!',
+  '💡 Kichik maqtov — katta motivatsiya. O‘quvchini maqtab qo‘ying!', '🥇 Siz bilan o‘qish — omad!',
+  '🕊 Ilm ulashish — eng savobli ish!', '😎 Ajoyib, hammasi nazoratingizda!',
+  '📈 Har darsda o‘sib boryapsiz!', '🌞 O‘quvchining kunini yorug‘ qilyapsiz!',
+  '👍 Juda yaxshi! Oxirigacha shu ruhda!', '🎓 Haqiqiy ustoz — sabrli ustoz. Barakalla!',
+];
+let motivBosqich = 0;
+let toliqAytildi = false;
+const motivNavbat = MOTIVATSIYA.slice().sort(() => Math.random() - 0.5);
+
+function motivKorsat(matn, ms = 6000) {
+  let q = document.getElementById('motivQuti');
+  if (!q) {
+    q = document.createElement('div');
+    q.id = 'motivQuti';
+    q.style.cssText = 'position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:60;max-width:min(92vw,520px);'
+      + 'padding:10px 18px;border-radius:999px;background:rgba(17,94,74,.94);color:#fff;font-weight:700;font-size:14.5px;'
+      + 'text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.25);transition:opacity .4s;pointer-events:none';
+    document.body.appendChild(q);
+  }
+  q.textContent = matn;
+  q.style.opacity = '1';
+  q.hidden = false;
+  clearTimeout(q._t);
+  q._t = setTimeout(() => { q.style.opacity = '0'; setTimeout(() => { q.hidden = true; }, 450); }, ms);
+}
+
+setInterval(() => {
+  if (!IS_TEACHER || !DARS_BOSHI || !peerId || DARS_TUGADI) return;
+  const otgan = Date.now() - DARS_BOSHI;
+  const bosqich = Math.floor(otgan / MOTIV_ORALIQ_MS);
+  if (bosqich < 1 || bosqich <= motivBosqich) return;
+  motivBosqich = bosqich;
+  if (sinovmi() && otgan >= TOLIQ_MS && !toliqAytildi) {
+    toliqAytildi = true;
+    motivKorsat('✅ 40 daqiqa — dars to‘liq hisoblandi. Barakalla! Endi kunlar va narxni bemalol gaplashing 🤝', 9000);
+    return;
+  }
+  if (!motivNavbat.length) motivNavbat.push(...MOTIVATSIYA.slice().sort(() => Math.random() - 0.5));
+  motivKorsat(motivNavbat.pop());
+}, 15_000);
+
+let qoidaAytildi = false;
+function sinovQoidasi() {
+  if (!IS_TEACHER || !sinovmi() || qoidaAytildi) return;
+  qoidaAytildi = true;
+  motivKorsat('💡 Narx haqida dars oxirida gaplashing. O‘quvchi so‘rasa: «Avval sifatli dars o‘tib beray, narxni oxirida gaplashamiz» 😊', 14000);
+}
 
 // ================= 1. WebSocket =================
 let ws = null, myId = null, peerId = null, isInitiator = false, retry = 0, qaytaUlanishTaymer = null;
@@ -237,6 +304,7 @@ async function onSignal(m) {
       if (m.peers.length) { peerId = m.peers[0].id; isInitiator = true; onPeerReady(m.peers[0]); }
       applyState(m.state);
       darsBoshiniQoy(m.darsOtganMs);
+      sinovQoidasi();
       break;
 
     case 'dars-vaqti': darsBoshiniQoy(m.otganMs); break;
@@ -1138,6 +1206,11 @@ el.btnLeave.onclick = async () => {
   if (IS_TEACHER) {
     const tanlov = await ustozChiqishOynasi();
     if (tanlov === 'bekor') return;
+    // Sinov darsi 40 daqiqadan oldin yakunlansa — "chala o'tildi" hisoblanadi, ustoz bilsin
+    if (tanlov === 'yakun' && sinovmi() && (!DARS_BOSHI || Date.now() - DARS_BOSHI < TOLIQ_MS)) {
+      const daq = DARS_BOSHI ? Math.floor((Date.now() - DARS_BOSHI) / 60_000) : 0;
+      if (!confirm(`Dars hali ${daq} daqiqa — 40 daqiqa bo‘lmadi.\n\nHozir yakunlasangiz, dars “⚠️ Chala o‘tildi” hisoblanadi va ball berilmaydi.\n\nBaribir yakunlaysizmi?`)) return;
+    }
     if (tanlov === 'vaqtincha') {
       // Dars yopilmaydi: o'quvchi kutib turadi, ustoz ish joyidan qaytib kiradi
       DARS_TUGADI = true;
