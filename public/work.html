@@ -177,6 +177,8 @@ body.work{background:var(--bg)}
 .telefon-qoymang b{color:#881337}
 .tanlov:disabled{opacity:.45;cursor:not-allowed}
 .dk-kch{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;color:var(--mut)}
+.tg-kod{margin-top:6px;font-size:13px;line-height:1.45}
+.tg-kod b{font-size:18px;letter-spacing:3px;font-variant-numeric:tabular-nums}
 .qoida{margin-top:10px;font-size:12.5px;line-height:1.45;color:var(--muted,#6b7280)}
 .tq{margin-top:10px;padding:8px 12px;border-radius:12px;font-size:13px;font-weight:700}
 .tq.ok{background:var(--green-soft);color:var(--green)}
@@ -465,7 +467,13 @@ const bosh = (ism) => String(ism || '?').trim().split(/\s+/).slice(0, 2).map((x)
 // Telefon — bosiladigan havola va ko'rinadigan raqam (havola ishlamasa ham raqam ko'rinib turadi)
 const telHavola = (t) => t ? `<a href="tel:${esc(t.replace(/[^\d+]/g, ''))}">${esc(t)}</a>` : '';
 // O'quvchining qo'shimcha raqami (operator sinovga yozganda oladi) — asosiysi javob bermasa
-const qoshTel = (t) => t ? ` <a href="tel:${esc(t.replace(/[^\d+]/g, ''))}" title="Qo‘shimcha raqam">📱 ${esc(t)}</a>` : '';
+// Qo'shimcha raqam (operator so'rab olgan) — 9 xonali saqlanadi, qo'ng'iroq uchun +998 qo'shiladi
+const qoshTel = (t) => {
+  if (!t) return '';
+  const r = t.replace(/[^\d+]/g, '');
+  const tel = /^\d{9}$/.test(r) ? `+998${r}` : r;
+  return ` <a href="tel:${esc(tel)}" title="Asosiy raqam ko‘tarilmasa — shunga qo‘ng‘iroq qiling">📱 qo‘shimcha ${esc(tel)}</a>`;
+};
 
 function halqaChiz(el, expiresAt) {
   const ms = new Date(expiresAt).getTime() - Date.now();
@@ -724,12 +732,14 @@ function tgHolat(d) {
   const q = (ok, matn, kutish) => `<div class="tg-qadam${ok ? ' ok' : ''}">${ok ? '✅' : '⏳'} ${ok ? matn : kutish}</div>`;
   return `<div class="tg-holat${hammasiTayyor(d) ? ' ok' : ''}">
     ${q(tgUlangan(d), `Telegram ulandi${d.tgName ? ' · ' + esc(d.tgName) : ''} — dars havolasi yuborildi`, 'Telegram kutilmoqda — @MT_yordam_bot da “Raqamni yuborish”')}
+    ${!tgUlangan(d) && d.tgKod ? `<div class="tg-kod">Telegrami boshqa raqamda bo‘lsa — botga shu kodni yozsin: <b>${esc(d.tgKod.slice(0, 3))} ${esc(d.tgKod.slice(3))}</b></div>` : ''}
   </div>`;
 }
 // Suhbat paytida ustozga eslatma: o'quvchi "keyin qilaman" deb ketsa, qayta ko'tarmaydi
 const TELEFON_QOYMANG = `<div class="telefon-qoymang"><b>📞 Telefonni qo‘ymang!</b>
   O‘quvchi siz bilan gaplashib turgan holda @MT_yordam_bot → <b>Start</b> → <b>“Raqamni yuborish”</b> qilsin. Dars havolasi botga keladi —
-  dars vaqtida <b>“▶️ Darsga kirish”</b> ni bosadi, ilova shart emas. ✅ yonguncha kuting — “keyin qilaman” deganlar ko‘pincha telefonni qayta ko‘tarmaydi.</div>`;
+  dars vaqtida <b>“▶️ Darsga kirish”</b> ni bosadi, ilova shart emas. ✅ yonguncha kuting — “keyin qilaman” deganlar ko‘pincha telefonni qayta ko‘tarmaydi.
+  Telegrami boshqa raqamda bo‘lsa — pastdagi <b>6 xonali kodni</b> ayting, botga yozadi va ulanadi.</div>`;
 
 // Sheet ochiq turganda o'quvchi botga ulanishi va ilovaga kirishini kutib, har 5 soniyada tekshiramiz
 let TG_KUTISH = null;
