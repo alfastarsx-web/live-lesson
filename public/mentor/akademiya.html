@@ -421,7 +421,7 @@ body:not(.js) .nojs{display:block}
       <li>Belgilangan <b>darsga chiqish</b> — uni o'tkazmaslik eng og'ir jarima.</li>
     </ul>
     <div class="good"><b>Norma bajarilsa:</b> +50 ball va seriya davom etadi. Ketma-ket kunlar ballaringizni ko'paytiradi: 7 kun ×1.2, 30 kun ×1.5.</div>
-    <div class="warn"><b>Bajarilmasa:</b> −30 ball va seriya uziladi. Haftada ikki kun dam olish esa normal — Jadvalda o'sha kunni dam olish qilib qo'ysangiz, seriya uzilmaydi.</div>
+    <div class="warn"><b>Bajarilmasa:</b> jarima yo'q, faqat seriya uziladi va +50 bonus bo'lmaydi. Haftada ikki kun dam olish esa normal — Jadvalda o'sha kunni dam olish qilib qo'ysangiz, seriya uzilmaydi.</div>
   </div>
 </section>
 
@@ -436,7 +436,7 @@ body:not(.js) .nojs{display:block}
     <p class="cap">So'rov qanday keladi</p>
     <div class="flow">
       <div class="st"><i>1</i><div><b>Push va Work ekrani</b><span>o'quvchi ismi, dars vaqti, operator izohi</span></div></div>
-      <div class="st hot"><i>2</i><div><b>15 daqiqa</b><span>qabul qilish uchun vaqt, taymer ko'rinib turadi</span></div></div>
+      <div class="st hot"><i>2</i><div><b>15 daqiqa</b><span>qabul qilish uchun vaqt (dars 3 soatdan keyin bo'lsa — 60 daqiqa), taymer ko'rinib turadi</span></div></div>
       <div class="st"><i>3</i><div><b>Birinchi bosgan oladi</b><span>qolganlarga "Kechikdingiz" chiqadi</span></div></div>
       <div class="st"><i>4</i><div><b>Dars sizniki</b><span>o'quvchining telefoni ochiladi, dars Bugun bo'limida</span></div></div>
     </div>
@@ -676,8 +676,8 @@ body:not(.js) .nojs{display:block}
     <h3>Uchta raqam</h3>
     <ul class="list">
       <li><b>Ball</b> — qancha ishladingiz. Rank va leaderboard uchun.</li>
-      <li><b>Reyting (0–100 ball)</b> — qanday ishladingiz (oxirgi 30 kun): norma bajarilgan kunlar 30, ochiq soatda onlayn 25, o'quvchi bahosi 25, sinov natijasini o'z vaqtida belgilash 20. Rank shartlari: Senior 92, Expert 94, Master 96, Legend 98.</li>
-      <li><b>Prioritet (0–100)</b> — ertaga qancha o'quvchi olasiz: norma 40, so'rovga javob 25, darsga chiqish intizomi 20, status va izoh 15. <b>50 dan past bo'lsa yangi o'quvchi berilmaydi.</b> Jadval haftasiga 10 soatdan kam bo'lsa prioritet 69 dan oshmaydi.</li>
+      <li><b>Reyting (0–100 ball)</b> — qanday ishladingiz (oxirgi 30 kun): o'quvchi bahosi 35, darsga kelib o'tkazish 25, sinov natijasini o'z vaqtida belgilash 20, so'rovga javob 20. Rank shartlari: Senior 92, Expert 94, Master 96, Legend 98.</li>
+      <li><b>Prioritet (0–100)</b> — ertaga qancha o'quvchi olasiz: so'rovga javob 40, darsga kelib o'tkazish 30, status va izoh 15, sinov natijasi 15. Ilovada onlayn o'tirish shart emas. <b>50 dan past bo'lsa yangi o'quvchi berilmaydi.</b> Jadval haftasiga 10 soatdan kam bo'lsa prioritet 69 dan oshmaydi.</li>
     </ul>
     <div class="chips"><span>Seriya: ×1.5 gacha</span><span>Nishonlar</span><span>Leaderboard <i class="tez">tez orada</i></span><span>Missiyalar <i class="tez">tez orada</i></span><span>Referral <i class="tez">tez orada</i></span></div>
   </div>
@@ -925,7 +925,7 @@ body:not(.js) .nojs{display:block}
     } else if(pass){
       html += '<div class="unlock"><h3>Sinov darsi so\'rovlari ochildi</h3><p>Keyingi uch qadam:</p><ol>' +
         '<li>Jadval bo\'limida bo\'sh soatlaringizni belgilang — haftasiga kamida 10 soat.</li>' +
-        '<li>Ochiq soatingizda ilovani yoniq tuting. So\'rov kelganda 15 daqiqa ichida qabul qiling.</li>' +
+        '<li>Bildirishnomalarni yoqib qo\'ying — so\'rov telefoningizga keladi. Kelganda muddat ichida (15 daqiqa, uzoq dars uchun 60) qabul qiling.</li>' +
         '<li>Darsdan oldin operator izohini o\'qing, darsdan keyin natijani 24 soat ichida belgilang.</li>' +
         '</ol></div>';
     }

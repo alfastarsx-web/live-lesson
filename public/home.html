@@ -504,8 +504,10 @@ function varaq(tur) {
     t = `<p class="xira" style="margin:6px 0 0">${q.starsCount
       ? `O‘quvchilar bahosi: <b>⭐ ${Number(q.starsAvg).toFixed(1)}</b> (oxirgi ${q.starsCount} ta, eng past va eng yuqorisi hisobga olinmaydi)`
       : 'O‘quvchilar bahosi hali yo‘q — 5 ta bahodan keyin hisobga kiradi'}</p>`
-      + bar('⭐ Yulduzlar', q.rating.stars, 25) + bar('✅ Norma kunlari', q.rating.norm, 30)
-      + bar('🟢 Ochiq soatda onlayn', q.rating.online, 25) + bar('📝 Sinov natijasi o‘z vaqtida', q.rating.outcomes, 20);
+      + (q.ratingItems
+        ? q.ratingItems.map((x) => bar(x.label, x.value, x.max)).join('')
+        : bar('⭐ Yulduzlar', q.rating.stars, 25) + bar('✅ Norma kunlari', q.rating.norm, 30)
+          + bar('🟢 Ochiq soatda onlayn', q.rating.online, 25) + bar('📝 Sinov natijasi o‘z vaqtida', q.rating.outcomes, 20));
   } else if (tur === 'rank' && p.rank) {
     const n = p.rank.next;
     sarlavha = `${p.rank.name} · ${p.rank.share}%`;
@@ -516,8 +518,11 @@ function varaq(tur) {
       : '<p class="xira">Eng yuqori rank — Legend 👑</p>';
   } else if (tur === 'prior' && q.priority) {
     sarlavha = `🚀 Prioritet ${p.priority.value} · ${p.priority.level.name}`;
-    t = bar('✅ Norma kunlari', q.priority.norm, 40) + bar('⚡ So‘rovga javob', q.priority.offers, 25)
-      + bar('🟢 Darsga chiqish', q.priority.online, 20) + bar('📝 Status va izoh', q.priority.notes, 15)
+    t = (q.priorityItems
+      ? q.priorityItems.map((x) => bar(x.label, x.value, x.max)).join('')
+        + '<p class="xira" style="margin:10px 0 0">Ilovada o‘tirish shart emas — so‘rov telefoningizga keladi. Muhimi: so‘rovga javob berish va darsga o‘z vaqtida kirish.</p>'
+      : bar('✅ Norma kunlari', q.priority.norm, 40) + bar('⚡ So‘rovga javob', q.priority.offers, 25)
+        + bar('🟢 Darsga chiqish', q.priority.online, 20) + bar('📝 Status va izoh', q.priority.notes, 15))
       + ((q.limits || []).includes('small_calendar') ? `<p style="margin:10px 0 0;color:#9a6315">⚠️ Jadval haftasiga ${q.weeklyHours} soat — 10 soatdan kam. Prioritet 69 dan oshmaydi.</p>` : '')
       + ((q.limits || []).includes('low_stars') ? '<p style="margin:6px 0 0;color:#9a6315">⚠️ Oxirgi darslar bahosi past — prioritet −15.</p>' : '');
   } else return;
