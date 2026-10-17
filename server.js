@@ -999,6 +999,35 @@ const server = http.createServer(app);
 // rooms: Map<roomId, { peers: Map<clientId, ws>, state: {...} }>
 const rooms = new Map();
 
+/**
+ * Admin paneldagi "Hozir darsda" uchun: qaysi xonada hozir kim o'tiribdi (faqat API so'raydi, maxfiy kalit bilan).
+ * Admin texnik yordam ulanishi ustoz hisoblanmaydi.
+ */
+app.get('/api/internal/xonalar', (req, res) => {
+  const secret = process.env.LESSON_TOKEN_SECRET || '';
+  const kalit = String(req.get('x-lesson-secret') || '');
+  if (!secret || kalit.length !== secret.length || !crypto.timingSafeEqual(Buffer.from(kalit), Buffer.from(secret))) {
+    return res.status(401).json({ error: 'ruxsat yo‘q' });
+  }
+  const xonalar = [];
+  for (const [id, room] of rooms) {
+    if (room.ended) continue;
+    const odamlar = [...room.peers.values()].filter((p) => !p.meta.yordam);
+    const ustoz = odamlar.find((p) => p.meta.role === 'teacher');
+    const oquvchi = odamlar.find((p) => p.meta.role === 'student');
+    if (!ustoz && !oquvchi) continue;
+    xonalar.push({
+      room: id,
+      ustoz: Boolean(ustoz),
+      oquvchi: Boolean(oquvchi),
+      ustozKirdi: ustoz?.meta.kirdi ? new Date(ustoz.meta.kirdi).toISOString() : null,
+      oquvchiKirdi: oquvchi?.meta.kirdi ? new Date(oquvchi.meta.kirdi).toISOString() : null,
+      oquvchiKelganmi: Boolean(room.ishtirok?.studentJoined),
+    });
+  }
+  res.json({ xonalar });
+});
+
 async function liveApi(action, data) {
   const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
   const secret = process.env.LESSON_TOKEN_SECRET || '';
@@ -1411,7 +1440,7 @@ wss.on('connection', async (ws, req) => {
   }
 
   const clientId = crypto.randomUUID();
-  ws.meta = { clientId, roomId, role, name, userId: claims?.userId || null, yordam: Boolean(claims?.yordam) };
+  ws.meta = { clientId, roomId, role, name, userId: claims?.userId || null, yordam: Boolean(claims?.yordam), kirdi: Date.now() };
   room.peers.set(clientId, ws);
   birgaYangila(room);
 
