@@ -262,6 +262,7 @@ body.work{background:var(--bg)}
     <b>📷 Selfi rasmingizni yuklang</b>
     <p>Selfi yuklamaguningizcha sizga <b>yangi o‘quvchi (sinov darsi so‘rovi) kelmaydi</b>. O‘quvchi sizni shu rasmdan taniydi: yuzingiz aniq ko‘rinsin, qora ko‘zoynaksiz.</p>
     <label class="selfi-tugma" id="selfiTugma">Selfi yuklash<input type="file" accept="image/*" capture="user" id="selfiFayl" hidden></label>
+    <p id="selfiProfil" hidden>⚠️ Ilovadagi <b>profil rasmingiz</b> bor, lekin u hisobga olinmaydi — bu <b>ID tasdiq uchun selfi</b>, alohida yuklanadi.</p>
     <p class="selfi-savol" id="selfiSavol">Savollaringiz bo‘lsa — ish botimizga yozing.</p>
   </section>
 
@@ -1489,6 +1490,7 @@ function opRejimChiz(d) {
 async function selfiYukla() {
   const r = await api('/api/selfi');
   $('#selfi').hidden = !(r && r.ok && r.data.bor === false);
+  $('#selfiProfil').hidden = !(r && r.ok && r.data.profil);
   // Savollar uchun ish boti (nomi serverdagi sozlamadan)
   const bot = r && r.ok && r.data.bot;
   if (bot) {
