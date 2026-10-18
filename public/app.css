@@ -390,3 +390,12 @@ body{
 /* Telefon: biror element sig'masa ham sahifa yon tomonga siljimasin (WebView) */
 html,body{overflow-x:clip}
 img{max-width:100%}
+
+/* Qat'iy qoida: o'quvchiga platformadan tashqari taklif taqiqlanadi (work va lidlar sahifalarida) */
+.qoida-ogoh{background:#fff1f2;border:1.5px solid #fda4af;border-radius:16px;padding:14px 16px;margin:0 0 14px;color:#881337}
+.qo-bosh{display:flex;align-items:center;gap:8px;font-size:14px;letter-spacing:.06em}
+.qo-bosh span{font-size:20px}
+.qoida-ogoh p{margin:8px 0 0;font-size:13.5px;line-height:1.5}
+.qo-faktlar{display:grid;gap:6px;margin-top:10px}
+.qo-faktlar div{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.45;background:#fff;border-radius:10px;padding:8px 10px}
+.qo-faktlar i{font-style:normal;font-size:16px;line-height:1.2}
