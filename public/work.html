@@ -136,6 +136,10 @@ body.work{background:var(--bg)}
 .hozir-bosh:disabled{opacity:.6;cursor:default}
 .maslahat{margin:0 0 12px;padding:14px 16px;border-radius:16px;background:#fffaeb;border:1.5px solid #f1c75a;font-size:13.5px;line-height:1.5;color:#5c4710}
 .maslahat b{display:block;font-size:14px;margin-bottom:4px;color:#3d2f08}
+.tolov-yoriq{margin-top:10px;border:1.5px solid #c7d7f5;background:#f4f8ff;border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.5;color:#1e3a5f}
+.tolov-yoriq summary{cursor:pointer;font-weight:800;font-size:13.5px}
+.tolov-yoriq ol{margin:8px 0 0;padding-left:20px;display:grid;gap:6px}
+.tolov-yoriq p{margin:8px 0 0}
 /* kamera va mikrofon tekshiruvi */
 .kamk{margin:0 0 12px;padding:14px 16px;border-radius:16px;background:#fffaeb;border:1.5px solid #f1c75a;font-size:13.5px;line-height:1.5;color:#5c4710}
 .kamk.xato{background:#fdecea;border-color:#ef8a7c;color:#6b1d12}
@@ -422,6 +426,18 @@ const MASLAHATLAR = [
   ['💡 Jiddiy o‘quvchini qanday bilasiz', 'Kun va soatlarni o‘zi aytib, “shu vaqtlarni boshqaga bermang, to‘lov qilaman” degan o‘quvchi — jiddiy. Darhol taklif yuboring: soatlar 24 soat unga band, boshqa o‘quvchiga ketmaydi.'],
   ['💡 24 soat — bonus oynasi', 'O‘quvchi taklifni 24 soat ichida to‘lasa, bir dars puli bonus sizga darhol yoziladi. Taklifni sinov darsi tugashi bilan yuborsangiz, o‘quvchi qizig‘i sovumasdan to‘laydi.'],
 ];
+// Taklif yuborilgach o'quvchiga to'lovni qanday tushuntirish (kartaga o'tkazma + chek)
+const TOLOV_TUSHUNTIRISH = `<details class="tolov-yoriq"><summary>🗣 O‘quvchiga to‘lovni qanday tushuntirasiz</summary>
+  <p>Dars oxirida yoki qo‘ng‘iroqda shunday ayting:</p>
+  <ol>
+    <li>“Taklifni yubordim — Telegram botda va kabinetingizdagi <b>Kurslar</b> bo‘limida chiqdi.”</li>
+    <li>“Botdagi <b>‘💳 To‘lov va chek’</b> tugmasini bosing — karta raqami shu yerda, <b>Nusxa</b> tugmasi bor.”</li>
+    <li>“Click, Payme, Uzum yoki bank ilovangizda <b>O‘tkazmalar → Kartaga</b> ni ochib, summani o‘tkazing.”</li>
+    <li>“Chiqqan <b>chekni skrinshot</b> qiling va kabinetda <b>‘📎 Chek skrinshotini tanlang’ → ‘To‘ladim’</b> ni bosing.”</li>
+    <li>“Pul tushgani tekshirilgach darslaringiz jadvalga tushadi va xabar keladi. Soatlar 24 soat sizga band.”</li>
+  </ol>
+  <p>💡 Iloji bo‘lsa, telefonda turib birga qiling — o‘quvchi qayerda to‘xtab qolganini darhol ko‘rasiz. Pul faqat MyTeacher kartasiga: o‘z kartangizga to‘lov olish qat’iyan taqiqlanadi.</p>
+</details>`;
 let FILTR = 'kelgusi';
 let ISM = '';
 
@@ -964,7 +980,8 @@ async function taklifOch(trialId) {
         </div>
       </div>
       <button class="qabul" type="button" id="tkYubor" style="width:100%;margin-top:16px" ${tayyor ? '' : 'disabled'}>${tayyor ? `Yuborish · ${narx(perWeek).toLocaleString('ru-RU')} so‘m` : `Yana ${perWeek - tanlov.size} ta kun tanlang`}</button>
-      <p style="font-size:12.5px;color:var(--mut);text-align:center;margin:8px 0 0">${tayyor ? esc(matn()) + ' · ' : ''}o‘quvchiga 24 soat band turadi</p>`;
+      <p style="font-size:12.5px;color:var(--mut);text-align:center;margin:8px 0 0">${tayyor ? esc(matn()) + ' · ' : ''}o‘quvchiga 24 soat band turadi</p>
+      ${TOLOV_TUSHUNTIRISH}`;
     $('#tkBron').onchange = (e) => {
       // Telefonda tasodifan bosilib ketmasin: yoqishdan oldin so'raymiz
       if (e.currentTarget.checked && !confirm('O‘quvchi o‘zi “hozir hammasini to‘lay olmayman, bron qilaman” dedimi?\n\nFaqat shunda yoqing — aks holda o‘quvchiga faqat to‘liq to‘lov ko‘rinsin.')) {
@@ -1226,7 +1243,7 @@ function taklifQatori(d) {
   if (o.status === 'requested') return `<div class="taklif-q req">🔥 O‘quvchi davom etmoqchi — kunlarni kelishing</div>${tugma('📩 Taklif yuborish')}`;
   if (o.status === 'sent') {
     const qoldi = Math.max(0, new Date(o.expiresAt).getTime() - Date.now());
-    return `<div class="taklif-q sent"><span>Taklif yuborildi · ${esc(o.slotsText || '')}</span><span>${Math.floor(qoldi / 3600000)} soat ${Math.floor(qoldi / 60000) % 60} daq</span></div>${tugma('O‘zgartirish')}`;
+    return `<div class="taklif-q sent"><span>Taklif yuborildi · ${esc(o.slotsText || '')}</span><span>${Math.floor(qoldi / 3600000)} soat ${Math.floor(qoldi / 60000) % 60} daq</span></div>${TOLOV_TUSHUNTIRISH}${tugma('O‘zgartirish')}`;
   }
   if (o.status === 'paying') return `<div class="taklif-q paying">💳 O‘quvchi to‘ladi — tekshirilmoqda · ${esc(o.slotsText || '')}</div>`;
   if (o.status === 'reserved') {
