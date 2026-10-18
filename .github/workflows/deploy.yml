@@ -1,0 +1,126 @@
+# Serverni yangilash: GitHub serverga SSH orqali kiradi, pm2'da shu repo papkasidan
+# ishlayotgan jarayonni topadi, main'ni tortadi, kerak bo'lsa build qiladi va
+# jarayonni qayta ishga tushiradi.
+#
+# Secret'lar (Settings → Secrets and variables → Actions → New repository secret):
+#   DEPLOY_HOST      — server manzili, masalan 46.8.195.59
+#   DEPLOY_USER      — server foydalanuvchisi, masalan root
+#   DEPLOY_KEY       — faqat deploy uchun ochilgan SSH kalitning maxfiy qismi (tavsiya)
+#   DEPLOY_PASSWORD  — yoki shu foydalanuvchining paroli (kalit bo'lmasa)
+#
+# main'ga har merge'da avtomatik ishlaydi; qo'lda: Actions → Deploy → Run workflow.
+# DEPLOY_HOST qo'yilmagan bo'lsa hech narsa qilmaydi.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Ikki deploy bir vaqtda ketmasin; navbatdagisi oldingisi tugashini kutadi
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HAS_HOST: ${{ secrets.DEPLOY_HOST != '' }}
+    steps:
+      - name: DEPLOY_HOST qo'yilmagan — o'tkazib yuborildi
+        if: env.HAS_HOST != 'true'
+        run: echo "DEPLOY_HOST secret'i yo'q, deploy o'tkazib yuborildi"
+
+      - name: Serverda yangilash
+        if: env.HAS_HOST == 'true'
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          REPO_NAME: live-lesson
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          envs: REPO_NAME
+          command_timeout: 15m
+          script: |
+            set -eo pipefail
+            # Interaktiv bo'lmagan SSH'da nvm/pm2 PATH'da bo'lmasligi mumkin
+            [ -s "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh"
+            export PATH="$PATH:/usr/local/bin"
+
+            # pm2 ro'yxati: "id holat papka". jlist oldidan ogohlantirish qatorlari chiqishi mumkin —
+            # faqat JSON massiv bo'lgan qatorni o'qiymiz
+            royxat() {
+              pm2 jlist 2>/dev/null | node -e '
+                let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
+                  for (const q of s.split("\n").reverse()) {
+                    if (!q.trim().startsWith("[")) continue;
+                    try {
+                      for (const p of JSON.parse(q)) console.log(p.pm_id + " " + p.pm2_env.status + " " + p.pm2_env.pm_cwd);
+                      return;
+                    } catch {}
+                  }
+                  process.exit(1);
+                })'
+            }
+
+            # pm2 jarayonlari ichidan papkasining git origin'i shu repo bo'lganini topamiz
+            CWD=""
+            IDS=""
+            while read -r id _holat cwd; do
+              [ -d "$cwd/.git" ] || continue
+              url=$(git -C "$cwd" remote get-url origin 2>/dev/null || true)
+              url=${url%.git}; url=${url%/}
+              [ "${url##*/}" = "$REPO_NAME" ] || [ "${url##*:}" = "$REPO_NAME" ] || continue
+              if [ -z "$CWD" ] || [ "$CWD" = "$cwd" ]; then CWD="$cwd"; IDS="$IDS $id"; fi
+            done < <(royxat)
+
+            if [ -z "$CWD" ]; then
+              echo "XATO: pm2'da $REPO_NAME papkasidan ishlayotgan jarayon topilmadi"
+              pm2 list
+              exit 1
+            fi
+            echo "Papka: $CWD · pm2 jarayon(lar):$IDS"
+            cd "$CWD"
+
+            if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+              echo "XATO: serverda kuzatiladigan fayllar qo'lda o'zgartirilgan — ustidan yozmaymiz:"
+              git status --short --untracked-files=no
+              exit 1
+            fi
+
+            ESKI=$(git rev-parse HEAD)
+            git fetch origin main
+            git merge --ff-only origin/main
+            YANGI=$(git rev-parse HEAD)
+            echo "Kod: ${ESKI:0:7} -> ${YANGI:0:7}"
+            git --no-pager log --oneline "$ESKI..$YANGI" | head -30
+
+            # Bog'liqliklar faqat package.json o'zgarganda yangilanadi
+            if [ "$ESKI" != "$YANGI" ] && git diff --name-only "$ESKI" "$YANGI" | grep -qE '^package(-lock)?\.json$'; then
+              echo "package.json o'zgargan — npm install"
+              npm install --no-audit --no-fund
+            fi
+            if node -e 'process.exit(require("./package.json").scripts?.build ? 0 : 1)'; then
+              echo "npm run build"
+              npm run build
+            fi
+
+            pm2 restart $IDS --update-env
+            sleep 8
+            pm2 list
+            for id in $IDS; do
+              holat=$(royxat | awk -v id="$id" '$1 == id { print $2 }')
+              if [ "$holat" != "online" ]; then
+                echo "XATO: pm2 jarayon $id holati: $holat"
+                pm2 logs "$id" --lines 60 --nostream || true
+                exit 1
+              fi
+            done
+            echo "Tayyor: $REPO_NAME ${YANGI:0:7}"
