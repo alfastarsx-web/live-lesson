@@ -1222,6 +1222,7 @@ function xonaniSaqla(id, room) {
       studentSeconds: soniya,
       birgaSeconds: birgaSoniya(room),
       darsBoshi: ish.darsBoshi,
+      ustozKirdi: ish.ustozKirdi,
       ended: room.ended,
     };
     fs.writeFile(xonaFayli(id), JSON.stringify(d), (err) => {
@@ -1246,7 +1247,8 @@ function getRoom(id) {
       // Sinov darsi hisoboti uchun: o'quvchi qachon kirdi va qancha turdi
       // birga* — ustoz va o'quvchi ikkalasi xonada bo'lgan vaqt (dars davomiyligi); darsBoshi — birinchi marta
       // ikkalasi uchrashgan payt (ustoz ekranidagi taymer shundan sanaydi, qayta ulanishda ham o'zgarmaydi)
-      ishtirok: { studentJoined: false, studentSeconds: 0, studentEnteredAt: null, birgaSeconds: 0, birgaBoshi: null, darsBoshi: null },
+      // ustozKirdi — ustoz (admin texnik yordami emas) xonaga kirdimi: kirmasa API "ustoz kelmadi" deb belgilaydi
+      ishtirok: { studentJoined: false, studentSeconds: 0, studentEnteredAt: null, birgaSeconds: 0, birgaBoshi: null, darsBoshi: null, ustozKirdi: false },
       lessonId: null,
       ended: false,
       endTimer: null,
@@ -1261,6 +1263,8 @@ function getRoom(id) {
       room.ishtirok.studentSeconds = Number(eski.studentSeconds) || 0;
       room.ishtirok.birgaSeconds = Number(eski.birgaSeconds) || 0;
       room.ishtirok.darsBoshi = Number(eski.darsBoshi) || null;
+      // Eski saqlangan xonada maydon yo'q — birga o'tirilgan bo'lsa ustoz kirgan
+      room.ishtirok.ustozKirdi = Boolean(eski.ustozKirdi) || Number(eski.birgaSeconds) > 0 || Boolean(eski.darsBoshi);
       room.ended = Boolean(eski.ended);
     }
     rooms.set(id, room);
@@ -1348,8 +1352,10 @@ async function sinovHisoboti(roomId, room, ended = false) {
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(10000),
     });
-    let r = await yubor({ room: roomId, studentJoined, studentSeconds, lessonSeconds: birgaSoniya(room), ended });
-    // API hali eski bo'lsa (lessonSeconds ni tanimaydi — 400) — eski ko'rinishda qayta: lid holati to'xtamasin
+    const mentorJoined = room.ishtirok.ustozKirdi;
+    let r = await yubor({ room: roomId, studentJoined, studentSeconds, lessonSeconds: birgaSoniya(room), mentorJoined, ended });
+    // API hali eski bo'lsa (yangi maydonlarni tanimaydi — 400) — eski ko'rinishda qayta: lid holati to'xtamasin
+    if (r.status === 400) r = await yubor({ room: roomId, studentJoined, studentSeconds, lessonSeconds: birgaSoniya(room), ended });
     if (r.status === 400) r = await yubor({ room: roomId, studentJoined, studentSeconds, ended });
     const d = await r.json().catch(() => ({}));
     console.log(`Sinov darsi hisoboti: ${roomId} kirdi=${studentJoined} soniya=${studentSeconds} birga=${birgaSoniya(room)} -> `
@@ -1515,6 +1521,11 @@ wss.on('connection', async (ws, req) => {
   broadcast(room, { type: 'peer-join', peer: { id: clientId, role, name } }, clientId);
   logEvent(room, { type: 'join', role, name });
 
+  if (role === 'teacher' && !claims?.yordam && !room.ishtirok.ustozKirdi) {
+    room.ishtirok.ustozKirdi = true;
+    // Ustoz keldi — API'da darhol qayd etilsin (keyin hisobot yo'qolsa ham "ustoz kelmadi" bo'lmasin)
+    void sinovHisoboti(roomId, room, false);
+  }
   if (role === 'student') {
     room.ishtirok.studentJoined = true;
     room.ishtirok.studentEnteredAt = Date.now();
