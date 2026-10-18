@@ -226,6 +226,9 @@ body.work{background:var(--bg)}
 .op-rejim .son b{display:inline;font-size:13px;color:var(--ink)}
 .op-rejim .ochish{flex:1;min-width:200px;text-align:center;padding:12px;border-radius:12px;background:var(--green);color:#fff;font-weight:800;text-decoration:none}
 .op-rejim .ochish.ochiq{background:#d8d8d3;color:var(--mut);pointer-events:none}
+.op-rejim .nazorat{margin-top:10px;font-size:12.5px;line-height:1.45;padding:9px 11px;border-radius:10px;background:#fef3c7;color:#92400e}
+.op-rejim .nazorat.toxta{background:#fff1f2;color:#be123c;font-weight:700}
+.op-rejim .nazorat.ok{background:#ecfdf5;color:#047857}
 </style>
 </head>
 <body class="work">
@@ -256,6 +259,7 @@ body.work{background:var(--bg)}
       <span class="son">Bugun: <b id="opRBugun">0 / 0</b> o‘quvchi</span>
       <a class="ochish" id="opROchish" href="/operator-kabinet">Qo‘ng‘iroq qilishni boshlash →</a>
     </div>
+    <div class="nazorat" id="opRNazorat" hidden></div>
   </section>
 
   <nav class="tablar" aria-label="Work bo‘limlari">
@@ -1409,9 +1413,27 @@ function opRejimChiz(d) {
   t.disabled = !!d.bloklangan || (!d.tasdiqlangan && !d.yoqilgan);
   $('#opRIchki').hidden = !d.yoqilgan;
   $('#opRBugun').textContent = `${d.bugun} / ${d.limit}`;
+  const n = d.nazorat;
+  const toxta = d.yoqilgan && n && n.holat === 'toxtatildi';
   const tugadi = d.yoqilgan && d.bugun >= d.limit;
-  $('#opROchish').classList.toggle('ochiq', tugadi);
-  $('#opROchish').textContent = tugadi ? 'Bugungi limit tugadi — ertaga davom etasiz' : 'Qo‘ng‘iroq qilishni boshlash →';
+  $('#opROchish').classList.toggle('ochiq', tugadi || toxta);
+  // Akademiya kabinetning o'zida ochiladi — shuning uchun tugma ochiq qoladi
+  $('#opROchish').textContent = toxta ? 'O‘quvchi berish to‘xtatilgan'
+    : tugadi ? 'Bugungi limit tugadi — ertaga davom etasiz'
+      : d.yoqilgan && d.akademiya === false ? 'Akademiyani boshlash →' : 'Qo‘ng‘iroq qilishni boshlash →';
+  // Amaliy nazorat: dastlabki sinovlardan qanchasida o'quvchi keldi
+  const nz = $('#opRNazorat');
+  nz.hidden = !d.yoqilgan || !n;
+  if (!nz.hidden) {
+    nz.className = 'nazorat' + (toxta ? ' toxta' : n.holat === 'otdi' || n.holat === 'ozod' ? ' ok' : '');
+    nz.textContent = toxta
+      ? `Dastlabki ${n.soni} ta sinovingizdan ${n.kelmadi} tasida o‘quvchi darsga kelmadi — yangi o‘quvchi berish to‘xtatildi. Admin bilan suhbatdan keyin qayta ochiladi.`
+      : n.holat === 'otdi' || n.holat === 'ozod'
+        ? '✅ Amaliy nazoratdan o‘tdingiz'
+        : `🎯 Amaliy nazorat: dastlabki ${n.soni} ta sinovdan ${n.jami} tasi o‘tdi` +
+          (n.kelmadi ? `, ${n.kelmadi} tasida o‘quvchi kelmadi` : '') +
+          `. ${n.chegara} tasida kelmasa — o‘quvchi berish to‘xtaydi. Telegram ✅ bo‘lmaguncha telefonni qo‘ymang.`;
+  }
   $('#opRIzoh').textContent = d.bloklangan
     ? 'Operator rejimini admin o‘chirib qo‘ygan. Savol bo‘lsa admin bilan bog‘laning.'
     : !d.tasdiqlangan && !d.yoqilgan
@@ -1427,7 +1449,7 @@ async function opRejimYukla() {
 $('#opRTugma').onchange = async (e) => {
   const t = e.currentTarget;
   const yoq = t.checked;
-  if (yoq && !confirm('Operator rejimini yoqasizmi?\n\n• Bazadagi o‘quvchilarga o‘zingiz qo‘ng‘iroq qilasiz (kuniga limit bor)\n• Sinovga yozsangiz dars boshqa ustozga ketmaydi — o‘zingizga yoziladi\n• Har o‘tilgan sinov va to‘lov uchun operatorlar kabi bonus\n\nBirinchi marta qisqa operator akademiyasidan o‘tasiz.')) {
+  if (yoq && !confirm('Operator rejimini yoqasizmi?\n\n• Bazadagi o‘quvchilarga o‘zingiz qo‘ng‘iroq qilasiz (kuniga limit bor)\n• Sinovga yozsangiz dars boshqa ustozga ketmaydi — o‘zingizga yoziladi\n• Har o‘tilgan sinov va to‘lov uchun operatorlar kabi bonus\n• Dastlabki 5 sinovdan 3 tasida o‘quvchi kelmasa — o‘quvchi berish to‘xtaydi\n\nAvval qisqa ustoz-operator akademiyasidan (6 modul va test) o‘tasiz.')) {
     t.checked = false;
     return;
   }
