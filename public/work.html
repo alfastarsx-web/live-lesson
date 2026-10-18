@@ -209,6 +209,13 @@ body.work{background:var(--bg)}
 .kc-tasdiq:disabled{background:#d8d8d3;color:var(--mut);cursor:not-allowed}
 
 /* Operator rejimi: ustoz bazadagi o'quvchilarga o'zi qo'ng'iroq qiladi */
+.selfi{background:#fff7ed;border:1.5px solid #fdba74;border-radius:16px;padding:14px 16px;margin:0 0 14px;color:#7c2d12}
+.selfi b{display:block;font-size:15px;font-weight:800}
+.selfi p{margin:6px 0 0;font-size:13px;line-height:1.45}
+.selfi p b{display:inline;font-size:13px}
+.selfi-tugma{display:block;margin-top:12px;text-align:center;padding:12px;border-radius:12px;background:#ea580c;color:#fff;font-weight:800;cursor:pointer}
+.selfi-tugma.band{opacity:.6;pointer-events:none}
+.selfi-savol a{color:#c2410c;font-weight:700}
 .op-rejim{background:var(--card);border-radius:16px;padding:14px 16px;margin:0 0 14px;box-shadow:var(--shadow)}
 .op-rejim .yuqori{display:flex;align-items:center;gap:12px}
 .op-rejim .yuqori div{flex:1;min-width:0}
@@ -245,6 +252,13 @@ body.work{background:var(--bg)}
       <div class="raqam yonib"><b id="rSorov">0</b><span>yangi so‘rov</span></div>
       <div class="raqam"><b id="rNatija">0</b><span>natija kutilmoqda</span></div>
     </div>
+  </section>
+
+  <section class="selfi" id="selfi" hidden aria-label="Selfi rasmi">
+    <b>📷 Selfi rasmingizni yuklang</b>
+    <p>Selfi yuklamaguningizcha sizga <b>yangi o‘quvchi (sinov darsi so‘rovi) kelmaydi</b>. O‘quvchi sizni shu rasmdan taniydi: yuzingiz aniq ko‘rinsin, qora ko‘zoynaksiz.</p>
+    <label class="selfi-tugma" id="selfiTugma">Selfi yuklash<input type="file" accept="image/*" capture="user" id="selfiFayl" hidden></label>
+    <p class="selfi-savol" id="selfiSavol">Savollaringiz bo‘lsa — ish botimizga yozing.</p>
   </section>
 
   <section class="op-rejim" id="opRejim" hidden aria-label="Operator rejimi">
@@ -1442,6 +1456,36 @@ function opRejimChiz(d) {
         ? 'Bazadagi o‘quvchilarga qo‘ng‘iroq qilasiz. Sinovga yozsangiz dars o‘zingizga yoziladi.'
         : 'Bazadagi o‘quvchilarga o‘zingiz qo‘ng‘iroq qiling — sinov darsi o‘zingizga yoziladi, operatorlar kabi bonus olasiz.';
 }
+// Selfi yo'q bo'lsa — ogohlantirish va shu yerning o'zida yuklash (sinov so'rovi faqat selfi bor ustozga)
+async function selfiYukla() {
+  const r = await api('/api/selfi');
+  $('#selfi').hidden = !(r && r.ok && r.data.bor === false);
+  // Savollar uchun ish boti (nomi serverdagi sozlamadan)
+  const bot = r && r.ok && r.data.bot;
+  if (bot) {
+    $('#selfiSavol').innerHTML = `Savollaringiz bo‘lsa — <a href="https://t.me/${encodeURIComponent(bot.replace(/^@/, ''))}" target="_blank" rel="noopener">${esc(bot)}</a> ga yozing.`;
+  }
+}
+$('#selfiFayl').onchange = async (e) => {
+  const f = e.currentTarget.files[0];
+  e.currentTarget.value = '';
+  if (!f) return;
+  const t = $('#selfiTugma');
+  t.classList.add('band');
+  t.firstChild.textContent = 'Yuklanmoqda…';
+  const fd = new FormData();
+  fd.append('file', f);
+  const r = await fetch('/api/selfi', { method: 'POST', body: fd, credentials: 'same-origin' })
+    .then(async (x) => ({ ok: x.ok, data: await x.json().catch(() => ({})) }))
+    .catch(() => ({ ok: false, data: { message: 'Internet aloqasini tekshiring' } }));
+  t.classList.remove('band');
+  t.firstChild.textContent = 'Selfi yuklash';
+  if (!r.ok || !r.data.bor) return toast(r.data.message || 'Yuklab bo‘lmadi — qayta urinib ko‘ring', 'err');
+  $('#selfi').hidden = true;
+  toast('Selfi yuklandi — endi sizga sinov so‘rovlari keladi', 'ok');
+  opRejimYukla();
+};
+
 async function opRejimYukla() {
   const r = await api('/api/ustoz-operator');
   if (r && r.ok) opRejimChiz(r.data);
@@ -1493,7 +1537,7 @@ window.addEventListener('hashchange', tabKorsat);
   ISM = w.data.name || '';
 
   qoidalarChiz();
-  await Promise.all([sorovlarniYukla(), darslarniYukla(), holatYukla(), qoidalarYukla(), opRejimYukla()]);
+  await Promise.all([sorovlarniYukla(), darslarniYukla(), holatYukla(), qoidalarYukla(), opRejimYukla(), selfiYukla()]);
   tabriklarniKorsat((ISM || '').split(/\s+/)[0]);
 
   // Ball qo'shilganda yengil ding (Onlayn tugmasi yonidan "+N" ko'tariladi)
