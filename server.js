@@ -625,20 +625,7 @@ const selfiYukla = multer({
   fileFilter: (req, file, cb) => cb(null, RASM_TURLARI.includes(file.mimetype) || /\.(png|jpe?g|webp|heic)$/i.test(file.originalname || '')),
 }).single('file');
 
-app.get('/api/selfi', async (req, res) => {
-  const token = cookies(req)[AI_COOKIE];
-  if (!token || !aiteacher.AITEACHER_ON) return res.status(401).json({ error: 'kirilmagan' });
-  try {
-    const r = await fetch(`${process.env.AITEACHER_API.replace(/\/$/, '')}/mentor`, {
-      headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(15000),
-    });
-    const d = await r.json().catch(() => ({}));
-    if (!r.ok) return res.status(r.status).json(d);
-    res.json({ bor: !!d.avatarUrl });
-  } catch (e) {
-    res.status(502).json({ message: 'Server vaqtincha javob bermadi' });
-  }
-});
+app.get('/api/selfi', (req, res) => aiProxy(req, res, '/mentor/selfi'));
 
 app.post('/api/selfi', (req, res) => selfiYukla(req, res, async (err) => {
   const token = cookies(req)[AI_COOKIE];
