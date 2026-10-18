@@ -207,6 +207,25 @@ body.work{background:var(--bg)}
 .kc-ogoh.yashil{background:var(--green-soft);color:var(--green)}
 .kc-tasdiq{width:100%;margin-top:14px;padding:14px;border:0;border-radius:14px;background:var(--green);color:#fff;font:inherit;font-weight:800;font-size:15px;cursor:pointer}
 .kc-tasdiq:disabled{background:#d8d8d3;color:var(--mut);cursor:not-allowed}
+
+/* Operator rejimi: ustoz bazadagi o'quvchilarga o'zi qo'ng'iroq qiladi */
+.op-rejim{background:var(--card);border-radius:16px;padding:14px 16px;margin:0 0 14px;box-shadow:var(--shadow)}
+.op-rejim .yuqori{display:flex;align-items:center;gap:12px}
+.op-rejim .yuqori div{flex:1;min-width:0}
+.op-rejim b{display:block;font-size:15px;font-weight:800}
+.op-rejim .izoh{font-size:12.5px;color:var(--mut2);line-height:1.45;margin-top:2px}
+.op-switch{position:relative;width:46px;height:28px;flex:0 0 auto;cursor:pointer}
+.op-switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.op-switch i{position:absolute;inset:0;border-radius:999px;background:#d8d8d3;transition:background .2s;pointer-events:none}
+.op-switch i::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.op-switch input:checked + i{background:var(--green)}
+.op-switch input:checked + i::after{transform:translateX(18px)}
+.op-switch input:focus-visible + i{outline:2px solid var(--green);outline-offset:2px}
+.op-rejim .ichki{margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.op-rejim .son{font-size:13px;color:var(--mut2);font-weight:600}
+.op-rejim .son b{display:inline;font-size:13px;color:var(--ink)}
+.op-rejim .ochish{flex:1;min-width:200px;text-align:center;padding:12px;border-radius:12px;background:var(--green);color:#fff;font-weight:800;text-decoration:none}
+.op-rejim .ochish.ochiq{background:#d8d8d3;color:var(--mut);pointer-events:none}
 </style>
 </head>
 <body class="work">
@@ -222,6 +241,20 @@ body.work{background:var(--bg)}
       <div class="raqam"><b id="rDars">0</b><span>bugungi dars</span></div>
       <div class="raqam yonib"><b id="rSorov">0</b><span>yangi so‘rov</span></div>
       <div class="raqam"><b id="rNatija">0</b><span>natija kutilmoqda</span></div>
+    </div>
+  </section>
+
+  <section class="op-rejim" id="opRejim" hidden aria-label="Operator rejimi">
+    <div class="yuqori">
+      <div>
+        <b>📞 Operator rejimi</b>
+        <div class="izoh" id="opRIzoh">Bazadagi o‘quvchilarga o‘zingiz qo‘ng‘iroq qiling — sinov darsi o‘zingizga yoziladi, operatorlar kabi bonus olasiz.</div>
+      </div>
+      <label class="op-switch" title="Operator rejimi"><input type="checkbox" id="opRTugma" aria-label="Operator rejimini yoqish"><i></i></label>
+    </div>
+    <div class="ichki" id="opRIchki" hidden>
+      <span class="son">Bugun: <b id="opRBugun">0 / 0</b> o‘quvchi</span>
+      <a class="ochish" id="opROchish" href="/operator-kabinet">Qo‘ng‘iroq qilishni boshlash →</a>
     </div>
   </section>
 
@@ -1368,6 +1401,48 @@ $('#holatTugma').onclick = async () => {
 };
 setInterval(() => { if (document.visibilityState === 'visible') holatChiz(); }, 1000);
 
+// ---------- operator rejimi ----------
+function opRejimChiz(d) {
+  $('#opRejim').hidden = false;
+  const t = $('#opRTugma');
+  t.checked = !!d.yoqilgan;
+  t.disabled = !!d.bloklangan || (!d.tasdiqlangan && !d.yoqilgan);
+  $('#opRIchki').hidden = !d.yoqilgan;
+  $('#opRBugun').textContent = `${d.bugun} / ${d.limit}`;
+  const tugadi = d.yoqilgan && d.bugun >= d.limit;
+  $('#opROchish').classList.toggle('ochiq', tugadi);
+  $('#opROchish').textContent = tugadi ? 'Bugungi limit tugadi — ertaga davom etasiz' : 'Qo‘ng‘iroq qilishni boshlash →';
+  $('#opRIzoh').textContent = d.bloklangan
+    ? 'Operator rejimini admin o‘chirib qo‘ygan. Savol bo‘lsa admin bilan bog‘laning.'
+    : !d.tasdiqlangan && !d.yoqilgan
+      ? 'Akkauntingiz tasdiqlangach operator rejimini yoqa olasiz.'
+      : d.yoqilgan
+        ? 'Bazadagi o‘quvchilarga qo‘ng‘iroq qilasiz. Sinovga yozsangiz dars o‘zingizga yoziladi.'
+        : 'Bazadagi o‘quvchilarga o‘zingiz qo‘ng‘iroq qiling — sinov darsi o‘zingizga yoziladi, operatorlar kabi bonus olasiz.';
+}
+async function opRejimYukla() {
+  const r = await api('/api/ustoz-operator');
+  if (r && r.ok) opRejimChiz(r.data);
+}
+$('#opRTugma').onchange = async (e) => {
+  const t = e.currentTarget;
+  const yoq = t.checked;
+  if (yoq && !confirm('Operator rejimini yoqasizmi?\n\n• Bazadagi o‘quvchilarga o‘zingiz qo‘ng‘iroq qilasiz (kuniga limit bor)\n• Sinovga yozsangiz dars boshqa ustozga ketmaydi — o‘zingizga yoziladi\n• Har o‘tilgan sinov va to‘lov uchun operatorlar kabi bonus\n\nBirinchi marta qisqa operator akademiyasidan o‘tasiz.')) {
+    t.checked = false;
+    return;
+  }
+  t.disabled = true;
+  const r = await api('/api/ustoz-operator', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ yoq }),
+  }).catch(() => ({ ok: false, data: { error: 'Internet aloqasini tekshiring' } }));
+  t.disabled = false;
+  if (!r) return;
+  if (!r.ok) { t.checked = !yoq; return toast(r.data.message || r.data.error || 'O‘zgartirib bo‘lmadi', 'err'); }
+  opRejimChiz(r.data);
+  toast(yoq ? 'Operator rejimi yoqildi' : 'Operator rejimi o‘chirildi — lid berilmaydi', yoq ? 'ok' : '');
+};
+
 // ---------- tablar ----------
 function tabKorsat() {
   const tab = location.hash === '#sinovlar' ? 'sinovlar' : 'bugun';
@@ -1396,7 +1471,7 @@ window.addEventListener('hashchange', tabKorsat);
   ISM = w.data.name || '';
 
   qoidalarChiz();
-  await Promise.all([sorovlarniYukla(), darslarniYukla(), holatYukla(), qoidalarYukla()]);
+  await Promise.all([sorovlarniYukla(), darslarniYukla(), holatYukla(), qoidalarYukla(), opRejimYukla()]);
   tabriklarniKorsat((ISM || '').split(/\s+/)[0]);
 
   // Ball qo'shilganda yengil ding (Onlayn tugmasi yonidan "+N" ko'tariladi)
