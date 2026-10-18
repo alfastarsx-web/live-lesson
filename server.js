@@ -617,6 +617,19 @@ app.post('/api/mentor-session/heartbeat', async (req, res) => {
   aiProxy(req, res, '/mentor-session/heartbeat');
 });
 
+// Ustozning operator rejimi: holat va yoqish/o'chirish (bazadagi lidlarga o'zi qo'ng'iroq qiladi)
+app.get('/api/ustoz-operator', (req, res) => aiProxy(req, res, '/operator/ustoz/holat'));
+app.post('/api/ustoz-operator', (req, res) => aiProxy(req, res, '/operator/ustoz/rejim'));
+// Operator kabinetini (ai.myteacher.uz) qayta login so'ramasdan ochish. Token manzilning # qismida —
+// u serverga yuborilmaydi va loglarga tushmaydi; kabinet uni o'qib, manzildan darhol olib tashlaydi.
+app.get('/operator-kabinet', (req, res) => {
+  const token = cookies(req)[AI_COOKIE];
+  if (!token) return res.redirect('/work.html');
+  const kabinet = (process.env.ADMIN_WEB_URL || 'https://ai.myteacher.uz').replace(/\/$/, '');
+  res.set('Cache-Control', 'no-store');
+  res.redirect(`${kabinet}/operator#t=${encodeURIComponent(token)}`);
+});
+
 // Operator yuborgan sinov darsi so'rovlari: ko'rish, qabul qilish, rad etish.
 // Akademiyadan o'tmagan mentor so'rov ololmaydi.
 app.get('/api/trial/incoming', async (req, res) => {
