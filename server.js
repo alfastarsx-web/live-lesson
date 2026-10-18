@@ -617,6 +617,49 @@ app.post('/api/mentor-session/heartbeat', async (req, res) => {
   aiProxy(req, res, '/mentor-session/heartbeat');
 });
 
+// ---------- Selfi (ID tasdiqdagi "avatar" hujjati) ----------
+// Selfi yuklamagan ustozga sinov so'rovi bormaydi — Ish sahifasi ogohlantiradi va shu yerda yuklatadi.
+const selfiYukla = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => cb(null, RASM_TURLARI.includes(file.mimetype) || /\.(png|jpe?g|webp|heic)$/i.test(file.originalname || '')),
+}).single('file');
+
+app.get('/api/selfi', async (req, res) => {
+  const token = cookies(req)[AI_COOKIE];
+  if (!token || !aiteacher.AITEACHER_ON) return res.status(401).json({ error: 'kirilmagan' });
+  try {
+    const r = await fetch(`${process.env.AITEACHER_API.replace(/\/$/, '')}/mentor`, {
+      headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(15000),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) return res.status(r.status).json(d);
+    res.json({ bor: !!d.avatarUrl });
+  } catch (e) {
+    res.status(502).json({ message: 'Server vaqtincha javob bermadi' });
+  }
+});
+
+app.post('/api/selfi', (req, res) => selfiYukla(req, res, async (err) => {
+  const token = cookies(req)[AI_COOKIE];
+  if (!token || !aiteacher.AITEACHER_ON) return res.status(401).json({ message: 'Sessiya tugagan — qayta kiring' });
+  if (err) return res.status(400).json({ message: err.code === 'LIMIT_FILE_SIZE' ? 'Rasm 10 MB dan katta' : 'Rasmni yuklab bo‘lmadi' });
+  if (!req.file) return res.status(400).json({ message: 'Rasm tanlang (JPG yoki PNG)' });
+  try {
+    const fd = new FormData();
+    fd.append('file', new Blob([req.file.buffer], { type: req.file.mimetype || 'image/jpeg' }), req.file.originalname || 'selfi.jpg');
+    const r = await fetch(`${process.env.AITEACHER_API.replace(/\/$/, '')}/mentor/documents/avatar`, {
+      method: 'PATCH', headers: { Authorization: `Bearer ${token}` }, body: fd, signal: AbortSignal.timeout(30000),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) return res.status(r.status).json({ message: d.message || 'Saqlab bo‘lmadi' });
+    res.json({ bor: !!d.avatarUrl });
+  } catch (e) {
+    console.warn(`selfi yuklash xato: ${e.message}`);
+    res.status(502).json({ message: 'Server vaqtincha javob bermadi — qayta urinib ko‘ring' });
+  }
+}));
+
 // Ustozning operator rejimi: holat va yoqish/o'chirish (bazadagi lidlarga o'zi qo'ng'iroq qiladi)
 app.get('/api/ustoz-operator', (req, res) => aiProxy(req, res, '/operator/ustoz/holat'));
 app.post('/api/ustoz-operator', (req, res) => aiProxy(req, res, '/operator/ustoz/rejim'));
