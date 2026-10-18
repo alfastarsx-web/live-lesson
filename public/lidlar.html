@@ -20,7 +20,7 @@
     <a href="/jadval.html">Jadval</a>
   </nav>
 
-  <section class="qoida-ogoh" aria-label="Qat'iy qoida">
+  <section class="qoida-ogoh" id="qoidaOgoh" hidden aria-label="Qat'iy qoida">
     <div class="qo-bosh"><span aria-hidden="true">⛔</span><b>QAT’IY QOIDA</b></div>
     <p>MyTeacher bergan o‘quvchiga <b>platformadan tashqari har qanday taklif</b> — shaxsiy dars, to‘lovni o‘zingizga olish, boshqa markaz yoki kursga chaqirish — <b>qat’iyan taqiqlanadi va qonuniy javobgarlikka tortiladi</b>.</p>
     <div class="qo-faktlar">
@@ -28,7 +28,9 @@
       <div><i aria-hidden="true">🤖</i><span>Platformadagi darslar <b>sun’iy intellekt</b> yordamida kuzatib boriladi</span></div>
       <div><i aria-hidden="true">🕵️</i><span>Lidlar orasida kompaniya vakillari <b>“sirli mijoz”</b> sifatida qoidaga rioya qilinishini tekshiradi</span></div>
     </div>
+    <button type="button" class="qo-qabul" id="qoidaQabul">✅ Tushunarli, qabul qildim</button>
   </section>
+  <script src="/qoida.js" defer></script>
 
   <div class="chiplar" id="chiplar">
     <button class="chip" data-t="all" aria-pressed="true">Barchasi (0)</button>
