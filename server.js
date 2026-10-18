@@ -627,6 +627,10 @@ const selfiYukla = multer({
 
 app.get('/api/selfi', (req, res) => aiProxy(req, res, '/mentor/selfi'));
 
+// Qat'iy qoida: qabul qilinganmi / "Tushunarli, qabul qildim" (vaqti serverda saqlanadi)
+app.get('/api/qoida', (req, res) => aiProxy(req, res, '/mentor/qoida'));
+app.post('/api/qoida', (req, res) => aiProxy(req, res, '/mentor/qoida'));
+
 app.post('/api/selfi', (req, res) => selfiYukla(req, res, async (err) => {
   const token = cookies(req)[AI_COOKIE];
   if (!token || !aiteacher.AITEACHER_ON) return res.status(401).json({ message: 'Sessiya tugagan — qayta kiring' });
