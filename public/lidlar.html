@@ -131,7 +131,7 @@ function kartaHtml(l) {
 
       <div class="sinov-quti" data-sinov-quti hidden>
         <b>Sinov darsi vaqti</b>
-        <input type="datetime-local" data-vaqt
+        <input type="datetime-local" step="3600" data-vaqt
                style="width:100%;padding:11px;border-radius:10px;border:1.5px solid var(--line);font:inherit">
         <div style="display:flex;gap:8px;margin-top:10px">
           <button class="asosiy" data-tasdiq style="padding:10px 14px;border-radius:10px;border:0;
@@ -323,6 +323,10 @@ async function sinovBelgila(id, quti) {
   const xabar = quti.querySelector('[data-xabar]');
   const qiymat = quti.querySelector('[data-vaqt]').value;
   if (!qiymat) { xabar.textContent = 'Vaqtni tanlang'; xabar.className = 'xabar2 err'; return; }
+  // Sinov darsi soat boshida (masalan 14:00) — boshqa darslar bilan ustma-ust tushmasin
+  if (new Date(qiymat).getMinutes() !== 0) {
+    xabar.textContent = 'Sinov darsi soat boshida boshlanadi — masalan 14:00'; xabar.className = 'xabar2 err'; return;
+  }
 
   const tasdiq = quti.querySelector('[data-tasdiq]');
   tasdiq.disabled = true;
