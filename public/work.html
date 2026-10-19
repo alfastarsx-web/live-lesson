@@ -1143,7 +1143,7 @@ const hozirQatori = () => `<div class="hozir" aria-label="Hozirgi vaqt"><span>${
 
 // ---------- Doimiy darslar: "Kelmadi", ko'chirish, qoidalar ----------
 let QOIDA = { kutishDaq: 15, kelmadiMuddatSoat: 24, kochirishOldinSoat: 12, paketDars: 12, paketKochirish: 3,
-  paketFavqulodda: 1, paketKechirim: 1, ustozBepulKochirish: 2, ustozKechJarima: 20, kechirimUlush: 0.5, kochirishKun: 7 };
+  paketFavqulodda: 1, paketKechirim: 1, ustozBepulKochirish: 2, ustozKechJarima: 20, kechirimUlush: 0, kochirishKun: 7 };
 // Doimiy dars: kutish vaqti o'tgan, o'quvchi xonaga kirmagan, natija belgilanmagan
 function kelmadiMumkin(d) {
   if (d.isTrial || d.outcome || d.status !== 'booked' || d.studentJoined) return false;
@@ -1154,7 +1154,7 @@ function qoidalarChiz() {
   const q = QOIDA;
   $('#qoidaRoyxat').innerHTML = [
     ['⏰', `Darsni o‘z vaqtida boshlang va o‘quvchini <b>${q.kutishDaq} daqiqa</b> kuting. Kelmasa — <b>“O‘quvchi kelmadi”</b> tugmasini bosing. Tugma faqat siz xonada kutgan bo‘lsangiz ishlaydi.`],
-    ['💰', `O‘quvchi kelmasa: har ${q.paketDars} darsdagi <b>birinchi kelmaslik kechiriladi</b> — dars o‘quvchiga jadval oxiriga qo‘shiladi, sizga dars haqining <b>${Math.round(q.kechirimUlush * 100)}%</b> to‘lanadi. Keyingilarida dars kuyadi — sizga <b>to‘liq haq</b>.`],
+    ['💰', `O‘quvchi kelmasa: har ${q.paketDars} darsdagi <b>birinchi kelmaslik kechiriladi</b> — dars o‘quvchiga jadval oxiriga qo‘shiladi${q.kechirimUlush > 0 ? `, sizga dars haqining <b>${Math.round(q.kechirimUlush * 100)}%</b> to‘lanadi` : ' (bu dars uchun haq to‘lanmaydi)'}. Keyingilarida dars kuyadi — sizga <b>to‘liq haq</b>.`],
     ['⭐', `+10 ball faqat <b>o‘tkazilgan</b> darsga beriladi. O‘quvchi xonaga kirmagan dars “o‘tildi” hisoblanmaydi.`],
     ['↻', `O‘quvchi darsni <b>${q.kochirishOldinSoat} soat oldin</b> o‘zi ko‘chira oladi (har ${q.paketDars} darsga ${q.paketKochirish} marta) yoki favqulodda kupon bilan (${q.paketFavqulodda} ta). Yangi vaqt faqat <b>bo‘sh soatlaringizdan</b> tanlanadi — sizga xabar keladi.`],
     ['👩‍🏫', `Siz ko‘chirsangiz: ${q.kochirishOldinSoat} soatdan oldin va 30 kunda bir o‘quvchi uchun <b>${q.ustozBepulKochirish} martagacha — jarimasiz</b>. O‘quvchi o‘zi so‘ragan bo‘lsa, “O‘quvchi so‘radi”ni tanlang — jarima yo‘q.`, 'ogoh'],
