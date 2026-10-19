@@ -443,7 +443,9 @@ function kutyaptiChiz({ tarix, jadval, oquvchilar, hamyon }) {
     ish.push([3, 'a', '⏱', `Haftada ${jadval.weeklySlots} soat ochiq`, `Kamida ${jadval.minWeeklySlots} soat kerak`, '/jadval.html', 'Jadval']);
   }
   for (const o of oquvchilar) {
-    if (o.plan && o.plan.daysLeft <= 5) {
+    if (o.assignmentId && (o.subscriptionState === 'yoq' || o.subscriptionState === 'tugagan')) {
+      ish.push([4, 's', '!', `${esc(o.student?.firstName || 'O‘quvchi')}: obuna yo‘q`, 'To‘lov kiritilmaguncha doimiy dars o‘tkazmang', '/oquvchilar.html', 'Ko‘rish']);
+    } else if (o.plan && o.plan.daysLeft <= 5) {
       ish.push([4, 's', '↻', `${esc(o.student?.firstName || 'O‘quvchi')} obunasi tugayapti`, `${o.plan.daysLeft} kun qoldi · eslatib qo‘ying`, '/oquvchilar.html', 'Ko‘rish']);
     }
   }
