@@ -119,11 +119,11 @@ body.can-draw #inkCanvas{cursor:crosshair}
 .oz-media-tugmalar button[data-oz="chat"]{background:#fef08a;color:#854d0e}
 
 /* ============ Keng ekran (Kompyuter): chapda doska, o'ngda video ============ */
-@media (min-width:900px) and (min-height:521px){
-  body:not(.is-mobile) .app{flex-direction:row-reverse}
-  body:not(.is-mobile) .stage{flex:0 0 300px;grid-template-columns:1fr;grid-template-rows:1fr 1fr;border-left:1px solid var(--line);border-right:none;border-bottom:none}
-  body:not(.is-mobile) .work{flex:1}
-  body:not(.is-mobile) .bar{bottom:10px}
+@media (orientation: landscape) and (min-width: 900px) and (min-height: 521px) {
+  .app { flex-direction: row-reverse; }
+  .stage { flex: 0 0 300px; grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; border-left: 1px solid var(--line); border-right: none; border-bottom: none; }
+  .work { flex: 1; }
+  .bar { bottom: 10px; }
 }
 
 /* Tor ekranda asboblar bitta qatorga sig'sin */
@@ -222,16 +222,15 @@ body.teacher .daftar-kor{display:none}
 .daftar-kor .soz b{min-width:40%;color:#111827}
 .daftar-kor .soz span{color:#4b5563}
 /* Kompyuter uchun daftar balandligi va video cheklovi */
-@media (min-width:900px) and (min-height:521px){
-  body:not(.is-mobile) .daftar{--daftar-h:190px}
-  body:not(.is-mobile) #screenVideo{max-height:calc(100dvh - 60px - var(--daftar-joy, 0px))}
+@media (orientation: landscape) and (min-width: 900px) and (min-height: 521px) {
+  .daftar { --daftar-h: 190px; }
+  #screenVideo { max-height: calc(100dvh - 60px - var(--daftar-joy, 0px)); }
 }
 /* Vertikal holatda video daftar bilan birga sig'sin */
-body.portrait #screenVideo,
-@media (orientation:portrait){
-  #screenVideo{max-height:calc(100dvh - clamp(130px, 26vh, 260px) - 70px - var(--daftar-joy, 0px))}
+@media (orientation: portrait) {
+  #screenVideo { max-height: calc(100dvh - clamp(80px, 14vh, 120px) - 60px - var(--daftar-joy, 0px)); }
 }
-@media (max-width:480px){body:not(.teacher) .daftar-holat{visibility:hidden}}
+@media (max-width: 480px) { body:not(.teacher) .daftar-holat { visibility: hidden; } }
 
 /* ===== Alohida mustaqil Jonli Chat paneli ===== */
 .chat-panel{
@@ -268,26 +267,7 @@ body.portrait #screenVideo,
 .chat-tugma{flex:0 0 auto;width:34px;height:34px;border:0;border-radius:10px;background:var(--acc);color:#101114;font-size:14px;font-weight:bold;cursor:pointer;display:grid;place-items:center;transition:opacity .15s}
 .chat-tugma:hover{opacity:.9}
 
-/* Telefondagi chat paneli: vertikalda pastdan, gorizontalda o'ngdan chiquvchi */
-body.is-mobile.portrait .chat-panel,
-@media (max-width:899px) and (orientation:portrait){
-  .chat-panel{
-    left:0 !important;right:0 !important;bottom:0 !important;width:100% !important;
-    height:clamp(280px, 50vh, 420px) !important;
-    border-radius:18px 18px 0 0 !important;box-shadow:0 -8px 30px rgba(0,0,0,.6) !important;
-  }
-}
-
-body.is-mobile.landscape .chat-panel,
-@media (orientation:landscape) and (max-height:540px){
-  .chat-panel{
-    position:fixed !important;right:8px !important;top:8px !important;bottom:8px !important;left:auto !important;
-    width:clamp(260px, 36vw, 320px) !important;height:auto !important;max-height:none !important;
-    border-radius:14px !important;z-index:2000 !important;box-shadow:0 8px 30px rgba(0,0,0,.7) !important;
-  }
-}
-
-/* ===== To'liq ekran rejimi (Fullscreen - telefon va planshetlar uchun) ===== */
+/* ===== To'liq ekran rejimi (Fullscreen) ===== */
 .btn-full-ekran{position:absolute;right:8px;top:8px;z-index:25;width:32px;height:32px;border-radius:10px;
   border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.65);backdrop-filter:blur(8px);
   color:#fff;font-size:15px;display:grid;place-items:center;cursor:pointer;line-height:1;transition:transform .15s}
@@ -311,104 +291,234 @@ body.is-mobile.landscape .chat-panel,
 .board.toliq-rejim #screenVideo{max-width:100vw !important;max-height:100dvh !important;width:100% !important;height:100% !important;object-fit:contain !important}
 .board.toliq-rejim #pdfCanvas{max-width:100vw !important;max-height:100dvh !important;width:auto !important;height:auto !important;object-fit:contain !important}
 
-/* ===== FAQAT MOBIL TELEFON: Vertikal (Portrait) ===== */
-body.is-mobile.portrait .stage,
-@media (max-width:899px) and (orientation:portrait){
-  body.has-screen .stage, body.has-doc .stage{
-    flex:0 0 clamp(64px, 10vh, 84px) !important;min-height:0 !important;
-    grid-template-columns:1fr 1fr !important;grid-template-rows:none !important;
+/* ==========================================================================
+   VERTIKAL REJIM (PORTRAIT): Tepa kameralar, past ish maydoni
+   ========================================================================== */
+@media (orientation: portrait) {
+  .app { flex-direction: column !important; }
+  .stage {
+    flex: 0 0 clamp(70px, 12vh, 92px) !important;
+    height: auto !important; min-height: 0 !important;
+    display: grid !important; grid-template-columns: 1fr 1fr !important; grid-template-rows: none !important;
+    border-bottom: 1px solid var(--line) !important; border-left: none !important; border-right: none !important;
+    padding: 3px !important; gap: 3px !important;
   }
-  body.has-screen .tile .tag, body.has-doc .tile .tag{font-size:9.5px !important;padding:1px 5px !important}
-  body.has-screen #screenVideo{
-    max-height:calc(100dvh - clamp(68px, 11vh, 88px) - 48px - var(--daftar-joy, 0px)) !important;
-    max-width:100% !important;width:100% !important;height:auto !important;object-fit:contain !important;
+  .stage .tile .tag { font-size: 9.5px !important; padding: 1px 5px !important; }
+  .stage .bar {
+    position: absolute !important; left: 50% !important; transform: translateX(-50%) !important;
+    bottom: 4px !important; gap: 4px !important; padding: 3px 6px !important;
+    background: rgba(23,24,27,.75) !important; backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255,255,255,.08) !important;
   }
-  body.has-screen .daftar, body.has-doc .daftar{height:36px !important}
+  .stage .bar .status { display: none !important; }
+  .stage .bar .ic { width: 28px !important; height: 28px !important; font-size: 13px !important; }
+  .work { flex: 1 !important; min-height: 0 !important; }
+  #screenVideo {
+    max-height: calc(100dvh - clamp(75px, 13vh, 95px) - 48px - var(--daftar-joy, 0px)) !important;
+    max-width: 100% !important; width: 100% !important; height: auto !important; object-fit: contain !important;
+  }
+  .daftar { height: 36px !important; }
+  .chat-panel {
+    left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100% !important;
+    height: clamp(280px, 50vh, 420px) !important; border-radius: 18px 18px 0 0 !important;
+    box-shadow: 0 -8px 30px rgba(0,0,0,.6) !important;
+  }
 }
 
-/* ===== FAQAT MOBIL TELEFON: Gorizontal (Landscape) ===== */
-/* Kompyuterga ta'sir qilmaydi — faqat telefonlar va past balandlikdagi ekranlar uchun */
-body.is-mobile.landscape,
-@media (orientation:landscape) and (max-height:540px){
-  .app{flex-direction:row !important}
-  .stage{
-    flex:0 0 clamp(96px, 16vw, 126px) !important;width:clamp(96px, 16vw, 126px) !important;
-    height:100% !important;min-height:0 !important;
-    display:flex !important;flex-direction:column !important;
-    grid-template-columns:none !important;grid-template-rows:none !important;
-    border-right:1px solid var(--line) !important;border-left:none !important;border-bottom:none !important;
-    gap:4px !important;padding:4px !important;background:#111214 !important;
-    padding-top:max(4px, env(safe-area-inset-top)) !important;
-    padding-left:max(4px, env(safe-area-inset-left)) !important;
-    padding-bottom:max(4px, env(safe-area-inset-bottom)) !important;
+/* ==========================================================================
+   MOBIL TELEFONDA GORIZONTAL REJIM (MOBILE LANDSCAPE)
+   Telefonda landshaftda ham kompyuter kabi gorizontal ko'rinsin:
+   Chapda katta ekran/doska, o'ngda ixcham vertikal kameralar ustuni
+   ========================================================================== */
+@media (orientation: landscape) and (max-height: 520px),
+       (orientation: landscape) and (max-width: 899px) {
+  .app {
+    flex-direction: row-reverse !important;
   }
-  .stage .tile{
-    flex:1 1 0 !important;min-height:0 !important;width:100% !important;
-    border-radius:8px !important;overflow:hidden !important;
-    background:#1b1c1f !important;position:relative !important;
+  .stage {
+    flex: 0 0 clamp(110px, 18vw, 150px) !important;
+    width: clamp(110px, 18vw, 150px) !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    border-left: 1px solid var(--line) !important;
+    border-top: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    gap: 3px !important;
+    padding: 3px !important;
+    background: #111214 !important;
+    padding-top: max(3px, env(safe-area-inset-top)) !important;
+    padding-right: max(3px, env(safe-area-inset-right)) !important;
+    padding-bottom: max(3px, env(safe-area-inset-bottom)) !important;
   }
-  .stage .tile video{width:100% !important;height:100% !important;object-fit:cover !important}
-  .stage .tile .tag{font-size:9.5px !important;padding:1px 5px !important;left:4px !important;top:4px !important}
-  .stage .bar{
-    position:static !important;transform:none !important;
-    display:flex !important;justify-content:center !important;align-items:center !important;
-    gap:3px !important;padding:3px 2px !important;
-    background:transparent !important;border:none !important;box-shadow:none !important;
-    margin-top:auto !important;flex:0 0 auto !important;
+  .stage .tile {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    background: #1b1c1f !important;
+    position: relative !important;
   }
-  .stage .bar .status{display:none !important}
-  .stage .bar .taymer{display:block !important;font-size:9px !important;text-align:center !important;padding:0 2px !important}
-  .stage .bar .ic{width:26px !important;height:26px !important;border-radius:8px !important;font-size:12px !important}
+  .stage .tile video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+  .stage .tile .tag {
+    font-size: 9.5px !important;
+    padding: 1px 5px !important;
+    left: 4px !important;
+    top: 4px !important;
+  }
+  .stage .bar {
+    position: static !important;
+    transform: none !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 3px !important;
+    padding: 3px 2px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin-top: auto !important;
+    flex: 0 0 auto !important;
+  }
+  .stage .bar .status { display: none !important; }
+  .stage .bar .taymer {
+    display: block !important;
+    font-size: 9px !important;
+    text-align: center !important;
+    padding: 0 2px !important;
+  }
+  .stage .bar .ic {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+  }
 
-  .work{
-    flex:1 !important;min-width:0 !important;height:100% !important;
-    display:flex !important;flex-direction:column !important;position:relative !important;
+  .work {
+    flex: 1 !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+    padding-left: max(0px, env(safe-area-inset-left)) !important;
   }
-  .board{
-    flex:1 !important;height:100% !important;min-height:0 !important;
-    padding:2px !important;background:#000 !important;overflow:hidden !important;
-    display:flex !important;align-items:center !important;justify-content:center !important;
-    position:relative !important;
+  .board {
+    flex: 1 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 2px !important;
+    background: #000 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
   }
-  #screenbox{
-    position:relative !important;max-width:100% !important;max-height:100% !important;
-    width:100% !important;height:100% !important;
-    display:flex !important;align-items:center !important;justify-content:center !important;
-    background:#000 !important;border-radius:0 !important;
+  .screenbox, #screenbox {
+    position: relative !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #000 !important;
+    border-radius: 0 !important;
   }
-  #screenVideo{
-    max-width:100% !important;max-height:100% !important;
-    width:auto !important;height:auto !important;object-fit:contain !important;
-    display:block !important;
+  #screenVideo {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    display: block !important;
   }
-  #pdfbox{
-    max-width:100% !important;max-height:100% !important;
-    display:flex !important;align-items:center !important;justify-content:center !important;
-    border-radius:0 !important;background:#000 !important;
+  .pdfbox, #pdfbox {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 0 !important;
+    background: #000 !important;
   }
-  #pdfCanvas{
-    max-width:100% !important;max-height:100% !important;
-    width:auto !important;height:auto !important;object-fit:contain !important;
+  #pdfCanvas {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
   }
 
-  .daftar{
-    flex:0 0 32px !important;height:32px !important;min-height:32px !important;
-    overflow:hidden !important;border-top:1px solid var(--line) !important;
+  .daftar {
+    flex: 0 0 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    overflow: hidden !important;
+    border-top: 1px solid var(--line) !important;
   }
-  .daftar:not(.yigiq){height:clamp(120px, 35vh, 180px) !important}
-  .daftar-bosh{padding:2px 6px !important;gap:3px !important;height:32px !important}
-  .daftar-tab{padding:2px 7px !important;font-size:10.5px !important}
-  .daftar-yig{width:24px !important;height:24px !important}
-  .daftar-tana{padding:0 4px 4px !important}
-  #daftarMatn, .daftar-kor{font-size:12px !important;padding:4px 6px !important}
+  .daftar:not(.yigiq) {
+    height: clamp(120px, 35vh, 180px) !important;
+  }
+  .daftar-bosh {
+    padding: 2px 6px !important;
+    gap: 3px !important;
+    height: 32px !important;
+  }
+  .daftar-tab {
+    padding: 2px 7px !important;
+    font-size: 10.5px !important;
+  }
+  .daftar-yig {
+    width: 24px !important;
+    height: 24px !important;
+  }
+  .daftar-tana {
+    padding: 0 4px 4px !important;
+  }
+  #daftarMatn, .daftar-kor {
+    font-size: 12px !important;
+    padding: 4px 6px !important;
+  }
 
-  .oz-media{
-    top:6px !important;left:6px !important;right:6px !important;max-width:380px !important;
-    padding:6px 10px !important;font-size:11px !important;max-height:85px !important;
-    overflow-y:auto !important;border-radius:10px !important;
+  .chat-panel {
+    position: fixed !important;
+    right: 8px !important;
+    top: 8px !important;
+    bottom: 8px !important;
+    left: auto !important;
+    width: clamp(260px, 34vw, 320px) !important;
+    height: auto !important;
+    max-height: none !important;
+    border-radius: 14px !important;
+    z-index: 2000 !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,.7) !important;
   }
-  .oz-media b{font-size:11.5px !important}
-  .oz-media-tugmalar button{font-size:10.5px !important;padding:4px 8px !important}
+
+  .oz-media {
+    top: 6px !important;
+    left: 6px !important;
+    right: 6px !important;
+    max-width: 380px !important;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    max-height: 85px !important;
+    overflow-y: auto !important;
+    border-radius: 10px !important;
+  }
+  .oz-media b { font-size: 11.5px !important; }
+  .oz-media-tugmalar button { font-size: 10.5px !important; padding: 4px 8px !important; }
 }
 
 
