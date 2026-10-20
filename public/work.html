@@ -1107,7 +1107,8 @@ function darsKarta(d, { tarix = false } = {}) {
   } else if (d.isTrial && d.leadId) {
     // "O'tildi" ni ustoz qo'ymaydi — dars xonasi birga o'tirilgan vaqtga qarab o'zi belgilaydi
     const tugmalar = d.leadStatus === 'trial_completed'
-      ? `<button class="yashil" data-holat="converted">To‘lov qildi</button><button data-holat="lost">Rad etdi</button>`
+      // "To'lov qildi" yo'q: o'quvchi faqat tasdiqlangan to'lov bilan o'quvchingizga aylanadi (taklif → chek → admin)
+      ? `<button data-holat="lost">Rad etdi</button>`
       : d.leadStatus === 'trial_scheduled' && !d.studentJoined
         ? `<button data-holat="trial_no_show">Kelmadi</button>`
         : '';
@@ -1324,7 +1325,7 @@ function tugmalarniUla(box) {
       if (!r.ok) return toast(r.data.message || 'O‘zgartirib bo‘lmadi', 'err');
       TARIX.filter((x) => x.leadId === id).forEach((x) => { x.leadStatus = b.dataset.holat; });
       bugunChiz(); sinovChiz(); smenaChiz();
-      toast(b.dataset.holat === 'converted' ? 'O‘quvchilar bo‘limiga o‘tdi' : 'Saqlandi', 'ok');
+      toast('Saqlandi', 'ok');
     };
   });
 }
