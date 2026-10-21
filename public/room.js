@@ -1352,7 +1352,8 @@ el.btnNext.onclick = () => { if (IS_TEACHER) gotoPage(pageNum + 1); };
 el.fileInput.onchange = async () => {
   const f = el.fileInput.files[0];
   if (!f) return;
-  if (f.size > 25 * 1024 * 1024) return toast('Fayl 25MB dan katta');
+  // Server bilan bir xil chegara (server.js: HUJJAT_MAX_MB)
+  if (f.size > 70 * 1024 * 1024) return toast('Fayl 70 MB dan katta — kichikroq faylni tanlang yoki ekranni ulashib ko‘rsating', 4000);
   setStatus('Yuklanmoqda…');
   const fd = new FormData();
   fd.append('file', f);
@@ -1499,12 +1500,20 @@ let color = '#ef4444';
 
 const WIDTH = { pen: 0.0045, hl: 0.030 }; // kanvas eniga nisbatan
 
+// "Varaqlash" (qol): chizish qatlami barmoqni ushlamaydi — hujjat telefonda barmoq bilan siljiydi.
+// Telefonda hujjat ochilganda birinchi ehtiyoj — o'qish va varaqlash, shuning uchun u yerda boshlang'ich rejim.
+function asbobQoy(t) {
+  tool = t;
+  document.querySelectorAll('.tool').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.tool === t)));
+  document.body.classList.toggle('qol-rejim', t === 'qol');
+}
 document.querySelectorAll('.tool').forEach((b) => {
   b.onclick = () => {
-    tool = b.dataset.tool;
-    document.querySelectorAll('.tool').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    asbobQoy(b.dataset.tool);
+    if (b.dataset.tool === 'qol') toast('Varaqlash: barmoq bilan siljiting. Chizish uchun ✏️ ni bosing');
   };
 });
+if (IS_MOBILE_DEVICE) asbobQoy('qol');
 function rangQoy(c) {
   color = c;
   document.querySelectorAll('.sw').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.color === c)));
@@ -1575,7 +1584,7 @@ function qatlamgaUlash(c, sahifa, tayyor) {
   };
 
   c.addEventListener('pointerdown', (e) => {
-    if (!chizaOladi() || !tayyor()) return;
+    if (!chizaOladi() || !tayyor() || tool === 'qol') return;
     if (e.pointerType === 'touch' && e.isPrimary === false) return;
     drawing = true;
     c.setPointerCapture(e.pointerId);

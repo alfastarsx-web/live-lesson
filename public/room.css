@@ -522,3 +522,6 @@ body.teacher .daftar-kor{display:none}
 }
 
 
+
+/* Varaqlash rejimi: chizish qatlami barmoqni ushlamaydi — hujjat siljiydi (telefonda) */
+.qol-rejim #inkCanvas{pointer-events:none;touch-action:auto}
