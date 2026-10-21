@@ -1352,7 +1352,8 @@ el.btnNext.onclick = () => { if (IS_TEACHER) gotoPage(pageNum + 1); };
 el.fileInput.onchange = async () => {
   const f = el.fileInput.files[0];
   if (!f) return;
-  if (f.size > 25 * 1024 * 1024) return toast('Fayl 25MB dan katta');
+  // Server bilan bir xil chegara (server.js: HUJJAT_MAX_MB)
+  if (f.size > 70 * 1024 * 1024) return toast('Fayl 70 MB dan katta — kichikroq faylni tanlang yoki ekranni ulashib ko‘rsating', 4000);
   setStatus('Yuklanmoqda…');
   const fd = new FormData();
   fd.append('file', f);

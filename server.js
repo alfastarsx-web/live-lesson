@@ -27,6 +27,8 @@ const app = express();
 
 // ---------- Hujjat yuklash (PDF va rasm) ----------
 const RASM_TURLARI = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+// Ustoz dars xonasida ochadigan hujjat (PDF/rasm) hajmi chegarasi
+const HUJJAT_MAX_MB = 70;
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => cb(null, UPLOAD_DIR),
@@ -35,7 +37,7 @@ const upload = multer({
       cb(null, `${Date.now()}-${crypto.randomBytes(4).toString('hex')}-${safe}`);
     },
   }),
-  limits: { fileSize: 25 * 1024 * 1024 },
+  limits: { fileSize: HUJJAT_MAX_MB * 1024 * 1024 },
   // Telefondan fayl tanlanganda brauzer ko'pincha application/octet-stream yoki
   // bo'sh tur yuboradi — faqat mimetype'ga ishonsak, haqiqiy PDF ham rad etiladi.
   // Shuning uchun kengaytma ham tekshiriladi.
@@ -71,7 +73,7 @@ app.post('/api/upload', (req, res, next) => {
   pdfYukla(req, res, (err) => {
     if (!err) return next();
     if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ error: 'Fayl 25MB dan katta' });
+      return res.status(400).json({ error: `Fayl ${HUJJAT_MAX_MB} MB dan katta — kichikroq faylni tanlang yoki ekranni ulashib ko‘rsating` });
     }
     console.warn('PDF yuklash xatosi:', err.message);
     res.status(400).json({ error: 'Faylni yuklab bo\u2018lmadi, qaytadan urinib ko\u2018ring' });
