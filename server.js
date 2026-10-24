@@ -745,6 +745,7 @@ const RUXSAT = [
   /^mentor-bot\/link$/,
   /^mentor-wallet\/sinov-qiroli$/,
   /^lesson-booking\/mentor\/jadval\/[0-9a-f-]{36}$/,
+  /^trial-natija\/mentor$/,
 ];
 
 // Mentor Telegram botidan uzish
@@ -764,6 +765,8 @@ app.post(/^\/api\/ai\/leads\/([0-9a-f-]{36})\/create-account$/, (req, res) => {
 
 // Ustoz to'lagan o'quvchisiga doimiy dars vaqtini o'zi belgilaydi (backend tekshiradi: o'z o'quvchisi, obunasi bor)
 app.post('/api/ai/lesson-booking/mentor/jadval', (req, res) => aiProxy(req, res, '/lesson-booking/mentor/jadval'));
+// Sinov natijasi (to'lashga rozi / o'ylamoqda — sana majburiy) — ustoz har bir o'tgan sinovdan keyin
+app.post('/api/ai/trial-natija/mentor', (req, res) => aiProxy(req, res, '/trial-natija/mentor'));
 
 // Yangi nishonlar ko'rildi — tabrik qayta chiqmasin
 app.post('/api/ai/mentor-gamification/badges/seen', (req, res) => aiProxy(req, res, '/mentor-gamification/badges/seen'));
