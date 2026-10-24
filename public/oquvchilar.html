@@ -45,6 +45,26 @@ body.oquvchilar{background:var(--bg)}
 .kutish.obunasiz span{color:#8f2a1f}
 .oq.yopiq{cursor:default}
 .malumot b{font-size:13.5px;font-weight:800;color:#23262d;font-variant-numeric:tabular-nums}
+
+/* Darsi jadvalda yo'q — ustoz o'zi vaqt belgilaydi */
+.jadvalsiz{margin-top:14px;background:var(--green-soft);border-radius:12px;padding:12px}
+.jadvalsiz b{display:block;font-size:13.5px;font-weight:800;color:var(--green)}
+.jadvalsiz span{display:block;font-size:12.5px;color:#3a3d45;margin:2px 0 10px}
+.jadvalsiz .tugma{width:100%}
+.dj{display:grid;grid-template-columns:30px repeat(7,minmax(0,1fr));gap:3px;font-size:11px}
+.dj .bosh{font-weight:800;text-align:center;color:var(--mut2);padding:2px 0 4px;position:sticky;top:0;z-index:1;background:#f4f4f1}
+.dj .soat{font-weight:800;color:var(--mut2);text-align:right;padding-right:3px;align-self:center}
+.dj button{position:relative;min-width:0;height:30px;padding:0;border-radius:8px;border:1.5px solid #e6e6e2;background:#fff;
+  font:inherit;font-size:10px;font-weight:800;color:var(--mut2);cursor:pointer}
+.dj button.ish{background:#f3faf6;border-color:#cfe5d8}
+.dj button[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
+.dj button:disabled{background:#ececf2;border-color:#ececf2;color:#8a8d96;cursor:not-allowed}
+.dj button .nuqta{position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:#c9a36b}
+.dj-izoh{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 4px;font-size:11.5px;color:var(--mut)}
+.dj-izoh i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.dj-past{flex:0 0 auto;padding:10px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid #e6e6e2;background:#f4f4f1}
+.dj-tanlov{margin-bottom:10px;font-size:14px;font-weight:700;min-height:20px}
+.dj-past .tugma{width:100%}
 </style>
 </head>
 <body class="oquvchilar">
@@ -72,6 +92,25 @@ body.oquvchilar{background:var(--bg)}
 
   <div id="royxat">
     <div class="skelet"></div><div class="skelet"></div>
+  </div>
+</div>
+
+<div class="parda" id="parda"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="djIsm">
+  <div class="tutqich"></div>
+  <div class="bosh"><b id="djIsm">Dars vaqti</b><span id="djObuna"></span></div>
+  <div class="tana">
+    <div class="dj" id="dj"></div>
+    <div class="dj-izoh">
+      <span><i style="background:var(--green)"></i>Tanlangan</span>
+      <span><i style="background:#f3faf6;border:1.5px solid #cfe5d8"></i>Ish vaqtingiz</span>
+      <span><i style="background:#ececf2"></i>Band</span>
+      <span><i style="background:#c9a36b;border-radius:50%"></i>Sinov darsi bor</span>
+    </div>
+  </div>
+  <div class="dj-past">
+    <div class="dj-tanlov" id="djTanlov">Har bir dars kuni uchun bitta soatni bosing</div>
+    <button class="tugma" type="button" id="djSaqla" disabled>Saqlash</button>
   </div>
 </div>
 
@@ -155,6 +194,12 @@ function kartaHtml(x) {
         <div class="obuna-qator"><span>Obuna ${esc(sanaUzun(p.endDate))} gacha</span><span>${qoldi}</span></div>
         <div class="chiziq-ob"><i style="width:${qoldiFoiz}%"></i></div>
       </div>
+      ${x.assignmentId && !x.nextLessonAt && p.daysLeft > 0 ? `
+      <div class="jadvalsiz">
+        <b>📅 Darslari hali jadvalda yo‘q</b>
+        <span>Dars vaqtini belgilang — o‘quvchiga xabar boradi va bu soatlarga sinov darslari tushmaydi.</span>
+        <button class="tugma" type="button" data-amal="jadval">Dars vaqtini belgilash</button>
+      </div>` : ''}
       <div class="oq-past">
         <div class="malumot">
           <div><small>Keyingi dars</small><b>${esc(keyingiMatn(x.nextLessonAt))}</b></div>
@@ -189,6 +234,7 @@ function chiz() {
 }
 
 function amalBajar(amal, id) {
+  if (amal === 'jadval') return jadvalOch(id);
   // Qo'ng'iroq va chat — ilovaning o'z ekranlari. WebView'dan native tomonga xabar beramiz.
   const xabar = { turi: amal, studentId: id };
   if (window.MyTeacher?.postMessage) window.MyTeacher.postMessage(JSON.stringify(xabar));
@@ -196,12 +242,97 @@ function amalBajar(amal, id) {
   else location.href = `/oquvchi.html?id=${encodeURIComponent(id)}`;
 }
 
+// ---------- Dars vaqtini belgilash (darsi jadvalda yo'q o'quvchi) ----------
+const KUN_TARTIB = [1, 2, 3, 4, 5, 6, 0];
+const KUN_QISQA = ['Ya', 'Du', 'Se', 'Chor', 'Pa', 'Ju', 'Sha'];
+const SOATLAR = Array.from({ length: 17 }, (_, i) => 6 + i);
+const ikki = (n) => String(n).padStart(2, '0');
+let DJ = null; // { id, slots: Map("wd|min" -> slot), tanlangan: Map(wd -> min) }
+
+function toast(matn, tur = '') {
+  const t = document.createElement('div');
+  t.className = `toast ${tur}`;
+  t.setAttribute('role', 'status');
+  t.textContent = matn;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4500);
+}
+
+function sheetOch(ochiq) {
+  $('#sheet').classList.toggle('ochiq', ochiq);
+  $('#parda').classList.toggle('ochiq', ochiq);
+}
+$('#parda').onclick = () => sheetOch(false);
+
+function tanlovMatni() {
+  const t = KUN_TARTIB.filter((wd) => DJ.tanlangan.has(wd));
+  if (!t.length) return 'Har bir dars kuni uchun bitta soatni bosing';
+  const soatlar = [...new Set(t.map((wd) => DJ.tanlangan.get(wd)))];
+  const vaqt = soatlar.length === 1
+    ? `${t.map((wd) => KUN_QISQA[wd]).join(', ')} · ${ikki(soatlar[0] / 60)}:00`
+    : t.map((wd) => `${KUN_QISQA[wd]} ${ikki(DJ.tanlangan.get(wd) / 60)}:00`).join(', ');
+  return `Haftada ${t.length} marta: ${vaqt}`;
+}
+
+function djChiz() {
+  let h = '<div class="bosh"></div>' + KUN_TARTIB.map((wd) => `<div class="bosh">${KUN_QISQA[wd]}</div>`).join('');
+  for (const soat of SOATLAR) {
+    h += `<div class="soat">${ikki(soat)}</div>`;
+    for (const wd of KUN_TARTIB) {
+      const s = DJ.slots.get(`${wd}|${soat * 60}`) || {};
+      const band = s.state === 'busy' || s.state === 'held';
+      const tanlandi = DJ.tanlangan.get(wd) === soat * 60;
+      const nom = band ? `${KUN_QISQA[wd]} ${ikki(soat)}:00 — band${s.studentName ? ` (${s.studentName})` : ''}` : `${KUN_QISQA[wd]} ${ikki(soat)}:00`;
+      h += `<button type="button" class="${s.ish ? 'ish' : ''}" data-wd="${wd}" data-m="${soat * 60}" aria-pressed="${tanlandi}"`
+        + ` aria-label="${esc(nom)}" ${band ? 'disabled' : ''}>${s.trials && !band ? '<span class="nuqta"></span>' : ''}</button>`;
+    }
+  }
+  $('#dj').innerHTML = h;
+  $('#djTanlov').textContent = tanlovMatni();
+  $('#djSaqla').disabled = !DJ.tanlangan.size;
+}
+
+$('#dj').onclick = (e) => {
+  const b = e.target.closest('button[data-wd]');
+  if (!b || b.disabled) return;
+  const wd = Number(b.dataset.wd);
+  const m = Number(b.dataset.m);
+  // Kuniga bitta dars: shu kunning boshqa soati bosilsa — o'shanga o'tadi
+  if (DJ.tanlangan.get(wd) === m) DJ.tanlangan.delete(wd); else DJ.tanlangan.set(wd, m);
+  djChiz();
+};
+
+async function jadvalOch(id) {
+  const r = await api(`/api/ai/lesson-booking/mentor/jadval/${encodeURIComponent(id)}`);
+  if (!r) return;
+  if (!r.ok) return toast(r.data.message || 'Ochib bo‘lmadi, qaytadan urinib ko‘ring', 'err');
+  DJ = { id, slots: new Map(r.data.slots.map((s) => [`${s.weekday}|${s.minute}`, s])), tanlangan: new Map() };
+  $('#djIsm').textContent = r.data.student.ism || 'O‘quvchi';
+  $('#djObuna').textContent = `Obuna ${sanaUzun(r.data.obunaGacha)} gacha — darslar shu kungacha qo‘yiladi`;
+  djChiz();
+  sheetOch(true);
+}
+
+$('#djSaqla').onclick = async () => {
+  const slots = [...DJ.tanlangan].map(([weekday, minute]) => ({ weekday, minute }));
+  $('#djSaqla').disabled = true;
+  $('#djSaqla').textContent = 'Saqlanmoqda…';
+  const r = await api('/api/ai/lesson-booking/mentor/jadval', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ studentUserId: DJ.id, slots }),
+  });
+  $('#djSaqla').textContent = 'Saqlash';
+  if (!r) return;
+  if (!r.ok) { $('#djSaqla').disabled = false; return toast(r.data.message || 'Saqlab bo‘lmadi, qaytadan urinib ko‘ring', 'err'); }
+  sheetOch(false);
+  const otdi = r.data.skipped?.length ? ` ${r.data.skipped.length} ta sana band bo‘lgani uchun o‘tkazildi.` : '';
+  toast(`✅ ${r.data.created} ta dars jadvalga qo‘yildi. Birinchisi: ${r.data.birinchi}.${otdi}`, 'ok');
+  yukla();
+};
+
 $('#qidiruv').oninput = chiz;
 
-(async () => {
-  await WebViewAuth.tayyorla();
-  // Mentor shu sahifada ishlayotganini bildirib turamiz — aks holda tizim uni oflayn deb biladi
-  mentorNabzi();
+async function yukla() {
   const r = await api('/api/ai/assignments/my-students/paid');
   if (!r) return;
   if (!r.ok) {
@@ -220,6 +351,13 @@ $('#qidiruv').oninput = chiz;
     obunasiz ? `<b>${obunasiz} tasining obunasi yo‘q</b>` : '',
   ].filter(Boolean).join(' · ');
   chiz();
+}
+
+(async () => {
+  await WebViewAuth.tayyorla();
+  // Mentor shu sahifada ishlayotganini bildirib turamiz — aks holda tizim uni oflayn deb biladi
+  mentorNabzi();
+  yukla();
 })();
 </script>
 <script src="/sorov-signal.js"></script>
