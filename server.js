@@ -746,6 +746,8 @@ const RUXSAT = [
   /^mentor-wallet\/sinov-qiroli$/,
   /^lesson-booking\/mentor\/jadval\/[0-9a-f-]{36}$/,
   /^trial-natija\/mentor$/,
+  /^lid-taklif\/mentor\/(incoming|faol)$/,
+  /^lid-taklif\/[0-9a-f-]{36}\/slotlar$/,
 ];
 
 // Mentor Telegram botidan uzish
@@ -767,6 +769,10 @@ app.post(/^\/api\/ai\/leads\/([0-9a-f-]{36})\/create-account$/, (req, res) => {
 app.post('/api/ai/lesson-booking/mentor/jadval', (req, res) => aiProxy(req, res, '/lesson-booking/mentor/jadval'));
 // Sinov natijasi (to'lashga rozi / o'ylamoqda — sana majburiy) — ustoz har bir o'tgan sinovdan keyin
 app.post('/api/ai/trial-natija/mentor', (req, res) => aiProxy(req, res, '/trial-natija/mentor'));
+// Vaqtsiz target lid: olish, o'tkazib yuborish, "vaqti to'g'ri kelmadi"
+app.post(/^\/api\/ai\/lid-taklif\/([0-9a-f-]{36})\/(accept|decline|vaqt)$/, (req, res) => {
+  aiProxy(req, res, `/lid-taklif/${req.params[0]}/${req.params[1]}`);
+});
 
 // Yangi nishonlar ko'rildi — tabrik qayta chiqmasin
 app.post('/api/ai/mentor-gamification/badges/seen', (req, res) => aiProxy(req, res, '/mentor-gamification/badges/seen'));
