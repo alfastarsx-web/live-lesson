@@ -1349,7 +1349,7 @@ app.post('/api/baho', async (req, res) => {
   }
 });
 
-async function sinovHisoboti(roomId, room, ended = false) {
+async function sinovHisoboti(roomId, room, ended = false, endedReason) {
   if (!roomId.startsWith('sinov-')) return;
 
   const base = (process.env.AITEACHER_API || '').replace(/\/$/, '');
@@ -1369,10 +1369,13 @@ async function sinovHisoboti(roomId, room, ended = false) {
       signal: AbortSignal.timeout(10000),
     });
     const mentorJoined = room.ishtirok.ustozKirdi;
-    let r = await yubor({ room: roomId, studentJoined, studentSeconds, lessonSeconds: birgaSoniya(room), mentorJoined, ended });
+    // Keep the safe meaning when talking to an older API that rejects endedReason:
+    // an empty-room timeout must never be retried as an explicit lesson end.
+    const legacyEnded = endedReason === 'room_empty' ? false : ended;
+    let r = await yubor({ room: roomId, studentJoined, studentSeconds, lessonSeconds: birgaSoniya(room), mentorJoined, ended, endedReason });
     // API hali eski bo'lsa (yangi maydonlarni tanimaydi — 400) — eski ko'rinishda qayta: lid holati to'xtamasin
-    if (r.status === 400) r = await yubor({ room: roomId, studentJoined, studentSeconds, lessonSeconds: birgaSoniya(room), ended });
-    if (r.status === 400) r = await yubor({ room: roomId, studentJoined, studentSeconds, ended });
+    if (r.status === 400) r = await yubor({ room: roomId, studentJoined, studentSeconds, lessonSeconds: birgaSoniya(room), ended: legacyEnded });
+    if (r.status === 400) r = await yubor({ room: roomId, studentJoined, studentSeconds, ended: legacyEnded });
     const d = await r.json().catch(() => ({}));
     console.log(`Sinov darsi hisoboti: ${roomId} kirdi=${studentJoined} soniya=${studentSeconds} birga=${birgaSoniya(room)} -> `
       + `${r.ok ? (d.status || 'qabul qilindi') : `xato ${r.status}`}`);
@@ -1569,7 +1572,7 @@ wss.on('connection', async (ws, req) => {
         if (room.daftarTaymer) daftarSaqla(roomId, room, true);
         if (roomId.startsWith('sinov-')) {
           room.ended = true;
-          void sinovHisoboti(roomId, room, true);
+          void sinovHisoboti(roomId, room, true, 'mentor');
         } else {
           void endActiveRoom(roomId, room);
         }
@@ -1747,7 +1750,7 @@ wss.on('connection', async (ws, req) => {
       room.bushTaymer = setTimeout(() => {
         const r = rooms.get(roomId);
         if (!r || r.peers.size > 0) return;
-        void sinovHisoboti(roomId, r, true);
+        void sinovHisoboti(roomId, r, true, 'room_empty');
         rooms.delete(roomId);
         xonaFayliniOchir(roomId);
       }, 10 * 60 * 1000);
