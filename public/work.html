@@ -1077,8 +1077,10 @@ function darsKarta(d, { tarix = false } = {}) {
   const teg = d.isTrial ? '<span class="teg sinov">Sinov</span>' : '';
   const holat = tarix && d.isTrial && LID_HOLAT[d.leadStatus]
     ? `<span class="teg ${LID_HOLAT[d.leadStatus][1]}">${LID_HOLAT[d.leadStatus][0]}</span>` : '';
-  // Sinov darsi 40 daqiqadan kam davom etgan — "chala o'tildi" (ball berilmaydi)
-  const chala = tarix && d.isTrial && d.outcome === 'chala' ? '<span class="teg t-yoq" title="40 daqiqadan kam davom etgan">⚠️ Chala o‘tildi</span>' : '';
+  // Birga o'tirilgan vaqt: 30–40 daqiqa — "chala o'tildi", 30 daqiqadan kam — "o'tilmadi" (sinov hisoblanmaydi)
+  const chala = !(tarix && d.isTrial) ? ''
+    : d.outcome === 'chala' ? '<span class="teg t-yoq" title="Birga 30–40 daqiqa o‘tirildi">⚠️ Chala o‘tildi</span>'
+      : d.outcome === 'qisqa' ? '<span class="teg t-yoq" title="Birga 30 daqiqadan kam o‘tirildi — sinov hisoblanmaydi">❌ O‘tilmadi (30 daq dan kam)</span>' : '';
   const baho = tarix && d.rating ? ` · ${'★'.repeat(d.rating)}` : '';
   const kun = new Date(d.startsAt);
   let past = '';
@@ -1093,7 +1095,7 @@ function darsKarta(d, { tarix = false } = {}) {
     const ochiq = Date.now() >= kun.getTime() - 10 * 60_000;
     const doimiy = !d.isTrial;
     const boshlanmagan = Date.now() < kun.getTime();
-    const qoida = d.isTrial ? '<div class="qoida">💡 Narx haqida dars oxirida gaplashing. Dars kamida 40 daqiqa — qisqa dars “chala o‘tildi” hisoblanadi.</div>' : '';
+    const qoida = d.isTrial ? '<div class="qoida">💡 Narx haqida dars oxirida gaplashing. Dars kamida 40 daqiqa: 30–40 daqiqa — “chala”, 30 daqiqadan kam — “o‘tilmadi” hisoblanadi.</div>' : '';
     past = `${qoida}${tasdiqQator(d)}<div class="dk-past">
       <button class="asosiy" data-kirish="${esc(d.id)}" data-sinov="${d.isTrial ? 1 : ''}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>${ochiq ? 'Darsni boshlash' : 'Kirish 10 daq oldin'}</button>
       ${doimiy && boshlanmagan ? `<button data-kochir="${esc(d.id)}">↻ Ko‘chirish</button>` : ''}
