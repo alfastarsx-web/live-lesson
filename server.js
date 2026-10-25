@@ -1132,7 +1132,8 @@ async function endActiveRoom(roomId, room) {
   room.ended = true;
   const report = async () => {
     try {
-      await liveApi('end', { lessonId: room.lessonId, room: roomId });
+      // Faqat ustoz va o'quvchi birga o'tirgan vaqt — API shu bo'yicha o'tildi/chala/o'tilmadi qiladi
+      await liveApi('end', { lessonId: room.lessonId, room: roomId, birgaSeconds: birgaSoniya(room) });
     } catch (err) {
       console.warn('Darsni yakunlash xatosi:', err.message);
       // Keep the room closed and retry until the invitation naturally expires.
