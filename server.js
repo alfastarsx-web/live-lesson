@@ -88,7 +88,32 @@ function yozuvImzoTogri(room, exp, sig) {
   const a = Buffer.from(String(sig || '')), b = Buffer.from(kutilgan);
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
-const yozuvFayllari = (room) => fs.readdirSync(YOZUV_DIR).filter((f) => f.startsWith(`${room}__`)).sort();
+const yozuvFayllari = (room) => fs.readdirSync(YOZUV_DIR).filter((f) => f.startsWith(`${room}__`) && !f.endsWith('.txt')).sort();
+const tahlilFayli = (room) => path.join(YOZUV_DIR, `${room}__tahlil.txt`);
+
+// AI tahlil (xulosa + transkripsiya): API Gemini'ga beradi, natija faylga saqlanadi — qayta bosilsa darhol
+app.post('/yozuv/:room/tahlil', async (req, res) => {
+  const { room } = req.params;
+  if (!yozuvImzoTogri(room, req.query.exp, req.query.sig)) return res.status(403).json({ error: 'Havola eskirgan' });
+  if (fs.existsSync(tahlilFayli(room))) return res.json({ matn: fs.readFileSync(tahlilFayli(room), 'utf8') });
+  const fayllar = yozuvFayllari(room);
+  if (!fayllar.length) return res.status(404).json({ error: 'Yozuv yo‘q' });
+  try {
+    const javob = await fetch(`${(process.env.AITEACHER_API || '').replace(/\/$/, '')}/lesson-booking/live/yozuv-tahlil`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-lesson-secret': process.env.LESSON_TOKEN_SECRET || '' },
+      body: JSON.stringify({ room, fayllar }),
+      signal: AbortSignal.timeout(180000),
+    });
+    const d = await javob.json().catch(() => ({}));
+    if (!javob.ok || !d.matn) return res.status(502).json({ error: d.message || 'Tahlil qilib bo‘lmadi — birozdan keyin qayta urinib ko‘ring' });
+    fs.writeFileSync(tahlilFayli(room), d.matn);
+    res.json({ matn: d.matn });
+  } catch (err) {
+    console.warn('Yozuv tahlili xatosi:', err.message);
+    res.status(502).json({ error: 'Tahlil qilib bo‘lmadi — birozdan keyin qayta urinib ko‘ring' });
+  }
+});
 
 app.get('/yozuv/:room', (req, res) => {
   const { room } = req.params;
@@ -100,7 +125,18 @@ app.get('/yozuv/:room', (req, res) => {
 <title>Sinov darsi yozuvi</title><body style="font-family:system-ui;max-width:640px;margin:24px auto;padding:0 16px;color:#1d1d1f">
 <h2 style="margin:0 0 12px">🎧 Sinov darsi yozuvi</h2>
 ${fayllar.length ? fayllar.map((f) => `<p style="margin:16px 0 6px;color:#666">Boshlangan: ${vaqt(f)} · ${(fs.statSync(path.join(YOZUV_DIR, f)).size / 1048576).toFixed(1)} MB</p>
-<audio controls preload="metadata" style="width:100%" src="/yozuv/${room}/${encodeURIComponent(f)}?${q}"></audio>`).join('')
+<audio controls preload="metadata" style="width:100%" src="/yozuv/${room}/${encodeURIComponent(f)}?${q}"></audio>
+<a href="/yozuv/${room}/${encodeURIComponent(f)}?${q}&yukla=1" style="display:inline-block;margin-top:6px;color:#4f46e5;font-weight:600;text-decoration:none">⬇️ Yuklab olish</a>`).join('')
+  + `<div style="margin-top:24px"><button id="tahlilBtn" style="font:600 15px system-ui;padding:10px 16px;border:0;border-radius:10px;background:#4f46e5;color:#fff;cursor:pointer">🤖 AI tahlil va matn</button>
+<p id="tahlilHolat" style="color:#666;font-size:13px"></p><pre id="tahlilMatn" style="white-space:pre-wrap;font:14px/1.5 system-ui;background:#f6f6f8;padding:14px;border-radius:12px;display:none"></pre></div>
+<script>
+const b=document.getElementById('tahlilBtn'),h=document.getElementById('tahlilHolat'),m=document.getElementById('tahlilMatn');
+const korsat=(t)=>{m.textContent=t;m.style.display='block';b.style.display='none';h.textContent='';};
+${fs.existsSync(tahlilFayli(room)) ? `korsat(${JSON.stringify(fs.readFileSync(tahlilFayli(room), 'utf8')).replace(/</g, '\\u003c')});` : ''}
+b.onclick=async()=>{b.disabled=true;h.textContent='Tahlil qilinmoqda… 1–3 daqiqa kuting ⏳';
+try{const r=await fetch('/yozuv/${room}/tahlil?${q}',{method:'POST'});const d=await r.json();if(!r.ok)throw new Error(d.error||'Xato');korsat(d.matn);}
+catch(e){h.textContent='😔 '+e.message;b.disabled=false;}};
+</script>`
     : '<p>Bu dars uchun yozuv yo‘q — ustoz va o‘quvchi xonada birga bo‘lmagan yoki yozuv 15 kundan keyin o‘chirilgan.</p>'}
 </body>`);
 });
@@ -109,6 +145,7 @@ app.get('/yozuv/:room/:fayl', (req, res) => {
   const { room, fayl } = req.params;
   if (!yozuvImzoTogri(room, req.query.exp, req.query.sig)) return res.status(403).end();
   if (!yozuvFayllari(room).includes(fayl)) return res.status(404).end();
+  if (req.query.yukla) return res.download(path.join(YOZUV_DIR, fayl), fayl);
   res.sendFile(path.join(YOZUV_DIR, fayl), { headers: { 'Cache-Control': 'private, no-store' } });
 });
 
