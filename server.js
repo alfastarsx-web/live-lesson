@@ -58,6 +58,68 @@ function claimsFrom(req) {
   return verify(req.query.t || bearer);
 }
 
+// ---------- Sinov darsi ovoz yozuvi (sifat nazorati) ----------
+// Ustoz brauzeri har 10 soniyada bo'lak yuboradi — internet uzilsa ham deyarli hammasi saqlanadi.
+// Har yozuv sessiyasi alohida fayl (ustoz qayta kirsa yangi sarlavha bilan boshlanadi). 15 kundan keyin o'chiriladi.
+const YOZUV_DIR = path.join(__dirname, 'yozuvlar');
+const YOZUV_KUN = 15;
+fs.mkdirSync(YOZUV_DIR, { recursive: true });
+const yozuvXona = (room) => /^sinov-[a-z0-9]{6,40}$/.test(String(room || ''));
+
+app.post('/api/yozuv', express.raw({ type: () => true, limit: '3mb' }), (req, res) => {
+  const c = AUTH_ON ? claimsFrom(req) : { role: 'teacher', room: String(req.query.room || '') };
+  if (!c || c.role !== 'teacher') return res.status(403).json({ error: 'ruxsat yo‘q' });
+  const room = String(c.room || '').toLowerCase();
+  const sessiya = String(req.query.s || '');
+  const tur = req.query.f === 'mp4' ? 'mp4' : 'webm';
+  if (!yozuvXona(room) || !/^\d{10,14}$/.test(sessiya)) return res.status(400).json({ error: 'noto‘g‘ri so‘rov' });
+  if (!Buffer.isBuffer(req.body) || !req.body.length) return res.json({ ok: true });
+  if (!diskdaJoyBor()) return res.status(507).json({ error: 'joy yo‘q' });
+  fs.appendFile(path.join(YOZUV_DIR, `${room}__${sessiya}.${tur}`), req.body, (err) => {
+    if (err) { console.warn('Yozuv saqlanmadi:', err.message); return res.status(500).json({ error: 'saqlanmadi' }); }
+    res.json({ ok: true });
+  });
+});
+
+// Admin havolasi API da imzolanadi: sig = HMAC(LESSON_TOKEN_SECRET, "yozuv:<room>:<exp>")
+function yozuvImzoTogri(room, exp, sig) {
+  if (!yozuvXona(room) || !/^\d+$/.test(String(exp)) || Number(exp) * 1000 < Date.now()) return false;
+  const kutilgan = crypto.createHmac('sha256', process.env.LESSON_TOKEN_SECRET || '').update(`yozuv:${room}:${exp}`).digest('hex');
+  const a = Buffer.from(String(sig || '')), b = Buffer.from(kutilgan);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+const yozuvFayllari = (room) => fs.readdirSync(YOZUV_DIR).filter((f) => f.startsWith(`${room}__`)).sort();
+
+app.get('/yozuv/:room', (req, res) => {
+  const { room } = req.params;
+  if (!yozuvImzoTogri(room, req.query.exp, req.query.sig)) return res.status(403).send('Havola eskirgan — adminkadan qayta oching');
+  const fayllar = yozuvFayllari(room);
+  const q = `exp=${encodeURIComponent(req.query.exp)}&sig=${encodeURIComponent(req.query.sig)}`;
+  const vaqt = (f) => new Date(Number(f.split('__')[1].split('.')[0])).toLocaleString('ru-RU', { timeZone: 'Asia/Tashkent' });
+  res.set('Cache-Control', 'no-store').send(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sinov darsi yozuvi</title><body style="font-family:system-ui;max-width:640px;margin:24px auto;padding:0 16px;color:#1d1d1f">
+<h2 style="margin:0 0 12px">🎧 Sinov darsi yozuvi</h2>
+${fayllar.length ? fayllar.map((f) => `<p style="margin:16px 0 6px;color:#666">Boshlangan: ${vaqt(f)} · ${(fs.statSync(path.join(YOZUV_DIR, f)).size / 1048576).toFixed(1)} MB</p>
+<audio controls preload="metadata" style="width:100%" src="/yozuv/${room}/${encodeURIComponent(f)}?${q}"></audio>`).join('')
+    : '<p>Bu dars uchun yozuv yo‘q — ustoz va o‘quvchi xonada birga bo‘lmagan yoki yozuv 15 kundan keyin o‘chirilgan.</p>'}
+</body>`);
+});
+
+app.get('/yozuv/:room/:fayl', (req, res) => {
+  const { room, fayl } = req.params;
+  if (!yozuvImzoTogri(room, req.query.exp, req.query.sig)) return res.status(403).end();
+  if (!yozuvFayllari(room).includes(fayl)) return res.status(404).end();
+  res.sendFile(path.join(YOZUV_DIR, fayl), { headers: { 'Cache-Control': 'private, no-store' } });
+});
+
+setInterval(() => {
+  const chegara = Date.now() - YOZUV_KUN * 86400000;
+  for (const f of fs.readdirSync(YOZUV_DIR)) {
+    const p = path.join(YOZUV_DIR, f);
+    try { if (fs.statSync(p).mtimeMs < chegara) fs.unlinkSync(p); } catch { /* o'chib bo'lgan */ }
+  }
+}, 6 * 3600_000).unref();
+
 const pdfYukla = upload.single('file');
 
 app.post('/api/upload', (req, res, next) => {
