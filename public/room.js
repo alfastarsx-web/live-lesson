@@ -708,11 +708,12 @@ function ensurePc() {
     el.remotePh.hidden = !(EKRAN && !IS_TEACHER);
     remoteKamChiz();
     playRemote();
+    yozuvUlash();
   };
 
   pc.onconnectionstatechange = () => {
     const s = pc.connectionState;
-    if (s === 'connected') { setStatus('Aloqa o‘rnatildi'); reportPath(); }
+    if (s === 'connected') { setStatus('Aloqa o‘rnatildi'); reportPath(); yozuvBoshla(); }
     else if (s === 'connecting') setStatus('Ulanmoqda…');
     else if (s === 'failed') { setStatus('Aloqa uzildi'); restartIce(); }
     else if (s === 'disconnected') setStatus('Aloqa beqaror…');
@@ -1645,6 +1646,61 @@ el.btnClear.onclick = () => {
   redraw();
   wsSend({ type: 'clear', page });
 };
+
+// ================= Sinov darsi ovoz yozuvi (sifat nazorati) =================
+// Faqat sinov xonasida, ustoz brauzerida: ustoz mikrofoni + o'quvchi ovozi bitta oqimga aralashtiriladi,
+// har 10 soniyada bo'lak serverga ketadi. Ikkala tomonga "yozilmoqda" belgisi ko'rinadi.
+const yozuvXonami = () => /^sinov-/.test(ROOM);
+let YOZUV = null; // { ctx, dest, rec, ulangan:Set, s, n, f }
+function yozuvUlash() {
+  if (!YOZUV) return;
+  const tracks = [
+    ...((localStream && localStream.getAudioTracks()) || []),
+    ...((remoteStream && remoteStream.getAudioTracks()) || []),
+  ];
+  for (const t of tracks) {
+    if (YOZUV.ulangan.has(t.id) || t.readyState !== 'live') continue;
+    try {
+      YOZUV.ctx.createMediaStreamSource(new MediaStream([t])).connect(YOZUV.dest);
+      YOZUV.ulangan.add(t.id);
+    } catch { /* yozuv darsni to'xtatmasin */ }
+  }
+}
+function yozuvBelgisi() {
+  if (document.getElementById('yozuvBelgi')) return;
+  const b = document.createElement('div');
+  b.id = 'yozuvBelgi';
+  b.textContent = '🔴 Dars sifat nazorati uchun yozib olinmoqda';
+  b.style.cssText = 'position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:50;background:rgba(0,0,0,.6);color:#fff;font:600 12px system-ui;padding:4px 10px;border-radius:999px;pointer-events:none';
+  document.body.appendChild(b);
+}
+function yozuvBoshla() {
+  if (!yozuvXonami()) return;
+  yozuvBelgisi();
+  if (!IS_TEACHER || YOZUV || typeof MediaRecorder === 'undefined') return;
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new Ctx();
+    const dest = ctx.createMediaStreamDestination();
+    const mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find((m) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m));
+    const rec = new MediaRecorder(dest.stream, { ...(mime ? { mimeType: mime } : {}), audioBitsPerSecond: 24000 });
+    YOZUV = { ctx, dest, rec, ulangan: new Set(), s: Date.now(), n: 0, f: (mime || rec.mimeType || '').includes('mp4') ? 'mp4' : 'webm' };
+    yozuvUlash();
+    rec.ondataavailable = (e) => {
+      if (!e.data || !e.data.size) return;
+      const q = new URLSearchParams({ s: String(YOZUV.s), n: String(YOZUV.n++), f: YOZUV.f, room: ROOM });
+      if (AKTIV_TOKEN) q.set('t', AKTIV_TOKEN);
+      fetch(`/api/yozuv?${q}`, { method: 'POST', body: e.data, keepalive: e.data.size < 60000 }).catch(() => {});
+    };
+    rec.start(10000);
+    // Mikrofon/kamera almashtirilsa yangi trek ham qo'shiladi
+    setInterval(yozuvUlash, 5000);
+    window.addEventListener('pagehide', () => { try { rec.requestData(); } catch { /* yopilmoqda */ } });
+    if (ctx.state === 'suspended') document.addEventListener('pointerdown', () => ctx.resume(), { once: true });
+  } catch (err) {
+    console.warn('Yozuv boshlanmadi:', err && err.message);
+  }
+}
 
 // ================= 5. Ishga tushirish =================
 let AKTIV_TOKEN = TOKEN;
