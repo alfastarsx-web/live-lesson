@@ -165,6 +165,11 @@ body.work{background:var(--bg)}
 .tk-jadval button{min-width:0;padding:0;height:34px;border-radius:9px;border:1.5px solid #cfe5d8;background:#f3faf6;font:inherit;font-size:11px;font-weight:800;color:var(--green);cursor:pointer}
 .tk-jadval button[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
 .tk-jadval span.yoq{height:34px;border-radius:9px;background:#f6f6f3}
+.tk-jadval button.qosh{border:1.5px dashed #d6d6cf;background:#fbfbf8;color:#b5b5ad;font-size:15px}
+.kun-kam{margin-top:12px;padding:10px 12px;border-radius:12px;background:#fff4e0;color:#8a5a00;font-size:13px;line-height:1.45}
+.kun-qosh{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:13px}
+.kun-qosh select{font:inherit;padding:7px 8px;border-radius:9px;border:1.5px solid #d6d6cf;background:#fff}
+.kun-qosh button{font:inherit;font-weight:800;padding:7px 12px;border-radius:9px;border:0;background:var(--green);color:#fff;cursor:pointer}
 .tk-jadval span.band{height:34px;border-radius:9px;background:#ececf2;color:#8a8d96;font-size:10px;font-weight:700;display:grid;place-items:center}
 
 @media (prefers-reduced-motion:reduce){
@@ -939,15 +944,47 @@ async function taklifOch(trialId) {
   $('#taklifSheet').classList.add('ochiq');
   const r = await api('/api/course-offers/slots');
   if (!r || !r.ok) { $('#tkTana').innerHTML = `<div class="bosh-kichik">${esc((r && r.data && r.data.message) || 'Jadvalni yuklab bo‘lmadi')}</div>`; return; }
-  const J = r.data;
+  let J = r.data;
   let perWeek = (o && o.perWeek) || 3;
   // Bron — istisno: oldindan o'chiq, faqat o'quvchi o'zi "hammasini hozir to'lay olmayman" desa yoqiladi
   let bron = !!(o && o.bronAllowed);
   // O'zgartirishda — avvalgi soatlar tanlangan turadi (ular "held" emas, shu taklifniki)
   let tanlov = new Map(((o && o.slots) || []).map((s) => [s.weekday, s.minute]));
   const oz = new Set(((o && o.slots) || []).map((s) => `${s.weekday}|${s.minute}`));
-  const holat = new Map(J.slots.map((s) => [`${s.weekday}|${s.minute}`, oz.has(`${s.weekday}|${s.minute}`) ? 'free' : s.state]));
-  const soatlar = [...new Set(J.slots.map((s) => s.minute))].sort((a, b) => a - b);
+  let holat, soatlar;
+  const jadvalniOl = () => {
+    holat = new Map(J.slots.map((s) => [`${s.weekday}|${s.minute}`, oz.has(`${s.weekday}|${s.minute}`) ? 'free' : s.state]));
+    soatlar = [...new Set(J.slots.map((s) => s.minute))].sort((a, b) => a - b);
+  };
+  jadvalniOl();
+  // Bo'sh soati bor kunlar soni — haftada N marta uchun N ta har xil kun kerak
+  const boshKunlar = () => new Set([...holat].filter(([, st]) => st === 'free').map(([k]) => Number(k.split('|')[0]))).size;
+  // Kun yetmasa — shu oynaning o'zidan haftalik jadvalga yangi soat qo'shiladi (shablon, har hafta)
+  const soatQosh = async (w, m) => {
+    if (!confirm(`Har hafta ${KUN_NOMI[w]} ${soatM(m)} ni jadvalingizga qo‘shaymi?\n\nBu soat doimiy ochiq bo‘ladi — keyin Jadval bo‘limida o‘zgartirishingiz mumkin.`)) return;
+    const a = await api('/api/booking/availability');
+    if (!a || !a.ok) return toast('Jadvalni olib bo‘lmadi — internetni tekshiring', 'err');
+    const items = (a.data || []).map((x) => ({ weekday: x.weekday, startMinute: x.startMinute, endMinute: x.endMinute }));
+    items.push({ weekday: w, startMinute: m, endMinute: m + 60 });
+    // Bir kundagi ustma-ust yoki yonma-yon oraliqlar birlashtiriladi
+    items.sort((x, y) => x.weekday - y.weekday || x.startMinute - y.startMinute);
+    const birlashgan = [];
+    for (const x of items) {
+      const o = birlashgan[birlashgan.length - 1];
+      if (o && o.weekday === x.weekday && x.startMinute <= o.endMinute) o.endMinute = Math.max(o.endMinute, x.endMinute);
+      else birlashgan.push({ ...x });
+    }
+    const res = await api('/api/booking/availability', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: birlashgan }),
+    }).catch(() => null);
+    if (!res || !res.ok) return toast((res && res.data && res.data.message) || 'Soatni qo‘shib bo‘lmadi', 'err');
+    const yangi = await api('/api/course-offers/slots');
+    if (yangi && yangi.ok) { J = yangi.data; jadvalniOl(); }
+    // Qo'shilgan soat darhol tanlanadi (kun bo'sh va limit yetmagan bo'lsa)
+    if (holat.get(`${w}|${m}`) === 'free' && !tanlov.has(w) && tanlov.size < perWeek) tanlov.set(w, m);
+    toast(`${KUN_NOMI[w]} ${soatM(m)} jadvalingizga qo‘shildi ✅`, 'ok');
+    chiz();
+  };
   const narx = (n) => (J.tariflar.find((x) => x.perWeek === n) || {}).narx || 0;
   const soatM = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
   const matn = () => {
@@ -965,12 +1002,17 @@ async function taklifOch(trialId) {
       ${soatlar.length ? `<div class="tk-jadval"><span></span>${KUN_TARTIB.map((w) => `<span class="bosh">${KUN_NOMI[w]}</span>`).join('')}
         ${soatlar.map((m) => `<span class="soat">${soatM(m)}</span>${KUN_TARTIB.map((w) => {
           const st = holat.get(`${w}|${m}`);
-          if (!st) return '<span class="yoq"></span>';
+          if (!st) return `<button type="button" class="qosh" data-qw="${w}" data-qm="${m}" aria-label="${KUN_NOMI[w]} ${soatM(m)} ni qo‘shish" title="Jadvalga qo‘shish">+</button>`;
           if (st === 'busy') return '<span class="band">dars</span>';
           if (st === 'held') return '<span class="band">band</span>';
           return `<button type="button" data-w="${w}" data-m="${m}" aria-pressed="${tanlov.get(w) === m}" aria-label="${KUN_NOMI[w]} ${soatM(m)}">${soatM(m).slice(0, 2)}</button>`;
         }).join('')}`).join('')}</div>`
-        : '<div class="bosh-kichik" style="margin-top:10px">Jadvalingizda ochiq soat yo‘q — avval Jadval bo‘limida soatlarni oching</div>'}
+        : '<div class="bosh-kichik" style="margin-top:10px">Jadvalingizda ochiq soat yo‘q — pastdan kun va soat qo‘shing</div>'}
+      ${boshKunlar() < perWeek ? `<div class="kun-kam">⚠️ Jadvalingizda faqat <b>${boshKunlar()} kunda</b> bo‘sh soat bor, haftada ${perWeek} marta uchun <b>${perWeek} ta har xil kun</b> kerak. Jadvaldagi “+” ni bosing yoki pastdan yangi kun qo‘shing 👇</div>` : ''}
+      <div class="kun-qosh"><span style="color:var(--mut)">Yangi soat:</span>
+        <select id="tkQw">${KUN_TARTIB.map((w) => `<option value="${w}">${KUN_NOMI[w]}</option>`).join('')}</select>
+        <select id="tkQm">${Array.from({ length: 18 }, (_, i) => (6 + i) * 60).map((m) => `<option value="${m}"${m === 18 * 60 ? ' selected' : ''}>${soatM(m)}</option>`).join('')}</select>
+        <button type="button" id="tkQosh">➕ Jadvalga qo‘shish</button></div>
       <div class="bron-ruxsat${bron ? ' yoniq' : ''}">
         <label><input type="checkbox" id="tkBron"${bron ? ' checked' : ''}><span>O‘quvchi bron so‘radi (hozir hammasini to‘lay olmaydi)</span></label>
         <div class="qoida">
@@ -998,6 +1040,14 @@ async function taklifOch(trialId) {
         chiz();
       };
     });
+    $('#tkTana').querySelectorAll('[data-qw]').forEach((b) => {
+      b.onclick = () => soatQosh(Number(b.dataset.qw), Number(b.dataset.qm));
+    });
+    $('#tkQosh').onclick = () => {
+      const w = Number($('#tkQw').value), m = Number($('#tkQm').value);
+      if (holat.has(`${w}|${m}`)) return toast(`${KUN_NOMI[w]} ${soatM(m)} jadvalingizda allaqachon bor`, 'err');
+      soatQosh(w, m);
+    };
     $('#tkTana').querySelectorAll('[data-w]').forEach((b) => {
       b.onclick = () => {
         const w = Number(b.dataset.w), m = Number(b.dataset.m);
