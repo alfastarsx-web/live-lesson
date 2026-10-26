@@ -608,7 +608,7 @@ function smenaChiz() {
   $('#salom').textContent = ISM ? `${salom}, ${ISM.split(/\s+/)[0]}` : salom;
 
   const bugun = KELGUSI.filter((x) => kunBoshi(x.startsAt) === kunBoshi(Date.now()));
-  const natija = TARIX.filter((x) => x.isTrial && ['trial_scheduled', 'trial_completed'].includes(x.leadStatus));
+  const natija = TARIX.filter((x) => x.isTrial && x.leadAssigned !== false && ['trial_scheduled', 'trial_completed'].includes(x.leadStatus));
   $('#rDars').textContent = bugun.length;
   $('#rSorov').textContent = SORROVLAR.length;
   $('#rNatija').textContent = natija.length;
@@ -1158,17 +1158,20 @@ function darsKarta(d, { tarix = false } = {}) {
     else if (kelmadiMumkin(d)) past = `<div class="dk-past"><button class="asosiy" data-kelmadi="${esc(d.id)}">O‘quvchi kelmadi</button></div>`;
   } else if (d.isTrial && d.leadId) {
     // "O'tildi" ni ustoz qo'ymaydi — dars xonasi birga o'tirilgan vaqtga qarab o'zi belgilaydi
-    const tugmalar = d.leadStatus === 'trial_completed'
-      // "To'lov qildi" yo'q: o'quvchi faqat tasdiqlangan to'lov bilan o'quvchingizga aylanadi (taklif → chek → admin)
-      ? `<button data-holat="lost">Rad etdi</button>`
-      : d.leadStatus === 'trial_scheduled' && !d.studentJoined
-        ? `<button data-holat="trial_no_show">Kelmadi</button>`
-        : '';
+    // Agar lid boshqa ustozga o'tkazilgan bo'lsa (leadAssigned === false) — bu ustoz natija qo'ymaydi va taklif yubormaydi
+    const tugmalar = d.leadAssigned === false
+      ? ''
+      : d.leadStatus === 'trial_completed'
+        // "To'lov qildi" yo'q: o'quvchi faqat tasdiqlangan to'lov bilan o'quvchingizga aylanadi (taklif → chek → admin)
+        ? `<button data-holat="lost">Rad etdi</button>`
+        : d.leadStatus === 'trial_scheduled' && !d.studentJoined
+          ? `<button data-holat="trial_no_show">Kelmadi</button>`
+          : '';
     if (tugmalar || d.leadPhone) past = `<div class="dk-past" data-lid="${esc(d.leadId)}">${tugmalar}${telHavola(d.leadPhone)}${qoshTel(d.leadExtraPhone)}</div>`;
-    if (['trial_scheduled', 'trial_completed', 'negotiating'].includes(d.leadStatus)) past += taklifQatori(d);
+    if (d.leadAssigned !== false && ['trial_scheduled', 'trial_completed', 'negotiating'].includes(d.leadStatus)) past += taklifQatori(d);
     const tugadi = kun.getTime() + (d.durationMin || 60) * 60_000;
     const qoldi = tugadi + BONUS_MS - Date.now();
-    if (d.leadStatus === 'trial_completed' && qoldi > 0) {
+    if (d.leadAssigned !== false && d.leadStatus === 'trial_completed' && qoldi > 0) {
       const foiz = Math.round((qoldi / BONUS_MS) * 100);
       past += `<div class="bonus">24 soat ichida to‘lasa bonus · ${Math.ceil(qoldi / 3600000)} soat qoldi
         <div class="bonus-chiziq"><i style="width:${foiz}%"></i></div></div>`;
@@ -1444,7 +1447,7 @@ function bugunChiz() {
   tugmalarniUla($('#bugungi'));
 
   // Natijasi belgilanmagan yoki javob kutilayotgan sinovlar
-  const diqqat = TARIX.filter((d) => (d.isTrial && ['trial_scheduled', 'trial_completed'].includes(d.leadStatus)) || kelmadiMumkin(d));
+  const diqqat = TARIX.filter((d) => (d.isTrial && d.leadAssigned !== false && ['trial_scheduled', 'trial_completed'].includes(d.leadStatus)) || kelmadiMumkin(d));
   // Maslahat — sinov darslari bo'lsa, har ochilganda navbatdagisi
   const bugungiSinov = KELGUSI.some((d) => d.isTrial) || diqqat.length;
   const m = MASLAHATLAR[Math.floor(Date.now() / 3600000) % MASLAHATLAR.length];
