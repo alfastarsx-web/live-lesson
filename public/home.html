@@ -283,6 +283,11 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
     <div style="flex:1"><b>Yangi qoida: sinov o‘quvchisiga tez bog‘laning</b><br><span class="xira">Sinov so‘rovini <b>10 daqiqada</b> qabul qiling. Qabul qilgach <b>15 daqiqada</b> o‘quvchiga qo‘ng‘iroq qilib, Telegram botga ulang — ulansa dars o‘zi tasdiqlanadi ✅ Ko‘tarmasa 5 daqiqadan keyin qayta qo‘ng‘iroq qiling, tizim eslatib turadi. 15 daqiqada ulanmasa, o‘quvchi boshqa ustozga o‘tadi — shuning uchun darhol qo‘ng‘iroq qiling 🙏</span></div>
     <button type="button" id="zanjirYop" aria-label="Yopish" style="border:0;background:none;font-size:18px;color:#9a9ca3;cursor:pointer;padding:4px 6px">×</button>
   </div>
+  <div class="akad" id="birBot" hidden style="position:relative;background:#e8f4fd">
+    <span class="ico a" aria-hidden="true" style="background:#229ED9;color:#fff">🤖</span>
+    <div style="flex:1"><b>Endi hammasi bitta botda</b><br><span class="xira">Savollaringizni ham <b>@MT_ustoz_bot</b> ga yozing — admin shu yerda javob beradi. Sinov so‘rovlari, eslatmalar va yozishma bir joyda bo‘ladi, boshqa botga o‘tish shart emas 🙂</span></div>
+    <button type="button" id="birBotYop" aria-label="Yopish" style="border:0;background:none;font-size:18px;color:#9a9ca3;cursor:pointer;padding:4px 6px">×</button>
+  </div>
   <div class="akad" id="yangilik" hidden style="position:relative">
     <span class="ico a" aria-hidden="true">🆕</span>
     <a href="/mentor/akademiya.html#yangiliklar" style="text-decoration:none;color:inherit;flex:1"><b>Akademiya yangilandi</b><br><span class="xira">Sentabr yangiliklari: tasdiqlash qo‘ng‘irog‘i, Telegram bot, taklif yuborish — 3 daqiqa</span></a>
@@ -770,6 +775,14 @@ async function yukla() {
     $('#yangilik').querySelector('a').addEventListener('click', yop);
   }
   // Yangi qoida (Oktabr oxiri): qabul 10 daq, tasdiq 15 daq, keyin boshqa ustozga. Yopilguncha turadi
+  // Yangilik: ustozning savollari ham ustoz botida (ish boti endi nomzodlar uchun)
+  const BIR_BOT = 'yangilik-bir-bot-2026-10';
+  let birBotKorgan = false;
+  try { birBotKorgan = localStorage.getItem(BIR_BOT) === '1'; } catch { /* yo'q */ }
+  if (akad && akad.mentor && !birBotKorgan) {
+    $('#birBot').hidden = false;
+    $('#birBotYop').onclick = () => { try { localStorage.setItem(BIR_BOT, '1'); } catch { /* yo'q */ } $('#birBot').hidden = true; };
+  }
   const ZANJIR = 'qoida-sinov-zanjir-2026-10';
   let zanjirKorgan = false;
   try { zanjirKorgan = localStorage.getItem(ZANJIR) === '1'; } catch { /* yo'q */ }
