@@ -760,11 +760,13 @@ const SABABLAR = [
   ['boglanib_bolmadi', 'Bog‘lanib bo‘lmadi', 'Telefonni olmadi — operator qayta urinadi'],
 ];
 
-function tasdiqOch(id) {
+// Tasdiqlangan sinov darsi: boshlanguncha ustoz vaqtni o'zi o'zgartira oladi
+const sinovVaqtOch = (id) => tasdiqOch(id, true);
+function tasdiqOch(id, faqatVaqt) {
   const d = KELGUSI.find((x) => x.id === id);
   if (!d) return;
   $('#tsVaqt').innerHTML = `${esc(d.studentName || 'O‘quvchi')} · ${esc(vaqtYorliq(d.startsAt))}${d.leadPhone ? ' · ' + telHavola(d.leadPhone) + qoshTel(d.leadExtraPhone) : ''}`;
-  tasdiqAsosiy(d);
+  if (faqatVaqt) tasdiqVaqt(d); else tasdiqAsosiy(d);
   $('#tasdiqParda').onclick = tasdiqYop;
   $('#tasdiqParda').classList.add('ochiq');
   $('#tasdiqSheet').classList.add('ochiq');
@@ -800,7 +802,13 @@ function tgKuzat(d) {
     if (!$('#tasdiqSheet').classList.contains('ochiq')) return clearInterval(TG_KUTISH);
     await darslarniYukla();
     const yangi = KELGUSI.find((x) => x.id === d.id);
-    if (!yangi || !yangi.confirmPending) { clearInterval(TG_KUTISH); return tasdiqYop(); }
+    if (!yangi || !yangi.confirmPending) {
+      clearInterval(TG_KUTISH);
+      // O'quvchi botga ulandi — dars o'zi tasdiqlandi. Ustoz yangi vaqt tanlayotgan bo'lsa, oyna qoladi
+      if (yangi && $('#tsKun')) return;
+      if (yangi) toast('✅ O‘quvchi botga ulandi — dars tasdiqlandi', 'ok');
+      return tasdiqYop();
+    }
     if (tgUlangan(yangi) !== tgUlangan(d)) {
       if (typeof ding === 'function') try { ding(); } catch (e) {}
       tasdiqAsosiy(yangi);
@@ -842,11 +850,11 @@ function tasdiqVaqt(d) {
   const soatOpt = Array.from({ length: 16 }, (_, i) => i + 8)
     .map((h) => `<option value="${h}"${h === joriy.getHours() ? ' selected' : ''}>${String(h).padStart(2, '0')}:00</option>`).join('');
   $('#tsTana').innerHTML = `
-    <div style="margin-top:2px;font-size:13.5px;color:var(--mut)">O‘quvchi bilan kelishilgan vaqtni tanlang — dars darhol tasdiqlanadi.</div>
+    <div style="margin-top:2px;font-size:13.5px;color:var(--mut)">O‘quvchi bilan kelishilgan vaqtni tanlang — ${d.confirmPending ? 'dars darhol tasdiqlanadi' : 'o‘quvchiga eslatmalar yangi vaqtga keladi'}.</div>
     <div class="ts-qator"><select id="tsKun" aria-label="Kun">${kunOpt}</select><select id="tsSoat" aria-label="Soat">${soatOpt}</select></div>
     <button class="qabul" type="button" id="tsSaqla" style="width:100%;margin-top:14px">Saqlash</button>
     <button class="ts-orqaga" type="button" id="tsOrqaga">Orqaga</button>`;
-  $('#tsOrqaga').onclick = () => tasdiqAsosiy(d);
+  $('#tsOrqaga').onclick = () => (d.confirmPending ? tasdiqAsosiy(d) : tasdiqYop());
   $('#tsSaqla').onclick = async (e) => {
     const [y, m, kun] = $('#tsKun').value.split('-').map(Number);
     const t = new Date(y, m, kun, Number($('#tsSoat').value), 0, 0, 0);
@@ -1114,6 +1122,7 @@ function darsKarta(d, { tarix = false } = {}) {
     past = `${qoida}${tasdiqQator(d)}<div class="dk-past">
       <button class="asosiy" data-kirish="${esc(d.id)}" data-sinov="${d.isTrial ? 1 : ''}" ${ochiq ? '' : 'disabled title="Darsdan 10 daqiqa oldin ochiladi"'}>${ochiq ? 'Darsni boshlash' : 'Kirish 10 daq oldin'}</button>
       ${doimiy && boshlanmagan ? `<button data-kochir="${esc(d.id)}">↻ Ko‘chirish</button>` : ''}
+      ${d.isTrial && boshlanmagan ? `<button data-sinov-vaqt="${esc(d.id)}">↻ Vaqtni o‘zgartirish</button>` : ''}
       ${doimiy && kelmadiMumkin(d) ? `<button data-kelmadi="${esc(d.id)}">O‘quvchi kelmadi</button>` : ''}
       ${telHavola(d.leadPhone || d.studentPhone)}${qoshTel(d.leadExtraPhone)}</div>
       ${ochiq ? '' : hozirTugma(d)}`;
@@ -1315,6 +1324,7 @@ function taklifQatori(d) {
 function tugmalarniUla(box) {
   box.querySelectorAll('[data-taklif]').forEach((b) => { b.onclick = () => taklifOch(b.dataset.taklif); });
   box.querySelectorAll('[data-kochir]').forEach((b) => { b.onclick = () => kochOch(b.dataset.kochir); });
+  box.querySelectorAll('[data-sinov-vaqt]').forEach((b) => { b.onclick = () => sinovVaqtOch(b.dataset.sinovVaqt); });
   box.querySelectorAll('[data-kelmadi]').forEach((b) => { b.onclick = () => kelmadiBos(b.dataset.kelmadi, b); });
   box.querySelectorAll('[data-tq]').forEach((b) => {
     b.onclick = async () => {
