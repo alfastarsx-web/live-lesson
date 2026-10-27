@@ -302,7 +302,7 @@ body:not(.js) .nojs{display:block}
     </div>
     <div class="txt">
       <div class="yangi" id="yangiliklar"><b class="t">🆕 Sentabr yangiliklari — 3 daqiqada</b>
-        1) O'quvchi sinov vaqtini ko'pincha <b>o'zi tanlaydi</b> — qabul qilgach 10 daqiqa ichida qo'ng'iroq qilib tasdiqlaysiz (4-modul).<br>
+        1) O'quvchi sinov vaqtini ko'pincha <b>o'zi tanlaydi</b> — qabul qilgach 15 daqiqa ichida qo'ng'iroq qilib, Telegram botga ulaysiz — shunda dars o'zi tasdiqlanadi (4-modul).<br>
         2) Qo'ng'iroqda o'quvchidan <b>@MT_yordam_bot</b> ni topib Start bosishini so'raysiz — dars havolasi va eslatmalarni bot yuboradi, ilova shart emas (5-modul).<br>
         3) Sinovdan keyin Work'dan <b>taklif</b> yuborasiz: kunlar, soatlar, narx. Soatlar 24 soat o'quvchiga band, u Kurslar bo'limida chek bilan to'laydi (7-modul).<br>
         4) <b>Prioritet 50 dan past</b> bo'lsa yangi o'quvchi berilmaydi (8-modul).
@@ -334,7 +334,7 @@ body:not(.js) .nojs{display:block}
     <p class="cap">Ishning zanjiri</p>
     <div class="flow">
       <div class="st"><i>1</i><div><b>Sinov darsi so'rovi</b><span>o'quvchi vaqtni tanlagan</span></div></div>
-      <div class="st"><i>2</i><div><b>Qabul va qo'ng'iroq</b><span>15 daqiqada qabul, 10 daqiqada tasdiq</span></div></div>
+      <div class="st"><i>2</i><div><b>Qabul va qo'ng'iroq</b><span>10 daqiqada qabul, 15 daqiqada tasdiq</span></div></div>
       <div class="st hot"><i>3</i><div><b>Sinov darsi</b><span>45–60 daqiqa, bepul</span></div></div>
       <div class="st"><i>4</i><div><b>Taklif</b><span>kunlar, soatlar, narx — 24 soat</span></div></div>
       <div class="st"><i>5</i><div><b>Doimiy o'quvchi</b><span>har oy daromad</span></div></div>
@@ -436,7 +436,7 @@ body:not(.js) .nojs{display:block}
     <p class="cap">So'rov qanday keladi</p>
     <div class="flow">
       <div class="st"><i>1</i><div><b>Push va Work ekrani</b><span>o'quvchi ismi, dars vaqti, operator izohi</span></div></div>
-      <div class="st hot"><i>2</i><div><b>15 daqiqa</b><span>qabul qilish uchun vaqt (dars 3 soatdan keyin bo'lsa — 60 daqiqa), taymer ko'rinib turadi</span></div></div>
+      <div class="st hot"><i>2</i><div><b>10 daqiqa</b><span>qabul qilish uchun vaqt (dars 3 soatdan keyin bo'lsa — 30 daqiqa), taymer ko'rinib turadi</span></div></div>
       <div class="st"><i>3</i><div><b>Birinchi bosgan oladi</b><span>qolganlarga "Kechikdingiz" chiqadi</span></div></div>
       <div class="st"><i>4</i><div><b>Dars sizniki</b><span>o'quvchining telefoni ochiladi, dars Bugun bo'limida</span></div></div>
     </div>
@@ -452,14 +452,15 @@ body:not(.js) .nojs{display:block}
     <div class="note"><b>Tezlik muhim.</b> So'rov bir necha mentorga birdan boradi. Ochiq soatingizda ilovani yoniq tuting va ovozni o'chirmang: ilova ochiq bo'lsa signal qaysi bo'limda bo'lsangiz ham chaladi, yopiq bo'lsa push har daqiqada qayta keladi.</div>
   </div>
   <div class="block">
-    <h3>Qabul qildingiz — 10 daqiqada tasdiqlang</h3>
+    <h3>Qabul qildingiz — 15 daqiqada tasdiqlang</h3>
     <p>O'quvchi vaqtni o'zi tanlagan bo'lsa, u adashib yoki havaskorona yozilgan bo'lishi mumkin. Shuning uchun dars kalendaringizda <b>sariq bo'lib miltillaydi</b> — siz o'quvchiga qo'ng'iroq qilib, real ekanini va vaqt aniqligini bilib olasiz.</p>
     <ul class="list">
       <li><b>Qabul qilish</b> — gaplashdingiz, vaqt aniq. Dars tasdiqlanadi.</li>
       <li><b>Vaqtni o'zgartirish</b> — boshqa vaqtga kelishdingiz. Yangi kun va soatni tanlaysiz, dars darhol tasdiqlanadi.</li>
       <li><b>Bekor qilish</b> — sababini tanlaysiz: adashib yozilgan, boshqa ustozga (so'rov boshqa ustozlarga ketadi) yoki bog'lanib bo'lmadi (operator qayta urinadi). Ball ayirilmaydi.</li>
     </ul>
-    <div class="note"><b>10 daqiqa o'tsa ham</b> slot o'zi bo'shamaydi — lekin qizil bo'lib qoladi va administrator ko'radi. Qo'ng'iroqni kechiktirmang.</div>
+    <div class="note"><b>Eng tezi — suhbat paytida botga ulash.</b> O'quvchi @MT_yordam_bot ga raqamini yuborishi bilan dars <b>o'zi tasdiqlanadi</b>. 10 va 5 daqiqa qolganda eslatma keladi.</div>
+    <div class="warn"><b>15 daqiqada tasdiqlanmasa</b> — o'quvchi avtomatik boshqa ustozga o'tadi (4 ta ustozgacha, keyin operator). Ball ayirilmaydi, lekin o'quvchi sizdan ketadi — qo'ng'iroqni kechiktirmang.</div>
   </div>
   <div class="block">
     <h3>Ikki oqim</h3>
@@ -524,7 +525,8 @@ body:not(.js) .nojs{display:block}
       <li><b>Izohni o'qing.</b> Unda o'quvchining maqsadi, darajasi va qulay vaqti yozilgan bo'ladi.</li>
       <li><b>Darsdan 10 daqiqa oldin</b> Work'dagi "Darsni boshlash" tugmasi ochiladi. Kamera, mikrofon va internetni oldindan tekshiring.</li>
       <li><b>Vaqtida kiring.</b> O'quvchi kutib qolgan dars — past baho va yo'qotilgan o'quvchi. Belgilangan darsga chiqmaslik eng og'ir xato.</li>
-      <li><b>Dars 1 soat — kamida 40 daqiqa.</b> Diagnostika va narx gaplashilgan bo'lsa, 45-daqiqada yakunlash normal. 40 daqiqadan kam davom etgan dars <b>"⚠️ Chala o'tildi"</b> hisoblanadi: ball berilmaydi va reytingingiz tushadi. "O'tildi"ni dars xonasi o'zi qo'yadi.</li>
+      <li><b>Dars 1 soat — kamida 40 daqiqa.</b> Faqat siz va o'quvchi <b>birga</b> bo'lgan vaqt hisoblanadi: 30 daqiqadan kam — <b>o'tilmadi</b>, 30–40 daqiqa — <b>"⚠️ Chala o'tildi"</b> (ball berilmaydi, reyting tushadi), 40+ — o'tildi. "O'tildi"ni dars xonasi o'zi qo'yadi. Sifat nazorati uchun sinov darsi ovozi yozib olinadi.</li>
+      <li><b>🎁 Kunlik bonus:</b> bir kunda <b>4 ta to'liq sinov</b> o'tsangiz — <b>+20 000 so'm</b>. Bonus 100 ming bo'lgach yechib olinadi.</li>
       <li><b>Telegrami boshqa raqamda bo'lsa</b> — Work'dagi dars kartasida chiqadigan <b>6 xonali kodni</b> ayting: o'quvchi @MT_yordam_bot ni topib, kodni yozadi va darhol ulanadi.</li>
       <li><b>O'quvchi telefonni ko'tarmasa</b> — kartadagi <b>📱 qo'shimcha raqamga</b> qo'ng'iroq qiling (operator yozib qo'ygan, ko'pincha oila a'zosiniki).</li>
       <li><b>Narx haqida dars oxirida gaplashing.</b> O'quvchi boshida so'rasa ham: <i>"Avval sizga sifatli dars o'tib beray, narxni oxirida gaplashamiz"</i> deng. O'quvchining "qarori qat'iy emas" deb darsni qisqartirmang — aynan sifatli dars uni qaror qilishga undaydi.</li>
@@ -651,10 +653,10 @@ body:not(.js) .nojs{display:block}
     <p>Taklif oynasida <b>"O'quvchi bron so'radi"</b> degan belgi bor. U oldindan o'chiq — o'quvchiga faqat <b>to'liq to'lov</b> ko'rinadi, "bron" so'zi umuman chiqmaydi.</p>
     <ul>
       <li><b>Bron haqida o'zingiz gap ochmang.</b> To'liq to'lashga tayyor o'quvchiga "bron ham bor" desangiz, u "unda bron qilib turay" deb to'lovni kechiktiradi.</li>
-      <li>Faqat o'quvchi <b>o'zi</b> "hozir hammasini to'lay olmayman" desa, belgini yoqib taklif yuboring. Shunda u kamida 100 000 so'm to'lab, soatlarni <b>3 kunga</b> band qiladi.</li>
-      <li>Qolgani 3 kunda to'lanmasa — soatlar bo'shaydi. O'quvchining to'lagan puli 15 kun saqlanadi va keyingi taklifingiz narxidan ayiriladi.</li>
+      <li>Faqat o'quvchi <b>o'zi</b> "hozir hammasini to'lay olmayman" desa, belgini yoqib taklif yuboring. Shunda u kamida 100 000 so'm to'lab, soatlarni <b>7 kunga</b> band qiladi.</li>
+      <li>Qolgani 7 kunda to'lanmasa — soatlar bo'shaydi. O'quvchining to'lagan puli 15 kun saqlanadi va keyingi taklifingiz narxidan ayiriladi.</li>
     </ul>
-    <div class="warn"><b>Bonus faqat to'liq to'lovda.</b> Bron bonus bermaydi. O'quvchi bron qilsa, 24 soat bonusi saqlanib turadi — qolgani 3 kun ichida to'lansagina bonus sizniki. Bronni ko'p yoqayotgan ustozlar administratorga ko'rinib turadi.</div>
+    <div class="warn"><b>Bonus faqat to'liq to'lovda.</b> Bron bonus bermaydi. O'quvchi bron qilsa, 24 soat bonusi saqlanib turadi — qolgani 7 kun ichida to'lansagina bonus sizniki. Bronni ko'p yoqayotgan ustozlar administratorga ko'rinib turadi.</div>
   </div>
 </section>
 
@@ -928,7 +930,7 @@ body:not(.js) .nojs{display:block}
     } else if(pass){
       html += '<div class="unlock"><h3>Sinov darsi so\'rovlari ochildi</h3><p>Keyingi uch qadam:</p><ol>' +
         '<li>Jadval bo\'limida bo\'sh soatlaringizni belgilang — haftasiga kamida 10 soat.</li>' +
-        '<li>Bildirishnomalarni yoqib qo\'ying — so\'rov telefoningizga keladi. Kelganda muddat ichida (15 daqiqa, uzoq dars uchun 60) qabul qiling.</li>' +
+        '<li>Bildirishnomalarni yoqib qo\'ying — so\'rov telefoningizga keladi. Kelganda muddat ichida (10 daqiqa, uzoq dars uchun 30) qabul qiling.</li>' +
         '<li>Darsdan oldin operator izohini o\'qing, darsdan keyin natijani 24 soat ichida belgilang.</li>' +
         '</ol></div>';
     }
