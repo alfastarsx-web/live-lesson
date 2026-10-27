@@ -217,7 +217,6 @@ body.work{background:var(--bg)}
 .kc-tasdiq{width:100%;margin-top:14px;padding:14px;border:0;border-radius:14px;background:var(--green);color:#fff;font:inherit;font-weight:800;font-size:15px;cursor:pointer}
 .kc-tasdiq:disabled{background:#d8d8d3;color:var(--mut);cursor:not-allowed}
 
-/* Operator rejimi: ustoz bazadagi o'quvchilarga o'zi qo'ng'iroq qiladi */
 .selfi{background:#fff7ed;border:1.5px solid #fdba74;border-radius:16px;padding:14px 16px;margin:0 0 14px;color:#7c2d12}
 .selfi b{display:block;font-size:15px;font-weight:800}
 .selfi p{margin:6px 0 0;font-size:13px;line-height:1.45}
@@ -225,26 +224,6 @@ body.work{background:var(--bg)}
 .selfi-tugma{display:block;margin-top:12px;text-align:center;padding:12px;border-radius:12px;background:#ea580c;color:#fff;font-weight:800;cursor:pointer}
 .selfi-tugma.band{opacity:.6;pointer-events:none}
 .selfi-savol a{color:#c2410c;font-weight:700}
-.op-rejim{background:var(--card);border-radius:16px;padding:14px 16px;margin:0 0 14px;box-shadow:var(--shadow)}
-.op-rejim .yuqori{display:flex;align-items:center;gap:12px}
-.op-rejim .yuqori div{flex:1;min-width:0}
-.op-rejim b{display:block;font-size:15px;font-weight:800}
-.op-rejim .izoh{font-size:12.5px;color:var(--mut2);line-height:1.45;margin-top:2px}
-.op-switch{position:relative;width:46px;height:28px;flex:0 0 auto;cursor:pointer}
-.op-switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
-.op-switch i{position:absolute;inset:0;border-radius:999px;background:#d8d8d3;transition:background .2s;pointer-events:none}
-.op-switch i::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.op-switch input:checked + i{background:var(--green)}
-.op-switch input:checked + i::after{transform:translateX(18px)}
-.op-switch input:focus-visible + i{outline:2px solid var(--green);outline-offset:2px}
-.op-rejim .ichki{margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.op-rejim .son{font-size:13px;color:var(--mut2);font-weight:600}
-.op-rejim .son b{display:inline;font-size:13px;color:var(--ink)}
-.op-rejim .ochish{flex:1;min-width:200px;text-align:center;padding:12px;border-radius:12px;background:var(--green);color:#fff;font-weight:800;text-decoration:none}
-.op-rejim .ochish.ochiq{background:#d8d8d3;color:var(--mut);pointer-events:none}
-.op-rejim .nazorat{margin-top:10px;font-size:12.5px;line-height:1.45;padding:9px 11px;border-radius:10px;background:#fef3c7;color:#92400e}
-.op-rejim .nazorat.toxta{background:#fff1f2;color:#be123c;font-weight:700}
-.op-rejim .nazorat.ok{background:#ecfdf5;color:#047857}
 </style>
 </head>
 <body class="work">
@@ -283,20 +262,6 @@ body.work{background:var(--bg)}
   </section>
   <script src="/qoida.js" defer></script>
 
-  <section class="op-rejim" id="opRejim" hidden aria-label="Operator rejimi">
-    <div class="yuqori">
-      <div>
-        <b>📞 Operator rejimi</b>
-        <div class="izoh" id="opRIzoh">Bazadagi o‘quvchilarga o‘zingiz qo‘ng‘iroq qiling — sinov darsi o‘zingizga yoziladi, operatorlar kabi bonus olasiz.</div>
-      </div>
-      <label class="op-switch" title="Operator rejimi"><input type="checkbox" id="opRTugma" aria-label="Operator rejimini yoqish"><i></i></label>
-    </div>
-    <div class="ichki" id="opRIchki" hidden>
-      <span class="son">Bugun: <b id="opRBugun">0 / 0</b> o‘quvchi</span>
-      <a class="ochish" id="opROchish" href="/operator-kabinet">Qo‘ng‘iroq qilishni boshlash →</a>
-    </div>
-    <div class="nazorat" id="opRNazorat" hidden></div>
-  </section>
 
   <nav class="tablar" aria-label="Work bo‘limlari">
     <div class="tablar-ichi">
@@ -1540,43 +1505,6 @@ $('#holatTugma').onclick = async () => {
 };
 setInterval(() => { if (document.visibilityState === 'visible') holatChiz(); }, 1000);
 
-// ---------- operator rejimi ----------
-function opRejimChiz(d) {
-  $('#opRejim').hidden = false;
-  const t = $('#opRTugma');
-  t.checked = !!d.yoqilgan;
-  t.disabled = !!d.bloklangan || (!d.tasdiqlangan && !d.yoqilgan);
-  $('#opRIchki').hidden = !d.yoqilgan;
-  $('#opRBugun').textContent = `${d.bugun} / ${d.limit}`;
-  const n = d.nazorat;
-  const toxta = d.yoqilgan && n && n.holat === 'toxtatildi';
-  const tugadi = d.yoqilgan && d.bugun >= d.limit;
-  $('#opROchish').classList.toggle('ochiq', tugadi || toxta);
-  // Akademiya kabinetning o'zida ochiladi — shuning uchun tugma ochiq qoladi
-  $('#opROchish').textContent = toxta ? 'O‘quvchi berish to‘xtatilgan'
-    : tugadi ? 'Bugungi limit tugadi — ertaga davom etasiz'
-      : d.yoqilgan && d.akademiya === false ? 'Akademiyani boshlash →' : 'Qo‘ng‘iroq qilishni boshlash →';
-  // Amaliy nazorat: dastlabki sinovlardan qanchasida o'quvchi keldi
-  const nz = $('#opRNazorat');
-  nz.hidden = !d.yoqilgan || !n;
-  if (!nz.hidden) {
-    nz.className = 'nazorat' + (toxta ? ' toxta' : n.holat === 'otdi' || n.holat === 'ozod' ? ' ok' : '');
-    nz.textContent = toxta
-      ? `Dastlabki ${n.soni} ta sinovingizdan ${n.kelmadi} tasida o‘quvchi darsga kelmadi — yangi o‘quvchi berish to‘xtatildi. Admin bilan suhbatdan keyin qayta ochiladi.`
-      : n.holat === 'otdi' || n.holat === 'ozod'
-        ? '✅ Amaliy nazoratdan o‘tdingiz'
-        : `🎯 Amaliy nazorat: dastlabki ${n.soni} ta sinovdan ${n.jami} tasi o‘tdi` +
-          (n.kelmadi ? `, ${n.kelmadi} tasida o‘quvchi kelmadi` : '') +
-          `. ${n.chegara} tasida kelmasa — o‘quvchi berish to‘xtaydi. Telegram ✅ bo‘lmaguncha telefonni qo‘ymang.`;
-  }
-  $('#opRIzoh').textContent = d.bloklangan
-    ? 'Operator rejimini admin o‘chirib qo‘ygan. Savol bo‘lsa admin bilan bog‘laning.'
-    : !d.tasdiqlangan && !d.yoqilgan
-      ? 'Akkauntingiz tasdiqlangach operator rejimini yoqa olasiz.'
-      : d.yoqilgan
-        ? 'Bazadagi o‘quvchilarga qo‘ng‘iroq qilasiz. Sinovga yozsangiz dars o‘zingizga yoziladi.'
-        : 'Bazadagi o‘quvchilarga o‘zingiz qo‘ng‘iroq qiling — sinov darsi o‘zingizga yoziladi, operatorlar kabi bonus olasiz.';
-}
 // Selfi yo'q bo'lsa — ogohlantirish va shu yerning o'zida yuklash (sinov so'rovi faqat selfi bor ustozga)
 async function selfiYukla() {
   const r = await api('/api/selfi');
@@ -1605,30 +1533,6 @@ $('#selfiFayl').onchange = async (e) => {
   if (!r.ok || !r.data.bor) return toast(r.data.message || 'Yuklab bo‘lmadi — qayta urinib ko‘ring', 'err');
   $('#selfi').hidden = true;
   toast('Selfi yuklandi — endi sizga sinov so‘rovlari keladi', 'ok');
-  opRejimYukla();
-};
-
-async function opRejimYukla() {
-  const r = await api('/api/ustoz-operator');
-  if (r && r.ok) opRejimChiz(r.data);
-}
-$('#opRTugma').onchange = async (e) => {
-  const t = e.currentTarget;
-  const yoq = t.checked;
-  if (yoq && !confirm('Operator rejimini yoqasizmi?\n\n• Bazadagi o‘quvchilarga o‘zingiz qo‘ng‘iroq qilasiz (kuniga limit bor)\n• Sinovga yozsangiz dars boshqa ustozga ketmaydi — o‘zingizga yoziladi\n• Har o‘tilgan sinov va to‘lov uchun operatorlar kabi bonus\n• Dastlabki 5 sinovdan 3 tasida o‘quvchi kelmasa — o‘quvchi berish to‘xtaydi\n\nAvval qisqa ustoz-operator akademiyasidan (6 modul va test) o‘tasiz.')) {
-    t.checked = false;
-    return;
-  }
-  t.disabled = true;
-  const r = await api('/api/ustoz-operator', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ yoq }),
-  }).catch(() => ({ ok: false, data: { error: 'Internet aloqasini tekshiring' } }));
-  t.disabled = false;
-  if (!r) return;
-  if (!r.ok) { t.checked = !yoq; return toast(r.data.message || r.data.error || 'O‘zgartirib bo‘lmadi', 'err'); }
-  opRejimChiz(r.data);
-  toast(yoq ? 'Operator rejimi yoqildi' : 'Operator rejimi o‘chirildi — lid berilmaydi', yoq ? 'ok' : '');
 };
 
 // ---------- tablar ----------
@@ -1659,7 +1563,7 @@ window.addEventListener('hashchange', tabKorsat);
   ISM = w.data.name || '';
 
   qoidalarChiz();
-  await Promise.all([sorovlarniYukla(), darslarniYukla(), holatYukla(), qoidalarYukla(), opRejimYukla(), selfiYukla()]);
+  await Promise.all([sorovlarniYukla(), darslarniYukla(), holatYukla(), qoidalarYukla(), selfiYukla()]);
   tabriklarniKorsat((ISM || '').split(/\s+/)[0]);
 
   // Ball qo'shilganda yengil ding (Onlayn tugmasi yonidan "+N" ko'tariladi)
