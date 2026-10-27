@@ -1018,8 +1018,8 @@ async function taklifOch(trialId) {
         <div class="qoida">
           Oldindan o‘chiq — o‘quvchiga faqat <b>to‘liq to‘lov</b> ko‘rinadi.<br>
           <b>Bron haqida o‘zingiz gap ochmang.</b> Faqat o‘quvchi o‘zi “hozir hammasini to‘lay olmayman” desa yoqing:
-          shunda u kamida 100 000 so‘m to‘lab, soatlarni 3 kunga band qila oladi.<br>
-          Bonus faqat to‘liq to‘lovda: bron qilsa, qolgani 3 kun ichida to‘lansagina bonus sizniki.
+          shunda u kamida 100 000 so‘m to‘lab, soatlarni 7 kunga band qila oladi.<br>
+          Bonus faqat to‘liq to‘lovda: bron qilsa, qolgani 7 kun ichida to‘lansagina bonus sizniki.
         </div>
       </div>
       <button class="qabul" type="button" id="tkYubor" style="width:100%;margin-top:16px" ${tayyor ? '' : 'disabled'}>${tayyor ? `Yuborish · ${narx(perWeek).toLocaleString('ru-RU')} so‘m` : `Yana ${perWeek - tanlov.size} ta kun tanlang`}</button>
@@ -1343,7 +1343,7 @@ function taklifQatori(d) {
     return `<div class="taklif-q bron"><span>🔖 Bron qildi · ${Number(o.bronAmount || 0).toLocaleString('ru-RU')} so‘m · qolgani ${esc(gacha)} gacha</span></div>`;
   }
   if (o.status === 'confirmed') return `<div class="taklif-q ok">✅ To‘landi — darslar jadvalingizda · ${esc(o.slotsText || '')}</div>`;
-  if (o.status === 'expired') return `<div class="taklif-q exp">${o.bronAmount ? '⌛ Bronning qolgani 3 kunda to‘lanmadi' : '⏳ 24 soatda to‘lanmadi'} — soatlar bo‘shadi</div>${tugma('Qayta yuborish')}`;
+  if (o.status === 'expired') return `<div class="taklif-q exp">${o.bronAmount ? '⌛ Bronning qolgani 7 kunda to‘lanmadi' : '⏳ 24 soatda to‘lanmadi'} — soatlar bo‘shadi</div>${tugma('Qayta yuborish')}`;
   return '';
 }
 
