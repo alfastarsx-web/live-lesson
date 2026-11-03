@@ -1190,7 +1190,7 @@ function qoidalarChiz() {
   const q = QOIDA;
   $('#qoidaRoyxat').innerHTML = [
     ['⏰', `Darsni o‘z vaqtida boshlang va o‘quvchini <b>${q.kutishDaq} daqiqa</b> kuting. Kelmasa — <b>“O‘quvchi kelmadi”</b> tugmasini bosing. Tugma faqat siz xonada kutgan bo‘lsangiz ishlaydi.`],
-    ['💰', `O‘quvchi kelmasa: har ${q.paketDars} darsdagi <b>birinchi kelmaslik kechiriladi</b> — dars o‘quvchiga jadval oxiriga qo‘shiladi${q.kechirimUlush > 0 ? `, sizga dars haqining <b>${Math.round(q.kechirimUlush * 100)}%</b> to‘lanadi` : ' (bu dars uchun haq to‘lanmaydi)'}. Keyingilarida dars kuyadi — sizga <b>to‘liq haq</b>.`],
+    ['💰', `O‘quvchi kelmasa: har to‘langan paketda (oyda) <b>faqat birinchi kelmaslik kechiriladi</b> — dars o‘quvchiga jadval oxiriga qo‘shiladi${q.kechirimUlush > 0 ? `, sizga dars haqining <b>${Math.round(q.kechirimUlush * 100)}%</b> to‘lanadi` : ' (bu dars uchun haq to‘lanmaydi)'}. Keyingilarida dars kuyadi — sizga <b>to‘liq haq</b>.`],
     ['⭐', `+10 ball faqat <b>o‘tkazilgan</b> darsga beriladi. O‘quvchi xonaga kirmagan dars “o‘tildi” hisoblanmaydi.`],
     ['↻', `O‘quvchi darsni <b>${q.kochirishOldinSoat} soat oldin</b> o‘zi ko‘chira oladi (har ${q.paketDars} darsga ${q.paketKochirish} marta) yoki favqulodda kupon bilan (${q.paketFavqulodda} ta). Yangi vaqt faqat <b>bo‘sh soatlaringizdan</b> tanlanadi — sizga xabar keladi.`],
     ['👩‍🏫', `Siz ko‘chirsangiz: ${q.kochirishOldinSoat} soatdan oldin va 30 kunda bir o‘quvchi uchun <b>${q.ustozBepulKochirish} martagacha — jarimasiz</b>. O‘quvchi o‘zi so‘ragan bo‘lsa, “O‘quvchi”ni tanlang — unga Telegram botda taklif ketadi, u <b>tasdiqlasa</b> dars jarimasiz ko‘chadi.`, 'ogoh'],
@@ -1311,7 +1311,7 @@ async function kochOch(id) {
   chiz();
 }
 async function kelmadiBos(id, b) {
-  if (!confirm(`O‘quvchi ${QOIDA.kutishDaq} daqiqa ichida darsga kirmadimi?\n\nBirinchi kelmaslik kechiriladi (dars o‘quvchiga oxiriga qo‘shiladi, sizga ${Math.round(QOIDA.kechirimUlush * 100)}%), keyingilarida dars kuyadi va sizga to‘liq haq to‘lanadi.`)) return;
+  if (!confirm(`O‘quvchi ${QOIDA.kutishDaq} daqiqa ichida darsga kirmadimi?\n\nPaketdagi birinchi kelmaslik kechiriladi (dars o‘quvchiga oxiriga qo‘shiladi, sizga ${Math.round(QOIDA.kechirimUlush * 100)}%), keyingilarida dars kuyadi va sizga to‘liq haq to‘lanadi.`)) return;
   b.disabled = true;
   const r = await api(`/api/booking/regular/${id}/no-show`, { method: 'POST' }).catch(() => null);
   b.disabled = false;
