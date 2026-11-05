@@ -280,7 +280,7 @@ a.grafik:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-rad
 
   <div class="akad" id="zanjir" hidden style="position:relative;background:#eef3fd">
     <span class="ico a" aria-hidden="true">⏱</span>
-    <div style="flex:1"><b>Yangi qoida: sinov o‘quvchisiga tez bog‘laning</b><br><span class="xira">Sinov so‘rovini <b>10 daqiqada</b> qabul qiling. Qabul qilgach <b>15 daqiqada</b> o‘quvchiga qo‘ng‘iroq qilib, Telegram botga ulang — ulansa dars o‘zi tasdiqlanadi ✅ Ko‘tarmasa 5 daqiqadan keyin qayta qo‘ng‘iroq qiling, tizim eslatib turadi. 15 daqiqada ulanmasa, o‘quvchi boshqa ustozga o‘tadi — shuning uchun darhol qo‘ng‘iroq qiling 🙏</span></div>
+    <div style="flex:1"><b>Yangi qoida: sinov o‘quvchisiga tez bog‘laning</b><br><span class="xira">Sinov so‘rovini <b>10 daqiqada</b> qabul qiling. Qabul qilgach <b>30 daqiqada</b> o‘quvchiga qo‘ng‘iroq qilib, Telegram botga ulang — ulansa dars o‘zi tasdiqlanadi ✅ Ko‘tarmasa 5 daqiqadan keyin qayta qo‘ng‘iroq qiling, tizim eslatib turadi. 30 daqiqada ulanmasa, o‘quvchi boshqa ustozga o‘tadi — shuning uchun darhol qo‘ng‘iroq qiling 🙏</span></div>
     <button type="button" id="zanjirYop" aria-label="Yopish" style="border:0;background:none;font-size:18px;color:#9a9ca3;cursor:pointer;padding:4px 6px">×</button>
   </div>
   <div class="akad" id="birBot" hidden style="position:relative;background:#e8f4fd">
@@ -774,7 +774,7 @@ async function yukla() {
     $('#yangilikYop').onclick = yop;
     $('#yangilik').querySelector('a').addEventListener('click', yop);
   }
-  // Yangi qoida (Oktabr oxiri): qabul 10 daq, tasdiq 15 daq, keyin boshqa ustozga. Yopilguncha turadi
+  // Yangi qoida (Oktabr oxiri): qabul 10 daq, tasdiq 30 daq, keyin boshqa ustozga. Yopilguncha turadi
   // Yangilik: ustozning savollari ham ustoz botida (ish boti endi nomzodlar uchun)
   const BIR_BOT = 'yangilik-bir-bot-2026-10';
   let birBotKorgan = false;
