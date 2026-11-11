@@ -95,7 +95,7 @@ body.jadval{background:var(--bg)}
     <h1 id="hajmSarlavha">…</h1>
     <div class="izoh3" id="hajmIzoh">Sinov darsi so‘rovlari faqat ochiq vaqtlaringizga keladi.</div>
     <div class="shkala" id="shkala"><i id="shkalaI" style="width:0"></i><b id="shkalaMin"></b></div>
-    <div class="shkala-yozuv"><span>0</span><span id="shkalaMinYozuv">kamida 10 soat</span><span id="shkalaMax">40</span></div>
+    <div class="shkala-yozuv"><span>0</span><span id="shkalaMinYozuv">kamida 24 soat</span><span id="shkalaMax">40</span></div>
   </section>
 
   <nav class="tablar" aria-label="Work bo‘limlari">
@@ -391,14 +391,27 @@ function oraliqlar() {
 }
 
 // ---------- hajm va saqlash paneli ----------
+/** Shablonda kamida Q.kunSoat soat ochiq hafta kunlari soni */
+function toliqKunlar() {
+  const Q = J.jadvalQoida || { minKun: 6, kunSoat: 4 };
+  const soat = Array(7).fill(0);
+  for (const o of oraliqlar()) soat[o.weekday] += Math.max(0, Math.floor(o.endMinute / 60) - Math.ceil(o.startMinute / 60));
+  return soat.filter((x) => x >= Q.kunSoat).length;
+}
+
 function hajmChiz() {
   const n = haftalikSlot();
   const min = J.minWeeklySlots;
   const max = Math.max(40, n);
   $('#hajmSarlavha').textContent = `Haftasiga ${n} soat`;
-  $('#hajmIzoh').innerHTML = n >= min
-    ? `<b>${n}</b> ta bir soatlik dars vaqti ochiq. Sinov darsi so‘rovlari faqat shu vaqtlarga keladi.`
-    : `<b>${n}</b> soat — tavsiya etilgan minimumdan <b>${min - n}</b> soat kam. Kam ochilgan jadvalga kam so‘rov keladi.`;
+  // Qoida: haftasiga kamida Q.minKun kun, har kuni kamida Q.kunSoat soat (aks holda jadval saqlanmaydi)
+  const Q = J.jadvalQoida || { minKun: 6, kunSoat: 4 };
+  const t = toliqKunlar();
+  $('#hajmIzoh').innerHTML = !n
+    ? `Jadval yopiq. Ochish uchun haftasiga kamida <b>${Q.minKun} kun</b>, har kuni kamida <b>${Q.kunSoat} soat</b> belgilang.`
+    : t >= Q.minKun
+      ? `<b>${n}</b> ta bir soatlik dars vaqti ochiq ✅ Sinov darsi so‘rovlari shu vaqtlarga keladi.`
+      : `Jadval doimiy bo‘lishi kerak: haftasiga kamida <b>${Q.minKun} kun</b>, har kuni <b>${Q.kunSoat}+ soat</b>. Hozir <b>${t}</b> kun to‘liq — yana ${Q.minKun - t} kun qo‘shing, shunda saqlanadi 🙏`;
   $('#shkalaI').style.width = `${Math.min(100, (n / max) * 100)}%`;
   $('#shkalaMin').style.left = `${(min / max) * 100}%`;
   $('#shkala').classList.toggle('kam', n < min);
@@ -417,7 +430,9 @@ function barChiz() {
     $('#saqlaMatn').innerHTML = `${Number(da)}-${OY_NOMLARI[Number(mo) - 1]}: ${KUN_TAHRIR.size} soat ochiq`;
   } else if (shOzg) {
     const n = haftalikSlot();
-    $('#saqlaMatn').innerHTML = `Shablon: haftasiga ${n} soat${n < J.minWeeklySlots ? `<small>Minimum ${J.minWeeklySlots} soat — ${J.minWeeklySlots - n} soat kam</small>` : ''}`;
+    const Q = J.jadvalQoida || { minKun: 6, kunSoat: 4 };
+    const t = toliqKunlar();
+    $('#saqlaMatn').innerHTML = `Shablon: haftasiga ${n} soat${n && t < Q.minKun ? `<small>${Q.minKun} kun × ${Q.kunSoat}+ soat kerak — hozir ${t} kun to‘liq</small>` : ''}`;
   }
 }
 
