@@ -352,7 +352,7 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
 .fikr{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 13px;font:700 14px 'Manrope',sans-serif;color:var(--ink);cursor:pointer}
 .fikr[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
 #bahoIzoh{width:100%;border:1.5px solid var(--line);border-radius:14px;padding:12px;font:600 15px 'Manrope',sans-serif;color:var(--ink);resize:vertical;margin-bottom:12px}
-.tariflar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tariflar{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .tarif{border:1.5px solid var(--line);border-radius:16px;padding:12px 6px;text-align:center;display:grid;gap:1px}
 .tarif b{font-family:'Unbounded';font-size:20px}
 .tarif strong{font-size:15px;margin-top:4px;font-variant-numeric:tabular-nums}
@@ -497,14 +497,14 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
           <div class="bosh" style="margin:0"><small>Sinovdan keyin</small><h2>Narx — haftada necha marta o‘qishingizga qarab</h2><p>Hech qanday yashirin to‘lov yo‘q. Sinov darsidan keyin davom etish — faqat sizning qaroringiz.</p></div>
         </div>
         <div>
-          <div class="katta num">350 000<small>so‘mdan / oyiga</small></div>
-          <p style="color:var(--mut);margin:8px 0 14px">Haftada 1 marta · oyiga 4 dars.</p>
+          <div class="katta num">850 000<small>so‘mdan / oyiga</small></div>
+          <p style="color:var(--mut);margin:8px 0 14px">Haftada 3 marta · oyiga 12 dars.</p>
           <div class="chastota">
-            <div class="ch"><b>1×</b><span>350 000</span></div>
-            <div class="ch"><b>2×</b><span>450 000</span></div>
-            <div class="ch top"><b>3×</b><span>550 000</span></div>
+            <div class="ch top"><b>3×</b><span>850 000</span></div>
+            <div class="ch"><b>4×</b><span>980 000</span></div>
+            <div class="ch"><b>5×</b><span>1 250 000</span></div>
           </div>
-          <p style="color:var(--mut2);font-size:13px;margin:10px 0 0">Haftada 6 martagacha — 850 000 so‘m/oy.</p>
+          <p style="color:var(--mut2);font-size:13px;margin:10px 0 0">Haftada 6 marta — 1 600 000 so‘m/oy.</p>
         </div>
       </div>
     </div>
@@ -952,7 +952,7 @@ body.bosqichda .hero,body.bosqichda main,body.bosqichda footer,body.bosqichda .p
     pk();
   }
   // Haftalik narxlar (oyiga) — mentor hamyoni HAFTALIK_NARXLAR bilan bir xil
-  const TARIFLAR = [[1, 350000], [2, 450000], [3, 550000], [4, 650000], [5, 750000], [6, 850000]];
+  const TARIFLAR = [[3, 850000], [4, 980000], [5, 1250000], [6, 1600000]];
   const YAXSHI = ['Tushunarli tushuntirdi', 'Ko‘p gapirtirdi', 'Samimiy va do‘stona', 'Xatolarimni ko‘rsatdi'];
   const YOMON = ['Ovoz yoki aloqa yomon', 'Juda tez gapirdi', 'Qiziq bo‘lmadi', 'Kech qoldi'];
   let baho = 0; const tanlangan = new Set();
