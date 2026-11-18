@@ -71,7 +71,7 @@ body:not(.js) .nojs{display:block}
 @media (prefers-reduced-motion:reduce){.screen{animation:none}}
 
 /* 7-modul: narx jadvali */
-.narxlar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.narxlar{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .narxlar div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center}
 .narxlar div.top{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
 .narxlar b{display:block;font-family:var(--display);font-size:20px;line-height:1.1;color:var(--brand)}
@@ -577,14 +577,12 @@ body:not(.js) .nojs{display:block}
   <div class="viz">
     <p class="cap">Oylik narx · haftadagi darslar soniga qarab</p>
     <div class="narxlar">
-      <div><b>1</b><span>marta</span><em>350 000</em></div>
-      <div class="top"><b>2</b><span>marta</span><em>450 000</em></div>
-      <div><b>3</b><span>marta</span><em>550 000</em></div>
-      <div><b>4</b><span>marta</span><em>650 000</em></div>
-      <div><b>5</b><span>marta</span><em>750 000</em></div>
-      <div><b>6</b><span>marta</span><em>850 000</em></div>
+      <div class="top"><b>3</b><span>marta</span><em>850 000</em></div>
+      <div><b>4</b><span>marta</span><em>980 000</em></div>
+      <div><b>5</b><span>marta</span><em>1 250 000</em></div>
+      <div><b>6</b><span>marta</span><em>1 600 000</em></div>
     </div>
-    <p style="margin-top:10px;font-size:13px;color:var(--mute)">Haftada 6 martadan ko'p yo'q. Oyiga darslar = haftada × 4.</p>
+    <p style="margin-top:10px;font-size:13px;color:var(--mute)">Haftada 3 martadan 6 martagacha. Oyiga darslar = haftada × 4.</p>
     <div class="progs">
       <div class="prog">
         <h4>Speaking</h4>
@@ -600,10 +598,10 @@ body:not(.js) .nojs{display:block}
   </div>
   <div class="block">
     <h3>Narxni qanday tushuntirasiz</h3>
-    <p>Oylik summani quruq aytish eng katta xato. Odam "450 000" ni eshitadi va uni bitta to'lov deb tasavvur qiladi. Narxni <b>bitta darsga bo'lib</b> ayting — shunda u taqqoslay oladigan raqamga aylanadi.</p>
+    <p>Oylik summani quruq aytish eng katta xato. Odam "850 000" ni eshitadi va uni bitta to'lov deb tasavvur qiladi. Narxni <b>bitta darsga bo'lib</b> ayting — shunda u taqqoslay oladigan raqamga aylanadi.</p>
     <div class="script">
       <p class="who">Narx aytish</p>
-      <p>[ISM], sizning holatingizda haftada ikki marta eng to'g'ri bo'ladi. Bu oyiga 450 000 so'm — ya'ni bitta dars 56 250 so'mga tushadi. Yakkama-yakka, faqat siz bilan, sizning materialingiz bo'yicha.</p>
+      <p>[ISM], sizning holatingizda haftada uch marta eng to'g'ri bo'ladi. Bu oyiga 850 000 so'm — ya'ni bitta dars 70 833 so'mga tushadi. Yakkama-yakka, faqat siz bilan, sizning materialingiz bo'yicha.</p>
     </div>
     <p style="margin-top:14px">Shundan keyin <b>jim turing.</b> Birinchi gapirgan yon beradi.</p>
   </div>
@@ -622,18 +620,18 @@ body:not(.js) .nojs{display:block}
     <p>Bu darsdan keyingi eng ko'p uchraydigan e'tiroz. Uchta javob bor, shu tartibda:</p>
     <dl class="kv">
       <div><dt>1. Sababni aniqlang</dt><dd>"Nimasi qimmat tuyuldi — summasimi yoki hozircha qiyinmi?"</dd></div>
-      <div><dt>2. Bitta darsga bo'ling</dt><dd>"Bitta dars 56 250 so'm — repetitor narxidan past"</dd></div>
-      <div><dt>3. Tarifni pasaytiring</dt><dd>"Haftada 1 martadan boshlaymiz — 350 000" — va shu bilan taklif yuboring</dd></div>
+      <div><dt>2. Bitta darsga bo'ling</dt><dd>"Bitta dars 70 833 so'm — shaxsiy ustoz bilan, uydan turib"</dd></div>
+      <div><dt>3. Tarifni pasaytiring</dt><dd>"Haftada 3 martadan boshlaymiz — 850 000" — va shu bilan taklif yuboring</dd></div>
     </dl>
     <div class="warn"><b>Narxni tushirmang.</b> Chegirma bermaysiz — dars sonini kamaytirasiz. Narxni bir marta tushirsangiz, o'quvchi uni haqiqiy narx deb qabul qilmay qo'yadi va keyingi oyda yana so'raydi.</div>
-    <div class="good"><b>Pul bo'lmasa:</b> "Tushundim. Sizga haftada 1 martalik variantni ochib qo'yaman, keyinroq kuchaytirasiz." O'quvchini yo'qotgandan ko'ra, arzon tarifda boshlagan yaxshi.</div>
+    <div class="good"><b>Pul bo'lmasa:</b> "Tushundim. Sizga haftada 3 martalik variantni ochib qo'yaman, keyinroq kuchaytirasiz." O'quvchini yo'qotgandan ko'ra, arzon tarifda boshlagan yaxshi.</div>
   </div>
   <div class="block">
     <h3>To'rt qoida</h3>
     <ul class="list">
       <li><b>Narxni aytib bo'lgach jim turing.</b> Birinchi gapirgan — yon beradi.</li>
       <li><b>Uzr so'ramang.</b> "Atigi", "jami-yo'g'i" kerak emas.</li>
-      <li><b>Chegirma so'ralsa</b> narxni emas, haftadagi dars sonini kamaytiring. Eng past narx — 350 000 so'm.</li>
+      <li><b>Chegirma so'ralsa</b> narxni emas, haftadagi dars sonini kamaytiring. Eng past narx — 850 000 so'm (haftada 3 marta).</li>
       <li><b>Kunlarni hoziroq kelishing</b> va o'quvchi ekranda turganida taklif yuboring.</li>
     </ul>
   </div>
